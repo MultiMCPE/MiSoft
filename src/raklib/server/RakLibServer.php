@@ -99,7 +99,7 @@ class RakLibServer extends \Thread{
 	 * @param int|null             $overrideProtocolVersion Optional custom protocol version to use, defaults to current RakLib's protocol
 	 * @param SleeperNotifier|null $sleeper
 	 */
-	public function __construct(\ThreadedLogger $logger, string $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, ?int $overrideProtocolVersion = null, ?SleeperNotifier $sleeper = null){
+	public function __construct(\ThreadedLogger $logger, $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, ?int $overrideProtocolVersion = null, ?SleeperNotifier $sleeper = null){
 		$this->address = $address;
 
 		$this->serverId = mt_rand(0, PHP_INT_MAX);
@@ -266,7 +266,7 @@ class RakLibServer extends \Thread{
 
 	public function run() : void{
 		try{
-			require $this->loaderPath;
+			$this->loaderPath->register(true);
 
 			gc_enable();
 			error_reporting(-1);

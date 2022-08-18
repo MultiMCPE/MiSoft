@@ -162,21 +162,20 @@ namespace pocketmine {
 			define('pocketmine\PATH', dirname(__FILE__, 3) . DIRECTORY_SEPARATOR);
 		}
 
-		$opts = getopt("", ["bootstrap:"]);
-		if(isset($opts["bootstrap"])){
-			$bootstrap = realpath($opts["bootstrap"]) ?: $opts["bootstrap"];
-		}else{
-			$bootstrap = \pocketmine\PATH . 'vendor/autoload.php';
+		if(!class_exists("ClassLoader", false)){
+			if(!is_file(\pocketmine\PATH . "src/spl/ClassLoader.php")){
+				echo "[CRITICAL] Unable to find the PocketMine-SPL library." . PHP_EOL;
+				echo "[CRITICAL] Please use provided builds or clone the repository recursively." . PHP_EOL;
+				exit(1);
+			}
+			require_once(\pocketmine\PATH . "src/spl/ClassLoader.php");
+			require_once(\pocketmine\PATH . "src/spl/BaseClassLoader.php");
 		}
-		define('pocketmine\COMPOSER_AUTOLOADER_PATH', $bootstrap);
 
-		if(\pocketmine\COMPOSER_AUTOLOADER_PATH !== false and is_file(\pocketmine\COMPOSER_AUTOLOADER_PATH)){
-			require_once(\pocketmine\COMPOSER_AUTOLOADER_PATH);
-		}else{
-			critical_error("Composer autoloader not found at " . $bootstrap);
-			critical_error("Please install/update Composer dependencies or use provided builds.");
-			exit(1);
-		}
+		$autoloader = new \BaseClassLoader();
+		$autoloader->addPath(\pocketmine\PATH . "src");
+		$autoloader->addPath(\pocketmine\PATH . "src" . DIRECTORY_SEPARATOR . "spl");
+		$autoloader->register(true);
 
 		set_error_handler([Utils::class, 'errorExceptionHandler']);
 
@@ -262,13 +261,6 @@ namespace pocketmine {
 			//TODO: move this to a Server field
 			define('pocketmine\START_TIME', microtime(true));
 			ThreadManager::init();
-
-			/*
-			 * We now use the Composer autoloader, but this autoloader is still for loading plugins.
-			 */
-			$autoloader = new \BaseClassLoader();
-			$autoloader->register(false);
-
 			new Server($autoloader, $logger, \pocketmine\DATA, \pocketmine\PLUGIN_PATH);
 
 			$logger->info("Stopping other threads");
