@@ -55,7 +55,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	/** @var int */
 	public $recipientSubId = 0x0;
 	/** @var int */
-	private $protocol = ProtocolInfo::CURRENT_PROTOCOL;
+	private $packetProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -66,15 +66,15 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	public function setProtocol(int $protocol) : void{
-	    $this->protocol = $protocol;
+	    $this->packetProtocol = $protocol;
 	}
 	
 	public function getProtocol() : int{
-	    return $this->protocol;
+	    return $this->packetProtocol;
 	}
 
     public function checkProtocol() : void{
-        if ($this->protocol === null) {
+        if ($this->packetProtocol === null) {
             throw new \InvalidArgumentException("Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.");
         }
     }
@@ -111,9 +111,9 @@ abstract class DataPacket extends NetworkBinaryStream{
 	 * @throws \UnexpectedValueException
 	 */
 	protected function decodeHeader(){
-        if ($this->protocol < ProtocolInfo::PROTOCOL_280) {
+        if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             $this->getByte();
-            if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_120) {
                 $this->senderSubId = $this->getByte();
                 $this->recipientSubId = $this->getByte();
                 if ($this->senderSubId > 0x4 || $this->recipientSubId > 0x4) {
@@ -147,9 +147,9 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	protected function encodeHeader(){
 	    $pid = static::NETWORK_ID;
-        if ($this->protocol < ProtocolInfo::PROTOCOL_280) {
+        if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             $this->putByte($pid);
-            if ($this->protocol >= ProtocolInfo::PROTOCOL_120) {
+            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_120) {
                 $this->putByte($this->senderSubId);
                 $this->putByte($this->recipientSubId);
             }

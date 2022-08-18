@@ -29,6 +29,7 @@ namespace pocketmine\network;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
 use pocketmine\network\mcpe\protocol\PacketPool;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Server;
 use function spl_object_hash;
 
@@ -180,6 +181,17 @@ class Network{
 	public function unblockAddress(string $address){
 		foreach($this->advancedInterfaces as $interface){
 			$interface->unblockAddress($address);
+		}
+	}
+	
+	public final static function convertProtocol(int $protocol) : int{
+		switch ($protocol) {
+			case ProtocolInfo::PROTOCOL_361:
+				return ProtocolInfo::PROTOCOL_361;
+			case ProtocolInfo::PROTOCOL_360:
+				return ProtocolInfo::PROTOCOL_360;
+			default:
+				return ProtocolInfo::PROTOCOL_110;
 		}
 	}
 }

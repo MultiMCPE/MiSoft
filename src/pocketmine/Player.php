@@ -148,6 +148,7 @@ use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\Network;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
@@ -272,6 +273,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $iusername = "";
 	/** @var string */
 	protected $displayName = "";
+	/** @var int */
+	protected $originalProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 	/** @var int */
 	protected $protocol = ProtocolInfo::CURRENT_PROTOCOL;
 	/** @var int */
@@ -1874,16 +1877,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-        $this->protocol = $packet->protocol;
+        $this->originalProtocol = $packet->protocol;
 		if(!$packet->isValidProtocol){
-			if($this->protocol < ProtocolInfo::CURRENT_PROTOCOL){
+			if($this->originalProtocol < ProtocolInfo::CURRENT_PROTOCOL){
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_CLIENT, true);
 			}else{
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_SERVER, true);
 			}
 
 			//This pocketmine disconnect message will only be seen by the console (PlayStatusPacket causes the messages to be shown for the client)
-			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.incompatibleProtocol", [$this->protocol ?? "unknown"]), false);
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.incompatibleProtocol", [$this->originalProtocol ?? "unknown"]), false);
 
 			return true;
 		}
@@ -1894,6 +1897,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
+        $this->protocol = Network::convertProtocol($packet->protocol);
 		$this->username = TextFormat::clean($packet->username);
 		$this->displayName = $this->username;
 		$this->iusername = strtolower($this->username);
@@ -3969,7 +3973,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return $this->isConnected();
 	}
 
-	public function getProtocol() : int{
+    public function getOriginalProtocol() : int{
+        return $this->originalProtocol;
+    }
+
+    public function getProtocol() : int{
 	    return $this->protocol;
 	}
 }
