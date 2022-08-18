@@ -14,48 +14,45 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
 use pocketmine\event\Event;
 use pocketmine\network\SourceInterface;
 use pocketmine\Player;
+use function is_a;
 
 /**
  * Allows the creation of players overriding the base Player class
  */
-class PlayerCreationEvent extends Event {
-	public static $handlerList = null;
-
+class PlayerCreationEvent extends Event{
 	/** @var SourceInterface */
 	private $interface;
-	/** @var mixed */
-	private $clientId;
 	/** @var string */
 	private $address;
 	/** @var int */
 	private $port;
 
-	/** @var Player::class */
+	/** @var string */
 	private $baseClass;
-	/** @var Player::class */
+	/** @var string */
 	private $playerClass;
 
 	/**
 	 * @param SourceInterface $interface
-	 * @param                 Player ::class   $baseClass
-	 * @param                 Player ::class   $playerClass
-	 * @param mixed           $clientId
+	 * @param string          $baseClass
+	 * @param string          $playerClass
 	 * @param string          $address
 	 * @param int             $port
 	 */
-	public function __construct(SourceInterface $interface, $baseClass, $playerClass, $clientId, $address, $port){
+	public function __construct(SourceInterface $interface, $baseClass, $playerClass, string $address, int $port){
 		$this->interface = $interface;
-		$this->clientId = $clientId;
 		$this->address = $address;
 		$this->port = $port;
 
@@ -75,40 +72,33 @@ class PlayerCreationEvent extends Event {
 	/**
 	 * @return SourceInterface
 	 */
-	public function getInterface(){
+	public function getInterface() : SourceInterface{
 		return $this->interface;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getAddress(){
+	public function getAddress() : string{
 		return $this->address;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getPort(){
+	public function getPort() : int{
 		return $this->port;
 	}
 
 	/**
-	 * @return mixed
-	 */
-	public function getClientId(){
-		return $this->clientId;
-	}
-
-	/**
-	 * @return Player::class
+	 * @return string
 	 */
 	public function getBaseClass(){
 		return $this->baseClass;
 	}
 
 	/**
-	 * @param Player ::class $class
+	 * @param string $class
 	 */
 	public function setBaseClass($class){
 		if(!is_a($class, $this->baseClass, true)){
@@ -119,14 +109,14 @@ class PlayerCreationEvent extends Event {
 	}
 
 	/**
-	 * @return Player::class
+	 * @return string
 	 */
 	public function getPlayerClass(){
 		return $this->playerClass;
 	}
 
 	/**
-	 * @param Player ::class $class
+	 * @param string $class
 	 */
 	public function setPlayerClass($class){
 		if(!is_a($class, $this->baseClass, true)){
@@ -135,5 +125,4 @@ class PlayerCreationEvent extends Event {
 
 		$this->playerClass = $class;
 	}
-
 }

@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,31 +14,31 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
-use pocketmine\entity\Item;
+use pocketmine\entity\object\ItemEntity;
 
-class ItemSpawnEvent extends EntityEvent {
-	public static $handlerList = null;
+class ItemSpawnEvent extends EntityEvent{
 
 	/**
-	 * @param Item $item
+	 * @param ItemEntity $item
 	 */
-	public function __construct(Item $item){
+	public function __construct(ItemEntity $item){
 		$this->entity = $item;
 
 	}
 
 	/**
-	 * @return Item
+	 * @return ItemEntity
 	 */
 	public function getEntity(){
 		return $this->entity;
 	}
-
 }

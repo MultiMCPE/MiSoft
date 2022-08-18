@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,74 +15,55 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\item;
 
 use pocketmine\block\Air;
 use pocketmine\block\Block;
+use pocketmine\block\BlockFactory;
 use pocketmine\block\Liquid;
+use pocketmine\entity\Living;
 use pocketmine\event\player\PlayerBucketEmptyEvent;
 use pocketmine\event\player\PlayerBucketFillEvent;
-use pocketmine\level\Level;
+use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Bucket extends Item {
-	/**
-	 * Bucket constructor.
-	 *
-	 * @param int $meta
-	 * @param int $count
-	 */
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::BUCKET, $meta, $count, "Bucket");
+class Bucket extends Item implements Consumable{
+	public function __construct(int $meta = 0){
+		parent::__construct(self::BUCKET, $meta, "Bucket");
 	}
 
 	public function getMaxStackSize() : int{
 		return $this->meta === Block::AIR ? 16 : 1; //empty buckets stack to 16
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function canBeActivated() : bool{
-		return true;
+	public function getFuelTime() : int{
+		if($this->meta === Block::LAVA or $this->meta === Block::FLOWING_LAVA){
+			return 20000;
+		}
+
+		return 0;
 	}
 
-	/**
-	 * @param Level  $level
-	 * @param Player $player
-	 * @param Block  $block
-	 * @param Block  $target
-	 * @param        $face
-	 * @param        $fx
-	 * @param        $fy
-	 * @param        $fz
-	 *
-	 * @return bool
-	 */
-	public function onActivate(Level $level, Player $player, Block $block, Block $target, $face, $fx, $fy, $fz){
-		$targetBlock = Block::get($this->meta);
+	public function onActivate(Player $player, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector) : bool{
+		$resultBlock = BlockFactory::get($this->meta);
 
-		if($targetBlock instanceof Air){
-			if($target instanceof Liquid and $target->getDamage() === 0){
+		if($resultBlock instanceof Air){
+			if($blockClicked instanceof Liquid and $blockClicked->getDamage() === 0){
 				$stack = clone $this;
 
-				$result = $stack->pop();
-
-				$id = $target->getId();
-				if($id == self::STILL_WATER){
-					$id = self::WATER;
-				}
-				if($id == self::STILL_LAVA){
-					$id = self::LAVA;
-				}
-				$result->setDamage($id);
-				$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketFillEvent($player, $block, $face, $this, $result));
+				$stack->pop();
+				$resultItem = ItemFactory::get(Item::BUCKET, $blockClicked->getFlowingForm()->getId());
+				$ev = new PlayerBucketFillEvent($player, $blockReplace, $face, $this, $resultItem);
+				$ev->call();
 				if(!$ev->isCancelled()){
-					$player->getLevel()->setBlock($target, new Air(), true, true);
+					$player->getLevel()->setBlock($blockClicked, BlockFactory::get(Block::AIR), true, true);
+					$player->getLevel()->broadcastLevelSoundEvent($blockClicked->add(0.5, 0.5, 0.5), $blockClicked->getBucketFillSound());
 					if($player->isSurvival()){
 						if($stack->getCount() === 0){
 							$player->getInventory()->setItemInHand($ev->getItem());
@@ -93,22 +74,19 @@ class Bucket extends Item {
 					}else{
 						$player->getInventory()->addItem($ev->getItem());
 					}
-					
+
 					return true;
 				}else{
 					$player->getInventory()->sendContents($player);
 				}
 			}
-		}elseif($targetBlock instanceof Liquid){
-			$result = clone $this;
-			$result->setDamage(0);
-			$player->getServer()->getPluginManager()->callEvent($ev = new PlayerBucketEmptyEvent($player, $block, $face, $this, $result));
+		}elseif($resultBlock instanceof Liquid and $blockReplace->canBeReplaced()){
+			$ev = new PlayerBucketEmptyEvent($player, $blockReplace, $face, $this, ItemFactory::get(Item::BUCKET));
+			$ev->call();
 			if(!$ev->isCancelled()){
-				//Only disallow water placement in the Nether, allow other liquids to be placed
-				//In vanilla, water buckets are emptied when used in the Nether, but no water placed.
-				if(!($player->getLevel()->getDimension() === Level::DIMENSION_NETHER and $targetBlock->getId() === self::WATER)){
-					$player->getLevel()->setBlock($block, $targetBlock, true, true);
-				}
+				$player->getLevel()->setBlock($blockReplace, $resultBlock->getFlowingForm(), true, true);
+				$player->getLevel()->broadcastLevelSoundEvent($blockReplace->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
+
 				if($player->isSurvival()){
 					$player->getInventory()->setItemInHand($ev->getItem());
 				}
@@ -119,5 +97,21 @@ class Bucket extends Item {
 		}
 
 		return false;
+	}
+
+	public function getResidue(){
+		return ItemFactory::get(Item::BUCKET, 0, 1);
+	}
+
+	public function getAdditionalEffects() : array{
+		return [];
+	}
+
+	public function canBeConsumed() : bool{
+		return $this->meta === 1; //Milk
+	}
+
+	public function onConsume(Living $consumer){
+		$consumer->removeAllEffects();
 	}
 }

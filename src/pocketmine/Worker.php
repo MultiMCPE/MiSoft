@@ -8,49 +8,40 @@
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
  * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
- *  _____            _               _____           
- * / ____|          (_)             |  __ \          
- *| |  __  ___ _ __  _ ___ _   _ ___| |__) | __ ___  
- *| | |_ |/ _ \ '_ \| / __| | | / __|  ___/ '__/ _ \ 
- *| |__| |  __/ | | | \__ \ |_| \__ \ |   | | | (_) |
- * \_____|\___|_| |_|_|___/\__, |___/_|   |_|  \___/ 
- *                         __/ |                    
- *                        |___/                     
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author GenisysPro
- * @link https://github.com/GenisysPro/GenisysPro
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine;
 
 /**
  * This class must be extended by all custom threading classes
  */
-abstract class Worker extends \Worker {
+abstract class Worker extends \Worker{
 
-	/** @var \ClassLoader */
+	/** @var \ClassLoader|null */
 	protected $classLoader;
+	/** @var string|null */
+	protected $composerAutoloaderPath;
 
 	protected $isKilled = false;
 
-	/**
-	 * @return \ClassLoader
-	 */
 	public function getClassLoader(){
 		return $this->classLoader;
 	}
 
-	/**
-	 * @param \ClassLoader|null $loader
-	 */
 	public function setClassLoader(\ClassLoader $loader = null){
+		$this->composerAutoloaderPath = \pocketmine\COMPOSER_AUTOLOADER_PATH;
+
 		if($loader === null){
 			$loader = Server::getInstance()->getLoader();
 		}
@@ -65,27 +56,20 @@ abstract class Worker extends \Worker {
 	 * (unless you are using a custom autoloader).
 	 */
 	public function registerClassLoader(){
-		if(!interface_exists("ClassLoader", false)){
-			require(\pocketmine\PATH . "src/spl/ClassLoader.php");
-			require(\pocketmine\PATH . "src/spl/BaseClassLoader.php");
+		if($this->composerAutoloaderPath !== null){
+			require $this->composerAutoloaderPath;
 		}
 		if($this->classLoader !== null){
-			$this->classLoader->register(true);
+			$this->classLoader->register(false);
 		}
 	}
 
-	/**
-	 * @param int $options
-	 *
-	 * @return bool
-	 */
 	public function start(?int $options = \PTHREADS_INHERIT_ALL){
 		ThreadManager::getInstance()->add($this);
 
 		if($this->getClassLoader() === null){
 			$this->setClassLoader();
 		}
-
 		return parent::start($options);
 	}
 
@@ -104,10 +88,7 @@ abstract class Worker extends \Worker {
 		ThreadManager::getInstance()->remove($this);
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getThreadName(){
+	public function getThreadName() : string{
 		return (new \ReflectionClass($this))->getShortName();
 	}
 }

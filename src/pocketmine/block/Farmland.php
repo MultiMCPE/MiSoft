@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,54 +15,41 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\item\Tool;
+use pocketmine\item\ItemFactory;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\math\Vector3;
 
 class Farmland extends Transparent{
 
 	protected $id = self::FARMLAND;
 
-	/**
-	 * Farmland constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Farmland";
 	}
 
-	/**
-	 * @return float
-	 */
-	public function getHardness(){
+	public function getHardness() : float{
 		return 0.6;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getToolType(){
-		return Tool::TYPE_SHOVEL;
+	public function getToolType() : int{
+		return BlockToolType::TYPE_SHOVEL;
 	}
 
-	/**
-	 * @return AxisAlignedBB
-	 */
-	protected function recalculateBoundingBox(){
+
+	protected function recalculateBoundingBox() : ?AxisAlignedBB{
 		return new AxisAlignedBB(
 			$this->x,
 			$this->y,
@@ -73,14 +60,59 @@ class Farmland extends Transparent{
 		);
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return array
-	 */
-	public function getDrops(Item $item) : array{
+	public function onNearbyBlockChange() : void{
+		if($this->getSide(Vector3::SIDE_UP)->isSolid()){
+			$this->level->setBlock($this, BlockFactory::get(Block::DIRT), true);
+		}
+	}
+
+	public function ticksRandomly() : bool{
+		return true;
+	}
+
+	public function onRandomTick() : void{
+		if(!$this->canHydrate()){
+			if($this->meta > 0){
+				$this->meta--;
+				$this->level->setBlock($this, $this, false, false);
+			}else{
+				$this->level->setBlock($this, BlockFactory::get(Block::DIRT), false, true);
+			}
+		}elseif($this->meta < 7){
+			$this->meta = 7;
+			$this->level->setBlock($this, $this, false, false);
+		}
+	}
+
+	protected function canHydrate() : bool{
+		//TODO: check rain
+		$start = $this->add(-4, 0, -4);
+		$end = $this->add(4, 1, 4);
+		for($y = $start->y; $y <= $end->y; ++$y){
+			for($z = $start->z; $z <= $end->z; ++$z){
+				for($x = $start->x; $x <= $end->x; ++$x){
+					$id = $this->level->getBlockIdAt($x, $y, $z);
+					if($id === Block::STILL_WATER or $id === Block::FLOWING_WATER){
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public function getDropsForCompatibleTool(Item $item) : array{
 		return [
-			[Item::DIRT, 0, 1],
+			ItemFactory::get(Item::DIRT)
 		];
+	}
+
+	public function isAffectedBySilkTouch() : bool{
+		return false;
+	}
+
+	public function getPickedItem() : Item{
+		return ItemFactory::get(Item::DIRT);
 	}
 }

@@ -19,53 +19,50 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\event\TranslationContainer;
+use pocketmine\command\utils\InvalidCommandSyntaxException;
+use pocketmine\lang\TranslationContainer;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
+use function array_filter;
+use function array_values;
+use function count;
+use function round;
 
-class TeleportCommand extends VanillaCommand {
+class TeleportCommand extends VanillaCommand{
 
-	/**
-	 * TeleportCommand constructor.
-	 *
-	 * @param $name
-	 */
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.tp.description",
-			"%commands.tp.usage"
+			"%commands.tp.usage",
+			["teleport"]
 		);
 		$this->setPermission("pocketmine.command.teleport");
 	}
 
-	/**
-	 * @param CommandSender $sender
-	 * @param string        $currentAlias
-	 * @param array         $args
-	 *
-	 * @return bool
-	 */
-	public function execute(CommandSender $sender, $currentAlias, array $args){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 		if(!$this->testPermission($sender)){
 			return true;
 		}
 
+		$args = array_values(array_filter($args, function($arg){
+			return $arg !== "";
+		}));
 		if(count($args) < 1 or count($args) > 6){
-			$sender->sendMessage(new TranslationContainer("commands.generic.usage", [$this->usageMessage]));
-
-			return true;
+			throw new InvalidCommandSyntaxException();
 		}
 
 		$target = null;
 		$origin = $sender;
 
-		if(count($args) === 1 or count($args) === 3 or count($args) === 5){
+		if(count($args) === 1 or count($args) === 3){
 			if($sender instanceof Player){
 				$target = $sender;
 			}else{
@@ -104,7 +101,7 @@ class TeleportCommand extends VanillaCommand {
 			Command::broadcastCommandMessage($sender, new TranslationContainer("commands.tp.success", [$origin->getName(), $target->getName()]));
 
 			return true;
-		}elseif($target->getLevel() !== null){
+		}elseif($target->isValid()){
 			if(count($args) === 4 or count($args) === 6){
 				$pos = 1;
 			}else{
@@ -118,8 +115,8 @@ class TeleportCommand extends VanillaCommand {
 			$pitch = $target->getPitch();
 
 			if(count($args) === 6 or (count($args) === 5 and $pos === 3)){
-				$yaw = $args[$pos++];
-				$pitch = $args[$pos++];
+				$yaw = (float) $args[$pos++];
+				$pitch = (float) $args[$pos++];
 			}
 
 			$target->teleport(new Vector3($x, $y, $z), $yaw, $pitch);
@@ -128,8 +125,6 @@ class TeleportCommand extends VanillaCommand {
 			return true;
 		}
 
-		$sender->sendMessage(new TranslationContainer("commands.generic.usage", [$this->usageMessage]));
-
-		return true;
+		throw new InvalidCommandSyntaxException();
 	}
 }

@@ -14,30 +14,34 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
-use pocketmine\event\TextContainer;
+use pocketmine\lang\TextContainer;
 use pocketmine\Player;
 
 /**
- * Called when a player joins the server, after sending all the spawn packets
+ * Called when the player spawns in the world after logging in, when they first see the terrain.
+ *
+ * Note: A lot of data is sent to the player between login and this event. Disconnecting the player during this event
+ * will cause this data to be wasted. Prefer disconnecting at login-time if possible to minimize bandwidth wastage.
+ * @see PlayerLoginEvent
  */
-class PlayerJoinEvent extends PlayerEvent {
-	public static $handlerList = null;
-
+class PlayerJoinEvent extends PlayerEvent{
 	/** @var string|TextContainer */
 	protected $joinMessage;
 
 	/**
 	 * PlayerJoinEvent constructor.
 	 *
-	 * @param Player $player
-	 * @param        $joinMessage
+	 * @param Player               $player
+	 * @param TextContainer|string $joinMessage
 	 */
 	public function __construct(Player $player, $joinMessage){
 		$this->player = $player;
@@ -47,7 +51,7 @@ class PlayerJoinEvent extends PlayerEvent {
 	/**
 	 * @param string|TextContainer $joinMessage
 	 */
-	public function setJoinMessage($joinMessage){
+	public function setJoinMessage($joinMessage) : void{
 		$this->joinMessage = $joinMessage;
 	}
 
@@ -57,5 +61,4 @@ class PlayerJoinEvent extends PlayerEvent {
 	public function getJoinMessage(){
 		return $this->joinMessage;
 	}
-
 }

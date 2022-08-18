@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,9 +15,11 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
+
+declare(strict_types=1);
 
 /**
  * Various Utilities used around the code
@@ -25,16 +27,78 @@
 
 namespace pocketmine\utils;
 
+use DaveRandom\CallbackValidator\CallbackType;
 use pocketmine\ThreadManager;
-use pocketmine\utils\MainLogger;
+use function array_combine;
+use function array_map;
+use function array_reverse;
+use function array_values;
+use function base64_decode;
+use function bin2hex;
+use function chunk_split;
+use function count;
+use function debug_zval_dump;
+use function dechex;
+use function error_reporting;
+use function exec;
+use function explode;
+use function fclose;
+use function file;
+use function file_exists;
+use function file_get_contents;
+use function function_exists;
+use function get_current_user;
+use function get_loaded_extensions;
+use function getenv;
+use function gettype;
+use function hexdec;
+use function implode;
+use function is_array;
+use function is_object;
+use function is_readable;
+use function is_string;
+use function json_decode;
+use function memory_get_usage;
+use function ob_end_clean;
+use function ob_get_contents;
+use function ob_start;
+use function ord;
+use function php_uname;
+use function phpversion;
+use function posix_kill;
+use function preg_grep;
+use function preg_match;
+use function preg_match_all;
+use function preg_replace;
+use function proc_close;
+use function proc_open;
+use function sha1;
+use function spl_object_hash;
+use function str_pad;
+use function str_replace;
+use function str_split;
+use function stream_get_contents;
+use function stripos;
+use function strlen;
+use function strpos;
+use function strtolower;
+use function substr;
+use function sys_get_temp_dir;
+use function trim;
+use function xdebug_get_function_stack;
+use const PHP_EOL;
+use const PHP_INT_MAX;
+use const PHP_INT_SIZE;
+use const PHP_MAXPATHLEN;
+use const STR_PAD_LEFT;
+use const STR_PAD_RIGHT;
 
 /**
  * Big collection of functions
  */
-class Utils {
-	public static $online = true;
-	public static $ip = false;
+class Utils{
 	public static $os;
+	/** @var UUID|null */
 	private static $serverUniqueId = null;
 
 	/**
@@ -53,6 +117,51 @@ class Utils {
 	}
 
 	/**
+	 * Returns a readable identifier for the given Closure, including file and line.
+	 *
+	 * @param \Closure $closure
+	 *
+	 * @return string
+	 * @throws \ReflectionException
+	 */
+	public static function getNiceClosureName(\Closure $closure) : string{
+		$func = new \ReflectionFunction($closure);
+		if(substr($func->getName(), -strlen('{closure}')) !== '{closure}'){
+			//closure wraps a named function, can be done with reflection or fromCallable()
+			//isClosure() is useless here because it just tells us if $func is reflecting a Closure object
+
+			$scope = $func->getClosureScopeClass();
+			if($scope !== null){ //class method
+				return
+					$scope->getName() .
+					($func->getClosureThis() !== null ? "->" : "::") .
+					$func->getName(); //name doesn't include class in this case
+			}
+
+			//non-class function
+			return $func->getName();
+		}
+		return "closure@" . self::cleanPath($func->getFileName()) . "#L" . $func->getStartLine();
+	}
+
+	/**
+	 * Returns a readable identifier for the class of the given object. Sanitizes class names for anonymous classes.
+	 *
+	 * @param object $obj
+	 *
+	 * @return string
+	 * @throws \ReflectionException
+	 */
+	public static function getNiceClassName(object $obj) : string{
+		$reflect = new \ReflectionClass($obj);
+		if($reflect->isAnonymous()){
+			return "anonymous@" . self::cleanPath($reflect->getFileName()) . "#L" . $reflect->getStartLine();
+		}
+
+		return $reflect->getName();
+	}
+
+	/**
 	 * Gets this machine / server instance unique ID
 	 * Returns a hash, the first 32 characters (or 16 if raw)
 	 * will be an identifier that won't change frequently.
@@ -62,7 +171,7 @@ class Utils {
 	 *
 	 * @return UUID
 	 */
-	public static function getMachineUniqueId($extra = ""){
+	public static function getMachineUniqueId(string $extra = "") : UUID{
 		if(self::$serverUniqueId !== null and $extra === ""){
 			return self::$serverUniqueId;
 		}
@@ -87,7 +196,7 @@ class Utils {
 			if(file_exists("/etc/machine-id")){
 				$machine .= file_get_contents("/etc/machine-id");
 			}else{
-				@exec("ifconfig", $mac);
+				@exec("ifconfig 2>/dev/null", $mac);
 				$mac = implode("\n", $mac);
 				if(preg_match_all("#HWaddr[ \t]{1,}([0-9a-f:]{17})#", $mac, $matches)){
 					foreach($matches[1] as $i => $v){
@@ -120,59 +229,16 @@ class Utils {
 		return $uuid;
 	}
 
-	public static function decodeJWT($token){
-        list($headB64, $payloadB64, $sigB64) = explode(".", $token);
-
-		$rawPayloadJSON = base64_decode(strtr($payloadB64, '-_', '+/'), true);
-		if($rawPayloadJSON === false){
-			throw new \Exception("Payload base64 is invalid and cannot be decoded");
-		}
-		$decodedPayload = json_decode($rawPayloadJSON, true);
-		if(!is_array($decodedPayload)){
-			throw new \Exception("Decoded payload should be array, " . gettype($decodedPayload) . " received");
-		}
-
-		return $decodedPayload;
-	}
-
 	/**
-	 * Gets the External IP using an external service, it is cached
+	 * @deprecated
+	 * @see Internet::getIP()
 	 *
 	 * @param bool $force default false, force IP check even when cached
 	 *
-	 * @return string
+	 * @return string|bool
 	 */
-
-	public static function getIP($force = false){
-		if(Utils::$online === false){
-			return false;
-		}elseif(Utils::$ip !== false and $force !== true){
-			return Utils::$ip;
-		}
-		$ip = trim(strip_tags(Utils::getURL("https://api.ipify.org")));
-		if($ip){
-			Utils::$ip = $ip;
-		}else{
-			$ip = Utils::getURL("http://www.checkip.org/");
-			if(preg_match('#">([0-9a-fA-F\:\.]*)</span>#', $ip, $matches) > 0){
-				Utils::$ip = $matches[1];
-			}else{
-				$ip = Utils::getURL("http://checkmyip.org/");
-				if(preg_match('#Your IP address is ([0-9a-fA-F\:\.]*)#', $ip, $matches) > 0){
-					Utils::$ip = $matches[1];
-				}else{
-					$ip = trim(Utils::getURL("http://ifconfig.me/ip"));
-					if($ip != ""){
-						Utils::$ip = $ip;
-					}else{
-						return false;
-					}
-				}
-			}
-		}
-
-		return Utils::$ip;
-
+	public static function getIP(bool $force = false){
+		return Internet::getIP($force);
 	}
 
 	/**
@@ -189,7 +255,7 @@ class Utils {
 	 *
 	 * @return string
 	 */
-	public static function getOS($recalculate = false){
+	public static function getOS(bool $recalculate = false) : string{
 		if(self::$os === null or $recalculate){
 			$uname = php_uname("s");
 			if(stripos($uname, "Darwin") !== false){
@@ -216,11 +282,10 @@ class Utils {
 		return self::$os;
 	}
 
-
 	/**
-	 * @return array
+	 * @return int[]
 	 */
-	public static function getRealMemoryUsage(){
+	public static function getRealMemoryUsage() : array{
 		$stack = 0;
 		$heap = 0;
 
@@ -243,9 +308,9 @@ class Utils {
 	/**
 	 * @param bool $advanced
 	 *
-	 * @return array|int|null
+	 * @return int[]|int
 	 */
-	public static function getMemoryUsage($advanced = false){
+	public static function getMemoryUsage(bool $advanced = false){
 		$reserved = memory_get_usage();
 		$VmSize = null;
 		$VmRSS = null;
@@ -277,10 +342,7 @@ class Utils {
 		return [$reserved, $VmRSS, $VmSize];
 	}
 
-	/**
-	 * @return int
-	 */
-	public static function getThreadCount(){
+	public static function getThreadCount() : int{
 		if(Utils::getOS() === "linux" or Utils::getOS() === "android"){
 			if(preg_match("/Threads:[ \t]+([0-9]+)/", file_get_contents("/proc/self/status"), $matches) > 0){
 				return (int) $matches[1];
@@ -296,7 +358,7 @@ class Utils {
 	 *
 	 * @return int
 	 */
-	public static function getCoreCount($recalculate = false){
+	public static function getCoreCount(bool $recalculate = false) : int{
 		static $processors = 0;
 
 		if($processors > 0 and !$recalculate){
@@ -314,15 +376,14 @@ class Utils {
 							++$processors;
 						}
 					}
-				}else{
-					if(preg_match("/^([0-9]+)\\-([0-9]+)$/", trim(@file_get_contents("/sys/devices/system/cpu/present")), $matches) > 0){
+				}elseif(is_readable("/sys/devices/system/cpu/present")){
+					if(preg_match("/^([0-9]+)\\-([0-9]+)$/", trim(file_get_contents("/sys/devices/system/cpu/present")), $matches) > 0){
 						$processors = (int) ($matches[2] - $matches[1]);
 					}
 				}
 				break;
 			case "bsd":
 			case "mac":
-				$processors = (int) `sysctl -n hw.ncpu`;
 				$processors = (int) `sysctl -n hw.ncpu`;
 				break;
 			case "win":
@@ -339,7 +400,7 @@ class Utils {
 	 *
 	 * @return string
 	 */
-	public static function hexdump($bin){
+	public static function hexdump(string $bin) : string{
 		$output = "";
 		$bin = str_split($bin, 16);
 		foreach($bin as $counter => $line){
@@ -355,11 +416,11 @@ class Utils {
 	/**
 	 * Returns a string that can be printed, replaces non-printable characters
 	 *
-	 * @param $str
+	 * @param mixed $str
 	 *
 	 * @return string
 	 */
-	public static function printable($str){
+	public static function printable($str) : string{
 		if(!is_string($str)){
 			return gettype($str);
 		}
@@ -380,79 +441,62 @@ class Utils {
 	}*/
 
 	/**
-	 * GETs an URL using cURL
+	 * @deprecated
+	 * @see Internet::getURL()
 	 *
-	 * @param       $page
-	 * @param int   $timeout default 10
-	 * @param array $extraHeaders
+	 * @param string  $page
+	 * @param int     $timeout default 10
+	 * @param array   $extraHeaders
+	 * @param string  &$err    Will be set to the output of curl_error(). Use this to retrieve errors that occured during the operation.
+	 * @param array[] &$headers
+	 * @param int     &$httpCode
 	 *
-	 * @return bool|mixed
+	 * @return bool|mixed false if an error occurred, mixed data if successful.
 	 */
-	public static function getURL($page, $timeout = 10, array $extraHeaders = []){
-		if(Utils::$online === false){
-			return false;
-		}
-
-		$ch = curl_init($page);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge(["User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0 PocketMine-MP"], $extraHeaders));
-		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-		curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
-		curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int) $timeout);
-		curl_setopt($ch, CURLOPT_TIMEOUT, (int) $timeout);
-		$ret = curl_exec($ch);
-		curl_close($ch);
-
-		return $ret;
+	public static function getURL(string $page, int $timeout = 10, array $extraHeaders = [], &$err = null, &$headers = null, &$httpCode = null){
+		return Internet::getURL($page, $timeout, $extraHeaders, $err, $headers, $httpCode);
 	}
 
 	/**
-	 * POSTs data to an URL
+	 * @deprecated
+	 * @see Internet::postURL()
 	 *
-	 * @param              $page
+	 * @param string       $page
 	 * @param array|string $args
 	 * @param int          $timeout
 	 * @param array        $extraHeaders
+	 * @param string       &$err Will be set to the output of curl_error(). Use this to retrieve errors that occured during the operation.
+	 * @param array[]      &$headers
+	 * @param int          &$httpCode
 	 *
-	 * @return bool|mixed
+	 * @return bool|mixed false if an error occurred, mixed data if successful.
 	 */
-	public static function postURL($page, $args, $timeout = 10, array $extraHeaders = []){
-		if(Utils::$online === false){
-			return false;
-		}
-
-		$ch = curl_init($page);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-		curl_setopt($ch, CURLOPT_FORBID_REUSE, 1);
-		curl_setopt($ch, CURLOPT_FRESH_CONNECT, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $args);
-		curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge(["User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0 PocketMine-MP"], $extraHeaders));
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int) $timeout);
-		curl_setopt($ch, CURLOPT_TIMEOUT, (int) $timeout);
-		$ret = curl_exec($ch);
-		curl_close($ch);
-
-		return $ret;
+	public static function postURL(string $page, $args, int $timeout = 10, array $extraHeaders = [], &$err = null, &$headers = null, &$httpCode = null){
+		return Internet::postURL($page, $args, $timeout, $extraHeaders, $err, $headers, $httpCode);
 	}
 
 	/**
-	 * @param $string
+	 * @deprecated
+	 * @see Internet::simpleCurl()
 	 *
-	 * @return int
+	 * @param string        $page
+	 * @param float|int     $timeout      The maximum connect timeout and timeout in seconds, correct to ms.
+	 * @param string[]      $extraHeaders extra headers to send as a plain string array
+	 * @param array         $extraOpts    extra CURLOPT_* to set as an [opt => value] map
+	 * @param callable|null $onSuccess    function to be called if there is no error. Accepts a resource argument as the cURL handle.
+	 *
+	 * @return array a plain array of three [result body : string, headers : array[], HTTP response code : int]. Headers are grouped by requests with strtolower(header name) as keys and header value as values
+	 *
+	 * @throws \RuntimeException if a cURL error occurs
 	 */
-	public static function javaStringHash($string){
+	public static function simpleCurl(string $page, $timeout = 10, array $extraHeaders = [], array $extraOpts = [], callable $onSuccess = null){
+		return Internet::simpleCurl($page, $timeout, $extraHeaders, $extraOpts, $onSuccess);
+	}
+
+	public static function javaStringHash(string $string) : int{
 		$hash = 0;
-		for($i = 0; $i < strlen($string); $i++){
-			$ord = ord($string{$i});
+		for($i = 0, $len = strlen($string); $i < $len; $i++){
+			$ord = ord($string[$i]);
 			if($ord & 0x80){
 				$ord -= 0x100;
 			}
@@ -468,23 +512,48 @@ class Utils {
 		return $hash;
 	}
 
+
 	/**
-	 * @param int    $severity
-	 * @param string $message
-	 * @param string $file
-	 * @param int    $line
+	 * @param string      $command Command to execute
+	 * @param string|null &$stdout Reference parameter to write stdout to
+	 * @param string|null &$stderr Reference parameter to write stderr to
 	 *
-	 * @return bool
-	 * @throws \ErrorException
+	 * @return int process exit code
 	 */
-	public static function errorExceptionHandler(int $severity, string $message, string $file, int $line) : bool{
-		if(error_reporting() & $severity){
-			throw new \ErrorException($message, 0, $severity, $file, $line);
+	public static function execute(string $command, string &$stdout = null, string &$stderr = null) : int{
+		$process = proc_open($command, [
+			["pipe", "r"],
+			["pipe", "w"],
+			["pipe", "w"]
+		], $pipes);
+
+		if($process === false){
+			$stderr = "Failed to open process";
+			$stdout = "";
+
+			return -1;
 		}
-		return true; //stfu operator
+
+		$stdout = stream_get_contents($pipes[1]);
+		$stderr = stream_get_contents($pipes[2]);
+
+		foreach($pipes as $p){
+			fclose($p);
+		}
+
+		return proc_close($process);
+	}
+
+	public static function decodeJWT(string $token) : array{
+		list($headB64, $payloadB64, $sigB64) = explode(".", $token);
+
+		return json_decode(base64_decode(strtr($payloadB64, '-_', '+/'), true), true);
 	}
 
 	public static function kill($pid) : void{
+		if(MainLogger::isRegisteredStatic()){
+			MainLogger::getLogger()->syncFlushBuffer();
+		}
 		switch(Utils::getOS()){
 			case "win":
 				exec("taskkill.exe /F /PID " . ((int) $pid) . " > NUL");
@@ -506,7 +575,7 @@ class Utils {
 	 *
 	 * @return int
 	 */
-	public static function getReferenceCount($value, $includeCurrent = true){
+	public static function getReferenceCount($value, bool $includeCurrent = true){
 		ob_start();
 		debug_zval_dump($value);
 		$ret = explode("\n", ob_get_contents());
@@ -519,24 +588,14 @@ class Utils {
 	}
 
 	/**
-	 * @param int        $start
-	 * @param array|null $trace
+	 * @param array $trace
+	 * @param int   $maxStringLength
 	 *
 	 * @return array
 	 */
-	public static function getTrace($start = 0, $trace = null){
-		if($trace === null){
-			if(function_exists("xdebug_get_function_stack")){
-				$trace = array_reverse(xdebug_get_function_stack());
-			}else{
-				$e = new \Exception();
-				$trace = $e->getTrace();
-			}
-		}
-
+	public static function printableTrace(array $trace, int $maxStringLength = 80) : array{
 		$messages = [];
-		$j = 0;
-		for($i = (int) $start; isset($trace[$i]); ++$i, ++$j){
+		for($i = 0; isset($trace[$i]); ++$i){
 			$params = "";
 			if(isset($trace[$i]["args"]) or isset($trace[$i]["params"])){
 				if(isset($trace[$i]["args"])){
@@ -545,17 +604,134 @@ class Utils {
 					$args = $trace[$i]["params"];
 				}
 
-				$params = implode(", ", array_map(function($value){
-					return (is_object($value) ? get_class($value) . " object" : gettype($value) . " " . (is_array($value) ? "Array()" : Utils::printable(@strval($value))));
+				$params = implode(", ", array_map(function($value) use($maxStringLength){
+					if(is_object($value)){
+						return "object " . self::getNiceClassName($value);
+					}
+					if(is_array($value)){
+						return "array[" . count($value) . "]";
+					}
+					if(is_string($value)){
+						return "string[" . strlen($value) . "] " . substr(Utils::printable($value), 0, $maxStringLength);
+					}
+					return gettype($value) . " " . Utils::printable((string) $value);
 				}, $args));
 			}
-			$messages[] = "#$j " . (isset($trace[$i]["file"]) ? self::cleanPath($trace[$i]["file"]) : "") . "(" . (isset($trace[$i]["line"]) ? $trace[$i]["line"] : "") . "): " . (isset($trace[$i]["class"]) ? $trace[$i]["class"] . (($trace[$i]["type"] === "dynamic" or $trace[$i]["type"] === "->") ? "->" : "::") : "") . $trace[$i]["function"] . "(" . Utils::printable($params) . ")";
+			$messages[] = "#$i " . (isset($trace[$i]["file"]) ? self::cleanPath($trace[$i]["file"]) : "") . "(" . (isset($trace[$i]["line"]) ? $trace[$i]["line"] : "") . "): " . (isset($trace[$i]["class"]) ? $trace[$i]["class"] . (($trace[$i]["type"] === "dynamic" or $trace[$i]["type"] === "->") ? "->" : "::") : "") . $trace[$i]["function"] . "(" . Utils::printable($params) . ")";
 		}
-
 		return $messages;
 	}
 
+	/**
+	 * @param int $skipFrames
+	 *
+	 * @return array
+	 */
+	public static function currentTrace(int $skipFrames = 0) : array{
+		++$skipFrames; //omit this frame from trace, in addition to other skipped frames
+		if(function_exists("xdebug_get_function_stack")){
+			$trace = array_reverse(xdebug_get_function_stack());
+		}else{
+			$e = new \Exception();
+			$trace = $e->getTrace();
+		}
+		for($i = 0; $i < $skipFrames; ++$i){
+			unset($trace[$i]);
+		}
+		return array_values($trace);
+	}
+
+	/**
+	 * @param int $skipFrames
+	 *
+	 * @return array
+	 */
+	public static function printableCurrentTrace(int $skipFrames = 0) : array{
+		return self::printableTrace(self::currentTrace(++$skipFrames));
+	}
+
 	public static function cleanPath($path){
-		return str_replace(["\\", ".php", "phar://", str_replace(["\\", "phar://"], ["/", ""], \pocketmine\PATH), str_replace(["\\", "phar://"], ["/", ""], \pocketmine\PLUGIN_PATH)], ["/", "", "", "", ""], $path);
+		$result = str_replace(["\\", ".php", "phar://"], ["/", "", ""], $path);
+
+		//remove relative paths
+		//TODO: make these paths dynamic so they can be unit-tested against
+		static $cleanPaths = [
+			\pocketmine\PLUGIN_PATH => "plugins", //this has to come BEFORE \pocketmine\PATH because it's inside that by default on src installations
+			\pocketmine\PATH => ""
+		];
+		foreach($cleanPaths as $cleanPath => $replacement){
+			$cleanPath = rtrim(str_replace(["\\", "phar://"], ["/", ""], $cleanPath), "/");
+			if(strpos($result, $cleanPath) === 0){
+				$result = ltrim(str_replace($cleanPath, $replacement, $result), "/");
+			}
+		}
+		return $result;
+	}
+
+	/**
+	 * Extracts one-line tags from the doc-comment
+	 *
+	 * @param string $docComment
+	 *
+	 * @return string[] an array of tagName => tag value. If the tag has no value, an empty string is used as the value.
+	 */
+	public static function parseDocComment(string $docComment) : array{
+		preg_match_all('/(*ANYCRLF)^[\t ]*\* @([a-zA-Z]+)(?:[\t ]+(.+))?[\t ]*$/m', $docComment, $matches);
+
+		return array_combine($matches[1], $matches[2]);
+	}
+
+	/**
+	 * @param int    $severity
+	 * @param string $message
+	 * @param string $file
+	 * @param int    $line
+	 *
+	 * @return bool
+	 * @throws \ErrorException
+	 */
+	public static function errorExceptionHandler(int $severity, string $message, string $file, int $line) : bool{
+		if(error_reporting() & $severity){
+			throw new \ErrorException($message, 0, $severity, $file, $line);
+		}
+
+		return true; //stfu operator
+	}
+
+	public static function testValidInstance(string $className, string $baseName) : void{
+		try{
+			$base = new \ReflectionClass($baseName);
+		}catch(\ReflectionException $e){
+			throw new \InvalidArgumentException("Base class $baseName does not exist");
+		}
+
+		try{
+			$class = new \ReflectionClass($className);
+		}catch(\ReflectionException $e){
+			throw new \InvalidArgumentException("Class $className does not exist");
+		}
+
+		if(!$class->isSubclassOf($baseName)){
+			throw new \InvalidArgumentException("Class $className does not " . ($base->isInterface() ? "implement" : "extend") . " " . $baseName);
+		}
+		if(!$class->isInstantiable()){
+			throw new \InvalidArgumentException("Class $className cannot be constructed");
+		}
+	}
+
+	/**
+	 * Verifies that the given callable is compatible with the desired signature. Throws a TypeError if they are
+	 * incompatible.
+	 *
+	 * @param callable $signature Dummy callable with the required parameters and return type
+	 * @param callable $subject Callable to check the signature of
+	 *
+	 * @throws \DaveRandom\CallbackValidator\InvalidCallbackException
+	 * @throws \TypeError
+	 */
+	public static function validateCallableSignature(callable $signature, callable $subject) : void{
+		if(!($sigType = CallbackType::createFromCallable($signature))->isSatisfiedBy($subject)){
+			throw new \TypeError("Declaration of callable `" . CallbackType::createFromCallable($subject) . "` must be compatible with `" . $sigType . "`");
+		}
 	}
 }

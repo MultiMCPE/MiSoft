@@ -19,22 +19,23 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\CommandSender;
-use pocketmine\event\TranslationContainer;
-use pocketmine\network\protocol\Info;
+use pocketmine\lang\TranslationContainer;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\TextFormat;
+use function count;
+use function implode;
+use function stripos;
+use function strtolower;
 
-class VersionCommand extends VanillaCommand {
+class VersionCommand extends VanillaCommand{
 
-	/**
-	 * VersionCommand constructor.
-	 *
-	 * @param string $name
-	 */
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.version.description",
@@ -44,53 +45,34 @@ class VersionCommand extends VanillaCommand {
 		$this->setPermission("pocketmine.command.version");
 	}
 
-	/**
-	 * @param CommandSender $sender
-	 * @param string        $currentAlias
-	 * @param array         $args
-	 *
-	 * @return bool
-	 */
-	public function execute(CommandSender $sender, $currentAlias, array $args){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 		if(!$this->testPermission($sender)){
-			return \true;
+			return true;
 		}
 
-		if(\count($args) === 0){
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended.title"));
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended1", [
+		if(count($args) === 0){
+			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended", [
 				$sender->getServer()->getName(),
-				$sender->getServer()->getCodename()
-			]));
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended2", [
-				phpversion()
-			]));
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended3", [
-				$sender->getServer()->getApiVersion()
-
-			]));
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended4", [
-				$sender->getServer()->getVersion()
-			]));
-			$sender->sendMessage(new TranslationContainer("pocketmine.server.info.extended5", [
-				Info::CURRENT_PROTOCOL
+				$sender->getServer()->getPocketMineVersion(),
+				$sender->getServer()->getVersion(),
+				ProtocolInfo::CURRENT_PROTOCOL
 			]));
 		}else{
-			$pluginName = \implode(" ", $args);
+			$pluginName = implode(" ", $args);
 			$exactPlugin = $sender->getServer()->getPluginManager()->getPlugin($pluginName);
 
 			if($exactPlugin instanceof Plugin){
 				$this->describeToSender($exactPlugin, $sender);
 
-				return \true;
+				return true;
 			}
 
-			$found = \false;
-			$pluginName = \strtolower($pluginName);
+			$found = false;
+			$pluginName = strtolower($pluginName);
 			foreach($sender->getServer()->getPluginManager()->getPlugins() as $plugin){
-				if(\stripos($plugin->getName(), $pluginName) !== \false){
+				if(stripos($plugin->getName(), $pluginName) !== false){
 					$this->describeToSender($plugin, $sender);
-					$found = \true;
+					$found = true;
 				}
 			}
 
@@ -99,30 +81,26 @@ class VersionCommand extends VanillaCommand {
 			}
 		}
 
-		return \true;
+		return true;
 	}
 
-	/**
-	 * @param Plugin        $plugin
-	 * @param CommandSender $sender
-	 */
 	private function describeToSender(Plugin $plugin, CommandSender $sender){
 		$desc = $plugin->getDescription();
 		$sender->sendMessage(TextFormat::DARK_GREEN . $desc->getName() . TextFormat::WHITE . " version " . TextFormat::DARK_GREEN . $desc->getVersion());
 
-		if($desc->getDescription() != \null){
+		if($desc->getDescription() !== ""){
 			$sender->sendMessage($desc->getDescription());
 		}
 
-		if($desc->getWebsite() != \null){
+		if($desc->getWebsite() !== ""){
 			$sender->sendMessage("Website: " . $desc->getWebsite());
 		}
 
-		if(\count($authors = $desc->getAuthors()) > 0){
-			if(\count($authors) === 1){
-				$sender->sendMessage("Author: " . \implode(", ", $authors));
+		if(count($authors = $desc->getAuthors()) > 0){
+			if(count($authors) === 1){
+				$sender->sendMessage("Author: " . implode(", ", $authors));
 			}else{
-				$sender->sendMessage("Authors: " . \implode(", ", $authors));
+				$sender->sendMessage("Authors: " . implode(", ", $authors));
 			}
 		}
 	}

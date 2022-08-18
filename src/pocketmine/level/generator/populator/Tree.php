@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,9 +15,11 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\level\generator\populator;
 
@@ -27,7 +29,7 @@ use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\object\Tree as ObjectTree;
 use pocketmine\utils\Random;
 
-class Tree extends Populator {
+class Tree extends Populator{
 	/** @var ChunkManager */
 	private $level;
 	private $randomAmount = 1;
@@ -35,38 +37,19 @@ class Tree extends Populator {
 
 	private $type;
 
-	/**
-	 * Tree constructor.
-	 *
-	 * @param int $type
-	 */
 	public function __construct($type = Sapling::OAK){
 		$this->type = $type;
 	}
 
-	/**
-	 * @param $amount
-	 */
 	public function setRandomAmount($amount){
 		$this->randomAmount = $amount;
 	}
 
-	/**
-	 * @param $amount
-	 */
 	public function setBaseAmount($amount){
 		$this->baseAmount = $amount;
 	}
 
-	/**
-	 * @param ChunkManager $level
-	 * @param              $chunkX
-	 * @param              $chunkZ
-	 * @param Random       $random
-	 *
-	 * @return mixed|void
-	 */
-	public function populate(ChunkManager $level, $chunkX, $chunkZ, Random $random){
+	public function populate(ChunkManager $level, int $chunkX, int $chunkZ, Random $random){
 		$this->level = $level;
 		$amount = $random->nextRange(0, $this->randomAmount) + $this->baseAmount;
 		for($i = 0; $i < $amount; ++$i){
@@ -80,18 +63,12 @@ class Tree extends Populator {
 		}
 	}
 
-	/**
-	 * @param $x
-	 * @param $z
-	 *
-	 * @return int
-	 */
-	private function getHighestWorkableBlock($x, $z){
-		for($y = 127; $y >= 0; --$y){
+	private function getHighestWorkableBlock(int $x, int $z) : int{
+		for($y = 127; $y > 0; --$y){
 			$b = $this->level->getBlockIdAt($x, $y, $z);
-			if($b === Block::DIRT or $b === Block::GRASS or $b === Block::PODZOL){
+			if($b === Block::DIRT or $b === Block::GRASS){
 				break;
-			}elseif($b !== 0 and $b !== Block::SNOW_LAYER){
+			}elseif($b !== Block::AIR and $b !== Block::SNOW_LAYER){
 				return -1;
 			}
 		}

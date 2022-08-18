@@ -23,6 +23,27 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use function abs;
+use function date_default_timezone_set;
+use function date_parse;
+use function exec;
+use function file_exists;
+use function file_get_contents;
+use function implode;
+use function ini_get;
+use function ini_set;
+use function is_link;
+use function json_decode;
+use function parse_ini_file;
+use function preg_match;
+use function readlink;
+use function str_replace;
+use function strpos;
+use function substr;
+use function timezone_abbreviations_list;
+use function timezone_name_from_abbr;
+use function trim;
+
 abstract class Timezone{
 
 	public static function get() : string{
@@ -61,7 +82,7 @@ abstract class Timezone{
 				break;
 			}
 
-			if($response = Utils::getURL("http://ip-api.com/json") //If system timezone detection fails or timezone is an invalid value.
+			if($response = Internet::getURL("http://ip-api.com/json") //If system timezone detection fails or timezone is an invalid value.
 				and $ip_geolocation_data = json_decode($response, true)
 				and $ip_geolocation_data['status'] !== 'fail'
 				and date_default_timezone_set($ip_geolocation_data['timezone'])
@@ -133,7 +154,7 @@ abstract class Timezone{
 					}
 				}
 
-				//Portable method for incompatible linux distributions.
+				//Portable method for incompatible 1 distributions.
 
 				$offset = trim(exec('date +%:z'));
 

@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,24 +14,32 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
-use pocketmine\entity\Projectile;
+use pocketmine\entity\projectile\Projectile;
+use pocketmine\math\RayTraceResult;
 
-class ProjectileHitEvent extends EntityEvent {
-	public static $handlerList = null;
+/**
+ * @allowHandle
+ */
+abstract class ProjectileHitEvent extends EntityEvent{
+	/** @var RayTraceResult */
+	private $rayTraceResult;
 
 	/**
-	 * @param Projectile $entity
+	 * @param Projectile     $entity
+	 * @param RayTraceResult $rayTraceResult
 	 */
-	public function __construct(Projectile $entity){
+	public function __construct(Projectile $entity, RayTraceResult $rayTraceResult){
 		$this->entity = $entity;
-
+		$this->rayTraceResult = $rayTraceResult;
 	}
 
 	/**
@@ -41,4 +49,13 @@ class ProjectileHitEvent extends EntityEvent {
 		return $this->entity;
 	}
 
+	/**
+	 * Returns a RayTraceResult object containing information such as the exact position struck, the AABB it hit, and
+	 * the face of the AABB that it hit.
+	 *
+	 * @return RayTraceResult
+	 */
+	public function getRayTraceResult() : RayTraceResult{
+		return $this->rayTraceResult;
+	}
 }

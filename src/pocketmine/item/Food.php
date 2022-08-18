@@ -19,70 +19,29 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\item;
 
-use pocketmine\entity\Entity;
-use pocketmine\event\entity\EntityEatItemEvent;
-use pocketmine\network\protocol\EntityEventPacket;
-use pocketmine\Player;
+use pocketmine\entity\Living;
 
-abstract class Food extends Item implements FoodSource {
-	/**
-	 * @return bool
-	 */
-	public function canBeConsumed() : bool{
+abstract class Food extends Item implements FoodSource{
+	public function requiresHunger() : bool{
 		return true;
 	}
 
 	/**
-	 * @param Entity $entity
-	 *
-	 * @return bool
-	 */
-	public function canBeConsumedBy(Entity $entity) : bool{
-		return $entity instanceof Player and ($entity->getFood() < $entity->getMaxFood()) and $this->canBeConsumed();
-	}
-
-	/**
-	 * @return Food|Item
+	 * @return Item
 	 */
 	public function getResidue(){
-		if($this->getCount() === 1){
-			return Item::get(0);
-		}else{
-			$new = clone $this;
-			$new->count--;
-			return $new;
-		}
+		return ItemFactory::get(Item::AIR, 0, 0);
 	}
 
-	/**
-	 * @return array
-	 */
 	public function getAdditionalEffects() : array{
 		return [];
 	}
 
-	/**
-	 * @param Entity $human
-	 */
-	public function onConsume(Entity $human){
-		$pk = new EntityEventPacket();
-		$pk->eid = $human->getId();
-		$pk->event = EntityEventPacket::USE_ITEM;
-		if($human instanceof Player){
-			$human->dataPacket($pk);
-		}
-		$human->getLevel()->getServer()->broadcastPacket($human->getViewers(), $pk);
+	public function onConsume(Living $consumer){
 
-		$human->getLevel()->getServer()->getPluginManager()->callEvent($ev = new EntityEatItemEvent($human, $this));
-
-		$human->addSaturation($ev->getSaturationRestore());
-		$human->addFood($ev->getFoodRestore());
-		foreach($ev->getAdditionalEffects() as $effect){
-			$human->addEffect($effect);
-		}
-
-		$human->getInventory()->setItemInHand($ev->getResidue());
 	}
 }

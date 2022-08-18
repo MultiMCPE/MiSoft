@@ -19,139 +19,149 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\entity;
 
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
+use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
-use pocketmine\network\protocol\MobEffectPacket;
-use pocketmine\Player;
+use pocketmine\utils\Color;
+use function constant;
+use function defined;
+use function strtoupper;
 
-class Effect {
-
-	const SPEED = 1;
-	const SLOWNESS = 2;
-	const HASTE = 3;
-	const SWIFTNESS = 3;
-	const FATIGUE = 4;
-	const MINING_FATIGUE = 4;
-	const STRENGTH = 5;
-	const HEALING = 6;
-	const HARMING = 7;
-	const JUMP = 8;
-	const NAUSEA = 9;
-	const CONFUSION = 9;
-	const REGENERATION = 10;
-	const DAMAGE_RESISTANCE = 11;
-	const FIRE_RESISTANCE = 12;
-	const WATER_BREATHING = 13;
-	const INVISIBILITY = 14;
-	const BLINDNESS = 15;
-	const NIGHT_VISION = 16;
-	const HUNGER = 17;
-	const WEAKNESS = 18;
-	const POISON = 19;
-	const WITHER = 20;
-	const HEALTH_BOOST = 21;
-	const ABSORPTION = 22;
-	const SATURATION = 23;
-    const LEVITATION = 24;
+class Effect{
+	public const SPEED = 1;
+	public const SLOWNESS = 2;
+	public const HASTE = 3;
+	public const FATIGUE = 4, MINING_FATIGUE = 4;
+	public const STRENGTH = 5;
+	public const INSTANT_HEALTH = 6, HEALING = 6;
+	public const INSTANT_DAMAGE = 7, HARMING = 7;
+	public const JUMP_BOOST = 8, JUMP = 8;
+	public const NAUSEA = 9, CONFUSION = 9;
+	public const REGENERATION = 10;
+	public const RESISTANCE = 11, DAMAGE_RESISTANCE = 11;
+	public const FIRE_RESISTANCE = 12;
+	public const WATER_BREATHING = 13;
+	public const INVISIBILITY = 14;
+	public const BLINDNESS = 15;
+	public const NIGHT_VISION = 16;
+	public const HUNGER = 17;
+	public const WEAKNESS = 18;
+	public const POISON = 19;
+	public const WITHER = 20;
+	public const HEALTH_BOOST = 21;
+	public const ABSORPTION = 22;
+	public const SATURATION = 23;
+	public const LEVITATION = 24; //TODO
+	public const FATAL_POISON = 25;
+	public const CONDUIT_POWER = 26;
 
 	/** @var Effect[] */
-	protected static $effects;
+	protected static $effects = [];
 
-	public static function init(){
-		self::$effects = new \SplFixedArray(256);
+	public static function init() : void{
+		self::registerEffect(new Effect(Effect::SPEED, "%potion.moveSpeed", new Color(0x7c, 0xaf, 0xc6)));
+		self::registerEffect(new Effect(Effect::SLOWNESS, "%potion.moveSlowdown", new Color(0x5a, 0x6c, 0x81), true));
+		self::registerEffect(new Effect(Effect::HASTE, "%potion.digSpeed", new Color(0xd9, 0xc0, 0x43)));
+		self::registerEffect(new Effect(Effect::MINING_FATIGUE, "%potion.digSlowDown", new Color(0x4a, 0x42, 0x17), true));
+		self::registerEffect(new Effect(Effect::STRENGTH, "%potion.damageBoost", new Color(0x93, 0x24, 0x23)));
+		self::registerEffect(new Effect(Effect::INSTANT_HEALTH, "%potion.heal", new Color(0xf8, 0x24, 0x23), false, 1, false));
+		self::registerEffect(new Effect(Effect::INSTANT_DAMAGE, "%potion.harm", new Color(0x43, 0x0a, 0x09), true, 1, false));
+		self::registerEffect(new Effect(Effect::JUMP_BOOST, "%potion.jump", new Color(0x22, 0xff, 0x4c)));
+		self::registerEffect(new Effect(Effect::NAUSEA, "%potion.confusion", new Color(0x55, 0x1d, 0x4a), true));
+		self::registerEffect(new Effect(Effect::REGENERATION, "%potion.regeneration", new Color(0xcd, 0x5c, 0xab)));
+		self::registerEffect(new Effect(Effect::RESISTANCE, "%potion.resistance", new Color(0x99, 0x45, 0x3a)));
+		self::registerEffect(new Effect(Effect::FIRE_RESISTANCE, "%potion.fireResistance", new Color(0xe4, 0x9a, 0x3a)));
+		self::registerEffect(new Effect(Effect::WATER_BREATHING, "%potion.waterBreathing", new Color(0x2e, 0x52, 0x99)));
+		self::registerEffect(new Effect(Effect::INVISIBILITY, "%potion.invisibility", new Color(0x7f, 0x83, 0x92)));
+		self::registerEffect(new Effect(Effect::BLINDNESS, "%potion.blindness", new Color(0x1f, 0x1f, 0x23), true));
+		self::registerEffect(new Effect(Effect::NIGHT_VISION, "%potion.nightVision", new Color(0x1f, 0x1f, 0xa1)));
+		self::registerEffect(new Effect(Effect::HUNGER, "%potion.hunger", new Color(0x58, 0x76, 0x53), true));
+		self::registerEffect(new Effect(Effect::WEAKNESS, "%potion.weakness", new Color(0x48, 0x4d, 0x48), true));
+		self::registerEffect(new Effect(Effect::POISON, "%potion.poison", new Color(0x4e, 0x93, 0x31), true));
+		self::registerEffect(new Effect(Effect::WITHER, "%potion.wither", new Color(0x35, 0x2a, 0x27), true));
+		self::registerEffect(new Effect(Effect::HEALTH_BOOST, "%potion.healthBoost", new Color(0xf8, 0x7d, 0x23)));
+		self::registerEffect(new Effect(Effect::ABSORPTION, "%potion.absorption", new Color(0x25, 0x52, 0xa5)));
+		self::registerEffect(new Effect(Effect::SATURATION, "%potion.saturation", new Color(0xf8, 0x24, 0x23), false, 1));
+		self::registerEffect(new Effect(Effect::LEVITATION, "%potion.levitation", new Color(0xce, 0xff, 0xff)));
+		self::registerEffect(new Effect(Effect::FATAL_POISON, "%potion.poison", new Color(0x4e, 0x93, 0x31), true));
+		self::registerEffect(new Effect(Effect::CONDUIT_POWER, "%potion.conduitPower", new Color(0x1d, 0xc2, 0xd1)));
+	}
 
-		self::$effects[Effect::SPEED] = new Effect(Effect::SPEED, "%potion.moveSpeed", 124, 175, 198);
-		self::$effects[Effect::SLOWNESS] = new Effect(Effect::SLOWNESS, "%potion.moveSlowdown", 90, 108, 129, true);
-		self::$effects[Effect::SWIFTNESS] = new Effect(Effect::SWIFTNESS, "%potion.digSpeed", 217, 192, 67);
-		self::$effects[Effect::FATIGUE] = new Effect(Effect::FATIGUE, "%potion.digSlowDown", 74, 66, 23, true);
-		self::$effects[Effect::STRENGTH] = new Effect(Effect::STRENGTH, "%potion.damageBoost", 147, 36, 35);
-		self::$effects[Effect::HEALING] = new InstantEffect(Effect::HEALING, "%potion.heal", 248, 36, 35);
-		self::$effects[Effect::HARMING] = new InstantEffect(Effect::HARMING, "%potion.harm", 67, 10, 9, true);
-		self::$effects[Effect::JUMP] = new Effect(Effect::JUMP, "%potion.jump", 34, 255, 76);
-		self::$effects[Effect::NAUSEA] = new Effect(Effect::NAUSEA, "%potion.confusion", 85, 29, 74, true);
-		self::$effects[Effect::REGENERATION] = new Effect(Effect::REGENERATION, "%potion.regeneration", 205, 92, 171);
-		self::$effects[Effect::DAMAGE_RESISTANCE] = new Effect(Effect::DAMAGE_RESISTANCE, "%potion.resistance", 153, 69, 58);
-		self::$effects[Effect::FIRE_RESISTANCE] = new Effect(Effect::FIRE_RESISTANCE, "%potion.fireResistance", 228, 154, 58);
-		self::$effects[Effect::WATER_BREATHING] = new Effect(Effect::WATER_BREATHING, "%potion.waterBreathing", 46, 82, 153);
-		self::$effects[Effect::INVISIBILITY] = new Effect(Effect::INVISIBILITY, "%potion.invisibility", 127, 131, 146);
-
-		self::$effects[Effect::BLINDNESS] = new Effect(Effect::BLINDNESS, "%potion.blindness", 191, 192, 192);
-		self::$effects[Effect::NIGHT_VISION] = new Effect(Effect::NIGHT_VISION, "%potion.nightVision", 0, 0, 139);
-		self::$effects[Effect::HUNGER] = new Effect(Effect::HUNGER, "%potion.hunger", 46, 139, 87);
-
-		self::$effects[Effect::WEAKNESS] = new Effect(Effect::WEAKNESS, "%potion.weakness", 72, 77, 72, true);
-		self::$effects[Effect::POISON] = new Effect(Effect::POISON, "%potion.poison", 78, 147, 49, true);
-		self::$effects[Effect::WITHER] = new Effect(Effect::WITHER, "%potion.wither", 53, 42, 39, true);
-		self::$effects[Effect::HEALTH_BOOST] = new Effect(Effect::HEALTH_BOOST, "%potion.healthBoost", 248, 125, 35);
-
-		self::$effects[Effect::ABSORPTION] = new Effect(Effect::ABSORPTION, "%potion.absorption", 36, 107, 251);
-		self::$effects[Effect::SATURATION] = new Effect(Effect::SATURATION, "%potion.saturation", 255, 0, 255);
-
-        self::$effects[Effect::LEVITATION] = new Effect(Effect::LEVITATION, "%potion.levitation", 206, 255, 255);
+	/**
+	 * @param Effect $effect
+	 */
+	public static function registerEffect(Effect $effect) : void{
+		self::$effects[$effect->getId()] = $effect;
 	}
 
 	/**
 	 * @param int $id
 	 *
-	 * @return $this
+	 * @return Effect|null
 	 */
-	public static function getEffect($id){
-		if(isset(self::$effects[$id])){
-			return clone self::$effects[(int) $id];
-		}
-		return null;
+	public static function getEffect(int $id) : ?Effect{
+		return self::$effects[$id] ?? null;
 	}
 
 	/**
-	 * @param $name
+	 * @param string $name
 	 *
-	 * @return null|Effect
+	 * @return Effect|null
 	 */
-	public static function getEffectByName($name){
-		if(defined(Effect::class . "::" . strtoupper($name))){
-			return self::getEffect(constant(Effect::class . "::" . strtoupper($name)));
+	public static function getEffectByName(string $name) : ?Effect{
+		$const = self::class . "::" . strtoupper($name);
+		if(defined($const)){
+			return self::getEffect(constant($const));
 		}
 		return null;
 	}
 
 	/** @var int */
 	protected $id;
-
+	/** @var string */
 	protected $name;
-
-	protected $duration;
-
-	protected $amplifier = 0;
-
+	/** @var Color */
 	protected $color;
-
-	protected $show = true;
-
-	protected $ambient = false;
-
+	/** @var bool */
 	protected $bad;
+	/** @var int */
+	protected $defaultDuration;
+	/** @var bool */
+	protected $hasBubbles;
 
 	/**
-	 * Effect constructor.
-	 *
-	 * @param      $id
-	 * @param      $name
-	 * @param      $r
-	 * @param      $g
-	 * @param      $b
-	 * @param bool $isBad
+	 * @param int    $id Effect ID as per Minecraft PE
+	 * @param string $name Translation key used for effect name
+	 * @param Color  $color
+	 * @param bool   $isBad Whether the effect is harmful
+	 * @param int    $defaultDuration Duration in ticks the effect will last for by default if applied without a duration.
+	 * @param bool   $hasBubbles Whether the effect has potion bubbles. Some do not (e.g. Instant Damage has its own particles instead of bubbles)
 	 */
-	public function __construct($id, $name, $r, $g, $b, $isBad = false){
+	public function __construct(int $id, string $name, Color $color, bool $isBad = false, int $defaultDuration = 300 * 20, bool $hasBubbles = true){
 		$this->id = $id;
 		$this->name = $name;
-		$this->bad = (bool) $isBad;
-		$this->setColor($r, $g, $b);
+		$this->color = $color;
+		$this->bad = $isBad;
+		$this->defaultDuration = $defaultDuration;
+		$this->hasBubbles = $hasBubbles;
 	}
 
 	/**
+	 * Returns the effect ID as per Minecraft PE
+	 * @return int
+	 */
+	public function getId() : int{
+		return $this->id;
+	}
+
+	/**
+	 * Returns the translation key used to translate this effect's name.
 	 * @return string
 	 */
 	public function getName() : string{
@@ -159,271 +169,212 @@ class Effect {
 	}
 
 	/**
-	 * @return int
+	 * Returns a Color object representing this effect's particle colour.
+	 * @return Color
 	 */
-	public function getId(){
-		return $this->id;
+	public function getColor() : Color{
+		return clone $this->color;
 	}
 
 	/**
-	 * Sets the number of ticks remaining until the effect expires.
+	 * Returns whether this effect is harmful.
+	 * TODO: implement inverse effect results for undead mobs
 	 *
-	 * @throws \InvalidArgumentException
-	 *
-	 * @return $this
-	 */
-	public function setDuration(int $ticks){
-		if($ticks < 0 or $ticks > INT32_MAX){
-			throw new \InvalidArgumentException("Effect duration must be in range 0 - " . INT32_MAX . ", got $ticks");
-		}
-		$this->duration = $ticks;
-		return $this;
-	}
-
-	public function getDuration(){
-		return $this->duration;
-	}
-
-	/**
 	 * @return bool
 	 */
-	public function isVisible(){
-		return $this->show;
-	}
-
-	/**
-	 * @param $bool
-	 *
-	 * @return $this
-	 */
-	public function setVisible($bool){
-		$this->show = (bool) $bool;
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getAmplifier(){
-		return $this->amplifier;
-	}
-
-	/**
-	 * @param int $amplifier
-	 *
-	 * @return $this
-	 */
-	public function setAmplifier(int $amplifier){
-		$this->amplifier = ($amplifier & 0xff);
-		return $this;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isAmbient(){
-		return $this->ambient;
-	}
-
-	/**
-	 * @param bool $ambient
-	 *
-	 * @return $this
-	 */
-	public function setAmbient($ambient = true){
-		$this->ambient = (bool) $ambient;
-		return $this;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isBad(){
+	public function isBad() : bool{
 		return $this->bad;
 	}
 
 	/**
+	 * Returns whether the effect is by default an instant effect.
 	 * @return bool
 	 */
-	public function canTick(){
-		if($this->amplifier < 0) $this->amplifier = 0;
+	public function isInstantEffect() : bool{
+		return $this->defaultDuration <= 1;
+	}
+
+	/**
+	 * Returns the default duration this effect will apply for if a duration is not specified.
+	 * @return int
+	 */
+	public function getDefaultDuration() : int{
+		return $this->defaultDuration;
+	}
+
+	/**
+	 * Returns whether this effect will give the subject potion bubbles.
+	 * @return bool
+	 */
+	public function hasBubbles() : bool{
+		return $this->hasBubbles;
+	}
+
+	/**
+	 * Returns whether the effect will do something on the current tick.
+	 *
+	 * @param EffectInstance $instance
+	 *
+	 * @return bool
+	 */
+	public function canTick(EffectInstance $instance) : bool{
 		switch($this->id){
 			case Effect::POISON:
-				if(($interval = (25 >> $this->amplifier)) > 0){
-					return ($this->duration % $interval) === 0;
+			case Effect::FATAL_POISON:
+				if(($interval = (25 >> $instance->getAmplifier())) > 0){
+					return ($instance->getDuration() % $interval) === 0;
 				}
 				return true;
 			case Effect::WITHER:
-				if(($interval = (50 >> $this->amplifier)) > 0){
-					return ($this->duration % $interval) === 0;
+				if(($interval = (50 >> $instance->getAmplifier())) > 0){
+					return ($instance->getDuration() % $interval) === 0;
 				}
 				return true;
 			case Effect::REGENERATION:
-				if(($interval = (40 >> $this->amplifier)) > 0){
-					return ($this->duration % $interval) === 0;
+				if(($interval = (40 >> $instance->getAmplifier())) > 0){
+					return ($instance->getDuration() % $interval) === 0;
 				}
 				return true;
 			case Effect::HUNGER:
 				return true;
-			case Effect::HEALING:
-			case Effect::HARMING:
-				return true;
+			case Effect::INSTANT_DAMAGE:
+			case Effect::INSTANT_HEALTH:
 			case Effect::SATURATION:
-			    //If forced to last longer than 1 tick, these apply every tick.
-				if(($interval = (20 >> $this->amplifier)) > 0){
-					return ($this->duration % $interval) === 0;
-				}
+				//If forced to last longer than 1 tick, these apply every tick.
 				return true;
 		}
 		return false;
 	}
 
 	/**
-	 * @param Entity $entity
+	 * Applies effect results to an entity. This will not be called unless canTick() returns true.
+	 *
+	 * @param Living         $entity
+	 * @param EffectInstance $instance
+	 * @param float          $potency
+	 * @param null|Entity    $source
+	 * @param null|Entity    $sourceOwner
 	 */
-	public function applyEffect(Entity $entity){
+	public function applyEffect(Living $entity, EffectInstance $instance, float $potency = 1.0, ?Entity $source = null, ?Entity $sourceOwner = null) : void{
 		switch($this->id){
+			/** @noinspection PhpMissingBreakStatementInspection */
 			case Effect::POISON:
-				if($entity->getHealth() > 1){
-					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, 1);
-					$entity->attack($ev->getFinalDamage(), $ev);
+				if($entity->getHealth() <= 1){
+					break;
 				}
+			case Effect::FATAL_POISON:
+				$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, 1);
+				$entity->attack($ev);
 				break;
 
 			case Effect::WITHER:
 				$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, 1);
-				$entity->attack($ev->getFinalDamage(), $ev);
+				$entity->attack($ev);
 				break;
 
 			case Effect::REGENERATION:
 				if($entity->getHealth() < $entity->getMaxHealth()){
 					$ev = new EntityRegainHealthEvent($entity, 1, EntityRegainHealthEvent::CAUSE_MAGIC);
-					$entity->heal($ev->getAmount(), $ev);
+					$entity->heal($ev);
 				}
 				break;
+
 			case Effect::HUNGER:
 				if($entity instanceof Human){
-					$entity->exhaust(0.025 * $this->amplifier, PlayerExhaustEvent::CAUSE_POTION);
+					$entity->exhaust(0.025 * $instance->getEffectLevel(), PlayerExhaustEvent::CAUSE_POTION);
 				}
 				break;
-			case Effect::HEALING:
-				$level = $this->amplifier + 1;
-				if(($entity->getHealth() + 4 * $level) <= $entity->getMaxHealth()){
-					$ev = new EntityRegainHealthEvent($entity, 4 * $level, EntityRegainHealthEvent::CAUSE_MAGIC);
-					$entity->heal($ev->getAmount(), $ev);
-				}else{
-					$ev = new EntityRegainHealthEvent($entity, $entity->getMaxHealth() - $entity->getHealth(), EntityRegainHealthEvent::CAUSE_MAGIC);
-					$entity->heal($ev->getAmount(), $ev);
+			case Effect::INSTANT_HEALTH:
+				//TODO: add particles (witch spell)
+				if($entity->getHealth() < $entity->getMaxHealth()){
+					$entity->heal(new EntityRegainHealthEvent($entity, (4 << $instance->getAmplifier()) * $potency, EntityRegainHealthEvent::CAUSE_MAGIC));
 				}
 				break;
-			case Effect::HARMING:
-				$level = $this->amplifier + 1;
-				if(($entity->getHealth() - 6 * $level) >= 0){
-					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, 6 * $level);
-					$entity->attack($ev->getFinalDamage(), $ev);
+			case Effect::INSTANT_DAMAGE:
+				//TODO: add particles (witch spell)
+				$damage = (4 << $instance->getAmplifier()) * $potency;
+				if($source !== null and $sourceOwner !== null){
+					$ev = new EntityDamageByChildEntityEvent($sourceOwner, $source, $entity, EntityDamageEvent::CAUSE_MAGIC, $damage);
+				}elseif($source !== null){
+					$ev = new EntityDamageByEntityEvent($source, $entity, EntityDamageEvent::CAUSE_MAGIC, $damage);
 				}else{
-					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, $entity->getHealth());
-					$entity->attack($ev->getFinalDamage(), $ev);
+					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_MAGIC, $damage);
 				}
+				$entity->attack($ev);
+
 				break;
 			case Effect::SATURATION:
-				if($entity instanceof Player){
-					if($entity->getServer()->foodEnabled){
-						$entity->setFood($entity->getFood() + 1);
-					}
+				if($entity instanceof Human){
+					$entity->addFood($instance->getEffectLevel());
+					$entity->addSaturation($instance->getEffectLevel() * 2);
 				}
 				break;
 		}
 	}
 
 	/**
-	 * @return array
+	 * Applies effects to the entity when the effect is first added.
+	 *
+	 * @param Living         $entity
+	 * @param EffectInstance $instance
 	 */
-	public function getColor(){
-		return [$this->color >> 16, ($this->color >> 8) & 0xff, $this->color & 0xff];
-	}
-
-	/**
-	 * @param $r
-	 * @param $g
-	 * @param $b
-	 */
-	public function setColor($r, $g, $b){
-		$this->color = (($r & 0xff) << 16) + (($g & 0xff) << 8) + ($b & 0xff);
-	}
-
-	/**
-	 * @param Entity      $entity
-	 * @param bool        $modify
-	 * @param Effect|null $oldEffect
-	 */
-	public function add(Entity $entity, $modify = false, Effect $oldEffect = null){
-		if($entity instanceof Player){
-			$pk = new MobEffectPacket();
-			$pk->eid = $entity->getId();
-			$pk->effectId = $this->getId();
-			$pk->amplifier = $this->getAmplifier();
-			$pk->particles = $this->isVisible();
-			$pk->duration = $this->getDuration();
-			if($modify){
-				$pk->eventId = MobEffectPacket::EVENT_MODIFY;
-			}else{
-				$pk->eventId = MobEffectPacket::EVENT_ADD;
-			}
-
-			$entity->dataPacket($pk);
-
-			if($this->id === Effect::SPEED){
+	public function add(Living $entity, EffectInstance $instance) : void{
+		switch($this->id){
+			case Effect::INVISIBILITY:
+				$entity->setInvisible();
+				$entity->setNameTagVisible(false);
+				break;
+			case Effect::SPEED:
 				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
-				if($modify and $oldEffect !== null){
-					$speed = $attr->getValue() / (1 + 0.2 * ($oldEffect->getAmplifier() + 1));
-				}else{
-					$speed = $attr->getValue();
+				$attr->setValue($attr->getValue() * (1 + 0.2 * $instance->getEffectLevel()));
+				break;
+			case Effect::SLOWNESS:
+				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
+				$attr->setValue($attr->getValue() * (1 - 0.15 * $instance->getEffectLevel()), true);
+				break;
+
+			case Effect::HEALTH_BOOST:
+				$entity->setMaxHealth($entity->getMaxHealth() + 4 * $instance->getEffectLevel());
+				break;
+			case Effect::ABSORPTION:
+				$new = (4 * $instance->getEffectLevel());
+				if($new > $entity->getAbsorption()){
+					$entity->setAbsorption($new);
 				}
-				$speed *= (1 + 0.2 * ($this->amplifier + 1));
-				$attr->setValue($speed);
-			}elseif($this->id === Effect::SLOWNESS){
-				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
-				if($modify and $oldEffect !== null){
-					$speed = $attr->getValue() / (1 - 0.15 * ($oldEffect->getAmplifier() + 1));
-				}else{
-					$speed = $attr->getValue();
-				}
-				$speed *= (1 - (0.15 * $this->amplifier + 1));
-				$attr->setValue($speed, true);
-			}
-		}
-
-		if($this->id === Effect::INVISIBILITY){
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, true);
-			$entity->setNameTagVisible(false);
+				break;
 		}
 	}
 
 	/**
-	 * @param Entity $entity
+	 * Removes the effect from the entity, resetting any changed values back to their original defaults.
+	 *
+	 * @param Living         $entity
+	 * @param EffectInstance $instance
 	 */
-	public function remove(Entity $entity){
-		if($entity instanceof Player){
-			$pk = new MobEffectPacket();
-			$pk->eid = $entity->getId();
-			$pk->eventId = MobEffectPacket::EVENT_REMOVE;
-			$pk->effectId = $this->getId();
-
-			$entity->dataPacket($pk);
-
-			if($this->id === Effect::SPEED){
+	public function remove(Living $entity, EffectInstance $instance) : void{
+		switch($this->id){
+			case Effect::INVISIBILITY:
+				$entity->setInvisible(false);
+				$entity->setNameTagVisible(true);
+				break;
+			case Effect::SPEED:
 				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
-				$attr->setValue($attr->getValue() / (1 + 0.2 * ($this->amplifier + 1)));
-			}elseif($this->id === Effect::SLOWNESS){
+				$attr->setValue($attr->getValue() / (1 + 0.2 * $instance->getEffectLevel()));
+				break;
+			case Effect::SLOWNESS:
 				$attr = $entity->getAttributeMap()->getAttribute(Attribute::MOVEMENT_SPEED);
-				$attr->setValue($attr->getValue() / (1 - 0.15 * ($this->amplifier + 1)));
-			}
+				$attr->setValue($attr->getValue() / (1 - 0.15 * $instance->getEffectLevel()));
+				break;
+			case Effect::HEALTH_BOOST:
+				$entity->setMaxHealth($entity->getMaxHealth() - 4 * $instance->getEffectLevel());
+				break;
+			case Effect::ABSORPTION:
+				$entity->setAbsorption(0);
+				break;
 		}
+	}
 
-		if($this->id === Effect::INVISIBILITY){
-			$entity->setDataFlag(Entity::DATA_FLAGS, Entity::DATA_FLAG_INVISIBLE, false);
-			$entity->setNameTagVisible(true);
-		}
+	public function __clone(){
+		$this->color = clone $this->color;
 	}
 }

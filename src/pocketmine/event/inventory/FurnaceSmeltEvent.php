@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,10 +14,12 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\inventory;
 
@@ -26,16 +28,15 @@ use pocketmine\event\Cancellable;
 use pocketmine\item\Item;
 use pocketmine\tile\Furnace;
 
-class FurnaceSmeltEvent extends BlockEvent implements Cancellable {
-	public static $handlerList = null;
-
+class FurnaceSmeltEvent extends BlockEvent implements Cancellable{
+	/** @var Furnace */
 	private $furnace;
+	/** @var Item */
 	private $source;
+	/** @var Item */
 	private $result;
 
 	/**
-	 * FurnaceSmeltEvent constructor.
-	 *
 	 * @param Furnace $furnace
 	 * @param Item    $source
 	 * @param Item    $result
@@ -51,28 +52,28 @@ class FurnaceSmeltEvent extends BlockEvent implements Cancellable {
 	/**
 	 * @return Furnace
 	 */
-	public function getFurnace(){
+	public function getFurnace() : Furnace{
 		return $this->furnace;
 	}
 
 	/**
 	 * @return Item
 	 */
-	public function getSource(){
+	public function getSource() : Item{
 		return $this->source;
 	}
 
 	/**
 	 * @return Item
 	 */
-	public function getResult(){
+	public function getResult() : Item{
 		return $this->result;
 	}
 
 	/**
 	 * @param Item $result
 	 */
-	public function setResult(Item $result){
+	public function setResult(Item $result) : void{
 		$this->result = $result;
 	}
 }

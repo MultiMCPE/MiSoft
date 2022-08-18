@@ -19,40 +19,71 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\plugin;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\PluginIdentifiableCommand;
+use pocketmine\scheduler\TaskScheduler;
 use pocketmine\Server;
 use pocketmine\utils\Config;
+use function dirname;
+use function fclose;
+use function file_exists;
+use function fopen;
+use function is_dir;
+use function mkdir;
+use function rtrim;
+use function str_replace;
+use function stream_copy_to_stream;
+use function strlen;
+use function strpos;
+use function strtolower;
+use function substr;
+use function trim;
+use const DIRECTORY_SEPARATOR;
 
-abstract class PluginBase implements Plugin {
+abstract class PluginBase implements Plugin{
 
 	/** @var PluginLoader */
 	private $loader;
 
-	/** @var \pocketmine\Server */
+	/** @var Server */
 	private $server;
 
 	/** @var bool */
 	private $isEnabled = false;
-
-	/** @var bool */
-	private $initialized = false;
 
 	/** @var PluginDescription */
 	private $description;
 
 	/** @var string */
 	private $dataFolder;
-	private $config;
+	/** @var Config|null */
+	private $config = null;
 	/** @var string */
 	private $configFile;
+	/** @var string */
 	private $file;
 
 	/** @var PluginLogger */
 	private $logger;
+
+	/** @var TaskScheduler */
+	private $scheduler;
+
+	public function __construct(PluginLoader $loader, Server $server, PluginDescription $description, string $dataFolder, string $file){
+		$this->loader = $loader;
+		$this->server = $server;
+		$this->description = $description;
+		$this->dataFolder = rtrim($dataFolder, "\\/") . "/";
+		$this->file = rtrim($file, "\\/") . "/";
+		$this->configFile = $this->dataFolder . "config.yml";
+		$this->logger = new PluginLogger($this);
+		$this->scheduler = new TaskScheduler($this->logger, $this->getFullName());
+	}
 
 	/**
 	 * Called when the plugin is loaded, before calling onEnable()
@@ -72,17 +103,23 @@ abstract class PluginBase implements Plugin {
 	/**
 	 * @return bool
 	 */
-	public final function isEnabled(){
-		return $this->isEnabled === true;
+	final public function isEnabled() : bool{
+		return $this->isEnabled;
 	}
 
 	/**
-	 * @param bool $boolean
+	 * Called by the plugin manager when the plugin is enabled or disabled to inform the plugin of its enabled state.
+	 *
+	 * @internal This is intended for core use only and should not be used by plugins
+	 * @see PluginManager::enablePlugin()
+	 * @see PluginManager::disablePlugin()
+	 *
+	 * @param bool $enabled
 	 */
-	public final function setEnabled($boolean = true){
-		if($this->isEnabled !== $boolean){
-			$this->isEnabled = $boolean;
-			if($this->isEnabled === true){
+	final public function setEnabled(bool $enabled = true) : void{
+		if($this->isEnabled !== $enabled){
+			$this->isEnabled = $enabled;
+			if($this->isEnabled){
 				$this->onEnable();
 			}else{
 				$this->onDisable();
@@ -93,64 +130,31 @@ abstract class PluginBase implements Plugin {
 	/**
 	 * @return bool
 	 */
-	public final function isDisabled(){
-		return $this->isEnabled === false;
+	final public function isDisabled() : bool{
+		return !$this->isEnabled;
 	}
 
-	/**
-	 * @return string
-	 */
-	public final function getDataFolder(){
+	final public function getDataFolder() : string{
 		return $this->dataFolder;
 	}
 
-	/**
-	 * @return PluginDescription
-	 */
-	public final function getDescription(){
+	final public function getDescription() : PluginDescription{
 		return $this->description;
-	}
-
-	/**
-	 * @param PluginLoader      $loader
-	 * @param Server            $server
-	 * @param PluginDescription $description
-	 * @param                   $dataFolder
-	 * @param                   $file
-	 */
-	public final function init(PluginLoader $loader, Server $server, PluginDescription $description, $dataFolder, $file){
-		if($this->initialized === false){
-			$this->initialized = true;
-			$this->loader = $loader;
-			$this->server = $server;
-			$this->description = $description;
-			$this->dataFolder = rtrim($dataFolder, "\\/") . "/";
-			$this->file = rtrim($file, "\\/") . "/";
-			$this->configFile = $this->dataFolder . "config.yml";
-			$this->logger = new PluginLogger($this);
-		}
 	}
 
 	/**
 	 * @return PluginLogger
 	 */
-	public function getLogger(){
+	public function getLogger() : PluginLogger{
 		return $this->logger;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public final function isInitialized(){
-		return $this->initialized;
 	}
 
 	/**
 	 * @param string $name
 	 *
-	 * @return Command|PluginIdentifiableCommand
+	 * @return Command|PluginIdentifiableCommand|null
 	 */
-	public function getCommand($name){
+	public function getCommand(string $name){
 		$command = $this->getServer()->getPluginCommand($name);
 		if($command === null or $command->getPlugin() !== $this){
 			$command = $this->getServer()->getPluginCommand(strtolower($this->description->getName()) . ":" . $name);
@@ -167,19 +171,19 @@ abstract class PluginBase implements Plugin {
 	 * @param CommandSender $sender
 	 * @param Command       $command
 	 * @param string        $label
-	 * @param array         $args
+	 * @param string[]      $args
 	 *
 	 * @return bool
 	 */
-	public function onCommand(CommandSender $sender, Command $command, $label, array $args){
+	public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
 		return false;
 	}
 
 	/**
 	 * @return bool
 	 */
-	protected function isPhar(){
-		return substr($this->file, 0, 7) === "phar://";
+	protected function isPhar() : bool{
+		return strpos($this->file, "phar://") === 0;
 	}
 
 	/**
@@ -188,9 +192,9 @@ abstract class PluginBase implements Plugin {
 	 *
 	 * @param string $filename
 	 *
-	 * @return resource Resource data, or null
+	 * @return null|resource Resource data, or null
 	 */
-	public function getResource($filename){
+	public function getResource(string $filename){
 		$filename = rtrim(str_replace("\\", "/", $filename), "/");
 		if(file_exists($this->file . "resources/" . $filename)){
 			return fopen($this->file . "resources/" . $filename, "rb");
@@ -205,7 +209,7 @@ abstract class PluginBase implements Plugin {
 	 *
 	 * @return bool
 	 */
-	public function saveResource($filename, $replace = false){
+	public function saveResource(string $filename, bool $replace = false) : bool{
 		if(trim($filename) === ""){
 			return false;
 		}
@@ -219,7 +223,7 @@ abstract class PluginBase implements Plugin {
 			mkdir(dirname($out), 0755, true);
 		}
 
-		if(file_exists($out) and $replace !== true){
+		if(file_exists($out) and !$replace){
 			return false;
 		}
 
@@ -230,16 +234,17 @@ abstract class PluginBase implements Plugin {
 	}
 
 	/**
-	 * Returns all the resources packaged with the plugin
+	 * Returns all the resources packaged with the plugin in the form ["path/in/resources" => SplFileInfo]
 	 *
-	 * @return string[]
+	 * @return \SplFileInfo[]
 	 */
-	public function getResources(){
+	public function getResources() : array{
 		$resources = [];
 		if(is_dir($this->file . "resources/")){
 			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->file . "resources/")) as $resource){
 				if($resource->isFile()){
-					$resources[] = $resource;
+					$path = str_replace(DIRECTORY_SEPARATOR, "/", substr((string) $resource, strlen($this->file . "resources/")));
+					$resources[$path] = $resource;
 				}
 			}
 		}
@@ -250,71 +255,57 @@ abstract class PluginBase implements Plugin {
 	/**
 	 * @return Config
 	 */
-	public function getConfig(){
-		if(!isset($this->config)){
+	public function getConfig() : Config{
+		if($this->config === null){
 			$this->reloadConfig();
 		}
 
 		return $this->config;
 	}
 
-	/**
-	 *
-	 */
 	public function saveConfig(){
-		if($this->getConfig()->save() === false){
+		if(!$this->getConfig()->save()){
 			$this->getLogger()->critical("Could not save config to " . $this->configFile);
 		}
 	}
 
-	/**
-	 *
-	 */
-	public function saveDefaultConfig(){
+	public function saveDefaultConfig() : bool{
 		if(!file_exists($this->configFile)){
-			$this->saveResource("config.yml", false);
+			return $this->saveResource("config.yml", false);
 		}
+		return false;
 	}
 
-	/**
-	 *
-	 */
 	public function reloadConfig(){
-		if(!$this->saveDefaultConfig()){
-			@mkdir($this->dataFolder);
-		}
+		$this->saveDefaultConfig();
 		$this->config = new Config($this->configFile);
-		if(($configStream = $this->getResource("config.yml")) !== null){
-			$this->config->setDefaults(yaml_parse(Config::fixYAMLIndexes(stream_get_contents($configStream))));
-			fclose($configStream);
-		}
 	}
 
 	/**
 	 * @return Server
 	 */
-	public final function getServer(){
+	final public function getServer() : Server{
 		return $this->server;
 	}
 
 	/**
 	 * @return string
 	 */
-	public final function getName(){
+	final public function getName() : string{
 		return $this->description->getName();
 	}
 
 	/**
 	 * @return string
 	 */
-	public final function getFullName(){
+	final public function getFullName() : string{
 		return $this->description->getFullName();
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
-	protected function getFile(){
+	protected function getFile() : string{
 		return $this->file;
 	}
 
@@ -325,4 +316,10 @@ abstract class PluginBase implements Plugin {
 		return $this->loader;
 	}
 
+	/**
+	 * @return TaskScheduler
+	 */
+	public function getScheduler() : TaskScheduler{
+		return $this->scheduler;
+	}
 }

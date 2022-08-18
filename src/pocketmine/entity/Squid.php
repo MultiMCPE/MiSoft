@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,56 +15,48 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
+
+declare(strict_types=1);
 
 namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\Item as ItemItem;
+use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
-use pocketmine\network\protocol\AddEntityPacket;
-use pocketmine\network\protocol\EntityEventPacket;
-use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use function atan2;
+use function mt_rand;
+use function sqrt;
+use const M_PI;
 
-class Squid extends WaterAnimal implements Ageable {
-	const NETWORK_ID = 17;
+class Squid extends WaterAnimal{
+	public const NETWORK_ID = self::SQUID;
 
 	public $width = 0.95;
-	public $length = 0.95;
 	public $height = 0.95;
 
-	public $dropExp = [1, 3];
-
-	/** @var Vector3 */
+	/** @var Vector3|null */
 	public $swimDirection = null;
 	public $swimSpeed = 0.1;
 
 	private $switchDirectionTicker = 0;
 
-	public function initEntity(){
+	public function initEntity() : void{
+		$this->setMaxHealth(10);
 		parent::initEntity();
-		$this->setMaxHealth(5);
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Squid";
 	}
 
-	/**
-	 * @param float             $damage
-	 * @param EntityDamageEvent $source
-	 *
-	 * @return bool|void
-	 */
-	public function attack($damage, EntityDamageEvent $source){
-		parent::attack($damage, $source);
+	public function attack(EntityDamageEvent $source) : void{
+		parent::attack($source);
 		if($source->isCancelled()){
 			return;
 		}
@@ -73,31 +65,20 @@ class Squid extends WaterAnimal implements Ageable {
 			$this->swimSpeed = mt_rand(150, 350) / 2000;
 			$e = $source->getDamager();
 			if($e !== null){
-		        $this->swimDirection = (new Vector3($this->x - $e->x, $this->y - $e->y, $this->z - $e->z))->normalize();
+				$this->swimDirection = (new Vector3($this->x - $e->x, $this->y - $e->y, $this->z - $e->z))->normalize();
 			}
 
-			$pk = new EntityEventPacket();
-			$pk->eid = $this->getId();
-			$pk->event = EntityEventPacket::SQUID_INK_CLOUD;
-			$this->server->broadcastPacket($this->hasSpawned, $pk);
+			$this->broadcastEntityEvent(ActorEventPacket::SQUID_INK_CLOUD);
 		}
 	}
 
-	/**
-	 * @return Vector3
-	 */
-	private function generateRandomDirection(){
+	private function generateRandomDirection() : Vector3{
 		return new Vector3(mt_rand(-1000, 1000) / 1000, mt_rand(-500, 500) / 1000, mt_rand(-1000, 1000) / 1000);
 	}
 
 
-	/**
-	 * @param $currentTick
-	 *
-	 * @return bool
-	 */
-	public function onUpdate($currentTick){
-		if($this->closed !== false){
+	public function entityBaseTick(int $tickDiff = 1) : bool{
+		if($this->closed){
 			return false;
 		}
 
@@ -108,11 +89,7 @@ class Squid extends WaterAnimal implements Ageable {
 			}
 		}
 
-		$this->lastUpdate = $currentTick;
-
-		$this->timings->startTiming();
-
-		$hasUpdate = parent::onUpdate($currentTick);
+		$hasUpdate = parent::entityBaseTick($tickDiff);
 
 		if($this->isAlive()){
 
@@ -120,90 +97,35 @@ class Squid extends WaterAnimal implements Ageable {
 				$this->swimDirection->y = -0.5;
 			}
 
-			$inWater = $this->isInsideOfWater();
+			$inWater = $this->isUnderwater();
 			if(!$inWater){
-				$this->motionY -= $this->gravity;
 				$this->swimDirection = null;
 			}elseif($this->swimDirection !== null){
-				if($this->motionX ** 2 + $this->motionY ** 2 + $this->motionZ ** 2 <= $this->swimDirection->lengthSquared()){
-					$this->motionX = $this->swimDirection->x * $this->swimSpeed;
-					$this->motionY = $this->swimDirection->y * $this->swimSpeed;
-					$this->motionZ = $this->swimDirection->z * $this->swimSpeed;
+				if($this->motion->lengthSquared() <= $this->swimDirection->lengthSquared()){
+					$this->motion = $this->swimDirection->multiply($this->swimSpeed);
 				}
 			}else{
 				$this->swimDirection = $this->generateRandomDirection();
 				$this->swimSpeed = mt_rand(50, 100) / 2000;
 			}
 
-			$expectedPos = new Vector3($this->x + $this->motionX, $this->y + $this->motionY, $this->z + $this->motionZ);
-
-			$this->move($this->motionX, $this->motionY, $this->motionZ);
-
-			if($expectedPos->distanceSquared($this) > 0){
-				$this->swimDirection = $this->generateRandomDirection();
-				$this->swimSpeed = mt_rand(50, 100) / 2000;
-			}
-
-			$friction = 1 - $this->drag;
-
-			$this->motionX *= $friction;
-			$this->motionY *= 1 - $this->drag;
-			$this->motionZ *= $friction;
-
-			$f = sqrt(($this->motionX ** 2) + ($this->motionZ ** 2));
-			$this->yaw = (-atan2($this->motionX, $this->motionZ) * 180 / M_PI);
-			$this->pitch = (-atan2($f, $this->motionY) * 180 / M_PI);
-
-			if($this->onGround){
-				$this->motionY *= -0.5;
-			}
-
+			$f = sqrt(($this->motion->x ** 2) + ($this->motion->z ** 2));
+			$this->yaw = (-atan2($this->motion->x, $this->motion->z) * 180 / M_PI);
+			$this->pitch = (-atan2($f, $this->motion->y) * 180 / M_PI);
 		}
 
-		$this->timings->stopTiming();
-
-		return $hasUpdate or !$this->onGround or abs($this->motionX) > 0.00001 or abs($this->motionY) > 0.00001 or abs($this->motionZ) > 0.00001;
+		return $hasUpdate;
 	}
 
-
-	/**
-	 * @param Player $player
-	 */
-	public function spawnTo(Player $player){
-		$pk = new AddEntityPacket();
-		$pk->eid = $this->getId();
-		$pk->type = Squid::NETWORK_ID;
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->speedX = $this->motionX;
-		$pk->speedY = $this->motionY;
-		$pk->speedZ = $this->motionZ;
-		$pk->yaw = $this->yaw;
-		$pk->pitch = $this->pitch;
-		$pk->metadata = $this->dataProperties;
-		$player->dataPacket($pk);
-
-		parent::spawnTo($player);
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getDrops(){
-		$lootingL = 0;
-		$cause = $this->lastDamageCause;
-		if($cause instanceof EntityDamageByEntityEvent and $cause->getDamager() instanceof Player){
-			$damager = $cause->getDamager();
-			if($damager instanceof Player){
-				$lootingL = $damager->getItemInHand()->getEnchantmentLevel(Enchantment::TYPE_WEAPON_LOOTING);
-
-				$drops = [ItemItem::get(ItemItem::DYE, 0, mt_rand(1, 3 + $lootingL))];
-
-				return $drops;
-			}
+	protected function applyGravity() : void{
+		if(!$this->isUnderwater()){
+			parent::applyGravity();
 		}
+	}
 
-		return [];
+	public function getDrops() : array{
+		return [
+			ItemFactory::get(Item::DYE, 0, mt_rand(1, 3))
+		];
 	}
 }

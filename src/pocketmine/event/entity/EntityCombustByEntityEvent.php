@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,35 +14,35 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
 use pocketmine\entity\Entity;
 
-class EntityCombustByEntityEvent extends EntityCombustEvent {
-
+class EntityCombustByEntityEvent extends EntityCombustEvent{
+	/** @var Entity */
 	protected $combuster;
 
 	/**
 	 * @param Entity $combuster
 	 * @param Entity $combustee
 	 * @param int    $duration
-	 * @param int    $ProtectLevel
 	 */
-	public function __construct(Entity $combuster, Entity $combustee, $duration, $ProtectLevel = 0){
-		parent::__construct($combustee, $duration, $ProtectLevel);
+	public function __construct(Entity $combuster, Entity $combustee, int $duration){
+		parent::__construct($combustee, $duration);
 		$this->combuster = $combuster;
 	}
 
 	/**
 	 * @return Entity
 	 */
-	public function getCombuster(){
+	public function getCombuster() : Entity{
 		return $this->combuster;
 	}
-
 }

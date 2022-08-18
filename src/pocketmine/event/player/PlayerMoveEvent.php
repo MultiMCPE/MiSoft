@@ -14,10 +14,12 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
@@ -25,15 +27,13 @@ use pocketmine\event\Cancellable;
 use pocketmine\level\Location;
 use pocketmine\Player;
 
-class PlayerMoveEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
-
+class PlayerMoveEvent extends PlayerEvent implements Cancellable{
+	/** @var Location */
 	private $from;
+	/** @var Location */
 	private $to;
 
 	/**
-	 * PlayerMoveEvent constructor.
-	 *
 	 * @param Player   $player
 	 * @param Location $from
 	 * @param Location $to
@@ -47,28 +47,21 @@ class PlayerMoveEvent extends PlayerEvent implements Cancellable {
 	/**
 	 * @return Location
 	 */
-	public function getFrom(){
+	public function getFrom() : Location{
 		return $this->from;
-	}
-
-	/**
-	 * @param Location $from
-	 */
-	public function setFrom(Location $from){
-		$this->from = $from;
 	}
 
 	/**
 	 * @return Location
 	 */
-	public function getTo(){
+	public function getTo() : Location{
 		return $this->to;
 	}
 
 	/**
 	 * @param Location $to
 	 */
-	public function setTo(Location $to){
+	public function setTo(Location $to) : void{
 		$this->to = $to;
 	}
 }

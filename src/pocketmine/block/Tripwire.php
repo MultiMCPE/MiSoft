@@ -19,49 +19,32 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\block;
 
-use pocketmine\item\Tool;
+use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 
-class Tripwire extends Transparent {
+class Tripwire extends Flowable{
 
 	protected $id = self::TRIPWIRE;
 
-	/**
-	 * Tripwire constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Tripwire";
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
+	public function getDropsForCompatibleTool(Item $item) : array{
+		return [
+			ItemFactory::get(Item::STRING)
+		];
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getHardness(){
-		return 0;
+	public function isAffectedBySilkTouch() : bool{
+		return false;
 	}
-
-	/**
-	 * @return int
-	 */
-	public function getResistance(){
-		return 0;
-	}
-
 }

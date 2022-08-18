@@ -19,104 +19,59 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\inventory;
 
-use pocketmine\entity\Human;
-use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\level\Position;
-use pocketmine\nbt\tag\ListTag;
-use pocketmine\network\protocol\TileEventPacket;
-use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
+use pocketmine\tile\EnderChest;
 
-class EnderChestInventory extends ContainerInventory {
+class EnderChestInventory extends ChestInventory{
 
-	/** @var Human|Player */
-	private $owner;
+	/** @var Position */
+	protected $holder;
+
+	public function __construct(){
+		ContainerInventory::__construct(new Position());
+	}
+
+	public function getNetworkType() : int{
+		return WindowTypes::CONTAINER;
+	}
+
+	public function getName() : string{
+		return "EnderChest";
+	}
+
+	public function getDefaultSize() : int{
+		return 27;
+	}
 
 	/**
-	 * EnderChestInventory constructor.
+	 * Set the holder's position to that of a tile
 	 *
-	 * @param Human $owner
-	 * @param null  $contents
+	 * @param EnderChest $enderChest
 	 */
-	public function __construct(Human $owner, $contents = null){
-		$this->owner = $owner;
-		parent::__construct(new FakeBlockMenu($this, $owner->getPosition()), InventoryType::get(InventoryType::ENDER_CHEST));
+	public function setHolderPosition(EnderChest $enderChest){
+		$this->holder->setComponents($enderChest->getFloorX(), $enderChest->getFloorY(), $enderChest->getFloorZ());
+		$this->holder->setLevel($enderChest->getLevel());
+	}
 
-		if($contents !== null){
-			if($contents instanceof ListTag){ //Saved data to be loaded into the inventory
-				foreach($contents as $item){
-					$this->setItem($item["Slot"], Item::nbtDeserialize($item));
-				}
-			}else{
-				throw new \InvalidArgumentException("Expecting ListTag, received " . gettype($contents));
-			}
-		}
+	protected function getOpenSound() : int{
+		return LevelSoundEventPacket::SOUND_ENDERCHEST_OPEN;
+	}
+
+	protected function getCloseSound() : int{
+		return LevelSoundEventPacket::SOUND_ENDERCHEST_CLOSED;
 	}
 
 	/**
-	 * @return Human|Player
-	 */
-	public function getOwner(){
-		return $this->owner;
-	}
-
-	/**
-	 * Set the fake block menu's position to a valid tile position
-	 * and send the inventory window to the owner
-	 *
-	 * @param Position $pos
-	 */
-	public function openAt(Position $pos){
-		$this->getHolder()->setComponents($pos->x, $pos->y, $pos->z);
-		$this->getHolder()->setLevel($pos->getLevel());
-		$this->owner->addWindow($this);
-	}
-
-	/**
-	 * @return FakeBlockMenu
+	 * This override is here for documentation and code completion purposes only.
+	 * @return Position
 	 */
 	public function getHolder(){
 		return $this->holder;
 	}
-
-	/**
-	 * @param Player $who
-	 */
-	public function onOpen(Player $who){
-		parent::onOpen($who);
-
-		if(count($this->getViewers()) === 1){
-			$pk = new TileEventPacket();
-			$pk->x = $this->getHolder()->getX();
-			$pk->y = $this->getHolder()->getY();
-			$pk->z = $this->getHolder()->getZ();
-			$pk->case1 = 1;
-			$pk->case2 = 2;
-			if(($level = $this->getHolder()->getLevel()) instanceof Level){
-				$level->addChunkPacket($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4, $pk);
-			}
-		}
-	}
-
-	/**
-	 * @param Player $who
-	 */
-	public function onClose(Player $who){
-		if(count($this->getViewers()) === 1){
-			$pk = new TileEventPacket();
-			$pk->x = $this->getHolder()->getX();
-			$pk->y = $this->getHolder()->getY();
-			$pk->z = $this->getHolder()->getZ();
-			$pk->case1 = 1;
-			$pk->case2 = 0;
-			if(($level = $this->getHolder()->getLevel()) instanceof Level){
-				$level->addChunkPacket($this->getHolder()->getX() >> 4, $this->getHolder()->getZ() >> 4, $pk);
-			}
-		}
-
-		parent::onClose($who);
-	}
-
 }

@@ -19,25 +19,25 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\command\defaults;
 
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
-use pocketmine\event\TranslationContainer;
-use pocketmine\item\Item;
-use pocketmine\nbt\NBT;
+use pocketmine\command\utils\InvalidCommandSyntaxException;
+use pocketmine\item\ItemFactory;
+use pocketmine\lang\TranslationContainer;
+use pocketmine\nbt\JsonNbtParser;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\Player;
 use pocketmine\utils\TextFormat;
+use function array_slice;
+use function count;
+use function implode;
 
-class GiveCommand extends VanillaCommand {
+class GiveCommand extends VanillaCommand{
 
-	/**
-	 * GiveCommand constructor.
-	 *
-	 * @param $name
-	 */
-	public function __construct($name){
+	public function __construct(string $name){
 		parent::__construct(
 			$name,
 			"%pocketmine.command.give.description",
@@ -46,26 +46,27 @@ class GiveCommand extends VanillaCommand {
 		$this->setPermission("pocketmine.command.give");
 	}
 
-	/**
-	 * @param CommandSender $sender
-	 * @param string        $currentAlias
-	 * @param array         $args
-	 *
-	 * @return bool
-	 */
-	public function execute(CommandSender $sender, $currentAlias, array $args){
+	public function execute(CommandSender $sender, string $commandLabel, array $args){
 		if(!$this->testPermission($sender)){
 			return true;
 		}
 
 		if(count($args) < 2){
-			$sender->sendMessage(new TranslationContainer("commands.generic.usage", [$this->usageMessage]));
-
-			return true;
+			throw new InvalidCommandSyntaxException();
 		}
 
 		$player = $sender->getServer()->getPlayer($args[0]);
-		$item = Item::fromString($args[1]);
+		if($player === null){
+			$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.player.notFound"));
+			return true;
+		}
+
+		try{
+			$item = ItemFactory::fromString($args[1]);
+		}catch(\InvalidArgumentException $e){
+			$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.give.item.notFound", [$args[1]]));
+			return true;
+		}
 
 		if(!isset($args[2])){
 			$item->setCount($item->getMaxStackSize());
@@ -77,8 +78,8 @@ class GiveCommand extends VanillaCommand {
 			$tags = $exception = null;
 			$data = implode(" ", array_slice($args, 3));
 			try{
-				$tags = NBT::parseJSON($data);
-			}catch(\Throwable $ex){
+				$tags = JsonNbtParser::parseJson($data);
+			}catch(\Exception $ex){
 				$exception = $ex;
 			}
 
@@ -90,20 +91,8 @@ class GiveCommand extends VanillaCommand {
 			$item->setNamedTag($tags);
 		}
 
-		if($player instanceof Player){
-			if($item->getId() === 0){
-				$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.give.item.notFound", [$args[1]]));
-
-				return true;
-			}
-
-			//TODO: overflow
-			$player->getInventory()->addItem(clone $item);
-		}else{
-			$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.generic.player.notFound"));
-
-			return true;
-		}
+		//TODO: overflow
+		$player->getInventory()->addItem(clone $item);
 
 		Command::broadcastCommandMessage($sender, new TranslationContainer("%commands.give.success", [
 			$item->getName() . " (" . $item->getId() . ":" . $item->getDamage() . ")",

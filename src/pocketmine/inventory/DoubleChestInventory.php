@@ -19,36 +19,38 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\network\protocol\TileEventPacket;
 use pocketmine\Player;
 use pocketmine\tile\Chest;
+use function array_merge;
+use function array_slice;
+use function count;
 
-class DoubleChestInventory extends ChestInventory implements InventoryHolder {
+class DoubleChestInventory extends ChestInventory implements InventoryHolder{
 	/** @var ChestInventory */
 	private $left;
 	/** @var ChestInventory */
 	private $right;
 
-	/**
-	 * DoubleChestInventory constructor.
-	 *
-	 * @param Chest $left
-	 * @param Chest $right
-	 */
 	public function __construct(Chest $left, Chest $right){
 		$this->left = $left->getRealInventory();
 		$this->right = $right->getRealInventory();
 		$items = array_merge($this->left->getContents(true), $this->right->getContents(true));
-		BaseInventory::__construct($this, InventoryType::get(InventoryType::DOUBLE_CHEST), $items);
+		BaseInventory::__construct($items);
 	}
 
-	/**
-	 * @return $this
-	 */
+	public function getName() : string{
+		return "Double Chest";
+	}
+
+	public function getDefaultSize() : int{
+		return $this->left->getDefaultSize() + $this->right->getDefaultSize();
+	}
+
 	public function getInventory(){
 		return $this;
 	}
@@ -60,23 +62,11 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 		return $this->left->getHolder();
 	}
 
-	/**
-	 * @param int $index
-	 *
-	 * @return Item
-	 */
-	public function getItem($index){
+	public function getItem(int $index) : Item{
 		return $index < $this->left->getSize() ? $this->left->getItem($index) : $this->right->getItem($index - $this->left->getSize());
 	}
 
-    /**
-     * @param int $index
-     * @param Item $item
-     *
-     * @param bool $send
-     * @return bool
-     */
-	public function setItem($index, Item $item, $send = true){
+	public function setItem(int $index, Item $item, bool $send = true) : bool{
 		$old = $this->getItem($index);
 		if($index < $this->left->getSize() ? $this->left->setItem($index, $item, $send) : $this->right->setItem($index - $this->left->getSize(), $item, $send)){
 			$this->onSlotChange($index, $old, $send);
@@ -96,26 +86,25 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 		return $result;
 	}
 
-    /**
-     * @param Item[] $items
-     * @param bool $send
-     */
-	public function setContents(array $items, $send = true){
-		if(count($items) > $this->size){
-			$items = array_slice($items, 0, $this->size, true);
+	/**
+	 * @param Item[] $items
+	 * @param bool   $send
+	 */
+	public function setContents(array $items, bool $send = true) : void{
+		$size = $this->getSize();
+		if(count($items) > $size){
+			$items = array_slice($items, 0, $size, true);
 		}
 
-		for($i = 0; $i < $this->size; ++$i){
+		$leftSize = $this->left->getSize();
+
+		for($i = 0; $i < $size; ++$i){
 			if(!isset($items[$i])){
-				if($i < $this->left->size){
-					if(isset($this->left->slots[$i])){
-						$this->clear($i);
-					}
-				}elseif(isset($this->right->slots[$i - $this->left->size])){
-					$this->clear($i);
+				if(($i < $leftSize and isset($this->left->slots[$i])) or isset($this->right->slots[$i - $leftSize])){
+					$this->clear($i, false);
 				}
-			}elseif(!$this->setItem($i, $items[$i])){
-				$this->clear($i);
+			}elseif(!$this->setItem($i, $items[$i], false)){
+				$this->clear($i, false);
 			}
 		}
 
@@ -124,39 +113,17 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 		}
 	}
 
-	/**
-	 * @param Player $who
-	 */
-	public function onOpen(Player $who){
+	public function onOpen(Player $who) : void{
 		parent::onOpen($who);
 
-		if(count($this->getViewers()) === 1){
-			$pk = new TileEventPacket();
-			$pk->x = $this->right->getHolder()->getX();
-			$pk->y = $this->right->getHolder()->getY();
-			$pk->z = $this->right->getHolder()->getZ();
-			$pk->case1 = 1;
-			$pk->case2 = 2;
-			if(($level = $this->right->getHolder()->getLevel()) instanceof Level){
-				$level->addChunkPacket($this->right->getHolder()->getX() >> 4, $this->right->getHolder()->getZ() >> 4, $pk);
-			}
+		if(count($this->getViewers()) === 1 and $this->right->getHolder()->isValid()){
+			$this->right->broadcastBlockEventPacket(true);
 		}
 	}
 
-	/**
-	 * @param Player $who
-	 */
-	public function onClose(Player $who){
-		if(count($this->getViewers()) === 1){
-			$pk = new TileEventPacket();
-			$pk->x = $this->right->getHolder()->getX();
-			$pk->y = $this->right->getHolder()->getY();
-			$pk->z = $this->right->getHolder()->getZ();
-			$pk->case1 = 1;
-			$pk->case2 = 0;
-			if(($level = $this->right->getHolder()->getLevel()) instanceof Level){
-				$level->addChunkPacket($this->right->getHolder()->getX() >> 4, $this->right->getHolder()->getZ() >> 4, $pk);
-			}
+	public function onClose(Player $who) : void{
+		if(count($this->getViewers()) === 1 and $this->right->getHolder()->isValid()){
+			$this->right->broadcastBlockEventPacket(false);
 		}
 		parent::onClose($who);
 	}
@@ -164,14 +131,14 @@ class DoubleChestInventory extends ChestInventory implements InventoryHolder {
 	/**
 	 * @return ChestInventory
 	 */
-	public function getLeftSide(){
+	public function getLeftSide() : ChestInventory{
 		return $this->left;
 	}
 
 	/**
 	 * @return ChestInventory
 	 */
-	public function getRightSide(){
+	public function getRightSide() : ChestInventory{
 		return $this->right;
 	}
 

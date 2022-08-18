@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,334 +14,211 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
-use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
 use pocketmine\event\Cancellable;
-use pocketmine\inventory\PlayerInventory;
-use pocketmine\item\enchantment\Enchantment;
-use pocketmine\item\Item;
-use pocketmine\Player;
+use function array_sum;
 
 /**
  * Called when an entity takes damage.
  */
-class EntityDamageEvent extends EntityEvent implements Cancellable {
-	public static $handlerList = null;
+class EntityDamageEvent extends EntityEvent implements Cancellable{
+	public const MODIFIER_ARMOR = 1;
+	public const MODIFIER_STRENGTH = 2;
+	public const MODIFIER_WEAKNESS = 3;
+	public const MODIFIER_RESISTANCE = 4;
+	public const MODIFIER_ABSORPTION = 5;
+	public const MODIFIER_ARMOR_ENCHANTMENTS = 6;
+	public const MODIFIER_CRITICAL = 7;
+	public const MODIFIER_TOTEM = 8;
+	public const MODIFIER_WEAPON_ENCHANTMENTS = 9;
 
-	const MODIFIER_BASE = 0;
-	const MODIFIER_RESISTANCE = 1;
-	const MODIFIER_ARMOR = 2;
-	const MODIFIER_PROTECTION = 3;
-	const MODIFIER_STRENGTH = 4;
-	const MODIFIER_WEAKNESS = 5;
-	const MODIFIER_CRITICAL = 7;
-	const MODIFIER_TOTEM = 8;
+	public const CAUSE_CONTACT = 0;
+	public const CAUSE_ENTITY_ATTACK = 1;
+	public const CAUSE_PROJECTILE = 2;
+	public const CAUSE_SUFFOCATION = 3;
+	public const CAUSE_FALL = 4;
+	public const CAUSE_FIRE = 5;
+	public const CAUSE_FIRE_TICK = 6;
+	public const CAUSE_LAVA = 7;
+	public const CAUSE_DROWNING = 8;
+	public const CAUSE_BLOCK_EXPLOSION = 9;
+	public const CAUSE_ENTITY_EXPLOSION = 10;
+	public const CAUSE_VOID = 11;
+	public const CAUSE_SUICIDE = 12;
+	public const CAUSE_MAGIC = 13;
+	public const CAUSE_CUSTOM = 14;
+	public const CAUSE_STARVATION = 15;
 
-	const CAUSE_CONTACT = 0;
-	const CAUSE_ENTITY_ATTACK = 1;
-	const CAUSE_PROJECTILE = 2;
-	const CAUSE_SUFFOCATION = 3;
-	const CAUSE_FALL = 4;
-	const CAUSE_FIRE = 5;
-	const CAUSE_FIRE_TICK = 6;
-	const CAUSE_LAVA = 7;
-	const CAUSE_DROWNING = 8;
-	const CAUSE_BLOCK_EXPLOSION = 9;
-	const CAUSE_ENTITY_EXPLOSION = 10;
-	const CAUSE_VOID = 11;
-	const CAUSE_SUICIDE = 12;
-	const CAUSE_MAGIC = 13;
-	const CAUSE_CUSTOM = 14;
-	const CAUSE_STARVATION = 15;
-	const CAUSE_LIGHTNING = 16;
-
+	/** @var int */
 	private $cause;
-	private $EPF = 0;
-	private $fireProtectL = 0;
-	/** @var array */
+	/** @var float */
+	private $baseDamage;
+	/** @var float */
+	private $originalBase;
+
+	/** @var float[] */
 	private $modifiers;
-	private $rateModifiers = [];
+	/** @var float[] */
 	private $originals;
-	private $usedArmors = [];
-	private $thornsLevel = [];
-	private $thornsArmor;
-	private $thornsDamage = 0;
+
+	/** @var int */
+	private $attackCooldown = 10;
 
 
 	/**
-	 * @param Entity    $entity
-	 * @param int       $cause
-	 * @param int|int[] $damage
-	 *
-	 * @throws \Exception
+	 * @param Entity  $entity
+	 * @param int     $cause
+	 * @param float   $damage
+	 * @param float[] $modifiers
 	 */
-	public function __construct(Entity $entity, $cause, $damage){
+	public function __construct(Entity $entity, int $cause, float $damage, array $modifiers = []){
 		$this->entity = $entity;
 		$this->cause = $cause;
-		if(is_array($damage)){
-			$this->modifiers = $damage;
-		}else{
-			$this->modifiers = [
-				self::MODIFIER_BASE => $damage
-			];
-		}
+		$this->baseDamage = $this->originalBase = $damage;
 
+		$this->modifiers = $modifiers;
 		$this->originals = $this->modifiers;
-
-		if(!isset($this->modifiers[self::MODIFIER_BASE])){
-			throw new \InvalidArgumentException("BASE Damage modifier missing");
-		}
-
-		//For DAMAGE_RESISTANCE
-		if($cause !== self::CAUSE_VOID and $cause !== self::CAUSE_SUICIDE){
-			if($entity->hasEffect(Effect::DAMAGE_RESISTANCE)){
-				$RES_level = 1 - 0.20 * ($entity->getEffect(Effect::DAMAGE_RESISTANCE)->getAmplifier() + 1);
-				if($RES_level < 0){
-					$RES_level = 0;
-				}
-				$this->setRateDamage($RES_level, self::MODIFIER_RESISTANCE);
-			}
-		}
-
-		//TODO: add zombie
-		if($entity instanceof Player and $entity->getInventory() instanceof PlayerInventory){
-			switch($cause){
-				case self::CAUSE_CONTACT:
-				case self::CAUSE_ENTITY_ATTACK:
-				case self::CAUSE_PROJECTILE:
-				case self::CAUSE_FIRE:
-				case self::CAUSE_LAVA:
-				case self::CAUSE_BLOCK_EXPLOSION:
-				case self::CAUSE_ENTITY_EXPLOSION:
-				case self::CAUSE_LIGHTNING:
-					$points = 0;
-					foreach($entity->getInventory()->getArmorContents() as $index => $i){
-						if($i->isArmor()){
-							$points += $i->getArmorValue();
-							$this->usedArmors[$index] = 1;
-						}
-					}
-					if($points !== 0){
-						$this->setRateDamage(1 - 0.04 * $points, self::MODIFIER_ARMOR);
-					}
-					//For Protection
-					$spe_Prote = null;
-					switch($cause){
-						case self::CAUSE_ENTITY_EXPLOSION:
-						case self::CAUSE_BLOCK_EXPLOSION:
-							$spe_Prote = Enchantment::TYPE_ARMOR_EXPLOSION_PROTECTION;
-							break;
-						case self::CAUSE_FIRE:
-						case self::CAUSE_LAVA:
-							$spe_Prote = Enchantment::TYPE_ARMOR_FIRE_PROTECTION;
-							break;
-						case self::CAUSE_PROJECTILE:
-							$spe_Prote = Enchantment::TYPE_ARMOR_PROJECTILE_PROTECTION;
-							break;
-						default;
-							break;
-					}
-					foreach($this->usedArmors as $index => $cost){
-						$i = $entity->getInventory()->getArmorItem($index);
-						if($i->isArmor()){
-							$this->EPF += $i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_PROTECTION);
-							$this->fireProtectL = max($this->fireProtectL, $i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_FIRE_PROTECTION));
-							if($i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_THORNS) > 0){
-								$this->thornsLevel[$index] = $i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_THORNS);
-							}
-							if($spe_Prote !== null){
-								$this->EPF += 2 * $i->getEnchantmentLevel($spe_Prote);
-							}
-						}
-					}
-					break;
-				case self::CAUSE_FALL:
-					//Feather Falling
-					$i = $entity->getInventory()->getBoots();
-					if($i->isArmor()){
-						$this->EPF += $i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_PROTECTION);
-						$this->EPF += 3 * $i->getEnchantmentLevel(Enchantment::TYPE_ARMOR_FALL_PROTECTION);
-					}
-					break;
-				case self::CAUSE_FIRE_TICK:
-				case self::CAUSE_SUFFOCATION:
-				case self::CAUSE_DROWNING:
-				case self::CAUSE_VOID:
-				case self::CAUSE_SUICIDE:
-				case self::CAUSE_MAGIC:
-				case self::CAUSE_CUSTOM:
-				case self::CAUSE_STARVATION:
-					break;
-				default:
-					break;
-			}
-			if($this->EPF !== 0){
-				$this->EPF = min(20, ceil($this->EPF * mt_rand(50, 100) / 100));
-				$this->setRateDamage(1 - 0.04 * $this->EPF, self::MODIFIER_PROTECTION);
-			}
-		}
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getCause(){
+	public function getCause() : int{
 		return $this->cause;
 	}
 
 	/**
-	 * @param int $type
+	 * Returns the base amount of damage applied, before modifiers.
 	 *
-	 * @return int
+	 * @return float
 	 */
-	public function getOriginalDamage($type = self::MODIFIER_BASE){
-		if(isset($this->originals[$type])){
-			return $this->originals[$type];
-		}
-		return 0;
+	public function getBaseDamage() : float{
+		return $this->baseDamage;
+	}
+
+	/**
+	 * Sets the base amount of damage applied, optionally recalculating modifiers.
+	 *
+	 * TODO: add ability to recalculate modifiers when this is set
+	 *
+	 * @param float $damage
+	 */
+	public function setBaseDamage(float $damage) : void{
+		$this->baseDamage = $damage;
+	}
+
+	/**
+	 * Returns the original base amount of damage applied, before alterations by plugins.
+	 *
+	 * @return float
+	 */
+	public function getOriginalBaseDamage() : float{
+		return $this->originalBase;
+	}
+
+	/**
+	 * @return float[]
+	 */
+	public function getOriginalModifiers() : array{
+		return $this->originals;
 	}
 
 	/**
 	 * @param int $type
 	 *
-	 * @return int
+	 * @return float
 	 */
-	public function getDamage($type = self::MODIFIER_BASE){
-		if(isset($this->modifiers[$type])){
-			return $this->modifiers[$type];
-		}
+	public function getOriginalModifier(int $type) : float{
+		return $this->originals[$type] ?? 0.0;
+	}
 
-		return 0;
+	/**
+	 * @return float[]
+	 */
+	public function getModifiers() : array{
+		return $this->modifiers;
+	}
+
+	/**
+	 * @param int $type
+	 *
+	 * @return float
+	 */
+	public function getModifier(int $type) : float{
+		return $this->modifiers[$type] ?? 0.0;
 	}
 
 	/**
 	 * @param float $damage
 	 * @param int   $type
-	 *
-	 * @throws \UnexpectedValueException
 	 */
-	public function setDamage($damage, $type = self::MODIFIER_BASE){
+	public function setModifier(float $damage, int $type) : void{
 		$this->modifiers[$type] = $damage;
 	}
 
 	/**
 	 * @param int $type
 	 *
-	 * @return float 1 - the percentage
-	 */
-	public function getRateDamage($type = self::MODIFIER_BASE){
-		if(isset($this->rateModifiers[$type])){
-			return $this->rateModifiers[$type];
-		}
-		return 1;
-	}
-
-	/**
-	 * @param float $damage
-	 * @param int   $type
-	 *
-	 * Notice:If you want to add/reduce the damage without reducing by Armor or effect. set a new Damage using setDamage
-	 * Notice:If you want to add/reduce the damage within reducing by Armor of effect. Plz change the MODIFIER_BASE
-	 * Notice:If you want to add/reduce the damage by multiplying. Plz use this function.
-	 */
-	public function setRateDamage($damage, $type = self::MODIFIER_BASE){
-		$this->rateModifiers[$type] = $damage;
-	}
-
-	/**
-	 * @param int $type
-	 *
 	 * @return bool
 	 */
-	public function isApplicable($type){
+	public function isApplicable(int $type) : bool{
 		return isset($this->modifiers[$type]);
 	}
 
 	/**
-	 * @return int
+	 * @return float
 	 */
-	public function getFinalDamage(){
-		$damage = $this->modifiers[self::MODIFIER_BASE];
-		foreach($this->rateModifiers as $type => $d){
-			$damage *= $d;
-		}
-		foreach($this->modifiers as $type => $d){
-			if($type !== self::MODIFIER_BASE){
-				$damage += $d;
-			}
-		}
-		return $damage;
+	public function getFinalDamage() : float{
+		return $this->baseDamage + array_sum($this->modifiers);
 	}
 
 	/**
-	 * @return Item $usedArmors
-	 * notice: $usedArmors $index->$cost
-	 * $index: the $index of ArmorInventory
-	 * $cost:  the num of durability cost
-	 */
-	public function getUsedArmors(){
-		return $this->usedArmors;
-	}
-
-	/**
-	 * @return Int $fireProtectL
-	 */
-	public function getFireProtectL(){
-		return $this->fireProtectL;
-	}
-
-	/**
+	 * Returns whether an entity can use armour points to reduce this type of damage.
 	 * @return bool
 	 */
-	public function useArmors(){
-		if($this->entity instanceof Player){
-			if($this->entity->isSurvival() and $this->entity->isAlive()){
-				foreach($this->usedArmors as $index => $cost){
-					$i = $this->entity->getInventory()->getArmorItem($index);
-					if($i->isArmor()){
-						$this->entity->getInventory()->damageArmor($index, $cost);
-					}
-				}
-			}
-			return true;
-		}
-		return false;
-	}
+	public function canBeReducedByArmor() : bool{
+		switch($this->cause){
+			case self::CAUSE_FIRE_TICK:
+			case self::CAUSE_SUFFOCATION:
+			case self::CAUSE_DROWNING:
+			case self::CAUSE_STARVATION:
+			case self::CAUSE_FALL:
+			case self::CAUSE_VOID:
+			case self::CAUSE_MAGIC:
+			case self::CAUSE_SUICIDE:
+				return false;
 
-	public function createThornsDamage(){
-		if($this->thornsLevel !== []){
-			$this->thornsArmor = array_rand($this->thornsLevel);
-			$thornsL = $this->thornsLevel[$this->thornsArmor];
-			if(mt_rand(1, 100) < $thornsL * 15){
-				//$this->thornsDamage = mt_rand(1, 4); 
-				$this->thornsDamage = 0; //Delete When #321 Is Fixed And Add In The Normal Damage
-			}
 		}
+
+		return true;
 	}
 
 	/**
+	 * Returns the cooldown in ticks before the target entity can be attacked again.
+	 *
 	 * @return int
 	 */
-	public function getThornsDamage(){
-		return $this->thornsDamage;
+	public function getAttackCooldown() : int{
+		return $this->attackCooldown;
 	}
 
 	/**
-	 * @return bool should be used after getThornsDamage()
+	 * Sets the cooldown in ticks before the target entity can be attacked again.
+	 *
+	 * NOTE: This value is not used in non-Living entities
+	 *
+	 * @param int $attackCooldown
 	 */
-	public function setThornsArmorUse(){
-		if($this->thornsArmor === null){
-			return false;
-		}else{
-			$this->usedArmors[$this->thornsArmor] = 3;
-			return true;
-		}
+	public function setAttackCooldown(int $attackCooldown) : void{
+		$this->attackCooldown = $attackCooldown;
 	}
 }

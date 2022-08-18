@@ -14,38 +14,35 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
 use pocketmine\event\Cancellable;
 use pocketmine\Player;
 
-class PlayerToggleSprintEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
-
+class PlayerToggleSprintEvent extends PlayerEvent implements Cancellable{
 	/** @var bool */
 	protected $isSprinting;
 
 	/**
-	 * PlayerToggleSprintEvent constructor.
-	 *
 	 * @param Player $player
-	 * @param        $isSprinting
+	 * @param bool   $isSprinting
 	 */
-	public function __construct(Player $player, $isSprinting){
+	public function __construct(Player $player, bool $isSprinting){
 		$this->player = $player;
-		$this->isSprinting = (bool) $isSprinting;
+		$this->isSprinting = $isSprinting;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function isSprinting(){
+	public function isSprinting() : bool{
 		return $this->isSprinting;
 	}
-
 }

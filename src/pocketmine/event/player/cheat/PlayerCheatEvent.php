@@ -14,19 +14,23 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 /**
  * Events called when the server detected that a player is cheating
  */
-
 namespace pocketmine\event\player\cheat;
 
 use pocketmine\event\player\PlayerEvent;
 
-abstract class PlayerCheatEvent extends PlayerEvent {
+/**
+ * @allowHandle
+ */
+abstract class PlayerCheatEvent extends PlayerEvent{
 
 }

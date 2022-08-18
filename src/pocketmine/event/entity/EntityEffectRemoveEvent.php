@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -14,39 +14,23 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\entity;
 
-use pocketmine\entity\Effect;
-use pocketmine\entity\Entity;
-use pocketmine\event\Cancellable;
-
-class EntityEffectRemoveEvent extends EntityEvent implements Cancellable{
-
-	public static $handlerList = null;
-
-	/** @var Effect */
-	protected $effect;
-
-	/**
-	 * EntityEffectRemoveEvent constructor.
-	 *
-	 * @param Entity $entity
-	 * @param int    $effect
-	 */
-	public function __construct(Entity $entity, int $effect){
-		$this->entity = $entity;
-		$this->effect = $effect;
-	}
-
-	/**
-	 * @return Effect
-	 */
-	public function getEffect(){
-		return $this->effect;
+/**
+ * Called when an effect is removed from an entity.
+ */
+class EntityEffectRemoveEvent extends EntityEffectEvent{
+	public function setCancelled(bool $value = true) : void{
+		if($this->getEffect()->getDuration() <= 0){
+			throw new \InvalidStateException("Removal of expired effects cannot be cancelled");
+		}
+		parent::setCancelled($value);
 	}
 }

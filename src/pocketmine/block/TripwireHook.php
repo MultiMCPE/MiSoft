@@ -19,40 +19,25 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\block;
 
-class TripwireHook extends Solid {
+class TripwireHook extends Flowable{
 
 	protected $id = self::TRIPWIRE_HOOK;
 
-	/**
-	 * TripwireHook constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Tripwire Hook";
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getHardness(){
+	public function getVariantBitmask() : int{
 		return 0;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getResistance(){
-		return 0;
-	}
-
+	//TODO
 }

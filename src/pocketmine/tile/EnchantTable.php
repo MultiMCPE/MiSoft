@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,70 +15,24 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\tile;
 
-use pocketmine\level\Level;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
-
-class EnchantTable extends Spawnable implements Nameable {
-
-	/**
-	 * EnchantTable constructor.
-	 *
-	 * @param Level       $level
-	 * @param CompoundTag $nbt
-	 */
-	public function __construct(Level $level, CompoundTag $nbt){
-		parent::__construct($level, $nbt);
+class EnchantTable extends Spawnable implements Nameable{
+	use NameableTrait{
+		loadName as readSaveData;
+		saveName as writeSaveData;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getName() : string{
-		return $this->hasName() ? $this->namedtag->CustomName->getValue() : "Enchanting Table";
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function hasName(){
-		return isset($this->namedtag->CustomName);
-	}
-
-	/**
-	 * @param void $str
-	 */
-	public function setName($str){
-		if($str === ""){
-			unset($this->namedtag->CustomName);
-			return;
-		}
-
-		$this->namedtag->CustomName = new StringTag("CustomName", $str);
-	}
-
-	/**
-	 * @return CompoundTag
-	 */
-	public function getSpawnCompound(){
-		$nbt = new CompoundTag("", [
-			new StringTag("id", Tile::ENCHANT_TABLE),
-			new IntTag("x", (int) $this->x),
-			new IntTag("y", (int) $this->y),
-			new IntTag("z", (int) $this->z)
-		]);
-
-		if($this->hasName()){
-			$nbt->CustomName = $this->namedtag->CustomName;
-		}
-
-		return $nbt;
+	public function getDefaultName() : string{
+		return "Enchanting Table";
 	}
 }

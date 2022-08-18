@@ -8,15 +8,6 @@
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
  * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
- *  _____            _               _____           
- * / ____|          (_)             |  __ \          
- *| |  __  ___ _ __  _ ___ _   _ ___| |__) | __ ___  
- *| | |_ |/ _ \ '_ \| / __| | | / __|  ___/ '__/ _ \ 
- *| |__| |  __/ | | | \__ \ |_| \__ \ |   | | | (_) |
- * \_____|\___|_| |_|_|___/\__, |___/_|   |_|  \___/ 
- *                         __/ |                    
- *                        |___/                     
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -28,6 +19,9 @@
  *
 */
 
+declare(strict_types=1);
+
+
 namespace pocketmine\resourcepacks;
 
 
@@ -35,31 +29,37 @@ interface ResourcePack{
 
 	/**
 	 * Returns the path to the resource pack. This might be a file or a directory, depending on the type of pack.
+	 * @return string
 	 */
 	public function getPath() : string;
 
 	/**
+	 * Returns the human-readable name of the resource pack
 	 * @return string
 	 */
 	public function getPackName() : string;
 
 	/**
+	 * Returns the pack's UUID as a human-readable string
 	 * @return string
 	 */
 	public function getPackId() : string;
 
 	/**
+	 * Returns the size of the pack on disk in bytes.
 	 * @return int
 	 */
 	public function getPackSize() : int;
 
 	/**
+	 * Returns a version number for the pack in the format major.minor.patch
 	 * @return string
 	 */
 	public function getPackVersion() : string;
 
 	/**
-	 * @return string
+	 * Returns the raw SHA256 sum of the compressed resource pack zip. This is used by clients to validate pack downloads.
+	 * @return string byte-array length 32 bytes
 	 */
 	public function getSha256() : string;
 

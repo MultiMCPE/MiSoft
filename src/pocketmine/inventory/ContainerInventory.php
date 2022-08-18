@@ -19,30 +19,38 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\inventory;
 
+use pocketmine\entity\Entity;
 use pocketmine\math\Vector3;
-use pocketmine\network\protocol\ContainerClosePacket;
-use pocketmine\network\protocol\ContainerOpenPacket;
+use pocketmine\network\mcpe\protocol\ContainerClosePacket;
+use pocketmine\network\mcpe\protocol\ContainerOpenPacket;
 use pocketmine\Player;
 
 abstract class ContainerInventory extends BaseInventory{
-	/**
-	 * @param Player $who
-	 */
-	public function onOpen(Player $who){
+	/** @var Vector3 */
+	protected $holder;
+
+	public function __construct(Vector3 $holder, array $items = [], int $size = null, string $title = null){
+		$this->holder = $holder;
+		parent::__construct($items, $size, $title);
+	}
+
+	public function onOpen(Player $who) : void{
 		parent::onOpen($who);
 		$pk = new ContainerOpenPacket();
-		$pk->windowid = $who->getWindowId($this);
-		$pk->type = $this->getType()->getNetworkType();
+		$pk->windowId = $who->getWindowId($this);
+		$pk->type = $this->getNetworkType();
 		$holder = $this->getHolder();
 
 		$pk->x = $pk->y = $pk->z = 0;
-		$pk->entityId = -1;
+		$pk->entityUniqueId = -1;
 
 		if($holder instanceof Entity){
-			$pk->entityId = $holder->getId();
-		}else{
+			$pk->entityUniqueId = $holder->getId();
+		}elseif($holder instanceof Vector3){
 			$pk->x = $holder->getFloorX();
 			$pk->y = $holder->getFloorY();
 			$pk->z = $holder->getFloorZ();
@@ -53,13 +61,23 @@ abstract class ContainerInventory extends BaseInventory{
 		$this->sendContents($who);
 	}
 
-	/**
-	 * @param Player $who
-	 */
-	public function onClose(Player $who){
+	public function onClose(Player $who) : void{
 		$pk = new ContainerClosePacket();
-		$pk->windowid = $who->getWindowId($this);
+		$pk->windowId = $who->getWindowId($this);
 		$who->dataPacket($pk);
 		parent::onClose($who);
+	}
+
+	/**
+	 * Returns the Minecraft PE inventory type used to show the inventory window to clients.
+	 * @return int
+	 */
+	abstract public function getNetworkType() : int;
+
+	/**
+	 * @return Vector3
+	 */
+	public function getHolder(){
+		return $this->holder;
 	}
 }

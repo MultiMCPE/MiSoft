@@ -2,86 +2,94 @@
 
 /*
  *
- *  _____   _____   __   _   _   _____  __    __  _____
- * /  ___| | ____| |  \ | | | | /  ___/ \ \  / / /  ___/
- * | |     | |__   |   \| | | | | |___   \ \/ /  | |___
- * | |  _  |  __|  | |\   | | | \___  \   \  /   \___  \
- * | |_| | | |___  | | \  | | |  ___| |   / /     ___| |
- * \_____/ |_____| |_|  \_| |_| /_____/  /_/     /_____/
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author iTX Technologies
- * @link https://itxtech.org
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
 use pocketmine\entity\Human;
 use pocketmine\event\Cancellable;
+use pocketmine\event\entity\EntityEvent;
 
-class PlayerExperienceChangeEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
+/**
+ * Called when a player gains or loses XP levels and/or progress.
+ */
+class PlayerExperienceChangeEvent extends EntityEvent implements Cancellable{
+	/** @var Human */
+	protected $entity;
+	/** @var int */
+	private $oldLevel;
+	/** @var float */
+	private $oldProgress;
+	/** @var int|null */
+	private $newLevel;
+	/** @var float|null */
+	private $newProgress;
 
-	public $progress;
-	public $expLevel;
+	public function __construct(Human $player, int $oldLevel, float $oldProgress, ?int $newLevel, ?float $newProgress){
+		$this->entity = $player;
 
-	/**
-	 * PlayerExperienceChangeEvent constructor.
-	 *
-	 * @param Human $player
-	 * @param int   $expLevel
-	 * @param float $progress
-	 */
-	public function __construct(Human $player, int $expLevel, float $progress){
-		$this->progress = $progress;
-		$this->expLevel = $expLevel;
-		$this->player = $player;
+		$this->oldLevel = $oldLevel;
+		$this->oldProgress = $oldProgress;
+		$this->newLevel = $newLevel;
+		$this->newProgress = $newProgress;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getExpLevel(){
-		return $this->expLevel;
-	}
-
-	/**
-	 * @param $level
-	 */
-	public function setExpLevel($level){
-		$this->expLevel = $level;
+	public function getOldLevel() : int{
+		return $this->oldLevel;
 	}
 
 	/**
 	 * @return float
 	 */
-	public function getProgress() : float{
-		return $this->progress;
+	public function getOldProgress() : float{
+		return $this->oldProgress;
 	}
 
 	/**
-	 * @param float $progress
+	 * @return int|null null indicates no change
 	 */
-	public function setProgress(float $progress){
-		$this->progress = $progress;
+	public function getNewLevel() : ?int{
+		return $this->newLevel;
 	}
 
 	/**
-	 * @return int
+	 * @return float|null null indicates no change
 	 */
-	public function getExp(){
-		return Human::getLevelXpRequirement($this->expLevel) + $this->progress;
+	public function getNewProgress() : ?float{
+		return $this->newProgress;
 	}
 
 	/**
-	 * @param $exp
+	 * @param int|null $newLevel
 	 */
-	public function setExp($exp){
-		$this->progress = $exp / Human::getLevelXpRequirement($this->expLevel);
+	public function setNewLevel(?int $newLevel) : void{
+		$this->newLevel = $newLevel;
+	}
+
+	/**
+	 * @param float|null $newProgress
+	 */
+	public function setNewProgress(?float $newProgress) : void{
+		$this->newProgress = $newProgress;
 	}
 }

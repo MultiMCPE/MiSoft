@@ -19,32 +19,32 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\utils;
 
 use pocketmine\Thread;
+use function getmypid;
+use function time;
 
-class ServerKiller extends Thread {
+class ServerKiller extends Thread{
 
 	public $time;
 
 	/** @var bool */
 	private $stopped = false;
 
-	/**
-	 * ServerKiller constructor.
-	 *
-	 * @param int $time
-	 */
 	public function __construct($time = 15){
 		$this->time = $time;
 	}
 
 	public function run(){
-		$start = time() + 1;
+		$this->registerClassLoader();
+		$start = time();
 		$this->synchronized(function(){
 			if(!$this->stopped){
-			    $this->wait($this->time * 1000000);
-		    }
+				$this->wait($this->time * 1000000);
+			}
 		});
 		if(time() - $start >= $this->time){
 			echo "\nTook too long to stop, server was killed forcefully!\n";
@@ -60,10 +60,7 @@ class ServerKiller extends Thread {
 		parent::quit();
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getThreadName(){
+	public function getThreadName() : string{
 		return "Server Killer";
 	}
 }

@@ -19,136 +19,80 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\tile;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\nbt\tag\ByteTag;
+use pocketmine\item\ItemFactory;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\FloatTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\StringTag;
 
-class ItemFrame extends Spawnable {
+class ItemFrame extends Spawnable{
+	public const TAG_ITEM_ROTATION = "ItemRotation";
+	public const TAG_ITEM_DROP_CHANCE = "ItemDropChance";
+	public const TAG_ITEM = "Item";
 
-	public $map_uuid = -1;
+	/** @var Item */
+	private $item;
+	/** @var int */
+	private $itemRotation;
+	/** @var float */
+	private $itemDropChance;
 
-	/**
-	 * ItemFrame constructor.
-	 *
-	 * @param Level       $level
-	 * @param CompoundTag $nbt
-	 */
-	public function __construct(Level $level, CompoundTag $nbt){
-		if(!isset($nbt->ItemRotation)){
-			$nbt->ItemRotation = new ByteTag("ItemRotation", 0);
+	protected function readSaveData(CompoundTag $nbt) : void{
+		if(($itemTag = $nbt->getCompoundTag(self::TAG_ITEM)) !== null){
+			$this->item = Item::nbtDeserialize($itemTag);
+		}else{
+			$this->item = ItemFactory::get(Item::AIR, 0, 0);
 		}
-
-		if(!isset($nbt->ItemDropChance)){
-			$nbt->ItemDropChance = new FloatTag("ItemDropChance", 1.0);
-		}
-
-		parent::__construct($level, $nbt);
+		$this->itemRotation = $nbt->getByte(self::TAG_ITEM_ROTATION, 0, true);
+		$this->itemDropChance = $nbt->getFloat(self::TAG_ITEM_DROP_CHANCE, 1.0, true);
 	}
 
-	/**
-	 * @return bool
-	 */
+	protected function writeSaveData(CompoundTag $nbt) : void{
+		$nbt->setFloat(self::TAG_ITEM_DROP_CHANCE, $this->itemDropChance);
+		$nbt->setByte(self::TAG_ITEM_ROTATION, $this->itemRotation);
+		$nbt->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM));
+	}
+
 	public function hasItem() : bool{
-		return $this->getItem()->getId() !== Item::AIR;
+		return !$this->item->isNull();
 	}
 
-	/**
-	 * @return Item
-	 */
 	public function getItem() : Item{
-		if(isset($this->namedtag->Item)){
-			return Item::nbtDeserialize($this->namedtag->Item);
-		}else{
-			return Item::get(Item::AIR);
-		}
+		return clone $this->item;
 	}
 
-	/**
-	 * @param Item|null $item
-	 */
 	public function setItem(Item $item = null){
-		if($item !== null and $item->getId() !== Item::AIR){
-			$this->namedtag->Item = $item->nbtSerialize(-1, "Item");
+		if($item !== null and !$item->isNull()){
+			$this->item = clone $item;
 		}else{
-			unset($this->namedtag->Item);
+			$this->item = ItemFactory::get(Item::AIR, 0, 0);
 		}
 		$this->onChanged();
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getItemRotation() : int{
-		return $this->namedtag->ItemRotation->getValue();
+		return $this->itemRotation;
 	}
 
-	/**
-	 * @param int $rotation
-	 */
 	public function setItemRotation(int $rotation){
-		$this->namedtag->ItemRotation = new ByteTag("ItemRotation", $rotation);
+		$this->itemRotation = $rotation;
 		$this->onChanged();
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getItemDropChance() : float{
-		return $this->namedtag->ItemDropChance->getValue();
+		return $this->itemDropChance;
 	}
 
-	/**
-	 * @param float $chance
-	 */
 	public function setItemDropChance(float $chance){
-		$this->namedtag->ItemDropChance = new FloatTag("ItemDropChance", $chance);
+		$this->itemDropChance = $chance;
 		$this->onChanged();
 	}
 
-	/**
-	 * @param string $mapid
-	 */
-	public function SetMapID(string $mapid){
-		$this->map_uuid = $mapid;
-		$this->namedtag->Map_UUID = new StringTag("map_uuid", $mapid);
-		$this->onChanged();
+	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
+		$nbt->setFloat(self::TAG_ITEM_DROP_CHANCE, $this->itemDropChance);
+		$nbt->setByte(self::TAG_ITEM_ROTATION, $this->itemRotation);
+		$nbt->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM));
 	}
-
-	/**
-	 * @return string
-	 */
-	public function getMapID() : string{
-		return $this->map_uuid;
-	}
-
-	/**
-	 * @return CompoundTag
-	 */
-	public function getSpawnCompound(){
-		$tag = new CompoundTag("", [
-			new StringTag("id", Tile::ITEM_FRAME),
-			new IntTag("x", (int) $this->x),
-			new IntTag("y", (int) $this->y),
-			new IntTag("z", (int) $this->z),
-			$this->namedtag->ItemDropChance,
-			$this->namedtag->ItemRotation,
-		]);
-		if($this->hasItem()){
-			$tag->Item = $this->namedtag->Item;
-			if($this->getItem()->getId() === Item::FILLED_MAP){
-				if(isset($this->namedtag->Map_UUID)){
-					$tag->Map_UUID = $this->namedtag->Map_UUID;
-				}
-			}
-		}
-
-		return $tag;
-	}
-
 }

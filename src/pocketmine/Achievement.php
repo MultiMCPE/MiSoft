@@ -8,35 +8,28 @@
  * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
  * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
- *  _____            _               _____           
- * / ____|          (_)             |  __ \          
- *| |  __  ___ _ __  _ ___ _   _ ___| |__) | __ ___  
- *| | |_ |/ _ \ '_ \| / __| | | / __|  ___/ '__/ _ \ 
- *| |__| |  __/ | | | \__ \ |_| \__ \ |   | | | (_) |
- * \_____|\___|_| |_|_|___/\__, |___/_|   |_|  \___/ 
- *                         __/ |                    
- *                        |___/                     
- *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author GenisysPro
- * @link https://github.com/GenisysPro/GenisysPro
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine;
 
-use pocketmine\event\TranslationContainer;
+use pocketmine\lang\TranslationContainer;
 use pocketmine\utils\TextFormat;
 
 /**
  * Handles the achievement list and a bit more
  */
-abstract class Achievement {
+abstract class Achievement{
 	/**
 	 * @var array[]
 	 */
@@ -48,82 +41,82 @@ abstract class Achievement {
 		"mineWood" => [
 			"name" => "Getting Wood",
 			"requires" => [ //"openInventory",
-			],
+			]
 		],
 		"buildWorkBench" => [
 			"name" => "Benchmarking",
 			"requires" => [
-				"mineWood",
-			],
+				"mineWood"
+			]
 		],
 		"buildPickaxe" => [
 			"name" => "Time to Mine!",
 			"requires" => [
-				"buildWorkBench",
-			],
+				"buildWorkBench"
+			]
 		],
 		"buildFurnace" => [
 			"name" => "Hot Topic",
 			"requires" => [
-				"buildPickaxe",
-			],
+				"buildPickaxe"
+			]
 		],
 		"acquireIron" => [
 			"name" => "Acquire hardware",
 			"requires" => [
-				"buildFurnace",
-			],
+				"buildFurnace"
+			]
 		],
 		"buildHoe" => [
 			"name" => "Time to Farm!",
 			"requires" => [
-				"buildWorkBench",
-			],
+				"buildWorkBench"
+			]
 		],
 		"makeBread" => [
 			"name" => "Bake Bread",
 			"requires" => [
-				"buildHoe",
-			],
+				"buildHoe"
+			]
 		],
 		"bakeCake" => [
 			"name" => "The Lie",
 			"requires" => [
-				"buildHoe",
-			],
+				"buildHoe"
+			]
 		],
 		"buildBetterPickaxe" => [
 			"name" => "Getting an Upgrade",
 			"requires" => [
-				"buildPickaxe",
-			],
+				"buildPickaxe"
+			]
 		],
 		"buildSword" => [
 			"name" => "Time to Strike!",
 			"requires" => [
-				"buildWorkBench",
-			],
+				"buildWorkBench"
+			]
 		],
 		"diamonds" => [
 			"name" => "DIAMONDS!",
 			"requires" => [
-				"acquireIron",
-			],
-		],
+				"acquireIron"
+			]
+		]
 
 	];
 
 
 	/**
 	 * @param Player $player
-	 * @param        $achievementId
+	 * @param string $achievementId
 	 *
 	 * @return bool
 	 */
-	public static function broadcast(Player $player, $achievementId){
+	public static function broadcast(Player $player, string $achievementId) : bool{
 		if(isset(Achievement::$list[$achievementId])){
 			$translation = new TranslationContainer("chat.type.achievement", [$player->getDisplayName(), TextFormat::GREEN . Achievement::$list[$achievementId]["name"] . TextFormat::RESET]);
-			if(Server::getInstance()->getConfigString("announce-player-achievements", true) === true){
+			if(Server::getInstance()->getConfigBool("announce-player-achievements", true)){
 				Server::getInstance()->broadcastMessage($translation);
 			}else{
 				$player->sendMessage($translation);
@@ -136,17 +129,17 @@ abstract class Achievement {
 	}
 
 	/**
-	 * @param       $achievementId
-	 * @param       $achievementName
-	 * @param array $requires
+	 * @param string $achievementId
+	 * @param string $achievementName
+	 * @param array  $requires
 	 *
 	 * @return bool
 	 */
-	public static function add($achievementId, $achievementName, array $requires = []){
+	public static function add(string $achievementId, string $achievementName, array $requires = []) : bool{
 		if(!isset(Achievement::$list[$achievementId])){
 			Achievement::$list[$achievementId] = [
 				"name" => $achievementName,
-				"requires" => $requires,
+				"requires" => $requires
 			];
 
 			return true;
@@ -154,6 +147,4 @@ abstract class Achievement {
 
 		return false;
 	}
-
-
 }

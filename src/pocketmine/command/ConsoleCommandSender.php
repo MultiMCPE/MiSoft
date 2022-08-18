@@ -19,41 +19,48 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\command;
 
-use pocketmine\event\TextContainer;
+use pocketmine\lang\TextContainer;
 use pocketmine\permission\PermissibleBase;
+use pocketmine\permission\Permission;
 use pocketmine\permission\PermissionAttachment;
+use pocketmine\permission\PermissionAttachmentInfo;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
+use function explode;
+use function trim;
+use const PHP_INT_MAX;
 
-class ConsoleCommandSender implements CommandSender {
+class ConsoleCommandSender implements CommandSender{
 
 	private $perm;
 
-	/**
-	 * ConsoleCommandSender constructor.
-	 */
+	/** @var int|null */
+	protected $lineHeight = null;
+
 	public function __construct(){
 		$this->perm = new PermissibleBase($this);
 	}
 
 	/**
-	 * @param \pocketmine\permission\Permission|string $name
+	 * @param Permission|string $name
 	 *
 	 * @return bool
 	 */
-	public function isPermissionSet($name){
+	public function isPermissionSet($name) : bool{
 		return $this->perm->isPermissionSet($name);
 	}
 
 	/**
-	 * @param \pocketmine\permission\Permission|string $name
+	 * @param Permission|string $name
 	 *
 	 * @return bool
 	 */
-	public function hasPermission($name){
+	public function hasPermission($name) : bool{
 		return $this->perm->hasPermission($name);
 	}
 
@@ -62,9 +69,9 @@ class ConsoleCommandSender implements CommandSender {
 	 * @param string $name
 	 * @param bool   $value
 	 *
-	 * @return \pocketmine\permission\PermissionAttachment
+	 * @return PermissionAttachment
 	 */
-	public function addAttachment(Plugin $plugin, $name = null, $value = null){
+	public function addAttachment(Plugin $plugin, string $name = null, bool $value = null) : PermissionAttachment{
 		return $this->perm->addAttachment($plugin, $name, $value);
 	}
 
@@ -82,28 +89,21 @@ class ConsoleCommandSender implements CommandSender {
 	}
 
 	/**
-	 * @return \pocketmine\permission\PermissionAttachmentInfo[]
+	 * @return PermissionAttachmentInfo[]
 	 */
-	public function getEffectivePermissions(){
+	public function getEffectivePermissions() : array{
 		return $this->perm->getEffectivePermissions();
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isPlayer(){
-		return false;
-	}
-
-	/**
-	 * @return \pocketmine\Server
+	 * @return Server
 	 */
 	public function getServer(){
 		return Server::getInstance();
 	}
 
 	/**
-	 * @param string $message
+	 * @param TextContainer|string $message
 	 */
 	public function sendMessage($message){
 		if($message instanceof TextContainer){
@@ -127,15 +127,25 @@ class ConsoleCommandSender implements CommandSender {
 	/**
 	 * @return bool
 	 */
-	public function isOp(){
+	public function isOp() : bool{
 		return true;
 	}
 
 	/**
 	 * @param bool $value
 	 */
-	public function setOp($value){
+	public function setOp(bool $value){
 
 	}
 
+	public function getScreenLineHeight() : int{
+		return $this->lineHeight ?? PHP_INT_MAX;
+	}
+
+	public function setScreenLineHeight(int $height = null){
+		if($height !== null and $height < 1){
+			throw new \InvalidArgumentException("Line height must be at least 1");
+		}
+		$this->lineHeight = $height;
+	}
 }

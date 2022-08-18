@@ -14,10 +14,12 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
@@ -32,9 +34,7 @@ use pocketmine\Player;
  *
  * The message contains a slash at the start
  */
-class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
-
+class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancellable{
 	/** @var string */
 	protected $message;
 
@@ -43,7 +43,7 @@ class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancellable {
 	 * @param Player $player
 	 * @param string $message
 	 */
-	public function __construct(Player $player, $message){
+	public function __construct(Player $player, string $message){
 		$this->player = $player;
 		$this->message = $message;
 	}
@@ -51,22 +51,21 @@ class PlayerCommandPreprocessEvent extends PlayerEvent implements Cancellable {
 	/**
 	 * @return string
 	 */
-	public function getMessage(){
+	public function getMessage() : string{
 		return $this->message;
 	}
 
 	/**
 	 * @param string $message
 	 */
-	public function setMessage($message){
+	public function setMessage(string $message) : void{
 		$this->message = $message;
 	}
 
 	/**
 	 * @param Player $player
 	 */
-	public function setPlayer(Player $player){
+	public function setPlayer(Player $player) : void{
 		$this->player = $player;
 	}
-
 }

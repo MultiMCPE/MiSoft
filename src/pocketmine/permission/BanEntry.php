@@ -19,76 +19,69 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\permission;
 
-use pocketmine\utils\MainLogger;
+use function array_shift;
+use function explode;
+use function implode;
+use function strlen;
+use function strtolower;
+use function trim;
 
-class BanEntry {
+class BanEntry{
+	/**
+	 * @var string
+	 */
 	public static $format = "Y-m-d H:i:s O";
 
+	/** @var string */
 	private $name;
 	/** @var \DateTime */
-	private $creationDate;
+	private $creationDate = null;
+	/** @var string */
 	private $source = "(Unknown)";
-	/** @var \DateTime */
+	/** @var \DateTime|null */
 	private $expirationDate = null;
+	/** @var string */
 	private $reason = "Banned by an operator.";
 
-	/**
-	 * BanEntry constructor.
-	 *
-	 * @param $name
-	 */
-	public function __construct($name){
+	public function __construct(string $name){
 		$this->name = strtolower($name);
 		$this->creationDate = new \DateTime();
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return $this->name;
 	}
 
-	/**
-	 * @return \DateTime
-	 */
-	public function getCreated(){
+	public function getCreated() : \DateTime{
 		return $this->creationDate;
 	}
 
-	/**
-	 * @param \DateTime $date
-	 */
 	public function setCreated(\DateTime $date){
 		self::validateDate($date);
 		$this->creationDate = $date;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getSource(){
+	public function getSource() : string{
 		return $this->source;
 	}
 
-	/**
-	 * @param $source
-	 */
-	public function setSource($source){
+	public function setSource(string $source){
 		$this->source = $source;
 	}
 
 	/**
-	 * @return \DateTime
+	 * @return \DateTime|null
 	 */
 	public function getExpires(){
 		return $this->expirationDate;
 	}
 
 	/**
-	 * @param \DateTime $date
+	 * @param \DateTime|null $date
 	 */
 	public function setExpires(\DateTime $date = null){
 		if($date !== null){
@@ -97,33 +90,21 @@ class BanEntry {
 		$this->expirationDate = $date;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function hasExpired(){
+	public function hasExpired() : bool{
 		$now = new \DateTime();
 
 		return $this->expirationDate === null ? false : $this->expirationDate < $now;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getReason(){
+	public function getReason() : string{
 		return $this->reason;
 	}
 
-	/**
-	 * @param $reason
-	 */
-	public function setReason($reason){
+	public function setReason(string $reason){
 		$this->reason = $reason;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getString(){
+	public function getString() : string{
 		$str = "";
 		$str .= $this->getName();
 		$str .= "|";
@@ -145,6 +126,7 @@ class BanEntry {
 	 * @link https://bugs.php.net/bug.php?id=75992
 	 *
 	 * @param \DateTime $dateTime
+	 *
 	 * @throws \RuntimeException if the argument can't be parsed from a formatted date string
 	 */
 	private static function validateDate(\DateTime $dateTime) : void{
@@ -154,10 +136,10 @@ class BanEntry {
 	/**
 	 * @param string $date
 	 *
-	 * @return \DateTime
+	 * @return \DateTime|null
 	 * @throws \RuntimeException
 	 */
-	private static function parseDate(string $date) : \DateTime{
+	private static function parseDate(string $date) : ?\DateTime{
 		$datetime = \DateTime::createFromFormat(self::$format, $date);
 		if(!($datetime instanceof \DateTime)){
 			throw new \RuntimeException("Error parsing date for BanEntry: " . implode(", ", \DateTime::getLastErrors()["errors"]));
@@ -169,7 +151,7 @@ class BanEntry {
 	/**
 	 * @param string $str
 	 *
-	 * @return BanEntry
+	 * @return BanEntry|null
 	 * @throws \RuntimeException
 	 */
 	public static function fromString(string $str) : ?BanEntry{
@@ -187,13 +169,14 @@ class BanEntry {
 				if(empty($str)){
 					break;
 				}
-			    $entry->setSource(trim(array_shift($str)));
+
+				$entry->setSource(trim(array_shift($str)));
 				if(empty($str)){
 					break;
 				}
 
 				$expire = trim(array_shift($str));
-				if(strtolower($expire) !== "forever" and strlen($expire) > 0){
+				if($expire !== "" and strtolower($expire) !== "forever"){
 					$entry->setExpires(self::parseDate($expire));
 				}
 				if(empty($str)){

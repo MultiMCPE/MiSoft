@@ -19,10 +19,17 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\scheduler;
 
+use pocketmine\utils\MainLogger;
 use pocketmine\utils\Utils;
 use pocketmine\Worker;
+use function error_reporting;
+use function gc_enable;
+use function ini_set;
+use function set_error_handler;
 
 class AsyncWorker extends Worker{
 	/** @var mixed[] */
@@ -34,7 +41,7 @@ class AsyncWorker extends Worker{
 	/** @var int */
 	private $memoryLimit;
 
-	public function __construct(\AttachableThreadedLogger $logger, int $id, int $memoryLimit){
+	public function __construct(\ThreadedLogger $logger, int $id, int $memoryLimit){
 		$this->logger = $logger;
 		$this->id = $id;
 		$this->memoryLimit = $memoryLimit;
@@ -47,6 +54,10 @@ class AsyncWorker extends Worker{
 
 		//set this after the autoloader is registered
 		set_error_handler([Utils::class, 'errorExceptionHandler']);
+
+		if($this->logger instanceof MainLogger){
+			$this->logger->registerStatic();
+		}
 
 		gc_enable();
 
@@ -63,22 +74,16 @@ class AsyncWorker extends Worker{
 		return $this->logger;
 	}
 
-	/**
-	 * @param \Throwable $e
-	 */
 	public function handleException(\Throwable $e){
 		$this->logger->logException($e);
 	}
 
-	public function getAsyncWorkerId() : int{
-		return $this->id;
+	public function getThreadName() : string{
+		return "Asynchronous Worker #" . $this->id;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getThreadName(){
-		return "Asynchronous Worker #" . $this->id;
+	public function getAsyncWorkerId() : int{
+		return $this->id;
 	}
 
 	/**
@@ -91,7 +96,7 @@ class AsyncWorker extends Worker{
 	public function saveToThreadStore(string $identifier, $value) : void{
 		self::$store[$identifier] = $value;
 	}
-	
+
 	/**
 	 * Retrieves mixed data from the worker's thread-local object store.
 	 *

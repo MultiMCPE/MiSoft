@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,28 +15,58 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\utils;
 
-use pocketmine\Server;
-
+use function array_change_key_case;
+use function array_keys;
+use function array_pop;
+use function array_shift;
+use function basename;
+use function count;
+use function date;
+use function explode;
+use function file_exists;
+use function file_get_contents;
+use function file_put_contents;
+use function implode;
+use function is_array;
+use function is_bool;
+use function json_decode;
+use function json_encode;
+use function preg_match_all;
+use function preg_replace;
+use function serialize;
+use function str_replace;
+use function strlen;
+use function strtolower;
+use function substr;
+use function trim;
+use function unserialize;
+use function yaml_emit;
+use function yaml_parse;
+use const CASE_LOWER;
+use const JSON_BIGINT_AS_STRING;
+use const JSON_PRETTY_PRINT;
 
 /**
  * Config Class for simple config manipulation of multiple formats.
  */
-class Config {
-	const DETECT = -1; //Detect by file extension
-	const PROPERTIES = 0; // .properties
-	const CNF = Config::PROPERTIES; // .cnf
-	const JSON = 1; // .js, .json
-	const YAML = 2; // .yml, .yaml
+class Config{
+	public const DETECT = -1; //Detect by file extension
+	public const PROPERTIES = 0; // .properties
+	public const CNF = Config::PROPERTIES; // .cnf
+	public const JSON = 1; // .js, .json
+	public const YAML = 2; // .yml, .yaml
 	//const EXPORT = 3; // .export, .xport
-	const SERIALIZED = 4; // .sl
-	const ENUM = 5; // .txt, .list, .enum
-	const ENUMERATION = Config::ENUM;
+	public const SERIALIZED = 4; // .sl
+	public const ENUM = 5; // .txt, .list, .enum
+	public const ENUMERATION = Config::ENUM;
 
 	/** @var array */
 	private $config = [];
@@ -49,6 +79,8 @@ class Config {
 	private $correct = false;
 	/** @var int */
 	private $type = Config::DETECT;
+	/** @var int */
+	private $jsonOptions = JSON_PRETTY_PRINT | JSON_BIGINT_AS_STRING;
 
 	/** @var bool */
 	private $changed = false;
@@ -68,7 +100,7 @@ class Config {
 		"serialize" => Config::SERIALIZED,
 		"txt" => Config::ENUM,
 		"list" => Config::ENUM,
-		"enum" => Config::ENUM,
+		"enum" => Config::ENUM
 	];
 
 	/**
@@ -77,7 +109,7 @@ class Config {
 	 * @param array  $default  Array with the default values that will be written to the file if it did not exist
 	 * @param null   &$correct Sets correct to true if everything has been loaded correctly
 	 */
-	public function __construct($file, $type = Config::DETECT, $default = [], &$correct = null){
+	public function __construct(string $file, int $type = Config::DETECT, array $default = [], &$correct = null){
 		$this->load($file, $type, $default);
 		$correct = $this->correct;
 	}
@@ -101,12 +133,12 @@ class Config {
 	}
 
 	/**
-	 * @param $str
+	 * @param string $str
 	 *
-	 * @return mixed
+	 * @return string
 	 */
-	public static function fixYAMLIndexes($str){
-		return preg_replace("#^([ ]*)([a-zA-Z_]{1}[ ]*)\\:$#m", "$1\"$2\":", $str);
+	public static function fixYAMLIndexes(string $str) : string{
+		return preg_replace("#^( *)(y|Y|yes|Yes|YES|n|N|no|No|NO|true|True|TRUE|false|False|FALSE|on|On|ON|off|Off|OFF)( *)\:#m", "$1\"$2\"$3:", $str);
 	}
 
 	/**
@@ -116,9 +148,10 @@ class Config {
 	 *
 	 * @return bool
 	 */
-	public function load(string $file, int $type = Config::DETECT, array $default = []){
+	public function load(string $file, int $type = Config::DETECT, array $default = []) : bool{
 		$this->correct = true;
 		$this->file = $file;
+
 		$this->type = $type;
 		if($this->type === Config::DETECT){
 			$extension = explode(".", basename($this->file));
@@ -134,11 +167,10 @@ class Config {
 			$this->config = $default;
 			$this->save();
 		}else{
-			if($this->correct === true){
+			if($this->correct){
 				$content = file_get_contents($this->file);
 				switch($this->type){
 					case Config::PROPERTIES:
-					case Config::CNF:
 						$this->parseProperties($content);
 						break;
 					case Config::JSON:
@@ -176,15 +208,15 @@ class Config {
 	/**
 	 * @return bool
 	 */
-	public function check(){
-		return $this->correct === true;
+	public function check() : bool{
+		return $this->correct;
 	}
 
 	/**
 	 * @return bool
 	 */
-	public function save(){
-		if($this->correct === true){
+	public function save() : bool{
+		if($this->correct){
 			$content = null;
 			switch($this->type){
 				case Config::PROPERTIES:
@@ -217,7 +249,78 @@ class Config {
 	}
 
 	/**
-	 * @param $k
+	 * Sets the options for the JSON encoding when saving
+	 *
+	 * @param int $options
+	 *
+	 * @return Config $this
+	 * @throws \RuntimeException if the Config is not in JSON
+	 * @see json_encode
+	 */
+	public function setJsonOptions(int $options) : Config{
+		if($this->type !== Config::JSON){
+			throw new \RuntimeException("Attempt to set JSON options for non-JSON config");
+		}
+		$this->jsonOptions = $options;
+		$this->changed = true;
+
+		return $this;
+	}
+
+	/**
+	 * Enables the given option in addition to the currently set JSON options
+	 *
+	 * @param int $option
+	 *
+	 * @return Config $this
+	 * @throws \RuntimeException if the Config is not in JSON
+	 * @see json_encode
+	 */
+	public function enableJsonOption(int $option) : Config{
+		if($this->type !== Config::JSON){
+			throw new \RuntimeException("Attempt to enable JSON option for non-JSON config");
+		}
+		$this->jsonOptions |= $option;
+		$this->changed = true;
+
+		return $this;
+	}
+
+	/**
+	 * Disables the given option for the JSON encoding when saving
+	 *
+	 * @param int $option
+	 *
+	 * @return Config $this
+	 * @throws \RuntimeException if the Config is not in JSON
+	 * @see json_encode
+	 */
+	public function disableJsonOption(int $option) : Config{
+		if($this->type !== Config::JSON){
+			throw new \RuntimeException("Attempt to disable JSON option for non-JSON config");
+		}
+		$this->jsonOptions &= ~$option;
+		$this->changed = true;
+
+		return $this;
+	}
+
+	/**
+	 * Returns the options for the JSON encoding when saving
+	 *
+	 * @return int
+	 * @throws \RuntimeException if the Config is not in JSON
+	 * @see json_encode
+	 */
+	public function getJsonOptions() : int{
+		if($this->type !== Config::JSON){
+			throw new \RuntimeException("Attempt to get JSON options for non-JSON config");
+		}
+		return $this->jsonOptions;
+	}
+
+	/**
+	 * @param string $k
 	 *
 	 * @return bool|mixed
 	 */
@@ -226,15 +329,15 @@ class Config {
 	}
 
 	/**
-	 * @param $k
-	 * @param $v
+	 * @param string $k
+	 * @param mixed  $v
 	 */
 	public function __set($k, $v){
 		$this->set($k, $v);
 	}
 
 	/**
-	 * @param $k
+	 * @param string $k
 	 *
 	 * @return bool
 	 */
@@ -243,15 +346,15 @@ class Config {
 	}
 
 	/**
-	 * @param $k
+	 * @param string $k
 	 */
 	public function __unset($k){
 		$this->remove($k);
 	}
 
 	/**
-	 * @param $key
-	 * @param $value
+	 * @param string $key
+	 * @param mixed  $value
 	 */
 	public function setNested($key, $value){
 		$vars = explode(".", $key);
@@ -277,8 +380,8 @@ class Config {
 	}
 
 	/**
-	 * @param       $key
-	 * @param mixed $default
+	 * @param string $key
+	 * @param mixed  $default
 	 *
 	 * @return mixed
 	 */
@@ -309,6 +412,7 @@ class Config {
 
 	public function removeNested(string $key) : void{
 		$this->nestedCache = [];
+		$this->changed = true;
 
 		$vars = explode(".", $key);
 
@@ -328,8 +432,8 @@ class Config {
 	}
 
 	/**
-	 * @param       $k
-	 * @param mixed $default
+	 * @param string $k
+	 * @param mixed  $default
 	 *
 	 * @return bool|mixed
 	 */
@@ -354,19 +458,19 @@ class Config {
 	/**
 	 * @param array $v
 	 */
-	public function setAll($v){
+	public function setAll(array $v){
 		$this->config = $v;
 		$this->changed = true;
 	}
 
 	/**
-	 * @param      $k
-	 * @param bool $lowercase If set, searches Config in single-case / lowercase.
+	 * @param string $k
+	 * @param bool   $lowercase If set, searches Config in single-case / lowercase.
 	 *
 	 * @return bool
 	 */
-	public function exists($k, $lowercase = false){
-		if($lowercase === true){
+	public function exists($k, bool $lowercase = false) : bool{
+		if($lowercase){
 			$k = strtolower($k); //Convert requested  key to lower
 			$array = array_change_key_case($this->config, CASE_LOWER); //Change all keys in array to lower
 			return isset($array[$k]); //Find $k in modified array
@@ -377,8 +481,6 @@ class Config {
 
 	/**
 	 * @param string $k
-	 *
-	 * @return void
 	 */
 	public function remove($k){
 		unset($this->config[$k]);
@@ -386,8 +488,9 @@ class Config {
 	}
 
 	/**
-	 * @return mixed[]
-	 * @phpstan-return list<string>|array<string, mixed>
+	 * @param bool $keys
+	 *
+	 * @return array
 	 */
 	public function getAll(bool $keys = false) : array{
 		return ($keys ? array_keys($this->config) : $this->config);
@@ -401,12 +504,12 @@ class Config {
 	}
 
 	/**
-	 * @param $default
-	 * @param $data
+	 * @param array $default
+	 * @param array &$data
 	 *
 	 * @return int
 	 */
-	private function fillDefaults($default, &$data){
+	private function fillDefaults(array $default, &$data) : int{
 		$changed = 0;
 		foreach($default as $k => $v){
 			if(is_array($v)){
@@ -428,9 +531,9 @@ class Config {
 	}
 
 	/**
-	 * @param $content
+	 * @param string $content
 	 */
-	private function parseList($content){
+	private function parseList(string $content){
 		foreach(explode("\n", trim(str_replace("\r\n", "\n", $content))) as $v){
 			$v = trim($v);
 			if($v == ""){
@@ -443,11 +546,11 @@ class Config {
 	/**
 	 * @return string
 	 */
-	private function writeProperties(){
+	private function writeProperties() : string{
 		$content = "#Properties Config file\r\n#" . date("D M j H:i:s T Y") . "\r\n";
 		foreach($this->config as $k => $v){
-			if(is_bool($v) === true){
-				$v = $v === true ? "on" : "off";
+			if(is_bool($v)){
+				$v = $v ? "on" : "off";
 			}elseif(is_array($v)){
 				$v = implode(";", $v);
 			}
@@ -458,10 +561,10 @@ class Config {
 	}
 
 	/**
-	 * @param $content
+	 * @param string $content
 	 */
-	private function parseProperties($content){
-		if(preg_match_all('/([a-zA-Z0-9\-_\.]*)=([^\r\n]*)/u', $content, $matches) > 0){ //false or 0 matches
+	private function parseProperties(string $content){
+		if(preg_match_all('/^\s*([a-zA-Z0-9\-_\.]+)[ \t]*=([^\r\n]*)/um', $content, $matches) > 0){ //false or 0 matches
 			foreach($matches[1] as $i => $k){
 				$v = trim($matches[2][$i]);
 				switch(strtolower($v)){
@@ -483,5 +586,4 @@ class Config {
 			}
 		}
 	}
-
 }

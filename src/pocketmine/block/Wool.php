@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,95 +15,51 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\block;
 
+use pocketmine\block\utils\ColorBlockMetaHelper;
+use pocketmine\item\Item;
 
-use pocketmine\item\Tool;
-
-class Wool extends Solid {
-	const WHITE = 0;
-	const ORANGE = 1;
-	const MAGENTA = 2;
-	const LIGHT_BLUE = 3;
-	const YELLOW = 4;
-	const LIME = 5;
-	const PINK = 6;
-	const GRAY = 7;
-	const LIGHT_GRAY = 8;
-	const CYAN = 9;
-	const PURPLE = 10;
-	const BLUE = 11;
-	const BROWN = 12;
-	const GREEN = 13;
-	const RED = 14;
-	const BLACK = 15;
+class Wool extends Solid{
 
 	protected $id = self::WOOL;
 
-	/**
-	 * Wool constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	/**
-	 * @return float
-	 */
-	public function getHardness(){
+	public function getHardness() : float{
 		return 0.8;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getToolType(){
-		return Tool::TYPE_SHEARS;
+	public function getToolType() : int{
+		return BlockToolType::TYPE_SHEARS;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
-		static $names = [
-			0 => "White Wool",
-			1 => "Orange Wool",
-			2 => "Magenta Wool",
-			3 => "Light Blue Wool",
-			4 => "Yellow Wool",
-			5 => "Lime Wool",
-			6 => "Pink Wool",
-			7 => "Gray Wool",
-			8 => "Light Gray Wool",
-			9 => "Cyan Wool",
-			10 => "Purple Wool",
-			11 => "Blue Wool",
-			12 => "Brown Wool",
-			13 => "Green Wool",
-			14 => "Red Wool",
-			15 => "Black Wool",
-		];
-		return $names[$this->meta & 0x0f];
+		return ColorBlockMetaHelper::getColorFromMeta($this->getVariant()) . " Wool";
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getBurnChance() : int{
+	public function getBreakTime(Item $item) : float{
+		$time = parent::getBreakTime($item);
+		if($item->getBlockToolType() === BlockToolType::TYPE_SHEARS){
+			$time *= 3; //shears break compatible blocks 15x faster, but wool 5x
+		}
+
+		return $time;
+	}
+
+	public function getFlameEncouragement() : int{
 		return 30;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getBurnAbility() : int{
+	public function getFlammability() : int{
 		return 60;
 	}
-
 }

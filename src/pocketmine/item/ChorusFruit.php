@@ -19,18 +19,22 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\item;
 
 use pocketmine\block\Liquid;
 use pocketmine\entity\Living;
-use pocketmine\entity\Entity;
 use pocketmine\level\sound\EndermanTeleportSound;
 use pocketmine\math\Vector3;
+use function assert;
+use function min;
+use function mt_rand;
 
 class ChorusFruit extends Food{
 
-	public function __construct($meta = 0, $count = 1){
-		parent::__construct(self::CHORUS_FRUIT, 0, $count, "Chorus Fruit");
+	public function __construct(int $meta = 0){
+		parent::__construct(self::CHORUS_FRUIT, $meta, "Chorus Fruit");
 	}
 
 	public function getFoodRestore() : int{
@@ -45,7 +49,7 @@ class ChorusFruit extends Food{
 		return false;
 	}
 
-	public function onConsume(Entity $consumer){
+	public function onConsume(Living $consumer){
 		$level = $consumer->getLevel();
 		assert($level !== null);
 
@@ -82,5 +86,9 @@ class ChorusFruit extends Food{
 
 			break;
 		}
+	}
+
+	public function getCooldownTicks() : int{
+		return 20;
 	}
 }

@@ -2,11 +2,11 @@
 
 /*
  *
- *  ____            _        _   __  __ _                  __  __ ____  
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \ 
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
  * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/ 
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_| 
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -15,273 +15,156 @@
  *
  * @author PocketMine Team
  * @link http://www.pocketmine.net/
- * 
+ *
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\block;
 
-use pocketmine\entity\Arrow;
-use pocketmine\entity\Effect;
 use pocketmine\entity\Entity;
+use pocketmine\entity\projectile\Arrow;
 use pocketmine\event\block\BlockBurnEvent;
 use pocketmine\event\entity\EntityCombustByBlockEvent;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\math\Vector3;
-use pocketmine\Server;
+use function min;
+use function mt_rand;
 
-class Fire extends Flowable {
+class Fire extends Flowable{
 
 	protected $id = self::FIRE;
 
-	/** @var Vector3 */
-	private $temporalVector = null;
-
-	/**
-	 * Fire constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
-		if($this->temporalVector === null){
-			$this->temporalVector = new Vector3(0, 0, 0);
-		}
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function hasEntityCollision(){
+	public function hasEntityCollision() : bool{
 		return true;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Fire Block";
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getLightLevel(){
+	public function getLightLevel() : int{
 		return 15;
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return bool
-	 */
-	public function isBreakable(Item $item){
+	public function isBreakable(Item $item) : bool{
 		return false;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function canBeReplaced(){
+	public function canBeReplaced() : bool{
 		return true;
 	}
 
-	/**
-	 * @param Entity $entity
-	 */
-	public function onEntityCollide(Entity $entity){
-		$ProtectL = 0;
-		if(!$entity->hasEffect(Effect::FIRE_RESISTANCE)){
-			$ev = new EntityDamageByBlockEvent($this, $entity, EntityDamageEvent::CAUSE_FIRE, 1);
-			if($entity->attack($ev->getFinalDamage(), $ev) === true){
-				$ev->useArmors();
-			}
-			$ProtectL = $ev->getFireProtectL();
-		}
+	public function onEntityCollide(Entity $entity) : void{
+		$ev = new EntityDamageByBlockEvent($this, $entity, EntityDamageEvent::CAUSE_FIRE, 1);
+		$entity->attack($ev);
 
-		$ev = new EntityCombustByBlockEvent($this, $entity, 8, $ProtectL);
+		$ev = new EntityCombustByBlockEvent($this, $entity, 8);
 		if($entity instanceof Arrow){
 			$ev->setCancelled();
 		}
-		Server::getInstance()->getPluginManager()->callEvent($ev);
+		$ev->call();
 		if(!$ev->isCancelled()){
 			$entity->setOnFire($ev->getDuration());
 		}
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return array
-	 */
-	public function getDrops(Item $item) : array{
+	public function getDropsForCompatibleTool(Item $item) : array{
 		return [];
 	}
 
-	/**
-	 * @param int $type
-	 *
-	 * @return int
-	 */
-	public function onUpdate($type){
-		if($type == Level::BLOCK_UPDATE_NORMAL or $type == Level::BLOCK_UPDATE_RANDOM or $type == Level::BLOCK_UPDATE_SCHEDULED){
-			if(!$this->getSide(Vector3::SIDE_DOWN)->isTopFacingSurfaceSolid() and !$this->canNeighborBurn()){
-				$this->getLevel()->setBlock($this, new Air(), true);
-				return Level::BLOCK_UPDATE_NORMAL;
-			}elseif($type == Level::BLOCK_UPDATE_NORMAL or $type == Level::BLOCK_UPDATE_RANDOM){
-				$this->getLevel()->scheduleUpdate($this, $this->getTickRate() + mt_rand(0, 10));
-			}elseif($type == Level::BLOCK_UPDATE_SCHEDULED and $this->getLevel()->getServer()->fireSpread){
-				$forever = $this->getSide(Vector3::SIDE_DOWN)->getId() == Block::NETHERRACK;
+	public function onNearbyBlockChange() : void{
+		if(!$this->getSide(Vector3::SIDE_DOWN)->isSolid() and !$this->hasAdjacentFlammableBlocks()){
+			$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), true);
+		}else{
+			$this->level->scheduleDelayedBlockUpdate($this, mt_rand(30, 40));
+		}
+	}
 
-				//TODO: END
+	public function ticksRandomly() : bool{
+		return true;
+	}
 
-				if(!$this->getSide(Vector3::SIDE_DOWN)->isTopFacingSurfaceSolid() and !$this->canNeighborBurn()){
-					$this->getLevel()->setBlock($this, new Air(), true);
+	public function onRandomTick() : void{
+		$down = $this->getSide(Vector3::SIDE_DOWN);
+
+		$result = null;
+		if($this->meta < 15 and mt_rand(0, 2) === 0){
+			$this->meta++;
+			$result = $this;
+		}
+		$canSpread = true;
+
+		if(!$down->burnsForever()){
+			//TODO: check rain
+			if($this->meta === 15){
+				if(!$down->isFlammable() and mt_rand(0, 3) === 3){ //1/4 chance to extinguish
+					$canSpread = false;
+					$result = BlockFactory::get(Block::AIR);
 				}
-
-				if(!$forever and $this->getLevel()->getWeather()->isRainy() and
-					($this->getLevel()->canBlockSeeSky($this) or
-						$this->getLevel()->canBlockSeeSky($this->getSide(Vector3::SIDE_EAST)) or
-						$this->getLevel()->canBlockSeeSky($this->getSide(Vector3::SIDE_WEST)) or
-						$this->getLevel()->canBlockSeeSky($this->getSide(Vector3::SIDE_SOUTH)) or
-						$this->getLevel()->canBlockSeeSky($this->getSide(Vector3::SIDE_NORTH))
-					)
-				){
-					$this->getLevel()->setBlock($this, new Air(), true);
-				}else{
-					$meta = $this->meta;
-
-					if($meta < 15 and mt_rand(0, 2) === 0){
-						$this->meta++;
-						$this->getLevel()->setBlock($this, $this, true);
-					}
-
-					$this->getLevel()->scheduleUpdate($this, $this->getTickRate() + mt_rand(0, 10));
-
-					if(!$forever and !$this->canNeighborBurn()){
-						if(!$this->getSide(Vector3::SIDE_DOWN)->isTopFacingSurfaceSolid() or $meta > 3){
-							$this->getLevel()->setBlock($this, new Air(), true);
-						}
-					}elseif(!$forever && !($this->getSide(Vector3::SIDE_DOWN)->getBurnAbility() > 0) && $meta >= 15 && mt_rand(0, 4) == 0){
-						$this->getLevel()->setBlock($this, new Air(), true);
-					}else{
-						$o = 0;
-
-						//TODO: decrease the o if the rainfall values are high
-
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_EAST), 300 + $o, $meta);
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_WEST), 300 + $o, $meta);
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_DOWN), 250 + $o, $meta);
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_UP), 250 + $o, $meta);
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_SOUTH), 300 + $o, $meta);
-						$this->tryToCatchBlockOnFire($this->getSide(Vector3::SIDE_NORTH), 300 + $o, $meta);
-
-						for($x = ($this->x - 1); $x <= ($this->x + 1); ++$x){
-							for($z = ($this->z - 1); $z <= ($this->z + 1); ++$z){
-								for($y = ($this->y - 1); $y <= ($this->y + 4); ++$y){
-									$k = 100;
-
-									if($y > $this->y + 1){
-										$k += ($y - ($this->y + 1)) * 100;
-									}
-
-									$chance = $this->getChanceOfNeighborsEncouragingFire($this->getLevel()->getBlock($this->temporalVector->setComponents($x, $y, $z)));
-
-									if($chance > 0){
-										$t = ($chance + 40 + $this->getLevel()->getServer()->getDifficulty() * 7);
-
-										//TODO: decrease t if the rainfall values are high
-
-										if($t > 0 and mt_rand(0, $k) <= $t){
-											$damage = min(15, $meta + mt_rand(0, 5) / 4);
-
-											$this->getLevel()->setBlock($this->temporalVector->setComponents($x, $y, $z), new Fire($damage), true);
-											$this->getLevel()->scheduleUpdate($this->temporalVector, $this->getTickRate());
-										}
-									}
-								}
-							}
-						}
-					}
+			}elseif(!$this->hasAdjacentFlammableBlocks()){
+				$canSpread = false;
+				if(!$down->isSolid() or $this->meta > 3){ //fire older than 3, or without a solid block below
+					$result = BlockFactory::get(Block::AIR);
 				}
 			}
 		}
-		return 0;
-	}
 
-	/**
-	 * @return int
-	 */
-	public function getTickRate() : int{
-		return 30;
-	}
+		if($result !== null){
+			$this->level->setBlock($this, $result);
+		}
 
-	/*public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			for($s = 0; $s <= 5; ++$s){
-				$side = $this->getSide($s);
-				if($side->getId() !== self::AIR and !($side instanceof Liquid)){
-					return false;
-				}
+		$this->level->scheduleDelayedBlockUpdate($this, mt_rand(30, 40));
+
+		if($canSpread){
+			//TODO: raise upper bound for chance in humid biomes
+
+			foreach($this->getHorizontalSides() as $side){
+				$this->burnBlock($side, 300);
 			}
-			$this->getLevel()->setBlock($this, new Air(), true);
 
-			return Level::BLOCK_UPDATE_NORMAL;
-		}elseif($type === Level::BLOCK_UPDATE_RANDOM){
-			if($this->getSide(0)->getId() !== self::NETHERRACK){
-				$this->getLevel()->setBlock($this, new Air(), true);
+			//vanilla uses a 250 upper bound here, but I don't think they intended to increase the chance of incineration
+			$this->burnBlock($this->getSide(Vector3::SIDE_UP), 350);
+			$this->burnBlock($this->getSide(Vector3::SIDE_DOWN), 350);
 
-				return Level::BLOCK_UPDATE_NORMAL;
+			//TODO: fire spread
+		}
+	}
+
+	public function onScheduledUpdate() : void{
+		$this->onRandomTick();
+	}
+
+	private function hasAdjacentFlammableBlocks() : bool{
+		for($i = 0; $i <= 5; ++$i){
+			if($this->getSide($i)->isFlammable()){
+				return true;
 			}
 		}
 
 		return false;
-	}*/
-
-	/**
-	 * @param Block $block
-	 * @param int   $bound
-	 * @param int   $damage
-	 */
-	private function tryToCatchBlockOnFire(Block $block, int $bound, int $damage){
-		$burnAbility = $block->getBurnAbility();
-
-		if(mt_rand(0, $bound) < $burnAbility){
-			if(mt_rand(0, $damage + 10) < 5){
-				$meta = max(15, $damage + mt_rand(0, 4) / 4);
-
-				$this->getLevel()->getServer()->getPluginManager()->callEvent($ev = new BlockBurnEvent($block));
-				if(!$ev->isCancelled()){
-					$this->getLevel()->setBlock($block, $fire = new Fire($meta), true);
-					$this->getLevel()->scheduleUpdate($block, $fire->getTickRate());
-				}
-			}else{
-				$this->getLevel()->setBlock($this, new Air(), true);
-			}
-
-			if($block instanceof TNT){
-				$block->prime();
-			}
-		}
 	}
 
-	/**
-	 * @param Block $block
-	 *
-	 * @return int|mixed
-	 */
-	private function getChanceOfNeighborsEncouragingFire(Block $block){
-		if($block->getId() !== self::AIR){
-			return 0;
-		}else{
-			$chance = 0;
-			for($i = 0; $i < 5; $i++){
-				$chance = max($chance, $block->getSide($i)->getBurnChance());
+	private function burnBlock(Block $block, int $chanceBound) : void{
+		if(mt_rand(0, $chanceBound) < $block->getFlammability()){
+			$ev = new BlockBurnEvent($block, $this);
+			$ev->call();
+			if(!$ev->isCancelled()){
+				$block->onIncinerate();
+
+				if(mt_rand(0, $this->meta + 9) < 5){ //TODO: check rain
+					$this->level->setBlock($block, BlockFactory::get(Block::FIRE, min(15, $this->meta + (mt_rand(0, 4) >> 2))));
+				}else{
+					$this->level->setBlock($block, BlockFactory::get(Block::AIR));
+				}
 			}
-			return $chance;
 		}
 	}
 }

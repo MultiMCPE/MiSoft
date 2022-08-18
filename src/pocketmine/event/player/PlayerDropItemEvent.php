@@ -14,10 +14,12 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
@@ -28,9 +30,7 @@ use pocketmine\Player;
 /**
  * Called when a player tries to drop an item from its hotbar
  */
-class PlayerDropItemEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
-
+class PlayerDropItemEvent extends PlayerEvent implements Cancellable{
 	/** @var Item */
 	private $drop;
 
@@ -46,8 +46,7 @@ class PlayerDropItemEvent extends PlayerEvent implements Cancellable {
 	/**
 	 * @return Item
 	 */
-	public function getItem(){
+	public function getItem() : Item{
 		return $this->drop;
 	}
-
 }

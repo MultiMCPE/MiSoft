@@ -19,38 +19,30 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\tile;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
+use pocketmine\item\ItemFactory;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\nbt\tag\ShortTag;
-use pocketmine\nbt\tag\StringTag;
 
-class FlowerPot extends Spawnable {
+class FlowerPot extends Spawnable{
+	public const TAG_ITEM = "item";
+	public const TAG_ITEM_DATA = "mData";
 
-	/**
-	 * FlowerPot constructor.
-	 *
-	 * @param Level       $level
-	 * @param CompoundTag $nbt
-	 */
-	public function __construct(Level $level, CompoundTag $nbt){
-		if(!isset($nbt->item)){
-			$nbt->item = new ShortTag("item", 0);
-		}
-		if(!isset($nbt->mData)){
-			$nbt->mData = new IntTag("mData", 0);
-		}
-		parent::__construct($level, $nbt);
+	/** @var Item */
+	private $item;
+
+	protected function readSaveData(CompoundTag $nbt) : void{
+		$this->item = ItemFactory::get($nbt->getShort(self::TAG_ITEM, 0, true), $nbt->getInt(self::TAG_ITEM_DATA, 0, true), 1);
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return bool
-	 */
+	protected function writeSaveData(CompoundTag $nbt) : void{
+		$nbt->setShort(self::TAG_ITEM, $this->item->getId());
+		$nbt->setInt(self::TAG_ITEM_DATA, $this->item->getDamage());
+	}
+
 	public function canAddItem(Item $item) : bool{
 		if(!$this->isEmpty()){
 			return false;
@@ -74,44 +66,25 @@ class FlowerPot extends Spawnable {
 		}
 	}
 
-	/**
-	 * @return Item
-	 */
 	public function getItem() : Item{
-		return Item::get((int) ($this->namedtag["item"] ?? 0), (int) ($this->namedtag["mData"] ?? 0), 1);
+		return clone $this->item;
 	}
 
-	/**
-	 * @param Item $item
-	 */
 	public function setItem(Item $item){
-		$this->namedtag["item"] = $item->getId();
-		$this->namedtag["mData"] = $item->getDamage();
+		$this->item = clone $item;
 		$this->onChanged();
 	}
 
 	public function removeItem(){
-		$this->setItem(Item::get(Item::AIR));
+		$this->setItem(ItemFactory::get(Item::AIR, 0, 0));
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isEmpty() : bool{
-		return $this->getItem()->getId() === Item::AIR;
+		return $this->getItem()->isNull();
 	}
 
-	/**
-	 * @return CompoundTag
-	 */
-	public function getSpawnCompound() : CompoundTag{
-		return new CompoundTag("", [
-			new StringTag("id", Tile::FLOWER_POT),
-			new IntTag("x", (int) $this->x),
-			new IntTag("y", (int) $this->y),
-			new IntTag("z", (int) $this->z),
-			$this->namedtag->item,
-			$this->namedtag->mData
-		]);
+	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
+		$nbt->setShort(self::TAG_ITEM, $this->item->getId());
+		$nbt->setInt(self::TAG_ITEM_DATA, $this->item->getDamage());
 	}
 }

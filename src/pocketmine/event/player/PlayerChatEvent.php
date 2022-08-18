@@ -14,23 +14,26 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\player;
 
+use pocketmine\command\CommandSender;
 use pocketmine\event\Cancellable;
+use pocketmine\permission\PermissionManager;
 use pocketmine\Player;
 use pocketmine\Server;
+use function spl_object_id;
 
 /**
  * Called when a player chats something
  */
-class PlayerChatEvent extends PlayerEvent implements Cancellable {
-	public static $handlerList = null;
-
+class PlayerChatEvent extends PlayerEvent implements Cancellable{
 	/** @var string */
 	protected $message;
 
@@ -38,26 +41,28 @@ class PlayerChatEvent extends PlayerEvent implements Cancellable {
 	protected $format;
 
 	/**
-	 * @var Player[]
+	 * @var CommandSender[]
 	 */
 	protected $recipients = [];
 
 	/**
-	 * PlayerChatEvent constructor.
-	 *
-	 * @param Player     $player
-	 * @param            $message
-	 * @param string     $format
-	 * @param array|null $recipients
+	 * @param Player          $player
+	 * @param string          $message
+	 * @param string          $format
+	 * @param CommandSender[] $recipients
 	 */
-	public function __construct(Player $player, $message, $format = "chat.type.text", array $recipients = null){
+	public function __construct(Player $player, string $message, string $format = "chat.type.text", array $recipients = null){
 		$this->player = $player;
 		$this->message = $message;
 
 		$this->format = $format;
 
 		if($recipients === null){
-			$this->recipients = Server::getInstance()->getPluginManager()->getPermissionSubscriptions(Server::BROADCAST_CHANNEL_USERS);
+			foreach(PermissionManager::getInstance()->getPermissionSubscriptions(Server::BROADCAST_CHANNEL_USERS) as $permissible){
+				if($permissible instanceof CommandSender){
+					$this->recipients[spl_object_id($permissible)] = $permissible;
+				}
+			}
 		}else{
 			$this->recipients = $recipients;
 		}
@@ -66,14 +71,14 @@ class PlayerChatEvent extends PlayerEvent implements Cancellable {
 	/**
 	 * @return string
 	 */
-	public function getMessage(){
+	public function getMessage() : string{
 		return $this->message;
 	}
 
 	/**
-	 * @param $message
+	 * @param string $message
 	 */
-	public function setMessage($message){
+	public function setMessage(string $message) : void{
 		$this->message = $message;
 	}
 
@@ -82,35 +87,35 @@ class PlayerChatEvent extends PlayerEvent implements Cancellable {
 	 *
 	 * @param Player $player
 	 */
-	public function setPlayer(Player $player){
+	public function setPlayer(Player $player) : void{
 		$this->player = $player;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getFormat(){
+	public function getFormat() : string{
 		return $this->format;
 	}
 
 	/**
-	 * @param $format
+	 * @param string $format
 	 */
-	public function setFormat($format){
+	public function setFormat(string $format) : void{
 		$this->format = $format;
 	}
 
 	/**
-	 * @return array|Player[]
+	 * @return CommandSender[]
 	 */
-	public function getRecipients(){
+	public function getRecipients() : array{
 		return $this->recipients;
 	}
 
 	/**
-	 * @param array $recipients
+	 * @param CommandSender[] $recipients
 	 */
-	public function setRecipients(array $recipients){
+	public function setRecipients(array $recipients) : void{
 		$this->recipients = $recipients;
 	}
 }

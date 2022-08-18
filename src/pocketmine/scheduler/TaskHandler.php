@@ -19,12 +19,14 @@
  *
 */
 
+declare(strict_types=1);
+
 namespace pocketmine\scheduler;
 
-use pocketmine\event\Timings;
-use pocketmine\utils\MainLogger;
+use pocketmine\timings\Timings;
+use pocketmine\timings\TimingsHandler;
 
-class TaskHandler {
+class TaskHandler{
 
 	/** @var Task */
 	protected $task;
@@ -44,102 +46,130 @@ class TaskHandler {
 	/** @var bool */
 	protected $cancelled = false;
 
-	/** @var \pocketmine\event\TimingsHandler */
-	public $timings;
+	/** @var TimingsHandler */
+	private $timings;
 
-	public $timingName = null;
+	/** @var string */
+	private $taskName;
+	/** @var string */
+	private $ownerName;
 
 	/**
-	 * @param string $timingName
-	 * @param Task   $task
-	 * @param int    $taskId
-	 * @param int    $delay
-	 * @param int    $period
+	 * @param Task        $task
+	 * @param int         $taskId
+	 * @param int         $delay
+	 * @param int         $period
+	 * @param string|null $ownerName
 	 */
-	public function __construct($timingName, Task $task, $taskId, $delay = -1, $period = -1){
+	public function __construct(Task $task, int $taskId, int $delay = -1, int $period = -1, ?string $ownerName = null){
 		$this->task = $task;
 		$this->taskId = $taskId;
 		$this->delay = $delay;
 		$this->period = $period;
-		$this->timingName = $timingName === null ? "Unknown" : $timingName;
-		$this->timings = Timings::getPluginTaskTimings($this, $period);
+		$this->taskName = $task->getName();
+		$this->ownerName = $ownerName ?? "Unknown";
+		$this->timings = Timings::getScheduledTaskTimings($this, $period);
 		$this->task->setHandler($this);
 	}
 
-	public function isCancelled(){
+	/**
+	 * @return bool
+	 */
+	public function isCancelled() : bool{
 		return $this->cancelled;
 	}
 
-	public function getNextRun(){
+	/**
+	 * @return int
+	 */
+	public function getNextRun() : int{
 		return $this->nextRun;
 	}
 
 	/**
-	 * @return void
+	 * @param int $ticks
 	 */
-	public function setNextRun($ticks){
+	public function setNextRun(int $ticks){
 		$this->nextRun = $ticks;
 	}
 
-	public function getTaskId(){
+	/**
+	 * @return int
+	 */
+	public function getTaskId() : int{
 		return $this->taskId;
 	}
 
-	public function getTask(){
+	/**
+	 * @return Task
+	 */
+	public function getTask() : Task{
 		return $this->task;
 	}
 
-	public function getDelay(){
+	/**
+	 * @return int
+	 */
+	public function getDelay() : int{
 		return $this->delay;
 	}
 
-	public function isDelayed(){
+	/**
+	 * @return bool
+	 */
+	public function isDelayed() : bool{
 		return $this->delay > 0;
 	}
 
-	public function isRepeating(){
+	/**
+	 * @return bool
+	 */
+	public function isRepeating() : bool{
 		return $this->period > 0;
 	}
 
-	public function getPeriod(){
+	/**
+	 * @return int
+	 */
+	public function getPeriod() : int{
 		return $this->period;
 	}
 
-	/**
-	 * @return void
-	 */
 	public function cancel(){
 		try{
 			if(!$this->isCancelled()){
 				$this->task->onCancel();
 			}
-		}catch(\Throwable $e){
-			MainLogger::getLogger()->logException($e);
 		}finally{
 			$this->remove();
 		}
 	}
 
-	/**
-	 * @return void
-	 */
 	public function remove(){
 		$this->cancelled = true;
 		$this->task->setHandler(null);
 	}
 
 	/**
-	 * @return void
+	 * @param int $currentTick
 	 */
 	public function run(int $currentTick){
-		$this->task->onRun($currentTick);
+		$this->timings->startTiming();
+		try{
+			$this->task->onRun($currentTick);
+		}finally{
+			$this->timings->stopTiming();
+		}
 	}
 
-	public function getTaskName(){
-		if($this->timingName !== null){
-			return $this->timingName;
-		}
+	/**
+	 * @return string
+	 */
+	public function getTaskName() : string{
+		return $this->taskName;
+	}
 
-		return get_class($this->task);
+	public function getOwnerName() : string{
+		return $this->ownerName;
 	}
 }

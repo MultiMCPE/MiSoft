@@ -1,5 +1,6 @@
 <?php
-/**
+
+/*
  *
  *  ____            _        _   __  __ _                  __  __ ____
  * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
@@ -13,61 +14,99 @@
  * (at your option) any later version.
  *
  * @author PocketMine Team
- * @link   http://www.pocketmine.net/
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\event\inventory;
 
 use pocketmine\event\Cancellable;
 use pocketmine\event\Event;
-use pocketmine\inventory\Recipe;
+use pocketmine\inventory\CraftingRecipe;
+use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\item\Item;
 use pocketmine\Player;
 
-class CraftItemEvent extends Event implements Cancellable {
-	public static $handlerList = null;
-	/** @var Item[] */
-	private $input = [];
-	/** @var Recipe */
+class CraftItemEvent extends Event implements Cancellable{
+	/** @var CraftingTransaction */
+	private $transaction;
+	/** @var CraftingRecipe */
 	private $recipe;
-	/** @var \pocketmine\Player */
-	private $player;
+	/** @var int */
+	private $repetitions;
+	/** @var Item[] */
+	private $inputs;
+	/** @var Item[] */
+	private $outputs;
 
 	/**
-	 * @param \pocketmine\Player $player
-	 * @param Item[]             $input
-	 * @param Recipe             $recipe
+	 * @param CraftingTransaction $transaction
+	 * @param CraftingRecipe      $recipe
+	 * @param int                 $repetitions
+	 * @param Item[]              $inputs
+	 * @param Item[]              $outputs
 	 */
-	public function __construct(Player $player, array $input, Recipe $recipe){
-		$this->player = $player;
-		$this->input = $input;
+	public function __construct(CraftingTransaction $transaction, CraftingRecipe $recipe, int $repetitions, array $inputs, array $outputs){
+		$this->transaction = $transaction;
 		$this->recipe = $recipe;
+		$this->repetitions = $repetitions;
+		$this->inputs = $inputs;
+		$this->outputs = $outputs;
 	}
 
 	/**
-	 * @return Item[]
+	 * Returns the inventory transaction involved in this crafting event.
+	 *
+	 * @return CraftingTransaction
 	 */
-	public function getInput(){
-		$items = [];
-		foreach($this->input as $i => $item){
-			$items[$i] = clone $item;
-		}
-		return $items;
+	public function getTransaction() : CraftingTransaction{
+		return $this->transaction;
 	}
 
 	/**
-	 * @return Recipe
+	 * Returns the recipe crafted.
+	 *
+	 * @return CraftingRecipe
 	 */
-	public function getRecipe(){
+	public function getRecipe() : CraftingRecipe{
 		return $this->recipe;
 	}
 
 	/**
-	 * @return \pocketmine\Player
+	 * Returns the number of times the recipe was crafted. This is usually 1, but might be more in the case of recipe
+	 * book shift-clicks (which craft lots of items in a batch).
+	 *
+	 * @return int
 	 */
-	public function getPlayer(){
-		return $this->player;
+	public function getRepetitions() : int{
+		return $this->repetitions;
+	}
+
+	/**
+	 * Returns a list of items destroyed as ingredients of the recipe.
+	 *
+	 * @return Item[]
+	 */
+	public function getInputs() : array{
+		return $this->inputs;
+	}
+
+	/**
+	 * Returns a list of items created by crafting the recipe.
+	 *
+	 * @return Item[]
+	 */
+	public function getOutputs() : array{
+		return $this->outputs;
+	}
+
+	/**
+	 * @return Player
+	 */
+	public function getPlayer() : Player{
+		return $this->transaction->getSource();
 	}
 }

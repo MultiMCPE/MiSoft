@@ -2,185 +2,121 @@
 
 /*
  *
- *  _____   _____   __   _   _   _____  __    __  _____
- * /  ___| | ____| |  \ | | | | /  ___/ \ \  / / /  ___/
- * | |     | |__   |   \| | | | | |___   \ \/ /  | |___
- * | |  _  |  __|  | |\   | | | \___  \   \  /   \___  \
- * | |_| | | |___  | | \  | | |  ___| |   / /     ___| |
- * \_____/ |_____| |_|  \_| |_| /_____/  /_/     /_____/
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author iTX Technologies
- * @link https://itxtech.org
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\level\Level;
-use pocketmine\level\sound\ItemFrameAddItemSound;
-use pocketmine\level\sound\ItemFrameRotateItemSound;
-use pocketmine\nbt\tag\{
-	ByteTag, CompoundTag, FloatTag, IntTag, StringTag
-};
+use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\tile\ItemFrame as TileItemFrame;
 use pocketmine\tile\Tile;
+use function lcg_value;
 
-class ItemFrame extends Flowable {
+class ItemFrame extends Flowable{
 	protected $id = Block::ITEM_FRAME_BLOCK;
 
-	/**
-	 * ItemFrame constructor.
-	 *
-	 * @param int $meta
-	 */
-	public function __construct($meta = 0){
+	protected $itemId = Item::ITEM_FRAME;
+
+	public function __construct(int $meta = 0){
 		$this->meta = $meta;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName() : string{
 		return "Item Frame";
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function canBeActivated() : bool{
-		return true;
-	}
-
-	/**
-	 * @param Item        $item
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
-	public function onActivate(Item $item, Player $player = null){
-		if(!(($tile = $this->level->getTile($this)) instanceof TileItemFrame)){
-			$nbt = new CompoundTag("", [
-				new StringTag("id", Tile::ITEM_FRAME),
-				new IntTag("x", $this->x),
-				new IntTag("y", $this->y),
-				new IntTag("z", $this->z),
-				new FloatTag("ItemDropChance", 1.0),
-				new ByteTag("ItemRotation", 0)
-			]);
-			$tile = Tile::createTile(Tile::ITEM_FRAME, $this->getLevel(), $nbt);
+	public function onActivate(Item $item, Player $player = null) : bool{
+		$tile = $this->level->getTile($this);
+		if(!($tile instanceof TileItemFrame)){
+			$tile = Tile::createTile(Tile::ITEM_FRAME, $this->getLevel(), TileItemFrame::createNBT($this));
+			if(!($tile instanceof TileItemFrame)){
+				return true;
+			}
 		}
 
 		if($tile->hasItem()){
 			$tile->setItemRotation(($tile->getItemRotation() + 1) % 8);
-			$this->getLevel()->addSound(new ItemFrameRotateItemSound($this));
 		}elseif(!$item->isNull()){
 			$tile->setItem($item->pop());
-			$this->getLevel()->addSound(new ItemFrameAddItemSound($this));
 		}
 
 		return true;
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return mixed
-	 */
-	public function onBreak(Item $item){
-		if(($tile = $this->level->getTile($this)) instanceof TileItemFrame){
-			//TODO: add events
-			if(lcg_value() <= $tile->getItemDropChance() and $tile->getItem()->getId() !== Item::AIR){
-				$this->level->dropItem($tile->getBlock(), $tile->getItem());
-			}
+	public function onNearbyBlockChange() : void{
+		$sides = [
+			0 => Vector3::SIDE_WEST,
+			1 => Vector3::SIDE_EAST,
+			2 => Vector3::SIDE_NORTH,
+			3 => Vector3::SIDE_SOUTH
+		];
+		if(isset($sides[$this->meta]) and !$this->getSide($sides[$this->meta])->isSolid()){
+			$this->level->useBreakOn($this);
 		}
-		return parent::onBreak($item);
 	}
 
-	/**
-	 * @param int $type
-	 *
-	 * @return bool|int
-	 */
-	public function onUpdate($type){
-		if($type === Level::BLOCK_UPDATE_NORMAL){
-			$sides = [
-				0 => 4,
-				1 => 5,
-				2 => 2,
-				3 => 3
-			];
-			if(!$this->getSide($sides[$this->meta])->isSolid()){
-				$this->level->useBreakOn($this);
-				return Level::BLOCK_UPDATE_NORMAL;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * @param Item        $item
-	 * @param Block       $block
-	 * @param Block       $target
-	 * @param int         $face
-	 * @param float       $fx
-	 * @param float       $fy
-	 * @param float       $fz
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
-	public function place(Item $item, Block $block, Block $target, $face, $fx, $fy, $fz, Player $player = null){
-		if($face === 0 or $face === 1){
+	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
+		if($face === Vector3::SIDE_DOWN or $face === Vector3::SIDE_UP or !$blockClicked->isSolid()){
 			return false;
 		}
 
 		$faces = [
-			2 => 3,
-			3 => 2,
-			4 => 1,
-			5 => 0
+			Vector3::SIDE_NORTH => 3,
+			Vector3::SIDE_SOUTH => 2,
+			Vector3::SIDE_WEST => 1,
+			Vector3::SIDE_EAST => 0
 		];
 
 		$this->meta = $faces[$face];
-		$this->level->setBlock($block, $this, true, true);
+		$this->level->setBlock($blockReplace, $this, true, true);
 
-		$nbt = new CompoundTag("", [
-			new StringTag("id", Tile::ITEM_FRAME),
-			new IntTag("x", $block->x),
-			new IntTag("y", $block->y),
-			new IntTag("z", $block->z),
-			new FloatTag("ItemDropChance", 1.0),
-			new ByteTag("ItemRotation", 0)
-		]);
-
-		if($item->hasCustomBlockData()){
-			foreach($item->getCustomBlockData() as $key => $v){
-				$nbt->{$key} = $v;
-			}
-		}
-
-		Tile::createTile(Tile::ITEM_FRAME, $this->getLevel(), $nbt);
+		Tile::createTile(Tile::ITEM_FRAME, $this->getLevel(), TileItemFrame::createNBT($this, $face, $item, $player));
 
 		return true;
 
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return array
-	 */
-	public function getDrops(Item $item) : array{
-		return [
-			[Item::ITEM_FRAME, 0, 1]
-		];
+	public function getVariantBitmask() : int{
+		return 0;
 	}
 
+	public function getDropsForCompatibleTool(Item $item) : array{
+		$drops = parent::getDropsForCompatibleTool($item);
+
+		$tile = $this->level->getTile($this);
+		if($tile instanceof TileItemFrame){
+			$tileItem = $tile->getItem();
+			if(lcg_value() <= $tile->getItemDropChance() and !$tileItem->isNull()){
+				$drops[] = $tileItem;
+			}
+		}
+
+		return $drops;
+	}
+
+	public function isAffectedBySilkTouch() : bool{
+		return false;
+	}
+
+	public function getHardness() : float{
+		return 0.25;
+	}
 }
