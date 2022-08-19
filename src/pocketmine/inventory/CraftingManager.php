@@ -27,7 +27,6 @@ use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\crafting\CraftingDataBuildTask;
-use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\timings\Timings;
 use function is_null;
 use function count;
@@ -114,36 +113,36 @@ class CraftingManager{
                 return;
             }
 
-            $p->dataPacket($craftingData);
+            $p->dataPacket($craftingData[$p->getCraftingProtocol()]);
         } finally {
             Timings::$craftingDataCacheRebuildTimer->stopTiming();
         }
     }
 
     /**
-     * @return ?BatchPacket
+     * @return ?array
      */
-    public function getCraftingData() : ?BatchPacket{
+    public function getCraftingData() : ?array{
         return $this->craftingData;
     }
 
     /**
-     * @param BatchPacket
+     * @param array $buffers
      * 
      * @return void
      */
-    public function setCraftingData(BatchPacket $packet) : void{
-        $this->craftingData = $packet;
+    public function setCraftingData(array $buffers) : void{
+        $this->craftingData = $buffers;
     }
 
     /**
-     * @param BatchPacket $packet
+     * @param array $buffers
      * 
      * @return void
      */
-    public function sendCraftingDataToQueue(BatchPacket $packet) : void{
+    public function sendCraftingDataToQueue(array $buffers) : void{
         foreach ($this->craftingDataQueue as $p) {
-            $p->dataPacket($packet);
+            $p->dataPacket($buffers[$p->getCraftingProtocol()]);
         }
 
         if (!is_null($this->craftingDataTask)) {

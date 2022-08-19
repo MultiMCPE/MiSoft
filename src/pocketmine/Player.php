@@ -99,6 +99,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\PlayerNetworkSessionAdapter;
+use pocketmine\network\mcpe\multiversion\ActionEnums;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
@@ -140,9 +141,6 @@ use pocketmine\network\mcpe\protocol\SetTitlePacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
-use pocketmine\network\mcpe\protocol\types\CommandData;
-use pocketmine\network\mcpe\protocol\types\CommandEnum;
-use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
@@ -277,6 +275,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $originalProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 	/** @var int */
 	protected $protocol = ProtocolInfo::CURRENT_PROTOCOL;
+	/** @var int */
+	protected $chunkProtocol = ProtocolInfo::CURRENT_PROTOCOL;
+	/** @var int */
+	protected $craftingProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 	/** @var int */
 	protected $randomClientId;
 	/** @var string */
@@ -721,41 +723,21 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function sendCommandData(){
-		$pk = new AvailableCommandsPacket();
+		$commands = [];
 		foreach($this->server->getCommandMap()->getCommands() as $name => $command){
-			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($this)){
+			if($command->getName() === "help" or !$command->testPermissionSilent($this)){
 				continue;
 			}
 
-			$data = new CommandData();
-			//TODO: commands containing uppercase letters in the name crash 1.9.0 client
-			$data->commandName = strtolower($command->getName());
-			$data->commandDescription = $this->server->getLanguage()->translateString($command->getDescription());
-			$data->flags = 0;
-			$data->permission = 0;
-
-			$parameter = new CommandParameter();
-			$parameter->paramName = "args";
-			$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-			$parameter->isOptional = true;
-			$data->overloads[0][0] = $parameter;
-
-			$aliases = $command->getAliases();
-			if(!empty($aliases)){
-				if(!in_array($data->commandName, $aliases, true)){
-					//work around a client bug which makes the original name not show when aliases are used
-					$aliases[] = $data->commandName;
-				}
-				$data->aliases = new CommandEnum();
-				$data->aliases->enumName = ucfirst($command->getName()) . "Aliases";
-				$data->aliases->enumValues = $aliases;
+			if(count($cmdData = $command->generateCustomCommandData($this)) > 0){
+				$commands[$command->getName()]["versions"][0] = $cmdData;
 			}
-
-			$pk->commandData[$command->getName()] = $data;
 		}
 
+		AvailableCommandsPacket::prepareCommands($commands);
+		
+		$pk = new AvailableCommandsPacket();
 		$this->dataPacket($pk);
-
 	}
 
 	/**
@@ -1877,16 +1859,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-        $this->originalProtocol = $packet->protocol;
+        $this->protocol = Network::convertProtocol($packet->protocol ?? ProtocolInfo::CURRENT_PROTOCOL);
 		if(!$packet->isValidProtocol){
-			if($this->originalProtocol < ProtocolInfo::CURRENT_PROTOCOL){
+			if($packet->protocol < ProtocolInfo::CURRENT_PROTOCOL){
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_CLIENT, true);
 			}else{
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_SERVER, true);
 			}
 
 			//This pocketmine disconnect message will only be seen by the console (PlayStatusPacket causes the messages to be shown for the client)
-			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.incompatibleProtocol", [$this->originalProtocol ?? "unknown"]), false);
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.incompatibleProtocol", [$packet->protocol ?? "unknown"]), false);
 
 			return true;
 		}
@@ -1897,7 +1879,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        $this->protocol = Network::convertProtocol($packet->protocol);
+        $this->originalProtocol = $packet->protocol;
+        $this->chunkProtocol = Network::convertChunkProtocol($this->protocol);
+        $this->craftingProtocol = Network::convertCraftingProtocol($this->protocol);
+
 		$this->username = TextFormat::clean($packet->username);
 		$this->displayName = $this->username;
 		$this->iusername = strtolower($this->username);
@@ -2245,6 +2230,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
+		if($packet->sound === LevelSoundEventPacket::SOUND_UNDEFINED){
+			return false;
+		}
+
 		//TODO: add events so plugins can change this
 		$this->getLevel()->broadcastPacketToViewers($this, $packet);
 		return true;
@@ -2739,15 +2728,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
-		if(!$this->spawned or (!$this->isAlive() and $packet->action !== PlayerActionPacket::ACTION_RESPAWN and $packet->action !== PlayerActionPacket::ACTION_DIMENSION_CHANGE_REQUEST)){
-			return true;
-		}
+        $action = ActionEnums::getPlayerAction($this->protocol, $packet->action);
+        if (!$this->spawned or (!$this->isAlive() && $action !== "CHANGE_DEMENSION" && $action !== "RESPAWN")) {
+            return false;
+        }
 
 		$packet->entityRuntimeId = $this->id;
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 
-		switch($packet->action){
-			case PlayerActionPacket::ACTION_START_BREAK:
+		switch($action){
+			case 'START_DESTROY_BLOCK':
 				if($pos->distanceSquared($this) > 10000){
 					break;
 				}
@@ -2781,56 +2771,43 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				break;
 
-			case PlayerActionPacket::ACTION_ABORT_BREAK:
-			case PlayerActionPacket::ACTION_STOP_BREAK:
+			case 'ABORT_DESTROY_BLOCK':
+			case 'STOP_DESTROY_BLOCK':
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_STOP_BREAK);
 				break;
-			case PlayerActionPacket::ACTION_START_SLEEPING:
-				//unused
-				break;
-			case PlayerActionPacket::ACTION_STOP_SLEEPING:
+			case 'STOP_SLEEPING':
 				$this->stopSleep();
 				break;
-			case PlayerActionPacket::ACTION_RESPAWN:
+			case 'CHANGE_DEMENSION':
+			case 'RESPAWN':
 				if($this->isAlive()){
 					break;
 				}
 
 				$this->respawn();
 				break;
-			case PlayerActionPacket::ACTION_JUMP:
+			case 'START_JUMP':
 				$this->jump();
 				return true;
-			case PlayerActionPacket::ACTION_START_SPRINT:
+			case 'START_SPRINTING':
 				$this->toggleSprint(true);
 				return true;
-			case PlayerActionPacket::ACTION_STOP_SPRINT:
+			case 'STOP_SPRINTING':
 				$this->toggleSprint(false);
 				return true;
-			case PlayerActionPacket::ACTION_START_SNEAK:
+			case 'START_SNEAKING':
 				$this->toggleSneak(true);
 				return true;
-			case PlayerActionPacket::ACTION_STOP_SNEAK:
+			case 'STOP_SNEAKING':
 				$this->toggleSneak(false);
 				return true;
-			case PlayerActionPacket::ACTION_START_GLIDE:
-			case PlayerActionPacket::ACTION_STOP_GLIDE:
-				break; //TODO
-			case PlayerActionPacket::ACTION_CONTINUE_BREAK:
+			case 'CRACK_BLOCK':
 				$block = $this->level->getBlock($pos);
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $block->getRuntimeId() | ($packet->face << 24));
 				//TODO: destroy-progress level event
 				break;
-			case PlayerActionPacket::ACTION_START_SWIMMING:
-				break; //TODO
-			case PlayerActionPacket::ACTION_STOP_SWIMMING:
-				//TODO: handle this when it doesn't spam every damn tick (yet another spam bug!!)
-				break;
-			case PlayerActionPacket::ACTION_INTERACT_BLOCK: //ignored (for now)
-				break;
 			default:
-				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());
-				return false;
+			    break;
 		}
 
 		$this->setUsingItem(false);
@@ -3980,4 +3957,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
     public function getProtocol() : int{
 	    return $this->protocol;
 	}
+
+    public function getChunkProtocol() : int{
+        return $this->chunkProtocol;
+    }
+
+    public function getCraftingProtocol() : int{
+        return $this->craftingProtocol;
+    }
 }

@@ -1870,7 +1870,6 @@ class Server{
 	 * @param DataPacket $packet
 	 */
 	public function broadcastPacket(array $players, DataPacket $packet){
-		$packet->encode();
 		$this->batchPackets($players, [$packet], false);
 	}
 
@@ -1888,27 +1887,37 @@ class Server{
 		}
 		Timings::$playerNetworkTimer->startTiming();
 
-		$targets = array_filter($players, function(Player $player) : bool{ return $player->isConnected(); });
+        $targets = [];
+        foreach($players as $player){
+            if($player->isConnected()){
+                $targets[$player->getProtocol()][] = $player;
+            }
+        }
 
 		if(!empty($targets)){
-			$pk = new BatchPacket();
+		    foreach($targets as $protocol => $receivers){
+		    	$pk = new BatchPacket();
+                $pk->setProtocol($protocol);
 
-			foreach($packets as $p){
-				$pk->addPacket($p);
-			}
+		    	foreach($packets as $p){
+		    	    $p->setProtocol($protocol);
 
-			if(Network::$BATCH_THRESHOLD >= 0 and strlen($pk->payload) >= Network::$BATCH_THRESHOLD){
-				$pk->setCompressionLevel($this->networkCompressionLevel);
-			}else{
-				$pk->setCompressionLevel(0); //Do not compress packets under the threshold
-				$forceSync = true;
-			}
+			    	$pk->addPacket($p);
+		    	}
 
-			if(!$forceSync and !$immediate and $this->networkCompressionAsync){
-				$task = new CompressBatchedTask($pk, $targets);
-				$this->asyncPool->submitTask($task);
-			}else{
-				$this->broadcastPacketsCallback($pk, $targets, $immediate);
+		    	if(Network::$BATCH_THRESHOLD >= 0 and strlen($pk->payload) >= Network::$BATCH_THRESHOLD){
+			    	$pk->setCompressionLevel($this->networkCompressionLevel);
+		    	}else{
+			    	$pk->setCompressionLevel(0); //Do not compress packets under the threshold
+				    $forceSync = true;
+		    	}
+
+		    	if(!$forceSync and !$immediate and $this->networkCompressionAsync){
+			    	$task = new CompressBatchedTask($pk, $receivers);
+			    	$this->asyncPool->submitTask($task);
+		    	}else{
+			    	$this->broadcastPacketsCallback($pk, $receivers, $immediate);
+		    	}
 			}
 		}
 
@@ -1921,10 +1930,6 @@ class Server{
 	 * @param bool        $immediate
 	 */
 	public function broadcastPacketsCallback(BatchPacket $pk, array $players, bool $immediate = false){
-		if(!$pk->isEncoded){
-			$pk->encode();
-		}
-
 		foreach($players as $i){
 			$i->sendDataPacket($pk, false, $immediate);
 		}

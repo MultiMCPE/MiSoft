@@ -54,8 +54,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $senderSubId = 0x0;
 	/** @var int */
 	public $recipientSubId = 0x0;
-	/** @var int */
-	private $packetProtocol = ProtocolInfo::CURRENT_PROTOCOL;
+	/** @var int|null */
+	private $packetProtocol;
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -75,7 +75,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 
     public function checkProtocol() : void{
         if ($this->packetProtocol === null) {
-            throw new \InvalidArgumentException("Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.");
+            throw new \InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
         }
     }
 

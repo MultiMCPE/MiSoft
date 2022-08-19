@@ -29,7 +29,7 @@ interface ProtocolInfo {
 	 * Actual Minecraft: PE protocol version
 	 */
 
-	public const CURRENT_PROTOCOL = 101;
+	public const CURRENT_PROTOCOL = 110;
 	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_361];
 	public const MINECRAFT_VERSION = 'v1.x';
 	public const MINECRAFT_VERSION_NETWORK = '1.x';
@@ -53,6 +53,7 @@ interface ProtocolInfo {
 	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 	/** 1.2 BETAS */
 	public const PROTOCOL_280 = 280; // 1.6.0.1
+	public const PROTOCOL_360 = 360;
 	public const PROTOCOL_361 = 361;
 
 	/**
@@ -80,7 +81,6 @@ interface ProtocolInfo {
 	public const UPDATE_BLOCK_PACKET = 0x15;
 	public const ADD_PAINTING_PACKET = 0x16;
 	public const EXPLODE_PACKET = 0x17;
-	public const LEVEL_SOUND_EVENT_PACKET_V1 = 0x18;
 	public const LEVEL_EVENT_PACKET = 0x19;
 	public const BLOCK_EVENT_PACKET = 0x1a;
 	public const ACTOR_EVENT_PACKET = 0x1b;
@@ -167,7 +167,6 @@ interface ProtocolInfo {
 	public const SET_SCORE_PACKET = 0x6c;
 	public const LAB_TABLE_PACKET = 0x6d;
 	public const UPDATE_BLOCK_SYNCED_PACKET = 0x6e;
-	public const MOVE_ACTOR_DELTA_PACKET = 0x6f;
 	public const SET_SCOREBOARD_IDENTITY_PACKET = 0x70;
 	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x71;
 	public const UPDATE_SOFT_ENUM_PACKET = 0x72;
@@ -175,7 +174,6 @@ interface ProtocolInfo {
 	public const SCRIPT_CUSTOM_EVENT_PACKET = 0x75;
 	public const SPAWN_PARTICLE_EFFECT_PACKET = 0x76;
 	public const AVAILABLE_ACTOR_IDENTIFIERS_PACKET = 0x77;
-	public const LEVEL_SOUND_EVENT_PACKET_V2 = 0x78;
 	public const NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET = 0x79;
 	public const BIOME_DEFINITION_LIST_PACKET = 0x7a;
 	public const LEVEL_SOUND_EVENT_PACKET = 0x7b;

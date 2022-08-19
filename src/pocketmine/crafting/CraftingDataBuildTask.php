@@ -24,9 +24,13 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\scheduler\AsyncTask;
+
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
+
 use pocketmine\inventory\CraftingManager;
+
 use pocketmine\Server;
 
 class CraftingDataBuildTask extends AsyncTask {
@@ -39,6 +43,8 @@ class CraftingDataBuildTask extends AsyncTask {
     protected $furnaceRecipes;
     /** @var int */
     protected $compressionLevel;
+    /** @var array */
+    protected $protocols = [ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel) {
 	    $this->shapelessRecipes = $shapelessRecipes;
@@ -48,47 +54,62 @@ class CraftingDataBuildTask extends AsyncTask {
 	}
 
 	public function onRun() {
-		$pk = new CraftingDataPacket();
-		$pk->cleanRecipes = true;
+	    $buffers = [];
+	    foreach ($this->protocols as $protocol) {
+	    	$pk = new CraftingDataPacket();
+	    	$pk->cleanRecipes = true;
 
-		foreach ($this->shapelessRecipes as $list) {
-			foreach ($list as $recipe) {
-				$pk->addShapelessRecipe($recipe);
-			}
-		}
+	    	foreach ($this->shapelessRecipes as $list) {
+		    	foreach ($list as $recipe) {
+			    	$pk->addShapelessRecipe($recipe);
+		    	}
+	    	}
 
-		foreach ($this->shapedRecipes as $list) {
-			foreach ($list as $recipe) {
-				$pk->addShapedRecipe($recipe);
-			}
-		}
+	    	foreach ($this->shapedRecipes as $list) {
+		    	foreach ($list as $recipe) {
+			    	$pk->addShapedRecipe($recipe);
+		    	}
+	    	}
 
-		foreach ($this->furnaceRecipes as $recipe) {
-			$pk->addFurnaceRecipe($recipe);
-		}
+	    	foreach ($this->furnaceRecipes as $recipe) {
+		    	$pk->addFurnaceRecipe($recipe);
+	    	}
 
-		$pk->encode();
+            $pk->setProtocol($protocol);
+	    	$pk->encode();
 
-		$batch = new BatchPacket();
-		$batch->addPacket($pk);
-		$batch->setCompressionLevel($this->compressionLevel);
-		$batch->encode();
+	    	$batch = new BatchPacket();
+	    	$batch->addPacket($pk);
+	    	$batch->setCompressionLevel($this->compressionLevel);
+	    	$batch->setProtocol($protocol);
+	    	$batch->encode();
 
-		$this->setResult($batch->buffer);
+	    	$buffers[$protocol] = $batch->buffer;
+	    }
+
+		$this->setResult($buffers);
 	}
 
 	public function onCompletion(Server $server) {
 	    if ($this->hasResult()) {
 	        if ($server->getCraftingManager() instanceof CraftingManager) {
-	            $data = $this->getResult();
+			    $buffers = [];
 
-				$batch = new BatchPacket($data);
-				assert(strlen($batch->buffer) > 0);
-				$batch->isEncoded = true;
+			    foreach ($this->getResult() as $protocol => $buffer) {
+			    	$batch = new BatchPacket($buffer);
+			    	assert(strlen($batch->buffer) > 0);
+			    	$batch->setProtocol($protocol);
+			    	$batch->isEncoded = true;
 
-	            $server->getCraftingManager()->setCraftingData($batch);
-	            $server->getCraftingManager()->sendCraftingDataToQueue($batch);
+			    	$buffers[$protocol] = $batch;
+			    }
+
+	            $server->getCraftingManager()->setCraftingData($buffers);
+	            $server->getCraftingManager()->sendCraftingDataToQueue($buffers);
 	        }
+	    } else {
+	        $server->getLogger()->error("CraftingDataCacheBuild request doesn't have any result data");
 	    }
 	}
+
 }
