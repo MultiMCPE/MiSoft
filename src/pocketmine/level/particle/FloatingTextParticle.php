@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\particle;
 
+use pocketmine\Server;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Skin;
 use pocketmine\item\Item;
@@ -45,44 +46,36 @@ class FloatingTextParticle extends Particle{
 
 	/**
 	 * @param Vector3 $pos
-	 * @param string  $text
-	 * @param string  $title
+	 * @param int $text
+	 * @param string $title
 	 */
-	public function __construct(Vector3 $pos, string $text, string $title = ""){
+	public function __construct(Vector3 $pos, $text, $title = ""){
 		parent::__construct($pos->x, $pos->y, $pos->z);
 		$this->text = $text;
 		$this->title = $title;
 	}
 
-	public function getText() : string{
-		return $this->text;
-	}
-
-	public function setText(string $text) : void{
+	public function setText($text){
 		$this->text = $text;
 	}
 
-	public function getTitle() : string{
-		return $this->title;
-	}
-
-	public function setTitle(string $title) : void{
+	public function setTitle($title){
 		$this->title = $title;
 	}
-
-	public function isInvisible() : bool{
+	
+	public function isInvisible(){
 		return $this->invisible;
 	}
-
-	public function setInvisible(bool $value = true) : void{
-		$this->invisible = $value;
+	
+	public function setInvisible($value = true){
+		$this->invisible = (bool) $value;
 	}
 
-	public function encode(){
+	public function spawnFor($players){
 		$p = [];
 
 		if($this->entityId === null){
-			$this->entityId = Entity::$entityCount++;
+			$this->entityId = bcadd("1095216660480", mt_rand(0, 0x7fffffff)); //No conflict with other things
 		}else{
 			$pk0 = new RemoveActorPacket();
 			$pk0->entityUniqueId = $this->entityId;
@@ -122,6 +115,8 @@ class FloatingTextParticle extends Particle{
 			$p[] = $remove;
 		}
 
-		return $p;
+		foreach ($p as $pk) {
+			Server::getInstance()->broadcastPacket($players, $pk);
+		}
 	}
 }

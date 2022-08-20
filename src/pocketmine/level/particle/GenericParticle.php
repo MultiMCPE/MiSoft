@@ -24,26 +24,52 @@ declare(strict_types=1);
 namespace pocketmine\level\particle;
 
 use pocketmine\math\Vector3;
+
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
+use pocketmine\network\mcpe\protocol\SpawnParticleEffectPacket;
+
+use pocketmine\network\mcpe\multiversion\ParticleEnums;
+
+use pocketmine\Server;
+
+use function is_null;
 
 class GenericParticle extends Particle{
-	/** @var int */
-	protected $id;
-	/** @var int */
-	protected $data;
 
-	public function __construct(Vector3 $pos, int $id, int $data = 0){
+	protected $id;
+	protected $data;
+	protected $customSpawnName = null;
+
+	public function __construct(Vector3 $pos, $id, $data = 0){
 		parent::__construct($pos->x, $pos->y, $pos->z);
-		$this->id = $id & 0xFFF;
+		$this->id = $id;
 		$this->data = $data;
 	}
 
-	public function encode(){
-		$pk = new LevelEventPacket;
-		$pk->evid = LevelEventPacket::EVENT_ADD_PARTICLE_MASK | $this->id;
-		$pk->position = $this->asVector3();
-		$pk->data = $this->data;
+	public function spawnFor($players){
+		foreach($players as $playerId => $player){
+		    $pk = null;
+			if(($protocol = $player->getProtocol()) >= ProtocolInfo::PROTOCOL_360 && !is_null($this->customSpawnName)){
+				$pk = new SpawnParticleEffectPacket();
+				$pk->position = $this->asVector3();
+				$pk->particleName = $this->customSpawnName;
+			} else {
+			    $id = ParticleEnums::getParticleArrayByProtocol($protocol);
+			    if(isset($id[$this->id])){
+		        	$pk = new LevelEventPacket();
+		        	$pk->evid = LevelEventPacket::EVENT_ADD_PARTICLE_MASK | $id[$this->id];
+		        	$pk->position = $this->asVector3();
+		        	$pk->data = $this->data;
+			    }
+			}
 
-		return $pk;
+			if(!is_null($pk)){
+			    $player->dataPacket($pk);
+			}
+
+			unset($players[$playerId]);
+		}
 	}
+
 }

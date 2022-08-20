@@ -23,27 +23,27 @@ declare(strict_types=1);
 
 namespace pocketmine\level\particle;
 
-use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
+use pocketmine\math\Vector3;
+use pocketmine\Server;
 
 class MobSpawnParticle extends Particle{
-	/** @var int */
+	
 	protected $width;
-	/** @var int */
 	protected $height;
-
-	public function __construct(Vector3 $pos, int $width = 0, int $height = 0){
+	
+	public function __construct(Vector3 $pos, $width = 0, $height = 0){
 		parent::__construct($pos->x, $pos->y, $pos->z);
 		$this->width = $width;
 		$this->height = $height;
 	}
-
-	public function encode(){
+	
+	public function spawnFor($players){
 		$pk = new LevelEventPacket;
 		$pk->evid = LevelEventPacket::EVENT_PARTICLE_SPAWN;
 		$pk->position = $this->asVector3();
 		$pk->data = ($this->width & 0xff) + (($this->height & 0xff) << 8);
-
-		return $pk;
+		
+		Server::getInstance()->broadcastPacket($players, $pk);
 	}
 }

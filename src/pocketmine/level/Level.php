@@ -513,18 +513,12 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function addParticle(Particle $particle, array $players = null){
-		$pk = $particle->encode();
-		if(!is_array($pk)){
-			$pk = [$pk];
+		if ($players === null) {
+			$players = $this->getChunkPlayers($particle->x >> 4, $particle->z >> 4);
 		}
-		if(!empty($pk)){
-			if($players === null){
-				foreach($pk as $e){
-					$this->broadcastPacketToViewers($particle, $e);
-				}
-			}else{
-				$this->server->batchPackets($players, $pk, false);
-			}
+
+		if (!empty($players)) {
+			$particle->spawnFor($players);
 		}
 	}
 
