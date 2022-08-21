@@ -38,6 +38,7 @@ use function str_repeat;
 
 class CraftingDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_DATA_PACKET;
+	public const PACKET_NAME = "CRAFTING_DATA_PACKET";
 
 	public const ENTRY_SHAPELESS = 0;
 	public const ENTRY_SHAPED = 1;

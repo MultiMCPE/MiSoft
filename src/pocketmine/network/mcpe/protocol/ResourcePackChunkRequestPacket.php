@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ResourcePackChunkRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CHUNK_REQUEST_PACKET;
+	public const PACKET_NAME = "RESOURCE_PACK_CHUNK_REQUEST_PACKET";
 
 	/** @var string */
 	public $packId;

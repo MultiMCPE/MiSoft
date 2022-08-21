@@ -28,7 +28,8 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class SetDisplayObjectivePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::SET_DISPLAY_OBJECTIVE_PACKET;
+	public const NETWORK_ID = ProtocolInfo331::SET_DISPLAY_OBJECTIVE_PACKET;
+	public const PACKET_NAME = "SET_DISPLAY_OBJECTIVE_PACKET";
 
 	/** @var string */
 	public $displaySlot;

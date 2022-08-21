@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class BlockPickRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BLOCK_PICK_REQUEST_PACKET;
+	public const PACKET_NAME = "BLOCK_PICK_REQUEST_PACKET";
 
 	/** @var int */
 	public $blockX;

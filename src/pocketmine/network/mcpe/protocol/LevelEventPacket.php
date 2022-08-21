@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class LevelEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_EVENT_PACKET;
+	public const PACKET_NAME = "LEVEL_EVENT_PACKET";
 
 	public const EVENT_SOUND_CLICK = 1000;
 	public const EVENT_SOUND_CLICK_FAIL = 1001;

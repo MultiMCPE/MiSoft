@@ -31,6 +31,7 @@ use function count;
 
 class ResourcePackClientResponsePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CLIENT_RESPONSE_PACKET;
+	public const PACKET_NAME = "RESOURCE_PACK_CLIENT_RESPONSE_PACKET";
 
 	public const STATUS_REFUSED = 1;
 	public const STATUS_SEND_PACKS = 2;

@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ActorEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ACTOR_EVENT_PACKET;
+	public const PACKET_NAME = "ACTOR_EVENT_PACKET";
 
 	public const HURT_ANIMATION = 2;
 	public const DEATH_ANIMATION = 3;

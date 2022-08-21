@@ -37,7 +37,6 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
-use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
 use function count;
@@ -596,42 +595,6 @@ class NetworkBinaryStream extends BinaryStream{
 		if($data->type === CommandOriginData::ORIGIN_DEV_CONSOLE or $data->type === CommandOriginData::ORIGIN_TEST){
 			$this->putVarLong($data->varlong1);
 		}
-	}
-
-	protected function getStructureSettings() : StructureSettings{
-		$result = new StructureSettings();
-
-		$result->paletteName = $this->getString();
-
-		$result->ignoreEntities = (($this->get(1) !== "\x00"));
-		$result->ignoreBlocks = (($this->get(1) !== "\x00"));
-
-		$this->getBlockPosition($result->structureSizeX, $result->structureSizeY, $result->structureSizeZ);
-		$this->getBlockPosition($result->structureOffsetX, $result->structureOffsetY, $result->structureOffsetZ);
-
-		$result->lastTouchedByPlayerID = $this->getEntityUniqueId();
-		$result->rotation = (\ord($this->get(1)));
-		$result->mirror = (\ord($this->get(1)));
-		$result->integrityValue = ((\unpack("G", $this->get(4))[1]));
-		$result->integritySeed = ((\unpack("N", $this->get(4))[1] << 32 >> 32));
-
-		return $result;
-	}
-
-	protected function putStructureSettings(StructureSettings $structureSettings) : void{
-		$this->putString($structureSettings->paletteName);
-
-		($this->buffer .= ($structureSettings->ignoreEntities ? "\x01" : "\x00"));
-		($this->buffer .= ($structureSettings->ignoreBlocks ? "\x01" : "\x00"));
-
-		$this->putBlockPosition($structureSettings->structureSizeX, $structureSettings->structureSizeY, $structureSettings->structureSizeZ);
-		$this->putBlockPosition($structureSettings->structureOffsetX, $structureSettings->structureOffsetY, $structureSettings->structureOffsetZ);
-
-		$this->putEntityUniqueId($structureSettings->lastTouchedByPlayerID);
-		($this->buffer .= \chr($structureSettings->rotation));
-		($this->buffer .= \chr($structureSettings->mirror));
-		($this->buffer .= (\pack("G", $structureSettings->integrityValue)));
-		($this->buffer .= (\pack("N", $structureSettings->integritySeed)));
 	}
 
 	protected function duplicateArmAndLeg(string $skinData) : string{

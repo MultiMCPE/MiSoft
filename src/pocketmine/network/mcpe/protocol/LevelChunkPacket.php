@@ -28,8 +28,9 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
 
-class LevelChunkPacket extends DataPacket/* implements ClientboundPacket*/{
+class LevelChunkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_CHUNK_PACKET;
+	public const PACKET_NAME = "LEVEL_CHUNK_PACKET";
 
 	/** @var int */
 	private $chunkX;

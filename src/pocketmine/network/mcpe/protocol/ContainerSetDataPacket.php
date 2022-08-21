@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ContainerSetDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_SET_DATA_PACKET;
+	public const PACKET_NAME = "CONTAINER_SET_DATA_PACKET";
 
 	public const PROPERTY_FURNACE_TICK_COUNT = 0;
 	public const PROPERTY_FURNACE_LIT_TIME = 1;

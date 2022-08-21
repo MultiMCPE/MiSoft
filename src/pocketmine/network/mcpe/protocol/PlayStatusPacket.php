@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class PlayStatusPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAY_STATUS_PACKET;
+	public const PACKET_NAME = "PLAY_STATUS_PACKET";
 
 	public const LOGIN_SUCCESS = 0;
 	public const LOGIN_FAILED_CLIENT = 1;

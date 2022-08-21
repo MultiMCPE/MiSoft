@@ -33,6 +33,7 @@ use function count;
 
 class PlayerListPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_LIST_PACKET;
+	public const PACKET_NAME = "PLAYER_LIST_PACKET";
 
 	public const TYPE_ADD = 0;
 	public const TYPE_REMOVE = 1;

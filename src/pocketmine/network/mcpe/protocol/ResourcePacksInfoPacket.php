@@ -32,6 +32,7 @@ use function count;
 
 class ResourcePacksInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACKS_INFO_PACKET;
+	public const PACKET_NAME = "RESOURCE_PACKS_INFO_PACKET";
 
 	/** @var bool */
 	public $mustAccept = false; //if true, forces client to use selected resource packs

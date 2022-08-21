@@ -39,6 +39,8 @@ use function method_exists;
 abstract class DataPacket extends NetworkBinaryStream{
 
 	public const NETWORK_ID = 0x0;
+	public const PACKET_NAME = "DATA_PACKET"; // xD
+
     public const PID_MASK = 0x3ff;
 
     private const SUBCLIENT_ID_MASK = 0x3;
@@ -56,6 +58,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $recipientSubId = 0x0;
 	/** @var int|null */
 	private $packetProtocol;
+    /** @var array */
+	protected static $packetsIds = [];
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -146,7 +150,11 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	protected function encodeHeader(){
-	    $pid = static::NETWORK_ID;
+		if (empty(self::$packetsIds)) {
+		    self::initPackets();
+		}
+
+	    $pid = self::$packetsIds[$this->packetProtocol][$this::PACKET_NAME];
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             $this->putByte($pid);
             if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_120) {
@@ -206,4 +214,13 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public function __set($name, $value){
 		throw new \Error("Undefined property: " . get_class($this) . "::\$" . $name);
 	}
+
+	public static function initPackets() {
+		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo110');
+		self::$packetsIds[ProtocolInfo::PROTOCOL_110] = $oClass->getConstants();
+		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo331');
+		self::$packetsIds[ProtocolInfo::PROTOCOL_360] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_361] = $oClass->getConstants();
+	}
+
 }

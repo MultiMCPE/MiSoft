@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class PlayerActionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_ACTION_PACKET;
+	public const PACKET_NAME = "PLAYER_ACTION_PACKET";
 
 	/** @var int */
 	public $entityRuntimeId;

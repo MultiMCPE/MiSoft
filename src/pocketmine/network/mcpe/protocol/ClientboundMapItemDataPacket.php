@@ -36,6 +36,7 @@ use function count;
 
 class ClientboundMapItemDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
+	public const PACKET_NAME = "CLIENTBOUND_MAP_ITEM_DATA_PACKET";
 
 	public const BITFLAG_TEXTURE_UPDATE = 0x02;
 	public const BITFLAG_DECORATION_UPDATE = 0x04;

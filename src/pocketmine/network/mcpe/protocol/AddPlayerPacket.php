@@ -34,6 +34,7 @@ use function count;
 
 class AddPlayerPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_PLAYER_PACKET;
+	public const PACKET_NAME = "ADD_PLAYER_PACKET";
 
 	/** @var UUID */
 	public $uuid;

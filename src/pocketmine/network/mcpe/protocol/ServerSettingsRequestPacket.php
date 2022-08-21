@@ -28,7 +28,8 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class ServerSettingsRequestPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::SERVER_SETTINGS_REQUEST_PACKET;
+	public const NETWORK_ID = ProtocolInfo331::SERVER_SETTINGS_REQUEST_PACKET;
+	public const PACKET_NAME = "SERVER_SETTINGS_REQUEST_PACKET";
 
 	protected function decodePayload(){
 		//No payload

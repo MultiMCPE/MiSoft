@@ -32,12 +32,11 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\RuntimeBlockMapping;
 use function count;
-use function file_get_contents;
-use function json_decode;
 use const pocketmine\RESOURCE_PATH;
 
 class StartGamePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::START_GAME_PACKET;
+	public const PACKET_NAME = "START_GAME_PACKET";
 
 	/** @var string|null */
 	private static $blockTableCache = null;
@@ -280,6 +279,8 @@ class StartGamePacket extends DataPacket{
 		}else{
 			($this->buffer .= self::serializeBlockTable($this->blockTable));
 		}
+
+		//$this->putUnsignedVarInt(0); // item list
 		if($this->itemTable === null){
 			if(self::$itemTableCache === null){
 				self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));

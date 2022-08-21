@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ServerToClientHandshakePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
+	public const PACKET_NAME = "SERVER_TO_CLIENT_HANDSHAKE_PACKET";
 
 	/**
 	 * @var string

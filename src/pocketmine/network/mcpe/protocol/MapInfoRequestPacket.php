@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class MapInfoRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MAP_INFO_REQUEST_PACKET;
+	public const PACKET_NAME = "MAP_INFO_REQUEST_PACKET";
 
 	/** @var int */
 	public $mapId;

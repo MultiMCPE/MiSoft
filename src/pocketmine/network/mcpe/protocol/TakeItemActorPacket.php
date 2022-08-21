@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class TakeItemActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TAKE_ITEM_ACTOR_PACKET;
+	public const PACKET_NAME = "TAKE_ITEM_ACTOR_PACKET";
 
 	/** @var int */
 	public $target;

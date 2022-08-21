@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class LevelSoundEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_SOUND_EVENT_PACKET;
+	public const PACKET_NAME = "LEVEL_SOUND_EVENT_PACKET";
 
 	public const SOUND_LARGE_BLAST = 'SOUND_LARGE_BLAST'; //for firework
 	public const SOUND_TWINKLE = 'SOUND_TWINKLE'; //for firework

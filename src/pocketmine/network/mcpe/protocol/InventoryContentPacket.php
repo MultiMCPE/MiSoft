@@ -30,7 +30,8 @@ use pocketmine\network\mcpe\NetworkSession;
 use function count;
 
 class InventoryContentPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::INVENTORY_CONTENT_PACKET;
+	public const NETWORK_ID = ProtocolInfo331::INVENTORY_CONTENT_PACKET;
+	public const PACKET_NAME = "INVENTORY_CONTENT_PACKET";
 
 	/** @var int */
 	public $windowId;

@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ResourcePackDataInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET;
+	public const PACKET_NAME = "RESOURCE_PACK_DATA_INFO_PACKET";
 
 	public const TYPE_INVALID = 'TYPE_INVALID';
 	public const TYPE_ADDON = 'TYPE_ADDON';

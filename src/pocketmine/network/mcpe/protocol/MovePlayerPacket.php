@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class MovePlayerPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_PLAYER_PACKET;
+	public const PACKET_NAME = "MOVE_PLAYER_PACKET";
 
 	public const MODE_NORMAL = 0;
 	public const MODE_RESET = 1;

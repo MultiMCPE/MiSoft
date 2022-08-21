@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 class ItemFrameDropItemPacket extends DataPacket{
 
 	public const NETWORK_ID = ProtocolInfo::ITEM_FRAME_DROP_ITEM_PACKET;
+	public const PACKET_NAME = "ITEM_FRAME_DROP_ITEM_PACKET";
 
 	/** @var int */
 	public $x;

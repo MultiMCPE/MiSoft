@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class PlayerInputPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_INPUT_PACKET;
+	public const PACKET_NAME = "PLAYER_INPUT_PACKET";
 
 	/** @var float */
 	public $motionX;

@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class BossEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BOSS_EVENT_PACKET;
+	public const PACKET_NAME = "BOSS_EVENT_PACKET";
 
 	/* S2C: Shows the boss-bar to the player. */
 	public const TYPE_SHOW = 0;

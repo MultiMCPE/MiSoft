@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class AnimatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ANIMATE_PACKET;
+	public const PACKET_NAME = "ANIMATE_PACKET";
 
 	public const ACTION_SWING_ARM = 1;
 

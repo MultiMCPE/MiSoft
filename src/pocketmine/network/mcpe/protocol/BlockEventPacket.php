@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class BlockEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BLOCK_EVENT_PACKET;
+	public const PACKET_NAME = "BLOCK_EVENT_PACKET";
 
 	/** @var int */
 	public $x;

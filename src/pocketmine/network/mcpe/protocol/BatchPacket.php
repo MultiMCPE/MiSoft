@@ -36,6 +36,7 @@ use function zlib_encode;
 
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;
+	public const PACKET_NAME = "BATCH_PACKET";
 
 	/** @var string */
 	public $payload = "";
@@ -114,7 +115,11 @@ class BatchPacket extends DataPacket{
 		}
 
 		foreach($this->getPackets() as $buf){
-			$pk = PacketPool::getPacket($buf);
+			$pk = PacketPool::getPacket($buf, $session->getProtocol());
+			if($pk === null) {
+			    continue;
+			}
+
             $pk->setProtocol($session->getProtocol());
 
 			if(!$pk->canBeBatched()){

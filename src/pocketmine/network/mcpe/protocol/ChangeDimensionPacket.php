@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ChangeDimensionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CHANGE_DIMENSION_PACKET;
+	public const PACKET_NAME = "CHANGE_DIMENSION_PACKET";
 
 	/** @var int */
 	public $dimension;

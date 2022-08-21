@@ -33,6 +33,7 @@ use function count;
 
 class ResourcePackStackPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_STACK_PACKET;
+	public const PACKET_NAME = "RESOURCE_PACK_STACK_PACKET";
 
 	/** @var bool */
 	public $mustAccept = false;
