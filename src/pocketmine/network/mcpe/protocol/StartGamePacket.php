@@ -280,15 +280,7 @@ class StartGamePacket extends DataPacket{
 			($this->buffer .= self::serializeBlockTable($this->blockTable));
 		}
 
-		//$this->putUnsignedVarInt(0); // item list
-		if($this->itemTable === null){
-			if(self::$itemTableCache === null){
-				self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));
-			}
-			($this->buffer .= self::$itemTableCache);
-		}else{
-			($this->buffer .= self::serializeItemTable($this->itemTable));
-		}
+		$this->putUnsignedVarInt(0); // item list
 
 		$this->putString($this->multiplayerCorrelationId);
 	}
@@ -300,16 +292,6 @@ class StartGamePacket extends DataPacket{
 			$stream->putString($v["name"]);
 			$stream->putLShort($v["data"]);
 			$stream->putLShort($v["legacy_id"]);
-		}
-		return $stream->getBuffer();
-	}
-
-	private static function serializeItemTable(array $table) : string{
-		$stream = new NetworkBinaryStream();
-		$stream->putUnsignedVarInt(count($table));
-		foreach($table as $name => $legacyId){
-			$stream->putString($name);
-			$stream->putLShort($legacyId);
 		}
 		return $stream->getBuffer();
 	}
