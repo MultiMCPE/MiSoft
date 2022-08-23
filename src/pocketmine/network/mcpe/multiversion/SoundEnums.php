@@ -278,9 +278,9 @@ abstract class SoundEnums {
      * @param int $playerProtocol
      * @param int $eventId
      * 
-     * @return string
+     * @return string|array
      */
-	public static function getLevelSoundEventName(int $playerProtocol, int $eventId) : string{
+	public static function getLevelSoundEventName(int $playerProtocol, int $eventId) {
 		$groupKey = self::getSoundKeyByProtocol($playerProtocol);
 		if (!isset(self::$levelSoundEvent[$groupKey][$eventId])) {
 			return end(self::$levelSoundEvent);
@@ -291,11 +291,11 @@ abstract class SoundEnums {
 
     /**
      * @param int $playerProtocol
-     * @param string $eventName
+     * @param string|array $eventName
      * 
      * @return int
      */
-	public static function getLevelSoundEventId(int $playerProtocol, string $eventName) : int{
+	public static function getLevelSoundEventId(int $playerProtocol, $eventName) : int{
 		$groupKey = self::getSoundKeyByProtocol($playerProtocol);
 		foreach (self::$levelSoundEvent[$groupKey] as $key => $value) {
 			if ($value === $eventName) {

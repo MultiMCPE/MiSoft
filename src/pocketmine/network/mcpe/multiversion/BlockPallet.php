@@ -39,7 +39,7 @@ class BlockPallet {
      */
 	public static function initAll() : array{
 		$result = [];
-		$folderPath = __DIR__ . "/data/";
+		$folderPath = \pocketmine\RESOURCE_PATH . "/vanilla/palette/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
 
 		foreach ($palletFiles as $fileName) {

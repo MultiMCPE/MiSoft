@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\object;
 
+use pocketmine\Player;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Fallable;
@@ -33,6 +34,8 @@ use pocketmine\item\ItemFactory;
 use pocketmine\level\Position;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\AddActorPacket;
 use function abs;
 use function floor;
 use function get_class;
@@ -141,5 +144,30 @@ class FallingBlock extends Entity{
 		parent::saveNBT();
 		$this->namedtag->setInt("TileID", $this->block->getId(), true);
 		$this->namedtag->setByte("Data", $this->block->getDamage());
+	}
+
+	/**
+	 * @param Player $player
+	 */
+	public function spawnTo(Player $player) : void{
+		if(!isset($this->hasSpawned[$player->getLoaderId()]) and $this->chunk !== null and isset($player->usedChunks[((($this->chunk->getX()) & 0xFFFFFFFF) << 32) | (( $this->chunk->getZ()) & 0xFFFFFFFF)])){
+			$this->hasSpawned[$player->getLoaderId()] = $player;
+
+	    	$pk = new AddActorPacket();
+	    	$pk->entityRuntimeId = $this->getId();
+	    	$pk->type = static::NETWORK_ID;
+	    	$pk->position = $this->asVector3();
+	    	$pk->motion = $this->getMotion();
+	    	$pk->yaw = $this->yaw;
+	    	$pk->headYaw = $this->yaw; //TODO
+	    	$pk->pitch = $this->pitch;
+	    	$pk->attributes = $this->attributeMap->getAll();
+			$pallet = DataPacket::getPallet($player->getProtocol());
+			if (!is_null($pallet)) { // for version higher than 1.1
+				$pk->metadata = [self::DATA_VARIANT => [self::DATA_TYPE_INT, $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage())]];
+			}
+
+	    	$player->dataPacket($pk);
+		}
 	}
 }
