@@ -51,7 +51,9 @@ class UpdateBlockPacket extends DataPacket{
 	/** @var int */
 	public $y;
 	/** @var int */
-	public $blockRuntimeId;
+	public $blockId;
+	/** @var int */
+	public $blockMeta;
 	/** @var int */
 	public $flags;
 	/** @var int */
@@ -59,14 +61,23 @@ class UpdateBlockPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->blockRuntimeId = $this->getUnsignedVarInt();
+		$runtimeId = $this->getUnsignedVarInt();
+		if ($runtimeId < 0) {
+			$this->blockId = -1;
+			$this->blockMeta = 0;
+		} else {
+			$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
+			$this->blockId = $blockData[0];
+			$this->blockMeta = $blockData[1];
+		}
 		$this->flags = $this->getUnsignedVarInt();
 		$this->dataLayerId = $this->getUnsignedVarInt();
 	}
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putUnsignedVarInt($this->blockRuntimeId);
+		$runtimeId = self::getBlockRuntimeID($this->blockId, $this->blockMeta, $this->getProtocol());
+		$this->putUnsignedVarInt($runtimeId);
 		$this->putUnsignedVarInt($this->flags);
 		$this->putUnsignedVarInt($this->dataLayerId);
 	}

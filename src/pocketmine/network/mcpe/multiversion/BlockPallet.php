@@ -23,13 +23,21 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion;
 
-use pocketmine\utils\BinaryStream;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 
 class BlockPallet {
 
-	public static $blockNamesIds = [];
+    /** @var array */
+	private $pallet = [];
+	/** @var array */
+	private $palletReverted = [];
+	/** @var string */
+	private $dataForPackets = "";
 
-	public static function initAll() {
+    /**
+     * @return array
+     */
+	public static function initAll() : array{
 		$result = [];
 		$folderPath = __DIR__ . "/data/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
@@ -44,19 +52,20 @@ class BlockPallet {
 			$pallet = new BlockPallet($folderPath . $fileName, $protocolNumber);
 			$result[$protocolNumber] = $pallet;
 		}
+
 		krsort($result);
 
 		return $result;
 	}
 
-	private $pallet = [];
-	private $palletReverted = [];
-	private $dataForPackets = "";
-
+    /**
+     * @param string $path
+     * @param int $protocolNumber
+     */
 	public function __construct(string $path, int $protocolNumber) {
 		$palletData = json_decode(file_get_contents($path), true);
 
-		$bs = new BinaryStream();
+		$bs = new NetworkBinaryStream();
 		$bs->putUnsignedVarInt(count($palletData));
 
 		foreach ($palletData as $runtimeID => $blockInfo) {
@@ -76,7 +85,12 @@ class BlockPallet {
 		$this->dataForPackets = $bs->getBuffer();
 	}
 
-	public function getBlockDataByRuntimeID($runtimeID) {
+    /**
+     * @param int $runtimeID
+     * 
+     * @return array
+     */
+	public function getBlockDataByRuntimeID(int $runtimeID) : array{
 		if (isset($this->palletReverted[$runtimeID])) {
 			return $this->palletReverted[$runtimeID];
 		}
@@ -84,7 +98,13 @@ class BlockPallet {
 		return [0, 0, ""];
 	}
 
-	public function getBlockRuntimeIDByData($id, $meta) {
+    /**
+     * @param int $id
+     * @param int $meta
+     * 
+     * @return int
+     */
+	public function getBlockRuntimeIDByData(int $id, int $meta) : int{
 		if (isset($this->pallet[$id][$meta])) {
 			return $this->pallet[$id][$meta];
 		}
@@ -92,7 +112,10 @@ class BlockPallet {
 		return 0;
 	}
 
-	public function getDataForPackets() {
+    /**
+     * @return string
+     */
+	public function getDataForPackets() : string{
 		return $this->dataForPackets;
 	}
 

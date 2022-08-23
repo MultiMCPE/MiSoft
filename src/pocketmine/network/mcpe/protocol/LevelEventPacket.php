@@ -130,7 +130,18 @@ class LevelEventPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVarInt($this->evid);
 		$this->putVector3Nullable($this->position);
-		$this->putVarInt($this->data);
+		switch ($this->evid) {
+			case self::EVENT_PARTICLE_DESTROY:
+			case self::EVENT_PARTICLE_PUNCH_BLOCK:
+				$id = $this->data & 0xff;
+				$meta = ($this->data >> 8) & 0x0f;
+				$runtimeId = self::getBlockRuntimeID($id, $meta, $this->getProtocol());
+				$this->putVarInt($runtimeId);
+				break;
+			default :
+				$this->putVarInt($this->data);
+				break;
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

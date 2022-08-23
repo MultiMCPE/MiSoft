@@ -75,7 +75,13 @@ class LevelSoundEventPacket extends DataPacket{
 		$this->sound = $this->getUnsignedVarInt();
 		$this->sound = SoundEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
-		$this->extraData = $this->getVarInt();
+		$runtimeId = $this->getVarInt();
+		if ($runtimeId < 0) {
+			$this->extraData = -1;
+		} else {
+			$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
+			$this->extraData = $blockData[0];
+		}
 		$this->entityType = $this->getString();
 		$this->isBabyMob = (($this->get(1) !== "\x00"));
 		$this->disableRelativeVolume = (($this->get(1) !== "\x00"));
@@ -85,7 +91,12 @@ class LevelSoundEventPacket extends DataPacket{
 	    $sound = SoundEnums::getLevelSoundEventId($this->getProtocol(), $this->sound);
 		$this->putUnsignedVarInt($sound);
 		$this->putVector3($this->position);
-		$this->putVarInt($this->extraData);
+		if ($this->extraData < 0) {
+			$this->putVarInt($this->extraData);
+		} else {
+			$runtimeId = self::getBlockRuntimeID($this->extraData, 0, $this->getProtocol());
+			$this->putVarInt($runtimeId);
+		}
 		$this->putString($this->entityType);
 		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));
 		($this->buffer .= ($this->disableRelativeVolume ? "\x01" : "\x00"));

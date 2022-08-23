@@ -27,11 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
-use pocketmine\network\mcpe\protocol\types\RuntimeBlockMapping;
-use function count;
 
 class StartGamePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::START_GAME_PACKET;
@@ -269,30 +266,11 @@ class StartGamePacket extends DataPacket{
 
 		$this->putVarInt($this->enchantmentSeed);
 
-		if($this->blockTable === null){
-			if(self::$blockTableCache === null){
-				//this is a really nasty hack, but it'll do for now
-				self::$blockTableCache = self::serializeBlockTable(RuntimeBlockMapping::getBedrockKnownStates());
-			}
-			($this->buffer .= self::$blockTableCache);
-		}else{
-			($this->buffer .= self::serializeBlockTable($this->blockTable));
-		}
+        $this->put(self::getBlockPalletData($this->getProtocol()));
 
 		$this->putUnsignedVarInt(0); // item list
 
 		$this->putString($this->multiplayerCorrelationId);
-	}
-
-	private static function serializeBlockTable(array $table) : string{
-		$stream = new NetworkBinaryStream();
-		$stream->putUnsignedVarInt(count($table));
-		foreach($table as $v){
-			$stream->putString($v["name"]);
-			$stream->putLShort($v["data"]);
-			$stream->putLShort($v["legacy_id"]);
-		}
-		return $stream->getBuffer();
 	}
 
 	public function handle(NetworkSession $session) : bool{

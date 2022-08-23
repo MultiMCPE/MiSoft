@@ -2124,6 +2124,7 @@ class Server{
 	 */
 	private function start(){
 		DataPacket::initPackets();
+		DataPacket::initPallet();
 		if($this->getConfigBool("enable-query", true)){
 			$this->queryHandler = new QueryHandler();
 		}

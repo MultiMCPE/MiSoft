@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\CachedEncapsulatedPacket;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\multiversion\BlockPallet;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\utils\Utils;
 use function bin2hex;
@@ -60,6 +61,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	private $packetProtocol;
     /** @var array */
 	protected static $packetsIds = [];
+	/** @var BlockPallet[] */
+	protected static $blockPalletes = [];
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -221,6 +224,64 @@ abstract class DataPacket extends NetworkBinaryStream{
 		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo331');
 		self::$packetsIds[ProtocolInfo::PROTOCOL_360] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_361] = $oClass->getConstants();
+	}
+
+    /**
+     * @return void
+     */
+	public static function initPallet() : void{
+		self::$blockPalletes = BlockPallet::initAll();
+	}
+
+    /**
+     * @param int $runtimeId
+     * @param int $playerProtocol
+     * 
+     * @return array
+     */
+	public static function getBlockIDByRuntime(int $runtimeId, int $playerProtocol) : array{
+		$pallet = self::getPallet($playerProtocol);
+
+		return is_null($pallet) ? [0, 0, ""] : $pallet->getBlockDataByRuntimeID($runtimeId);
+	}
+
+    /**
+     * @param int $id
+     * @param int $meta
+     * @param int $playerProtocol
+     * 
+     * @return int
+     */
+	public static function getBlockRuntimeID(int $id, int $meta, int $playerProtocol) : int{
+		$pallet = self::getPallet($playerProtocol);
+
+		return is_null($pallet) ? 0 : $pallet->getBlockRuntimeIDByData($id, $meta);
+	}
+
+    /**
+     * @param int $playerProtocol
+     * 
+     * @return string
+     */
+	public static function getBlockPalletData(int $playerProtocol) : string{
+		$pallet = self::getPallet($playerProtocol);
+
+		return is_null($pallet) ? "" : $pallet->getDataForPackets();
+	}
+
+	/**
+	 * @param int $playerProtocol
+	 * 
+	 * @return BlockPallet
+	 */
+	public static function getPallet(int $playerProtocol) : ?BlockPallet{
+		foreach (self::$blockPalletes as $protocol => $pallet) {
+			if ($playerProtocol >= $protocol) {
+				return $pallet;
+			}
+		}
+
+		return null;
 	}
 
 }
