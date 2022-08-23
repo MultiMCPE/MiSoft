@@ -950,7 +950,6 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\TakeItemActorPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/TakeItemActorPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\TextPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/TextPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\TransferPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/TransferPacket.php',
-        'pocketmine\\network\\mcpe\\protocol\\UnknownPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/UnknownPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\UpdateAttributesPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/UpdateAttributesPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\UpdateBlockPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/UpdateBlockPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\CommandOriginData' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/CommandOriginData.php',

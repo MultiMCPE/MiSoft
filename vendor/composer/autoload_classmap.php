@@ -887,7 +887,6 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\TakeItemActorPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/TakeItemActorPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\TextPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/TextPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\TransferPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/TransferPacket.php',
-    'pocketmine\\network\\mcpe\\protocol\\UnknownPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/UnknownPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\UpdateAttributesPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/UpdateAttributesPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\UpdateBlockPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/UpdateBlockPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\CommandOriginData' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/CommandOriginData.php',
