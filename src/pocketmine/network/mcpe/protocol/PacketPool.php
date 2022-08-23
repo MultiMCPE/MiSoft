@@ -193,6 +193,7 @@ class PacketPool {
     	static::registerPacket331(ProtocolInfo331::PLAY_SOUND_PACKET, new PlaySoundPacket());
     	static::registerPacket331(ProtocolInfo331::ITEM_FRAME_DROP_ITEM_PACKET, new ItemFrameDropItemPacket());
     	static::registerPacket331(ProtocolInfo331::BOSS_EVENT_PACKET, new BossEventPacket());
+    	static::registerPacket331(ProtocolInfo331::BOOK_EDIT_PACKET, new BookEditPacket());
 		static::registerPacket331(ProtocolInfo331::SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET, new SetLocalPlayerAsInitializedPacket());
 		static::registerPacket331(0xfe, new BatchPacket());
 	}
