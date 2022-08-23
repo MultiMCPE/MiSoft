@@ -34,7 +34,7 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityExplodeEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\level\particle\HugeExplodeSeedParticle;
+use pocketmine\level\particle\HugeExplodeParticle;
 use pocketmine\level\utils\SubChunkIteratorManager;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
@@ -266,7 +266,7 @@ class Explosion{
 		$pk->records = $send;
 		$this->level->broadcastPacketToViewers($source, $pk);
 
-		$this->level->addParticle(new HugeExplodeSeedParticle($source));
+		$this->level->addParticle(new HugeExplodeParticle($source));
 		$this->level->broadcastLevelSoundEvent($source, LevelSoundEventPacket::SOUND_EXPLODE);
 
 		return true;
