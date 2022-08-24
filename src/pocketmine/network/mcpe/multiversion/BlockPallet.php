@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class BlockPallet {
 
@@ -79,7 +80,9 @@ class BlockPallet {
 
 			$bs->putString($blockInfo['name']);
 			$bs->putLShort($blockInfo['data']);
-			$bs->putLShort($blockInfo['id']);
+			if ($protocolNumber >= ProtocolInfo::PROTOCOL_360) {
+		    	$bs->putLShort($blockInfo['id']);
+			}
 		}
 
 		$this->dataForPackets = $bs->getBuffer();

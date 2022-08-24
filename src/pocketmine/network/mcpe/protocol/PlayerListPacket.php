@@ -94,9 +94,11 @@ class PlayerListPacket extends DataPacket{
 				$this->putString($entry->username);
 				$this->putString($entry->skin->getSkinId());
 				
-				$skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
-				if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
-					$skinData = $this->duplicateArmAndLeg($skinData);
+			    $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+			    	if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
+				    	$skinData = $this->duplicateArmAndLeg($skinData);
+			    	}
 				}
 				$this->putString($skinData);
 				

@@ -116,12 +116,14 @@ class LevelChunkPacket extends DataPacket{
 	protected function decodePayload() : void{
 		$this->chunkX = $this->getVarInt();
 		$this->chunkZ = $this->getVarInt();
-		$this->subChunkCount = $this->getUnsignedVarInt();
-		$this->cacheEnabled = (($this->get(1) !== "\x00"));
-		if($this->cacheEnabled){
-			for($i =  0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-				$this->usedBlobHashes[] = (Binary::readLLong($this->get(8)));
-			}
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	$this->subChunkCount = $this->getUnsignedVarInt();
+	    	$this->cacheEnabled = (($this->get(1) !== "\x00"));
+	    	if($this->cacheEnabled){
+			    for($i =  0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+			    	$this->usedBlobHashes[] = (Binary::readLLong($this->get(8)));
+		    	}
+		    }
 		}
 		$this->extraPayload = $this->getString();
 	}
@@ -129,12 +131,14 @@ class LevelChunkPacket extends DataPacket{
 	protected function encodePayload() : void{
 		$this->putVarInt($this->chunkX);
 		$this->putVarInt($this->chunkZ);
-		$this->putUnsignedVarInt($this->subChunkCount);
-		($this->buffer .= ($this->cacheEnabled ? "\x01" : "\x00"));
-		if($this->cacheEnabled){
-			$this->putUnsignedVarInt(count($this->usedBlobHashes));
-			foreach($this->usedBlobHashes as $hash){
-				($this->buffer .= (\pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	$this->putUnsignedVarInt($this->subChunkCount);
+	    	($this->buffer .= ($this->cacheEnabled ? "\x01" : "\x00"));
+	    	if($this->cacheEnabled){
+		    	$this->putUnsignedVarInt(count($this->usedBlobHashes));
+		    	foreach($this->usedBlobHashes as $hash){
+			    	($this->buffer .= (\pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+		    	}
 			}
 		}
 		$this->putString($this->extraPayload);

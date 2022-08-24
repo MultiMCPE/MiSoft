@@ -78,6 +78,7 @@ class AvailableCommandsPacket extends DataPacket{
 		$enums = [];
 		$enumsCount = 0;
 		$commandsStreams = [
+		    ProtocolInfo::PROTOCOL_354 => new NetworkBinaryStream(),
 			ProtocolInfo::PROTOCOL_360 => new NetworkBinaryStream(),
 			ProtocolInfo::PROTOCOL_361 => new NetworkBinaryStream()
 		];

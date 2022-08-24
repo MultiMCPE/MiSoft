@@ -65,8 +65,10 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		$this->chunkCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
 		$this->compressedPackSize = (Binary::readLLong($this->get(8)));
 		$this->sha256 = $this->getString();
-		$this->isPremium = (($this->get(1) !== "\x00"));
-		$this->packType = (\ord($this->get(1)));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	$this->isPremium = (($this->get(1) !== "\x00"));
+	    	$this->packType = (\ord($this->get(1)));
+		}
 	}
 
 	protected function encodePayload(){
@@ -75,8 +77,10 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		($this->buffer .= (\pack("V", $this->chunkCount)));
 		($this->buffer .= (\pack("VV", $this->compressedPackSize & 0xFFFFFFFF, $this->compressedPackSize >> 32)));
 		$this->putString($this->sha256);
-		($this->buffer .= ($this->isPremium ? "\x01" : "\x00"));
-		($this->buffer .= \chr(ResourceEnums::getPackTypeId($this->getProtocol(), $this->packType)));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	($this->buffer .= ($this->isPremium ? "\x01" : "\x00"));
+	    	($this->buffer .= \chr(ResourceEnums::getPackTypeId($this->getProtocol(), $this->packType)));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

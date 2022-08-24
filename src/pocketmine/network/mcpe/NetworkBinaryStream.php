@@ -35,6 +35,7 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\utils\BinaryStream;
@@ -73,7 +74,82 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
 	}
 
-	public function getSlot() : Item{
+	public function getSlotOld() : Item{
+		$id = $this->getVarInt();
+		if($id === 0){
+			return ItemFactory::get(0, 0, 0);
+		}
+
+		$auxValue = $this->getVarInt();
+		$data = $auxValue >> 8;
+		if($data === 0x7fff){
+			$data = -1;
+		}
+		$cnt = $auxValue & 0xff;
+
+		$nbtLen = $this->getLShort();
+
+		/** @var CompoundTag|string $nbt */
+		$nbt = "";
+		if($nbtLen === 0xffff){
+			$c = $this->getByte();
+			if($c !== 1){
+				throw new \UnexpectedValueException("Unexpected NBT count $c");
+			}
+			$nbt = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+		}elseif($nbtLen !== 0){
+			throw new \UnexpectedValueException("Unexpected fake NBT length $nbtLen");
+		}
+
+		//TODO
+		for($i = 0, $canPlaceOn = $this->getVarInt(); $i < $canPlaceOn; ++$i){
+			$this->getString();
+		}
+
+		//TODO
+		for($i = 0, $canDestroy = $this->getVarInt(); $i < $canDestroy; ++$i){
+			$this->getString();
+		}
+
+		if($id === ItemIds::SHIELD){
+			$this->getVarLong(); //"blocking tick" (ffs mojang)
+		}
+
+		return ItemFactory::get($id, $data, $cnt, $nbt);
+	}
+
+	public function putSlotOld(Item $item) : void{
+		if($item->getId() === 0){
+			$this->putVarInt(0);
+
+			return;
+		}
+
+		$this->putVarInt($item->getId());
+		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
+		$this->putVarInt($auxValue);
+
+		if($item->hasCompoundTag()){
+			$this->putLShort(0xffff);
+			$this->putByte(1); //TODO: some kind of count field? always 1 as of 1.9.0
+			$this->put((new NetworkLittleEndianNBTStream())->write($item->getNamedTag()));
+		}else{
+			$this->putLShort(0);
+		}
+
+		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
+		$this->putVarInt(0); //CanDestroy entry count (TODO)
+
+		if($item->getId() === ItemIds::SHIELD){
+			$this->putVarLong(0); //"blocking tick" (ffs mojang)
+		}
+	}
+
+	public function getSlot(int $playerProtocol) : Item{
+	    if ($playerProtocol < ProtocolInfo::PROTOCOL_360) {
+	        return $this->getSlotOld();
+	    }
+
 		$id = $this->getVarInt();
 		if($id === 0){
 			return ItemFactory::get(0, 0, 0);
@@ -134,7 +210,13 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 
-	public function putSlot(Item $item) : void{
+	public function putSlot(Item $item, int $playerProtocol) : void{
+	    if ($playerProtocol < ProtocolInfo::PROTOCOL_360) {
+	        $this->putSlotOld($item);
+
+	        return;
+	    }
+
 		if($item->getId() === 0){
 			$this->putVarInt(0);
 

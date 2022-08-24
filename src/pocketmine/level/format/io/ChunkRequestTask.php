@@ -53,7 +53,7 @@ class ChunkRequestTask extends AsyncTask {
 
 	protected $compressionLevel;
 	
-	protected $protocols = [ProtocolInfo::PROTOCOL_360];
+	protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_360];
 
 	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk) {
 		$this->levelId = $level->getId();
@@ -79,9 +79,7 @@ class ChunkRequestTask extends AsyncTask {
 
 	    $buffers = [];
 	    foreach ($this->protocols as $protocol) {
-	        $chunk = $chunk->networkSerialize($protocol) . $this->tiles;
-
-	    	$pk = LevelChunkPacket::withoutCache($this->chunkX, $this->chunkZ, $this->subChunkCount, $chunk);
+	    	$pk = LevelChunkPacket::withoutCache($this->chunkX, $this->chunkZ, $this->subChunkCount, $chunk->networkSerialize($protocol) . $this->tiles);
 	    	$pk->setProtocol($protocol);
 
 	    	$batch = new BatchPacket();

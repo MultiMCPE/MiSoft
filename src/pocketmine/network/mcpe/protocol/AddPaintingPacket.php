@@ -23,10 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
-
 use pocketmine\math\Vector3;
+
 use pocketmine\network\mcpe\NetworkSession;
 
 class AddPaintingPacket extends DataPacket{
@@ -37,8 +35,12 @@ class AddPaintingPacket extends DataPacket{
 	public $entityUniqueId = null;
 	/** @var int */
 	public $entityRuntimeId;
-	/** @var Vector3 */
-	public $position;
+	/** @var int */
+	public $x;
+	/** @var int */
+	public $y;
+	/** @var int */
+	public $z;
 	/** @var int */
 	public $direction;
 	/** @var string */
@@ -47,7 +49,14 @@ class AddPaintingPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->position = $this->getVector3();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	$position = $this->getVector3();
+	    	$this->x = $position->x;
+	    	$this->y = $position->y;
+	    	$this->z = $position->z;
+		} else {
+		    $this->getBlockPosition($this->x, $this->y, $this->z);
+		}
 		$this->direction = $this->getVarInt();
 		$this->title = $this->getString();
 	}
@@ -55,7 +64,11 @@ class AddPaintingPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putVector3($this->position);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		    $this->putVector3(new Vector3($this->x, $this->y, $this->z));
+		} else {
+		    $this->putBlockPosition($this->x, $this->y, $this->z);
+		}
 		$this->putVarInt($this->direction);
 		$this->putString($this->title);
 	}

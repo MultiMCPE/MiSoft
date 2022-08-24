@@ -42,7 +42,7 @@ class InventoryContentPacket extends DataPacket{
 		$this->windowId = $this->getUnsignedVarInt();
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
-			$this->items[] = $this->getSlot();
+			$this->items[] = $this->getSlot($this->getProtocol());
 		}
 	}
 
@@ -50,7 +50,7 @@ class InventoryContentPacket extends DataPacket{
 		$this->putUnsignedVarInt($this->windowId);
 		$this->putUnsignedVarInt(count($this->items));
 		foreach($this->items as $item){
-			$this->putSlot($item);
+			$this->putSlot($item, $this->getProtocol());
 		}
 	}
 

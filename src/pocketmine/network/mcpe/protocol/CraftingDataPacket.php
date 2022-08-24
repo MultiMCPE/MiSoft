@@ -73,43 +73,59 @@ class CraftingDataPacket extends DataPacket{
 				case self::ENTRY_SHAPELESS:
 				case self::ENTRY_SHULKER_BOX:
 				case self::ENTRY_SHAPELESS_CHEMISTRY:
-					$entry["recipe_id"] = $this->getString();
+				    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				    	$entry["recipe_id"] = $this->getString();
+				    }
 					$ingredientCount = $this->getUnsignedVarInt();
 					/** @var Item */
 					$entry["input"] = [];
 					for($j = 0; $j < $ingredientCount; ++$j){
-						$entry["input"][] = $in = $this->getRecipeIngredient();
-						$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system because it isn't always 1
+					   	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system because it isn't always 1
+					   	} else {
+					   	    $entry["input"][] = $this->getSlot($this->getProtocol());
+					   	}
 					}
 					$resultCount = $this->getUnsignedVarInt();
 					$entry["output"] = [];
 					for($k = 0; $k < $resultCount; ++$k){
-						$entry["output"][] = $this->getSlot();
+						$entry["output"][] = $this->getSlot($this->getProtocol());
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
 					$entry["block"] = $this->getString();
-					$entry["priority"] = $this->getVarInt();
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				    	$entry["priority"] = $this->getVarInt();
+					}
 
 					break;
 				case self::ENTRY_SHAPED:
 				case self::ENTRY_SHAPED_CHEMISTRY:
-					$entry["recipe_id"] = $this->getString();
+				    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+					    $entry["recipe_id"] = $this->getString();
+				    }
 					$entry["width"] = $this->getVarInt();
 					$entry["height"] = $this->getVarInt();
 					$count = $entry["width"] * $entry["height"];
 					$entry["input"] = [];
 					for($j = 0; $j < $count; ++$j){
-						$entry["input"][] = $in = $this->getRecipeIngredient();
-						$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system
+					    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system
+					    } else {
+					        $entry["input"][] = $this->getSlot($this->getProtocol());
+					    }
 					}
 					$resultCount = $this->getUnsignedVarInt();
 					$entry["output"] = [];
 					for($k = 0; $k < $resultCount; ++$k){
-						$entry["output"][] = $this->getSlot();
+						$entry["output"][] = $this->getSlot($this->getProtocol());
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
 					$entry["block"] = $this->getString();
-					$entry["priority"] = $this->getVarInt();
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				    	$entry["priority"] = $this->getVarInt();
+					}
 
 					break;
 				case self::ENTRY_FURNACE:
@@ -123,9 +139,13 @@ class CraftingDataPacket extends DataPacket{
 						}
 					}
 					$entry["input"] = ItemFactory::get($inputId, $inputData);
-					$entry["output"] = $out = $this->getSlot();
-					if($out->getDamage() === 0x7fff){
-						$out->setDamage(0); //TODO HACK: some 1.12 furnace recipe outputs have wildcard damage values
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				    	$entry["output"] = $out = $this->getSlot($this->getProtocol());
+				    	if($out->getDamage() === 0x7fff){
+					    	$out->setDamage(0); //TODO HACK: some 1.12 furnace recipe outputs have wildcard damage values
+				    	}
+					} else {
+					    $entry["output"] = $this->getSlot($this->getProtocol());
 					}
 					$entry["block"] = $this->getString();
 
@@ -141,71 +161,88 @@ class CraftingDataPacket extends DataPacket{
 		$this->cleanRecipes = (($this->get(1) !== "\x00"));
 	}
 
-	private static function writeEntry($entry, NetworkBinaryStream $stream, int $pos){
+	private static function writeEntry($entry, NetworkBinaryStream $stream, int $pos, int $playerProtocol){
 		if($entry instanceof ShapelessRecipe){
-			return self::writeShapelessRecipe($entry, $stream, $pos);
+			return self::writeShapelessRecipe($entry, $stream, $pos, $playerProtocol);
 		}elseif($entry instanceof ShapedRecipe){
-			return self::writeShapedRecipe($entry, $stream, $pos);
+			return self::writeShapedRecipe($entry, $stream, $pos, $playerProtocol);
 		}elseif($entry instanceof FurnaceRecipe){
-			return self::writeFurnaceRecipe($entry, $stream);
+			return self::writeFurnaceRecipe($entry, $stream, $playerProtocol);
 		}
 		//TODO: add MultiRecipe
 
 		return -1;
 	}
 
-	private static function writeShapelessRecipe(ShapelessRecipe $recipe, NetworkBinaryStream $stream, int $pos){
-		$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	private static function writeShapelessRecipe(ShapelessRecipe $recipe, NetworkBinaryStream $stream, int $pos, int $playerProtocol){
+	    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
+	    	$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	    }
 		$stream->putUnsignedVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){
-			$stream->putRecipeIngredient($item);
+		    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
+		    	$stream->putRecipeIngredient($item);
+		    } else {
+		        $stream->putSlot($item, $playerProtocol);
+		    }
 		}
 
 		$results = $recipe->getResults();
 		$stream->putUnsignedVarInt(count($results));
 		foreach($results as $item){
-			$stream->putSlot($item);
+			$stream->putSlot($item, $playerProtocol);
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		$stream->putVarInt(50); //TODO: priority
+		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	    	$stream->putVarInt(50); //TODO: priority
+		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
 	}
 
-	private static function writeShapedRecipe(ShapedRecipe $recipe, NetworkBinaryStream $stream, int $pos){
-		$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	private static function writeShapedRecipe(ShapedRecipe $recipe, NetworkBinaryStream $stream, int $pos, int $playerProtocol){
+	    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
+	    	$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	    }
 		$stream->putVarInt($recipe->getWidth());
 		$stream->putVarInt($recipe->getHeight());
 
 		for($z = 0; $z < $recipe->getHeight(); ++$z){
 			for($x = 0; $x < $recipe->getWidth(); ++$x){
-				$stream->putRecipeIngredient($recipe->getIngredient($x, $z));
+			    $ingredient = $recipe->getIngredient($x, $z);
+			    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
+			    	$stream->putRecipeIngredient($ingredient);
+			    } else {
+			        $stream->putSlot($ingredient, $playerProtocol);
+			    }
 			}
 		}
 
 		$results = $recipe->getResults();
 		$stream->putUnsignedVarInt(count($results));
 		foreach($results as $item){
-			$stream->putSlot($item);
+			$stream->putSlot($item, $playerProtocol);
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		$stream->putVarInt(50); //TODO: priority
+		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	    	$stream->putVarInt(50); //TODO: priority
+		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;
 	}
 
-	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, NetworkBinaryStream $stream){
+	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, NetworkBinaryStream $stream, int $playerProtocol){
 		$stream->putVarInt($recipe->getInput()->getId());
 		$result = CraftingDataPacket::ENTRY_FURNACE;
 		if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
 			$stream->putVarInt($recipe->getInput()->getDamage());
 			$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}
-		$stream->putSlot($recipe->getResult());
+		$stream->putSlot($recipe->getResult(), $playerProtocol);
 		$stream->putString("furnace"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 		return $result;
 	}
@@ -228,7 +265,7 @@ class CraftingDataPacket extends DataPacket{
 		$writer = new NetworkBinaryStream();
 		$counter = 0;
 		foreach($this->entries as $d){
-			$entryType = self::writeEntry($d, $writer, $counter++);
+			$entryType = self::writeEntry($d, $writer, $counter++, $this->getProtocol());
 			if($entryType >= 0){
 				$this->putVarInt($entryType);
 				($this->buffer .= $writer->getBuffer());

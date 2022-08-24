@@ -125,8 +125,8 @@ class NetworkInventoryAction{
 		}
 
 		$this->inventorySlot = $packet->getUnsignedVarInt();
-		$this->oldItem = $packet->getSlot();
-		$this->newItem = $packet->getSlot();
+		$this->oldItem = $packet->getSlot($packet->getProtocol());
+		$this->newItem = $packet->getSlot($packet->getProtocol());
 
 		return $this;
 	}
@@ -155,8 +155,8 @@ class NetworkInventoryAction{
 		}
 
 		$packet->putUnsignedVarInt($this->inventorySlot);
-		$packet->putSlot($this->oldItem);
-		$packet->putSlot($this->newItem);
+		$packet->putSlot($this->oldItem, $packet->getProtocol());
+		$packet->putSlot($this->newItem, $packet->getProtocol());
 	}
 
 	/**

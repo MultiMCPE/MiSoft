@@ -315,6 +315,7 @@ abstract class SoundEnums {
 		switch ($playerProtocol) {
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
+			case ProtocolInfo::PROTOCOL_354:
 				return self::GROUP_3;
 			default:
 				return self::GROUP_3;

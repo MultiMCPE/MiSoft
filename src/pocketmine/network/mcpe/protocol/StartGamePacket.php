@@ -186,7 +186,9 @@ class StartGamePacket extends DataPacket{
 		$this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
 		$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
 		$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
-		$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	    	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+		}
 
 		$this->levelId = $this->getString();
 		$this->worldName = $this->getString();
@@ -205,11 +207,13 @@ class StartGamePacket extends DataPacket{
 			$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
 		}
 		$this->itemTable = [];
-		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$id = $this->getString();
-			$legacyId = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$id = $this->getString();
+		    	$legacyId = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
 
-			$this->itemTable[$id] = $legacyId;
+		    	$this->itemTable[$id] = $legacyId;
+	    	}
 		}
 
 		$this->multiplayerCorrelationId = $this->getString();
@@ -256,7 +260,9 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
-		($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	    	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+		}
 
 		$this->putString($this->levelId);
 		$this->putString($this->worldName);
@@ -268,7 +274,9 @@ class StartGamePacket extends DataPacket{
 
         $this->put(self::getBlockPalletData($this->getProtocol()));
 
-		$this->putUnsignedVarInt(0); // item list
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    	$this->putUnsignedVarInt(0); // item list
+		}
 
 		$this->putString($this->multiplayerCorrelationId);
 	}

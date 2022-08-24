@@ -42,13 +42,13 @@ class InventorySlotPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->windowId = $this->getUnsignedVarInt();
 		$this->inventorySlot = $this->getUnsignedVarInt();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($this->getProtocol());
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->windowId);
 		$this->putUnsignedVarInt($this->inventorySlot);
-		$this->putSlot($this->item);
+		$this->putSlot($this->item, $this->getProtocol());
 	}
 
 	public function handle(NetworkSession $session) : bool{

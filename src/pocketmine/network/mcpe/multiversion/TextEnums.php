@@ -85,6 +85,7 @@ abstract class TextEnums {
 		switch ($playerProtocol) {
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
+			case ProtocolInfo::PROTOCOL_354:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

@@ -87,7 +87,7 @@ class AddPlayerPacket extends DataPacket{
 		$this->pitch = ((\unpack("g", $this->get(4))[1]));
 		$this->yaw = ((\unpack("g", $this->get(4))[1]));
 		$this->headYaw = ((\unpack("g", $this->get(4))[1]));
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($this->getProtocol());
 		$this->metadata = $this->getEntityMetadata();
 
 		$this->uvarint1 = $this->getUnsignedVarInt();
@@ -117,7 +117,7 @@ class AddPlayerPacket extends DataPacket{
 		($this->buffer .= (\pack("g", $this->pitch)));
 		($this->buffer .= (\pack("g", $this->yaw)));
 		($this->buffer .= (\pack("g", $this->headYaw ?? $this->yaw)));
-		$this->putSlot($this->item);
+		$this->putSlot($this->item, $this->getProtocol());
 		$this->putEntityMetadata($this->metadata);
 
 		$this->putUnsignedVarInt($this->uvarint1);

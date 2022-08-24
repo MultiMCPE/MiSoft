@@ -51,7 +51,7 @@ class AddItemActorPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->item = $this->getSlot();
+		$this->item = $this->getSlot($this->getProtocol());
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
 		$this->metadata = $this->getEntityMetadata();
@@ -61,7 +61,7 @@ class AddItemActorPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putSlot($this->item);
+		$this->putSlot($this->item, $this->getProtocol());
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
 		$this->putEntityMetadata($this->metadata);

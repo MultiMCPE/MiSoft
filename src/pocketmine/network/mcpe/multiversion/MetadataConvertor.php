@@ -110,6 +110,7 @@ class MetadataConvertor {
 		switch ($playerProtocol) {
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
+			case ProtocolInfo::PROTOCOL_354:
 				$protocolMetadata = self::$entityMetadataIds360;
 				break;
 			default:
@@ -142,6 +143,7 @@ class MetadataConvertor {
 		switch ($playerProtocol) {
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
+			case ProtocolInfo::PROTOCOL_354:
 				$newFlags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
 				$protocolFlags = self::$entityFlags340;
 				break;
