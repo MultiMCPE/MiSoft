@@ -93,7 +93,9 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->trData->itemInHand = $this->getSlot($this->getProtocol());
 				$this->trData->playerPos = $this->getVector3();
 				$this->trData->clickPos = $this->getVector3();
-				$this->trData->blockRuntimeId = $this->getUnsignedVarInt();
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_340) {
+			    	$this->trData->blockRuntimeId = $this->getUnsignedVarInt();
+				}
 				break;
 			case self::TYPE_USE_ITEM_ON_ENTITY:
 				$this->trData->entityRuntimeId = $this->getEntityRuntimeId();
@@ -134,7 +136,9 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->putSlot($this->trData->itemInHand, $this->getProtocol());
 				$this->putVector3($this->trData->playerPos);
 				$this->putVector3($this->trData->clickPos);
-				$this->putUnsignedVarInt($this->trData->blockRuntimeId);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_340) {
+			    	$this->putUnsignedVarInt($this->trData->blockRuntimeId);
+				}
 				break;
 			case self::TYPE_USE_ITEM_ON_ENTITY:
 				$this->putEntityRuntimeId($this->trData->entityRuntimeId);

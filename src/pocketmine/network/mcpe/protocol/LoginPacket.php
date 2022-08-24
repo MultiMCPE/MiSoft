@@ -105,7 +105,11 @@ class LoginPacket extends DataPacket{
 	}
 
 	protected function decodeConnectionRequest() : void{
-		$buffer = new BinaryStream($this->getString());
+        if ($this->getProtocol() < ProtocolInfo::PROTOCOL_110) {
+            $buffer = new BinaryStream(\zlib_decode($this->getString(), 0x400 * 0x400 * 0x40));
+        } else {
+            $buffer = new BinaryStream($this->getString());
+        }
 
 		$this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
 

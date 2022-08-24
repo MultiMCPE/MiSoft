@@ -208,6 +208,10 @@ class Network{
 			    return ProtocolInfo::PROTOCOL_351;
 			case ProtocolInfo::PROTOCOL_350:
 			    return ProtocolInfo::PROTOCOL_350;
+			case ProtocolInfo::PROTOCOL_342:
+			    return ProtocolInfo::PROTOCOL_342;
+			case ProtocolInfo::PROTOCOL_340:
+			    return ProtocolInfo::PROTOCOL_340;
 			default:
 				return ProtocolInfo::PROTOCOL_110;
 		}
@@ -226,6 +230,8 @@ class Network{
 			case ProtocolInfo::PROTOCOL_354:
 			case ProtocolInfo::PROTOCOL_351:
 			case ProtocolInfo::PROTOCOL_350:
+			case ProtocolInfo::PROTOCOL_342:
+			case ProtocolInfo::PROTOCOL_340:
 			    return ProtocolInfo::PROTOCOL_110;
 			default:
 				return ProtocolInfo::PROTOCOL_110;
@@ -247,6 +253,9 @@ class Network{
 			case ProtocolInfo::PROTOCOL_351:
 			case ProtocolInfo::PROTOCOL_350:
 			    return ProtocolInfo::PROTOCOL_350;
+			case ProtocolInfo::PROTOCOL_342:
+			case ProtocolInfo::PROTOCOL_340:
+			    return ProtocolInfo::PROTOCOL_110;
 			default:
 				return ProtocolInfo::PROTOCOL_110;
 		}

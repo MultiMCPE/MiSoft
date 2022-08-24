@@ -45,9 +45,6 @@ use function strlen;
 
 class NetworkBinaryStream extends BinaryStream{
 
-	private const DAMAGE_TAG = "Damage"; //TAG_Int
-	private const DAMAGE_TAG_CONFLICT_RESOLUTION = "___Damage_ProtocolCollisionResolution___";
-
 	public function getString() : string{
 		return $this->get($this->getUnsignedVarInt());
 	}
@@ -74,82 +71,7 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
 	}
 
-	public function getSlotOld() : Item{
-		$id = $this->getVarInt();
-		if($id === 0){
-			return ItemFactory::get(0, 0, 0);
-		}
-
-		$auxValue = $this->getVarInt();
-		$data = $auxValue >> 8;
-		if($data === 0x7fff){
-			$data = -1;
-		}
-		$cnt = $auxValue & 0xff;
-
-		$nbtLen = $this->getLShort();
-
-		/** @var CompoundTag|string $nbt */
-		$nbt = "";
-		if($nbtLen === 0xffff){
-			$c = $this->getByte();
-			if($c !== 1){
-				throw new \UnexpectedValueException("Unexpected NBT count $c");
-			}
-			$nbt = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
-		}elseif($nbtLen !== 0){
-			throw new \UnexpectedValueException("Unexpected fake NBT length $nbtLen");
-		}
-
-		//TODO
-		for($i = 0, $canPlaceOn = $this->getVarInt(); $i < $canPlaceOn; ++$i){
-			$this->getString();
-		}
-
-		//TODO
-		for($i = 0, $canDestroy = $this->getVarInt(); $i < $canDestroy; ++$i){
-			$this->getString();
-		}
-
-		if($id === ItemIds::SHIELD){
-			$this->getVarLong(); //"blocking tick" (ffs mojang)
-		}
-
-		return ItemFactory::get($id, $data, $cnt, $nbt);
-	}
-
-	public function putSlotOld(Item $item) : void{
-		if($item->getId() === 0){
-			$this->putVarInt(0);
-
-			return;
-		}
-
-		$this->putVarInt($item->getId());
-		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
-		$this->putVarInt($auxValue);
-
-		if($item->hasCompoundTag()){
-			$this->putLShort(0xffff);
-			$this->putByte(1); //TODO: some kind of count field? always 1 as of 1.9.0
-			$this->put((new NetworkLittleEndianNBTStream())->write($item->getNamedTag()));
-		}else{
-			$this->putLShort(0);
-		}
-
-		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
-		$this->putVarInt(0); //CanDestroy entry count (TODO)
-
-		if($item->getId() === ItemIds::SHIELD){
-			$this->putVarLong(0); //"blocking tick" (ffs mojang)
-		}
-	}
-
 	public function getSlot(int $playerProtocol) : Item{
-	    if ($playerProtocol < ProtocolInfo::PROTOCOL_360) {
-	        return $this->getSlotOld();
-	    }
-
 		$id = $this->getVarInt();
 		if($id === 0){
 			return ItemFactory::get(0, 0, 0);
@@ -187,76 +109,35 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->getString();
 		}
 
-		if($id === ItemIds::SHIELD){
-			$this->getVarLong(); //"blocking tick" (ffs mojang)
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_340){
+	    	if($id === ItemIds::SHIELD){
+		    	$this->getVarLong(); //"blocking tick" (ffs mojang)
+	    	}
 		}
-		if($nbt !== null){
-			if($nbt->hasTag(self::DAMAGE_TAG, IntTag::class)){
-				$data = $nbt->getInt(self::DAMAGE_TAG);
-				$nbt->removeTag(self::DAMAGE_TAG);
-				if($nbt->count() === 0){
-					$nbt = null;
-					goto end;
-				}
-			}
-			if(($conflicted = $nbt->getTag(self::DAMAGE_TAG_CONFLICT_RESOLUTION)) !== null){
-				$nbt->removeTag(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-				$conflicted->setName(self::DAMAGE_TAG);
-				$nbt->setTag($conflicted);
-			}
-		}
-		end:
+
 		return ItemFactory::get($id, $data, $cnt, $nbt);
 	}
 
-
 	public function putSlot(Item $item, int $playerProtocol) : void{
-	    if ($playerProtocol < ProtocolInfo::PROTOCOL_360) {
-	        $this->putSlotOld($item);
-
-	        return;
-	    }
-
-		if($item->getId() === 0){
+		if ($item->getId() === 0) {
 			$this->putVarInt(0);
 
 			return;
 		}
 
 		$this->putVarInt($item->getId());
-		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
-		$this->putVarInt($auxValue);
-
-		$nbt = null;
-		if($item->hasCompoundTag()){
-			$nbt = clone $item->getNamedTag();
-		}
-		if($item instanceof Durable and $item->getDamage() > 0){
-			if($nbt !== null){
-				if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
-					$nbt->removeTag(self::DAMAGE_TAG);
-					$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-					$nbt->setTag($existing);
-				}
-			}else{
-				$nbt = new CompoundTag();
-			}
-			$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
-		}
-
-		if($nbt !== null){
-			($this->buffer .= (\pack("v", 0xffff)));
-			($this->buffer .= \chr(1)); //TODO: some kind of count field? always 1 as of 1.9.0
-			($this->buffer .= (new NetworkLittleEndianNBTStream())->write($nbt));
-		}else{
-			($this->buffer .= (\pack("v", 0)));
-		}
+		$this->putVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());
+		$nbt = $item->getCompoundTag();
+		$this->putLShort(strlen($nbt));
+		$this->put($nbt);
 
 		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 		$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-		if($item->getId() === ItemIds::SHIELD){
-			$this->putVarLong(0); //"blocking tick" (ffs mojang)
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_340){
+	    	if($item->getId() === ItemIds::SHIELD){
+		    	$this->putVarLong(0); //"blocking tick" (ffs mojang)
+	    	}
 		}
 	}
 
