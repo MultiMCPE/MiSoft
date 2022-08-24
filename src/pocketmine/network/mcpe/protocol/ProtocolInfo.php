@@ -30,7 +30,7 @@ interface ProtocolInfo {
 	 */
 
 	public const CURRENT_PROTOCOL = 110;
-	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
 	public const MINECRAFT_VERSION = 'v1.x';
 	public const MINECRAFT_VERSION_NETWORK = '1.x';
 
@@ -53,6 +53,10 @@ interface ProtocolInfo {
 	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 	/** 1.2 BETAS */
 	public const PROTOCOL_280 = 280; // 1.6.0.1
+	public const PROTOCOL_350 = 350; // 1.11.0.1
+	public const PROTOCOL_351 = 351; // 1.11.0.3
+	public const PROTOCOL_352 = 352; // 1.11.0.4
+	public const PROTOCOL_353 = 353; // 1.11.0.5
 	public const PROTOCOL_354 = 354; // 1.11.0.7, 1.11.0.8, 1.11.0.9, 1.11.0.10, 1.11.0, 1.11.1, 1.11.2, 1.11.3, 1.11.4
 	public const PROTOCOL_360 = 360; // 1.12.0.2
 	public const PROTOCOL_361 = 361; // 1.12.0.3, 1.12.0.4, 1.12.0.6, 1.12.0.9, 1.12.0.10, 1.12.0.11, 1.12.0.12, 1.12.0.13, 1.12.0.14

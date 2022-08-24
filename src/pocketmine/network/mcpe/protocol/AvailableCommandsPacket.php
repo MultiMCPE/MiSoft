@@ -78,9 +78,11 @@ class AvailableCommandsPacket extends DataPacket{
 		$enums = [];
 		$enumsCount = 0;
 		$commandsStreams = [
-		    ProtocolInfo::PROTOCOL_354 => new NetworkBinaryStream(),
+			ProtocolInfo::PROTOCOL_361 => new NetworkBinaryStream(),
 			ProtocolInfo::PROTOCOL_360 => new NetworkBinaryStream(),
-			ProtocolInfo::PROTOCOL_361 => new NetworkBinaryStream()
+		    ProtocolInfo::PROTOCOL_354 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_351 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_350 => new NetworkBinaryStream()
 		];
 
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
@@ -156,7 +158,9 @@ class AvailableCommandsPacket extends DataPacket{
                         }
 
 						$commandsStreams[$protocol]->putBool(isset($paramData['optional']) && $paramData['optional']);
-						$commandsStreams[$protocol]->putByte(0);
+						if ($protocol >= ProtocolInfo::PROTOCOL_350) {
+					    	$commandsStreams[$protocol]->putByte(0);
+						}
 					}
 				}
 			}

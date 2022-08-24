@@ -75,7 +75,9 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		$this->mapId = $this->getEntityUniqueId();
 		$this->type = $this->getUnsignedVarInt();
 		$this->dimensionId = (\ord($this->get(1)));
-		$this->isLocked = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_351) {
+	    	$this->isLocked = (($this->get(1) !== "\x00"));
+		}
 
 		if(($this->type & 0x08) !== 0){
 			$count = $this->getUnsignedVarInt();
@@ -148,7 +150,9 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 		$this->putUnsignedVarInt($type);
 		($this->buffer .= \chr($this->dimensionId));
-		($this->buffer .= ($this->isLocked ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_351) {
+	    	($this->buffer .= ($this->isLocked ? "\x01" : "\x00"));
+		}
 
 		if(($type & 0x08) !== 0){ //TODO: find out what these are for
 			$this->putUnsignedVarInt($eidsCount);

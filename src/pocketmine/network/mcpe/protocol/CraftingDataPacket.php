@@ -93,7 +93,9 @@ class CraftingDataPacket extends DataPacket{
 						$entry["output"][] = $this->getSlot($this->getProtocol());
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
-					$entry["block"] = $this->getString();
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
+				    	$entry["block"] = $this->getString();
+					}
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 				    	$entry["priority"] = $this->getVarInt();
 					}
@@ -122,7 +124,9 @@ class CraftingDataPacket extends DataPacket{
 						$entry["output"][] = $this->getSlot($this->getProtocol());
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
-					$entry["block"] = $this->getString();
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
+				    	$entry["block"] = $this->getString();
+					}
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 				    	$entry["priority"] = $this->getVarInt();
 					}
@@ -147,7 +151,9 @@ class CraftingDataPacket extends DataPacket{
 					} else {
 					    $entry["output"] = $this->getSlot($this->getProtocol());
 					}
-					$entry["block"] = $this->getString();
+					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
+				    	$entry["block"] = $this->getString();
+					}
 
 					break;
 				case self::ENTRY_MULTI:
@@ -194,7 +200,9 @@ class CraftingDataPacket extends DataPacket{
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
-		$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
+	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		}
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
 	    	$stream->putVarInt(50); //TODO: priority
 		}
@@ -227,7 +235,9 @@ class CraftingDataPacket extends DataPacket{
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
-		$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
+	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		}
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
 	    	$stream->putVarInt(50); //TODO: priority
 		}
@@ -243,7 +253,9 @@ class CraftingDataPacket extends DataPacket{
 			$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}
 		$stream->putSlot($recipe->getResult(), $playerProtocol);
-		$stream->putString("furnace"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
+	    	$stream->putString("furnace"); //TODO: blocktype (no prefix) (this might require internal API breaks)
+		}
 		return $result;
 	}
 
