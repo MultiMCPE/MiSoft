@@ -115,6 +115,8 @@ class MetadataConvertor {
 			case ProtocolInfo::PROTOCOL_350:
 			case ProtocolInfo::PROTOCOL_342:
 			case ProtocolInfo::PROTOCOL_340:
+			case ProtocolInfo::PROTOCOL_332:
+			case ProtocolInfo::PROTOCOL_331:
 				$protocolMetadata = self::$entityMetadataIds360;
 				break;
 			default:
@@ -152,6 +154,8 @@ class MetadataConvertor {
 			case ProtocolInfo::PROTOCOL_350:
 			case ProtocolInfo::PROTOCOL_342:
 			case ProtocolInfo::PROTOCOL_340:
+			case ProtocolInfo::PROTOCOL_332:
+			case ProtocolInfo::PROTOCOL_331:
 				$newFlags = 1 << 19; //DATA_FLAG_CAN_CLIMBING
 				$protocolFlags = self::$entityFlags340;
 				break;

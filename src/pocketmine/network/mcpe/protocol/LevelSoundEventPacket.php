@@ -72,7 +72,11 @@ class LevelSoundEventPacket extends DataPacket{
 	public $disableRelativeVolume = false;
 
 	protected function decodePayload(){
-		$this->sound = $this->getUnsignedVarInt();
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    	$this->sound = $this->getUnsignedVarInt();
+	    } else {
+	        $this->sound = (\ord($this->get(1)));
+	    }
 		$this->sound = SoundEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
 		$runtimeId = $this->getVarInt();
@@ -89,7 +93,11 @@ class LevelSoundEventPacket extends DataPacket{
 
 	protected function encodePayload(){
 	    $sound = SoundEnums::getLevelSoundEventId($this->getProtocol(), $this->sound);
-		$this->putUnsignedVarInt($sound);
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    	$this->putUnsignedVarInt($sound);
+	    } else {
+	        ($this->buffer .= \chr($sound));
+	    }
 		$this->putVector3($this->position);
 		if ($this->extraData < 0) {
 			$this->putVarInt($this->extraData);

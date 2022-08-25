@@ -168,7 +168,9 @@ class StartGamePacket extends DataPacket{
 		$this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
 		$this->rainLevel = ((\unpack("g", $this->get(4))[1]));
 		$this->lightningLevel = ((\unpack("g", $this->get(4))[1]));
-		$this->hasConfirmedPlatformLockedContent = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    	$this->hasConfirmedPlatformLockedContent = (($this->get(1) !== "\x00"));
+		}
 		$this->isMultiplayerGame = (($this->get(1) !== "\x00"));
 		$this->hasLANBroadcast = (($this->get(1) !== "\x00"));
 		$this->xboxLiveBroadcastMode = $this->getVarInt();
@@ -206,8 +208,8 @@ class StartGamePacket extends DataPacket{
 
 			$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
 		}
-		$this->itemTable = [];
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		    $this->itemTable = [];
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$id = $this->getString();
 		    	$legacyId = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
@@ -242,7 +244,9 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->hasEduFeaturesEnabled ? "\x01" : "\x00"));
 		($this->buffer .= (\pack("g", $this->rainLevel)));
 		($this->buffer .= (\pack("g", $this->lightningLevel)));
-		($this->buffer .= ($this->hasConfirmedPlatformLockedContent ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    	($this->buffer .= ($this->hasConfirmedPlatformLockedContent ? "\x01" : "\x00"));
+		}
 		($this->buffer .= ($this->isMultiplayerGame ? "\x01" : "\x00"));
 		($this->buffer .= ($this->hasLANBroadcast ? "\x01" : "\x00"));
 		$this->putVarInt($this->xboxLiveBroadcastMode);
