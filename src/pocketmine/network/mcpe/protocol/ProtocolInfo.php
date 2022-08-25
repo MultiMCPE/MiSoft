@@ -30,7 +30,7 @@ interface ProtocolInfo {
 	 */
 
 	public const CURRENT_PROTOCOL = 110;
-	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
 	public const MINECRAFT_VERSION = 'v1.x';
 	public const MINECRAFT_VERSION_NETWORK = '1.x';
 
@@ -53,6 +53,8 @@ interface ProtocolInfo {
 	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 	/** 1.2 BETAS */
 	public const PROTOCOL_280 = 280; // 1.6.0.1
+	public const PROTOCOL_290 = 290; // 1.7.0.2, 1.7.0.3
+	public const PROTOCOL_291 = 291; // 1.7.0.5, 1.7.0.7, 1.7.0.9, 1.7.0, 1.7.1
 	public const PROTOCOL_310 = 310; // 1.8.0.4, 1.8.0.8
 	public const PROTOCOL_311 = 311; // 1.8.0.9, 1.8.0.10
 	public const PROTOCOL_312 = 312; // 1.8.0.11, 1.8.0.13, 1.8.0.14

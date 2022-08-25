@@ -95,6 +95,7 @@ abstract class TextEnums {
 			case ProtocolInfo::PROTOCOL_330:
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
+			case ProtocolInfo::PROTOCOL_290:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

@@ -1913,7 +1913,7 @@ class Server{
 		    	}
 
 		    	if(!$forceSync and !$immediate and $this->networkCompressionAsync){
-			    	$task = new CompressBatchedTask($pk, $receivers);
+			    	$task = new CompressBatchedTask($pk, $receivers, $protocol);
 			    	$this->asyncPool->submitTask($task);
 		    	}else{
 			    	$this->broadcastPacketsCallback($pk, $receivers, $immediate);

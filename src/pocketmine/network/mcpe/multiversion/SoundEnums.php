@@ -325,6 +325,7 @@ abstract class SoundEnums {
 			case ProtocolInfo::PROTOCOL_330:
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
+			case ProtocolInfo::PROTOCOL_290:
 				return self::GROUP_3;
 			default:
 				return self::GROUP_3;

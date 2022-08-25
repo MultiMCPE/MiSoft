@@ -850,6 +850,7 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\PlayerSkinPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PlayerSkinPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo.php',
     'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo110' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo110.php',
+    'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo120' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo120.php',
     'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo310' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo310.php',
     'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo331' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo331.php',
     'pocketmine\\network\\mcpe\\protocol\\PurchaseReceiptPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PurchaseReceiptPacket.php',

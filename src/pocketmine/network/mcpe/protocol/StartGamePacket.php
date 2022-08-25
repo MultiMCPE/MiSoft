@@ -208,7 +208,9 @@ class StartGamePacket extends DataPacket{
 		$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
 		$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
 		$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
-		$this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	    	$this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
 	    	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
 	    	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
@@ -301,7 +303,9 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
 		($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
-		($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	    	($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
 	    	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
 	    	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));

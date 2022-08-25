@@ -28,11 +28,13 @@ use pocketmine\utils\Binary;
 class PacketPool {
 	/** @var \SplFixedArray<DataPacket> */
 	protected static $packetPool110 = null;
+	protected static $packetPool120 = null;
 	protected static $packetPool310 = null;
 	protected static $packetPool331 = null;
 
 	public static function init() {
 	    static::registerPackets110();
+	    static::registerPackets120();
 	    static::registerPackets310();
 	    static::registerPackets331();
 	}
@@ -43,6 +45,14 @@ class PacketPool {
 	 */
 	public static function registerPacket110(int $id, DataPacket $class) {
 		static::$packetPool110[$id] = $class;
+	}
+
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public static function registerPacket120(int $id, DataPacket $class) {
+		static::$packetPool120[$id] = $class;
 	}
 
 	/**
@@ -125,6 +135,86 @@ class PacketPool {
 		static::registerPacket110(ProtocolInfo110::MAP_INFO_REQUEST_PACKET, new MapInfoRequestPacket());
 		static::registerPacket110(ProtocolInfo110::SPAWN_EXPERIENCE_ORB_PACKET, new SpawnExperienceOrbPacket());
 		static::registerPacket110(0xfe, new BatchPacket());
+	}
+
+    /**
+     * @return void
+     */
+	private static function registerPackets310() : void{
+		static::$packetPool120 = new \SplFixedArray(256);
+		static::registerPacket120(ProtocolInfo120::SPAWN_EXPERIENCE_ORB_PACKET, new SpawnExperienceOrbPacket());
+		static::registerPacket120(ProtocolInfo120::CHANGE_DIMENSION_PACKET, new ChangeDimensionPacket());
+		static::registerPacket120(ProtocolInfo120::CLIENTBOUND_MAP_ITEM_DATA_PACKET, new ClientboundMapItemDataPacket());
+		static::registerPacket120(ProtocolInfo120::PLAY_STATUS_PACKET, new PlayStatusPacket());
+		static::registerPacket120(ProtocolInfo120::DISCONNECT_PACKET, new DisconnectPacket());
+		static::registerPacket120(ProtocolInfo120::TEXT_PACKET, new TextPacket());
+		static::registerPacket120(ProtocolInfo120::SET_TIME_PACKET, new SetTimePacket());
+		static::registerPacket120(ProtocolInfo120::START_GAME_PACKET, new StartGamePacket());
+		static::registerPacket120(ProtocolInfo120::ADD_PLAYER_PACKET, new AddPlayerPacket());
+		static::registerPacket120(ProtocolInfo120::ADD_ACTOR_PACKET, new AddActorPacket());
+		static::registerPacket120(ProtocolInfo120::REMOVE_ACTOR_PACKET, new RemoveActorPacket());
+		static::registerPacket120(ProtocolInfo120::ADD_ITEM_ACTOR_PACKET, new AddItemActorPacket());
+		static::registerPacket120(ProtocolInfo120::TAKE_ITEM_ACTOR_PACKET, new TakeItemActorPacket());
+		static::registerPacket120(ProtocolInfo120::MOVE_ACTOR_ABSOLUTE_PACKET, new MoveActorAbsolutePacket());
+		static::registerPacket120(ProtocolInfo120::MOVE_PLAYER_PACKET, new MovePlayerPacket());
+		static::registerPacket120(ProtocolInfo120::UPDATE_BLOCK_PACKET, new UpdateBlockPacket());
+		static::registerPacket120(ProtocolInfo120::ADD_PAINTING_PACKET, new AddPaintingPacket());
+		static::registerPacket120(ProtocolInfo120::EXPLODE_PACKET, new ExplodePacket());
+		static::registerPacket120(ProtocolInfo120::LEVEL_EVENT_PACKET, new LevelEventPacket());
+		static::registerPacket120(ProtocolInfo120::BLOCK_EVENT_PACKET, new BlockEventPacket());
+		static::registerPacket120(ProtocolInfo120::ACTOR_EVENT_PACKET, new ActorEventPacket());
+		static::registerPacket120(ProtocolInfo120::MOB_EQUIPMENT_PACKET, new MobEquipmentPacket());
+		static::registerPacket120(ProtocolInfo120::MOB_ARMOR_EQUIPMENT_PACKET, new MobArmorEquipmentPacket());
+		static::registerPacket120(ProtocolInfo120::INTERACT_PACKET, new InteractPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_ACTION_PACKET, new PlayerActionPacket());
+		static::registerPacket120(ProtocolInfo120::SET_ACTOR_DATA_PACKET, new SetActorDataPacket());
+		static::registerPacket120(ProtocolInfo120::SET_ACTOR_MOTION_PACKET, new SetActorMotionPacket());
+		static::registerPacket120(ProtocolInfo120::SET_ACTOR_LINK_PACKET, new SetActorLinkPacket());
+		static::registerPacket120(ProtocolInfo120::SET_SPAWN_POSITION_PACKET, new SetSpawnPositionPacket());
+		static::registerPacket120(ProtocolInfo120::ANIMATE_PACKET, new AnimatePacket());
+		static::registerPacket120(ProtocolInfo120::RESPAWN_PACKET, new RespawnPacket());
+		static::registerPacket120(ProtocolInfo120::CONTAINER_OPEN_PACKET, new ContainerOpenPacket());
+		static::registerPacket120(ProtocolInfo120::CONTAINER_CLOSE_PACKET, new ContainerClosePacket());
+		static::registerPacket120(ProtocolInfo120::CONTAINER_SET_DATA_PACKET, new ContainerSetDataPacket());
+		static::registerPacket120(ProtocolInfo120::CRAFTING_DATA_PACKET, new CraftingDataPacket());
+		static::registerPacket120(ProtocolInfo120::CRAFTING_EVENT_PACKET, new CraftingEventPacket());
+		static::registerPacket120(ProtocolInfo120::ADVENTURE_SETTINGS_PACKET, new AdventureSettingsPacket());
+		static::registerPacket120(ProtocolInfo120::BLOCK_ACTOR_DATA_PACKET, new BlockActorDataPacket());
+		static::registerPacket120(ProtocolInfo120::LEVEL_CHUNK_PACKET, new LevelChunkPacket());
+		static::registerPacket120(ProtocolInfo120::SET_COMMANDS_ENABLED_PACKET, new SetCommandsEnabledPacket());
+		static::registerPacket120(ProtocolInfo120::SET_DIFFICULTY_PACKET, new SetDifficultyPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_LIST_PACKET, new PlayerListPacket());
+		static::registerPacket120(ProtocolInfo120::REQUEST_CHUNK_RADIUS_PACKET, new RequestChunkRadiusPacket());
+		static::registerPacket120(ProtocolInfo120::CHUNK_RADIUS_UPDATED_PACKET, new ChunkRadiusUpdatedPacket());
+		static::registerPacket120(ProtocolInfo120::AVAILABLE_COMMANDS_PACKET, new AvailableCommandsPacket());
+		static::registerPacket120(ProtocolInfo120::TRANSFER_PACKET, new TransferPacket());
+		static::registerPacket120(ProtocolInfo120::CLIENT_TO_SERVER_HANDSHAKE_PACKET, new ClientToServerHandshakePacket());
+		static::registerPacket120(ProtocolInfo120::RESOURCE_PACK_DATA_INFO_PACKET, new ResourcePackDataInfoPacket());
+		static::registerPacket120(ProtocolInfo120::RESOURCE_PACKS_INFO_PACKET, new ResourcePackDataInfoPacket());
+		static::registerPacket120(ProtocolInfo120::RESOURCE_PACK_CLIENT_RESPONSE_PACKET, new ResourcePackClientResponsePacket());
+		static::registerPacket120(ProtocolInfo120::RESOURCE_PACK_CHUNK_REQUEST_PACKET, new ResourcePackChunkRequestPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_INPUT_PACKET, new PlayerInputPacket());
+		static::registerPacket120(ProtocolInfo120::MAP_INFO_REQUEST_PACKET, new MapInfoRequestPacket());
+		static::registerPacket120(ProtocolInfo120::INVENTORY_TRANSACTION_PACKET, new InventoryTransactionPacket());
+		static::registerPacket120(ProtocolInfo120::INVENTORY_CONTENT_PACKET, new InventoryContentPacket());
+		static::registerPacket120(ProtocolInfo120::INVENTORY_SLOT_PACKET, new InventorySlotPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, new PlayerHotbarPacket());
+		static::registerPacket120(ProtocolInfo120::COMMAND_REQUEST_PACKET, new CommandRequestPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_HOTBAR_PACKET, new PlayerHotbarPacket());
+		static::registerPacket120(ProtocolInfo120::PLAYER_SKIN_PACKET, new PlayerSkinPacket());
+		static::registerPacket120(ProtocolInfo120::MODAL_FORM_RESPONSE_PACKET, new ModalFormResponsePacket());
+		static::registerPacket120(ProtocolInfo120::SERVER_SETTINGS_REQUEST_PACKET, new ServerSettingsRequestPacket());
+		static::registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, new PurchaseReceiptPacket());
+		static::registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, new SubClientLoginPacket());
+		static::registerPacket120(ProtocolInfo120::AVAILABLE_ACTOR_IDENTIFIERS_PACKET, new AvailableActorIdentifiersPacket());
+		static::registerPacket120(ProtocolInfo120::LEVEL_SOUND_EVENT_PACKET, new LevelSoundEventPacket());
+		static::registerPacket120(ProtocolInfo120::SPAWN_PARTICLE_EFFECT_PACKET, new SpawnParticleEffectPacket());
+    	static::registerPacket120(ProtocolInfo120::PLAY_SOUND_PACKET, new PlaySoundPacket());
+    	static::registerPacket120(ProtocolInfo120::ITEM_FRAME_DROP_ITEM_PACKET, new ItemFrameDropItemPacket());
+    	static::registerPacket120(ProtocolInfo120::BOSS_EVENT_PACKET, new BossEventPacket());
+    	static::registerPacket120(ProtocolInfo120::BOOK_EDIT_PACKET, new BookEditPacket());
+		static::registerPacket120(ProtocolInfo120::SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET, new SetLocalPlayerAsInitializedPacket());
+		static::registerPacket120(0xfe, new BatchPacket());
 	}
 
     /**
@@ -314,6 +404,9 @@ class PacketPool {
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
 				$class = isset(static::$packetPool310[$pid]) ? clone static::$packetPool310[$pid] : null;
+				break;
+			case ProtocolInfo::PROTOCOL_290:
+				$class = isset(static::$packetPool120[$pid]) ? clone static::$packetPool120[$pid] : null;
 				break;
 			default:
 				$class = isset(static::$packetPool110[$pid]) ? clone static::$packetPool110[$pid] : null;
