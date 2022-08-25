@@ -62,7 +62,7 @@ class ResourcePackStackPacket extends DataPacket{
 			$this->getString();
 		}
 
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
 	    	$this->isExperimental = (($this->get(1) !== "\x00"));
 		}
 	}
@@ -84,7 +84,7 @@ class ResourcePackStackPacket extends DataPacket{
 			$this->putString(""); //TODO: subpack name
 		}
 
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
 	    	($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
 		}
 	}

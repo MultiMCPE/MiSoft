@@ -140,7 +140,7 @@ class PacketPool {
     /**
      * @return void
      */
-	private static function registerPackets310() : void{
+	private static function registerPackets120() : void{
 		static::$packetPool120 = new \SplFixedArray(256);
 		static::registerPacket120(ProtocolInfo120::SPAWN_EXPERIENCE_ORB_PACKET, new SpawnExperienceOrbPacket());
 		static::registerPacket120(ProtocolInfo120::CHANGE_DIMENSION_PACKET, new ChangeDimensionPacket());
@@ -206,9 +206,7 @@ class PacketPool {
 		static::registerPacket120(ProtocolInfo120::SERVER_SETTINGS_REQUEST_PACKET, new ServerSettingsRequestPacket());
 		static::registerPacket120(ProtocolInfo120::PURCHASE_RECEIPT_PACKET, new PurchaseReceiptPacket());
 		static::registerPacket120(ProtocolInfo120::SUB_CLIENT_LOGIN_PACKET, new SubClientLoginPacket());
-		static::registerPacket120(ProtocolInfo120::AVAILABLE_ACTOR_IDENTIFIERS_PACKET, new AvailableActorIdentifiersPacket());
 		static::registerPacket120(ProtocolInfo120::LEVEL_SOUND_EVENT_PACKET, new LevelSoundEventPacket());
-		static::registerPacket120(ProtocolInfo120::SPAWN_PARTICLE_EFFECT_PACKET, new SpawnParticleEffectPacket());
     	static::registerPacket120(ProtocolInfo120::PLAY_SOUND_PACKET, new PlaySoundPacket());
     	static::registerPacket120(ProtocolInfo120::ITEM_FRAME_DROP_ITEM_PACKET, new ItemFrameDropItemPacket());
     	static::registerPacket120(ProtocolInfo120::BOSS_EVENT_PACKET, new BossEventPacket());
