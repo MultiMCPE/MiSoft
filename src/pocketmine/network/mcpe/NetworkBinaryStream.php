@@ -85,18 +85,25 @@ class NetworkBinaryStream extends BinaryStream{
 
 		/** @var CompoundTag|null $nbt */
 		$nbt = null;
-		if($nbtLen === 0xffff){
-			$c = (\ord($this->get(1)));
-			if($c !== 1){
-				throw new \UnexpectedValueException("Unexpected NBT count $c");
+		if ($nbtLen > 0) {
+			$nbt = $this->get($nbtLen);
+		} elseif($nbtLen === -1) {
+			$nbtCount = $this->getUnsignedVarInt();
+			if ($nbtCount > 100) {
+				throw new \UnexpectedValueException("Get slot nbt error, too many count");
 			}
-			$decodedNBT = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
-			if(!($decodedNBT instanceof CompoundTag)){
-				throw new \UnexpectedValueException("Unexpected root tag type for itemstack");
+
+			for ($i = 0; $i < $nbtCount; $i++) {
+				$offset = $this->getOffset();
+				if ($offset > strlen($this->getBuffer())) {
+					throw new \UnexpectedValueException("Get slot nbt error");
+				}
+
+		    	$decodedNBT = (new NetworkLittleEndianNBTStream())->read(substr($this->getBuffer(), $offset), false);
+
+		    	$nbt = $decodedNBT;
+		    	$this->setOffset($offset + $nbt->getOffset());
 			}
-			$nbt = $decodedNBT;
-		}elseif($nbtLen !== 0){
-			throw new \UnexpectedValueException("Unexpected fake NBT length $nbtLen");
 		}
 
 		//TODO
