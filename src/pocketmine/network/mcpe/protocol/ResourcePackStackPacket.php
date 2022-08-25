@@ -62,7 +62,9 @@ class ResourcePackStackPacket extends DataPacket{
 			$this->getString();
 		}
 
-		$this->isExperimental = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	$this->isExperimental = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload(){
@@ -82,7 +84,9 @@ class ResourcePackStackPacket extends DataPacket{
 			$this->putString(""); //TODO: subpack name
 		}
 
-		($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

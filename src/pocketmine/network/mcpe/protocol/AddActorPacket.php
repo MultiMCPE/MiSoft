@@ -169,9 +169,13 @@ class AddActorPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->type = array_search($t = $this->getString(), self::LEGACY_ID_MAP_BC, true);
-		if($this->type === false){
-			throw new \UnexpectedValueException("Can't map ID $t to legacy ID");
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	$this->type = array_search($t = $this->getString(), self::LEGACY_ID_MAP_BC, true);
+	    	if($this->type === false){
+		    	throw new \UnexpectedValueException("Can't map ID $t to legacy ID");
+	    	}
+		} else {
+		    $this->type = $this->getUnsignedVarInt();
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
@@ -207,10 +211,14 @@ class AddActorPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		if(!isset(self::LEGACY_ID_MAP_BC[$this->type])){
-			throw new \InvalidArgumentException("Unknown entity numeric ID $this->type");
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	if(!isset(self::LEGACY_ID_MAP_BC[$this->type])){
+			    throw new \InvalidArgumentException("Unknown entity numeric ID $this->type");
+	    	}
+	    	$this->putString(self::LEGACY_ID_MAP_BC[$this->type]);
+		} else {
+		    $this->putUnsignedVarInt($this->type);
 		}
-		$this->putString(self::LEGACY_ID_MAP_BC[$this->type]);
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
 		($this->buffer .= (\pack("g", $this->pitch)));

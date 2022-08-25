@@ -28,10 +28,12 @@ use pocketmine\utils\Binary;
 class PacketPool {
 	/** @var \SplFixedArray<DataPacket> */
 	protected static $packetPool110 = null;
+	protected static $packetPool310 = null;
 	protected static $packetPool331 = null;
 
 	public static function init() {
 	    static::registerPackets110();
+	    static::registerPackets310();
 	    static::registerPackets331();
 	}
 
@@ -41,6 +43,14 @@ class PacketPool {
 	 */
 	public static function registerPacket110(int $id, DataPacket $class) {
 		static::$packetPool110[$id] = $class;
+	}
+
+	/**
+	 * @param int        $id 0-255
+	 * @param DataPacket $class
+	 */
+	public static function registerPacket310(int $id, DataPacket $class) {
+		static::$packetPool310[$id] = $class;
 	}
 
 	/**
@@ -115,6 +125,87 @@ class PacketPool {
 		static::registerPacket110(ProtocolInfo110::MAP_INFO_REQUEST_PACKET, new MapInfoRequestPacket());
 		static::registerPacket110(ProtocolInfo110::SPAWN_EXPERIENCE_ORB_PACKET, new SpawnExperienceOrbPacket());
 		static::registerPacket110(0xfe, new BatchPacket());
+	}
+
+    /**
+     * @return void
+     */
+	private static function registerPackets310() : void{
+		static::$packetPool310 = new \SplFixedArray(256);
+		static::registerPacket310(ProtocolInfo310::SPAWN_EXPERIENCE_ORB_PACKET, new SpawnExperienceOrbPacket());
+		static::registerPacket310(ProtocolInfo310::CHANGE_DIMENSION_PACKET, new ChangeDimensionPacket());
+		static::registerPacket310(ProtocolInfo310::CLIENTBOUND_MAP_ITEM_DATA_PACKET, new ClientboundMapItemDataPacket());
+		static::registerPacket310(ProtocolInfo310::PLAY_STATUS_PACKET, new PlayStatusPacket());
+		static::registerPacket310(ProtocolInfo310::DISCONNECT_PACKET, new DisconnectPacket());
+		static::registerPacket310(ProtocolInfo310::TEXT_PACKET, new TextPacket());
+		static::registerPacket310(ProtocolInfo310::SET_TIME_PACKET, new SetTimePacket());
+		static::registerPacket310(ProtocolInfo310::START_GAME_PACKET, new StartGamePacket());
+		static::registerPacket310(ProtocolInfo310::ADD_PLAYER_PACKET, new AddPlayerPacket());
+		static::registerPacket310(ProtocolInfo310::ADD_ACTOR_PACKET, new AddActorPacket());
+		static::registerPacket310(ProtocolInfo310::REMOVE_ACTOR_PACKET, new RemoveActorPacket());
+		static::registerPacket310(ProtocolInfo310::ADD_ITEM_ACTOR_PACKET, new AddItemActorPacket());
+		static::registerPacket310(ProtocolInfo310::TAKE_ITEM_ACTOR_PACKET, new TakeItemActorPacket());
+		static::registerPacket310(ProtocolInfo310::MOVE_ACTOR_ABSOLUTE_PACKET, new MoveActorAbsolutePacket());
+		static::registerPacket310(ProtocolInfo310::MOVE_PLAYER_PACKET, new MovePlayerPacket());
+		static::registerPacket310(ProtocolInfo310::UPDATE_BLOCK_PACKET, new UpdateBlockPacket());
+		static::registerPacket310(ProtocolInfo310::ADD_PAINTING_PACKET, new AddPaintingPacket());
+		static::registerPacket310(ProtocolInfo310::EXPLODE_PACKET, new ExplodePacket());
+		static::registerPacket310(ProtocolInfo310::LEVEL_EVENT_PACKET, new LevelEventPacket());
+		static::registerPacket310(ProtocolInfo310::BLOCK_EVENT_PACKET, new BlockEventPacket());
+		static::registerPacket310(ProtocolInfo310::ACTOR_EVENT_PACKET, new ActorEventPacket());
+		static::registerPacket310(ProtocolInfo310::MOB_EQUIPMENT_PACKET, new MobEquipmentPacket());
+		static::registerPacket310(ProtocolInfo310::MOB_ARMOR_EQUIPMENT_PACKET, new MobArmorEquipmentPacket());
+		static::registerPacket310(ProtocolInfo310::INTERACT_PACKET, new InteractPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_ACTION_PACKET, new PlayerActionPacket());
+		static::registerPacket310(ProtocolInfo310::SET_ACTOR_DATA_PACKET, new SetActorDataPacket());
+		static::registerPacket310(ProtocolInfo310::SET_ACTOR_MOTION_PACKET, new SetActorMotionPacket());
+		static::registerPacket310(ProtocolInfo310::SET_ACTOR_LINK_PACKET, new SetActorLinkPacket());
+		static::registerPacket310(ProtocolInfo310::SET_SPAWN_POSITION_PACKET, new SetSpawnPositionPacket());
+		static::registerPacket310(ProtocolInfo310::ANIMATE_PACKET, new AnimatePacket());
+		static::registerPacket310(ProtocolInfo310::RESPAWN_PACKET, new RespawnPacket());
+		static::registerPacket310(ProtocolInfo310::CONTAINER_OPEN_PACKET, new ContainerOpenPacket());
+		static::registerPacket310(ProtocolInfo310::CONTAINER_CLOSE_PACKET, new ContainerClosePacket());
+		static::registerPacket310(ProtocolInfo310::CONTAINER_SET_DATA_PACKET, new ContainerSetDataPacket());
+		static::registerPacket310(ProtocolInfo310::CRAFTING_DATA_PACKET, new CraftingDataPacket());
+		static::registerPacket310(ProtocolInfo310::CRAFTING_EVENT_PACKET, new CraftingEventPacket());
+		static::registerPacket310(ProtocolInfo310::ADVENTURE_SETTINGS_PACKET, new AdventureSettingsPacket());
+		static::registerPacket310(ProtocolInfo310::BLOCK_ACTOR_DATA_PACKET, new BlockActorDataPacket());
+		static::registerPacket310(ProtocolInfo310::LEVEL_CHUNK_PACKET, new LevelChunkPacket());
+		static::registerPacket310(ProtocolInfo310::SET_COMMANDS_ENABLED_PACKET, new SetCommandsEnabledPacket());
+		static::registerPacket310(ProtocolInfo310::SET_DIFFICULTY_PACKET, new SetDifficultyPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_LIST_PACKET, new PlayerListPacket());
+		static::registerPacket310(ProtocolInfo310::REQUEST_CHUNK_RADIUS_PACKET, new RequestChunkRadiusPacket());
+		static::registerPacket310(ProtocolInfo310::CHUNK_RADIUS_UPDATED_PACKET, new ChunkRadiusUpdatedPacket());
+		static::registerPacket310(ProtocolInfo310::AVAILABLE_COMMANDS_PACKET, new AvailableCommandsPacket());
+		static::registerPacket310(ProtocolInfo310::TRANSFER_PACKET, new TransferPacket());
+		static::registerPacket310(ProtocolInfo310::CLIENT_TO_SERVER_HANDSHAKE_PACKET, new ClientToServerHandshakePacket());
+		static::registerPacket310(ProtocolInfo310::RESOURCE_PACK_DATA_INFO_PACKET, new ResourcePackDataInfoPacket());
+		static::registerPacket310(ProtocolInfo310::RESOURCE_PACKS_INFO_PACKET, new ResourcePackDataInfoPacket());
+		static::registerPacket310(ProtocolInfo310::RESOURCE_PACK_CLIENT_RESPONSE_PACKET, new ResourcePackClientResponsePacket());
+		static::registerPacket310(ProtocolInfo310::RESOURCE_PACK_CHUNK_REQUEST_PACKET, new ResourcePackChunkRequestPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_INPUT_PACKET, new PlayerInputPacket());
+		static::registerPacket310(ProtocolInfo310::MAP_INFO_REQUEST_PACKET, new MapInfoRequestPacket());
+		static::registerPacket310(ProtocolInfo310::INVENTORY_TRANSACTION_PACKET, new InventoryTransactionPacket());
+		static::registerPacket310(ProtocolInfo310::INVENTORY_CONTENT_PACKET, new InventoryContentPacket());
+		static::registerPacket310(ProtocolInfo310::INVENTORY_SLOT_PACKET, new InventorySlotPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_HOTBAR_PACKET, new PlayerHotbarPacket());
+		static::registerPacket310(ProtocolInfo310::COMMAND_REQUEST_PACKET, new CommandRequestPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_HOTBAR_PACKET, new PlayerHotbarPacket());
+		static::registerPacket310(ProtocolInfo310::PLAYER_SKIN_PACKET, new PlayerSkinPacket());
+		static::registerPacket310(ProtocolInfo310::MODAL_FORM_RESPONSE_PACKET, new ModalFormResponsePacket());
+		static::registerPacket310(ProtocolInfo310::SERVER_SETTINGS_REQUEST_PACKET, new ServerSettingsRequestPacket());
+		static::registerPacket310(ProtocolInfo310::PURCHASE_RECEIPT_PACKET, new PurchaseReceiptPacket());
+		static::registerPacket310(ProtocolInfo310::SUB_CLIENT_LOGIN_PACKET, new SubClientLoginPacket());
+		static::registerPacket310(ProtocolInfo310::AVAILABLE_ACTOR_IDENTIFIERS_PACKET, new AvailableActorIdentifiersPacket());
+		static::registerPacket310(ProtocolInfo310::LEVEL_SOUND_EVENT_PACKET, new LevelSoundEventPacket());
+		static::registerPacket310(ProtocolInfo310::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET, new NetworkChunkPublisherUpdatePacket());
+		static::registerPacket310(ProtocolInfo310::SPAWN_PARTICLE_EFFECT_PACKET, new SpawnParticleEffectPacket());
+    	static::registerPacket310(ProtocolInfo310::PLAY_SOUND_PACKET, new PlaySoundPacket());
+    	static::registerPacket310(ProtocolInfo310::ITEM_FRAME_DROP_ITEM_PACKET, new ItemFrameDropItemPacket());
+    	static::registerPacket310(ProtocolInfo310::BOSS_EVENT_PACKET, new BossEventPacket());
+    	static::registerPacket310(ProtocolInfo310::BOOK_EDIT_PACKET, new BookEditPacket());
+		static::registerPacket310(ProtocolInfo310::SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET, new SetLocalPlayerAsInitializedPacket());
+		static::registerPacket310(0xfe, new BatchPacket());
 	}
 
     /**
@@ -218,6 +309,11 @@ class PacketPool {
 			case ProtocolInfo::PROTOCOL_332:
 			case ProtocolInfo::PROTOCOL_331:
 				$class = isset(static::$packetPool331[$pid]) ? clone static::$packetPool331[$pid] : null;
+				break;
+			case ProtocolInfo::PROTOCOL_330:
+			case ProtocolInfo::PROTOCOL_311:
+			case ProtocolInfo::PROTOCOL_310:
+				$class = isset(static::$packetPool310[$pid]) ? clone static::$packetPool310[$pid] : null;
 				break;
 			default:
 				$class = isset(static::$packetPool110[$pid]) ? clone static::$packetPool110[$pid] : null;

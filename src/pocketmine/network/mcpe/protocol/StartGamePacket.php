@@ -88,6 +88,8 @@ class StartGamePacket extends DataPacket{
 	public $isMultiplayerGame = true;
 	/** @var bool */
 	public $hasLANBroadcast = true;
+	/** @var bool */
+	public $hasXboxLiveBroadcast = false;
 	/** @var int */
 	public $xboxLiveBroadcastMode = 0; //TODO: find values
 	/** @var int */
@@ -104,12 +106,18 @@ class StartGamePacket extends DataPacket{
 	public $hasBonusChestEnabled = false;
 	/** @var bool */
 	public $hasStartWithMapEnabled = false;
+	/** @var bool */
+	public $hasTrustPlayersEnabled = false;
 	/** @var int */
 	public $defaultPlayerPermission = PlayerPermissions::MEMBER; //TODO
 
 	/** @var int */
 	public $serverChunkTickRadius = 4; //TODO (leave as default for now)
 
+	/** @var bool */
+	public $hasPlatformBroadcast = false;
+	/** @var bool */
+	public $xboxLiveBroadcastIntent = false;
 	/** @var bool */
 	public $hasLockedBehaviorPack = false;
 	/** @var bool */
@@ -173,21 +181,38 @@ class StartGamePacket extends DataPacket{
 		}
 		$this->isMultiplayerGame = (($this->get(1) !== "\x00"));
 		$this->hasLANBroadcast = (($this->get(1) !== "\x00"));
-		$this->xboxLiveBroadcastMode = $this->getVarInt();
-		$this->platformBroadcastMode = $this->getVarInt();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	    	$this->xboxLiveBroadcastMode = $this->getVarInt();
+	    	$this->platformBroadcastMode = $this->getVarInt();
+		} else {
+		    $this->hasXboxLiveBroadcast = (($this->get(1) !== "\x00"));
+		}
 		$this->commandsEnabled = (($this->get(1) !== "\x00"));
 		$this->isTexturePacksRequired = (($this->get(1) !== "\x00"));
 		$this->gameRules = $this->getGameRules();
 		$this->hasBonusChestEnabled = (($this->get(1) !== "\x00"));
 		$this->hasStartWithMapEnabled = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		    $this->hasTrustPlayersEnabled = (($this->get(1) !== "\x00"));
+		}
 		$this->defaultPlayerPermission = $this->getVarInt();
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		    $this->xboxLiveBroadcastMode = $this->getVarInt();
+		}
 		$this->serverChunkTickRadius = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		    $this->hasPlatformBroadcast = (($this->get(1) !== "\x00"));
+		    $this->platformBroadcastMode = $this->getVarInt();
+		    $this->xboxLiveBroadcastIntent = (($this->get(1) !== "\x00"));
+		}
 		$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
 		$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
 		$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
 		$this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
-		$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
-		$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	    	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
+	    	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
 	    	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
 		}
@@ -249,21 +274,38 @@ class StartGamePacket extends DataPacket{
 		}
 		($this->buffer .= ($this->isMultiplayerGame ? "\x01" : "\x00"));
 		($this->buffer .= ($this->hasLANBroadcast ? "\x01" : "\x00"));
-		$this->putVarInt($this->xboxLiveBroadcastMode);
-		$this->putVarInt($this->platformBroadcastMode);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	    	$this->putVarInt($this->xboxLiveBroadcastMode);
+		    $this->putVarInt($this->platformBroadcastMode);
+		} else {
+		    ($this->buffer .= ($this->hasXboxLiveBroadcast ? "\x01" : "\x00"));
+		}
 		($this->buffer .= ($this->commandsEnabled ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isTexturePacksRequired ? "\x01" : "\x00"));
 		$this->putGameRules($this->gameRules);
 		($this->buffer .= ($this->hasBonusChestEnabled ? "\x01" : "\x00"));
 		($this->buffer .= ($this->hasStartWithMapEnabled ? "\x01" : "\x00"));
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		    ($this->buffer .= ($this->hasTrustPlayersEnabled ? "\x01" : "\x00"));
+		}
 		$this->putVarInt($this->defaultPlayerPermission);
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		    $this->putVarInt($this->xboxLiveBroadcastMode);
+		}
 		($this->buffer .= (\pack("V", $this->serverChunkTickRadius)));
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+	    	($this->buffer .= ($this->hasPlatformBroadcast ? "\x01" : "\x00"));
+	    	$this->putVarInt($this->platformBroadcastMode);
+	    	($this->buffer .= ($this->xboxLiveBroadcastIntent ? "\x01" : "\x00"));
+		}
 		($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
 		($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
 		($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
-		($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
-		($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	    	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
 	    	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
 		}

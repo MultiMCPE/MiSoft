@@ -44,14 +44,18 @@ class SpawnParticleEffectPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->dimensionId = (\ord($this->get(1)));
-		$this->entityUniqueId = $this->getEntityUniqueId();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+		}
 		$this->position = $this->getVector3();
 		$this->particleName = $this->getString();
 	}
 
 	protected function encodePayload(){
 		($this->buffer .= \chr($this->dimensionId));
-		$this->putEntityUniqueId($this->entityUniqueId);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	    	$this->putEntityUniqueId($this->entityUniqueId);
+		}
 		$this->putVector3($this->position);
 		$this->putString($this->particleName);
 	}

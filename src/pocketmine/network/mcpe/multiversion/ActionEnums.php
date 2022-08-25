@@ -110,6 +110,9 @@ abstract class ActionEnums {
 			case ProtocolInfo::PROTOCOL_340:
 			case ProtocolInfo::PROTOCOL_332:
 			case ProtocolInfo::PROTOCOL_331:
+			case ProtocolInfo::PROTOCOL_330:
+			case ProtocolInfo::PROTOCOL_311:
+			case ProtocolInfo::PROTOCOL_310:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

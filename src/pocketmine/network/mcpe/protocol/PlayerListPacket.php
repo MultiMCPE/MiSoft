@@ -105,16 +105,19 @@ class PlayerListPacket extends DataPacket{
 				$capeData = $entry->skin->getCapeData();
 				$this->putString($capeData);
 				
-				$skinGeometryName = strtolower($entry->skin->getGeometryName());
+				$skinGeometryName = $entry->skin->getGeometryName();
 				$skinGeometryData = $entry->skin->getGeometryData();
-				$tempData = json_decode($skinGeometryData, true);
-				if (is_array($tempData)) {
-					foreach ($tempData as $key => $value) {
-						unset($tempData[$key]);
-						$tempData[strtolower($key)] = $value;
-					}
-					
-					$skinGeometryData = json_encode($tempData);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+				    $skinGeometryName = strtolower($skinGeometryName);
+			    	$tempData = json_decode($skinGeometryData, true);
+			    	if (is_array($tempData)) {
+				    	foreach ($tempData as $key => $value) {
+					    	unset($tempData[$key]);
+					    	$tempData[strtolower($key)] = $value;
+				    	}
+					    
+				    	$skinGeometryData = json_encode($tempData);
+			    	}
 				}
 				$this->putString($skinGeometryName);
 				$this->putString($this->prepareGeometryDataForOld($skinGeometryData));

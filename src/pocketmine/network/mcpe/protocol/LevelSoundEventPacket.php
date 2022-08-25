@@ -86,7 +86,12 @@ class LevelSoundEventPacket extends DataPacket{
 			$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
 			$this->extraData = $blockData[0];
 		}
-		$this->entityType = $this->getString();
+		
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	$this->entityType = $this->getString();
+		} else {
+		    $this->entityType = $this->getVarInt();
+		}
 		$this->isBabyMob = (($this->get(1) !== "\x00"));
 		$this->disableRelativeVolume = (($this->get(1) !== "\x00"));
 	}
@@ -105,7 +110,11 @@ class LevelSoundEventPacket extends DataPacket{
 			$runtimeId = self::getBlockRuntimeID($this->extraData, 0, $this->getProtocol());
 			$this->putVarInt($runtimeId);
 		}
-		$this->putString($this->entityType);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+	    	$this->putString(AddActorPacket::LEGACY_ID_MAP_BC[$this->entityType] ?? ":");
+		} else {
+		    $this->putVarInt($this->entityType);
+		}
 		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));
 		($this->buffer .= ($this->disableRelativeVolume ? "\x01" : "\x00"));
 	}
