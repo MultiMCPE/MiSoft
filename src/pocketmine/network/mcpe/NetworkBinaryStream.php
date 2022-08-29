@@ -32,8 +32,11 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
@@ -44,6 +47,9 @@ use function count;
 use function strlen;
 
 class NetworkBinaryStream extends BinaryStream{
+
+	private const DAMAGE_TAG = "Damage"; //TAG_Int
+	private const DAMAGE_TAG_CONFLICT_RESOLUTION = "___Damage_ProtocolCollisionResolution___";
 
 	public function getString() : string{
 		return $this->get($this->getUnsignedVarInt());
@@ -85,25 +91,30 @@ class NetworkBinaryStream extends BinaryStream{
 
 		/** @var CompoundTag|null $nbt */
 		$nbt = null;
-		if ($nbtLen > 0) {
-			$nbt = $this->get($nbtLen);
-		} elseif($nbtLen === -1) {
-			$nbtCount = $this->getUnsignedVarInt();
-			if ($nbtCount > 100) {
-				throw new \UnexpectedValueException("Get slot nbt error, too many count");
-			}
-
-			for ($i = 0; $i < $nbtCount; $i++) {
-				$offset = $this->getOffset();
-				if ($offset > strlen($this->getBuffer())) {
-					throw new \UnexpectedValueException("Get slot nbt error");
-				}
-
-		    	$decodedNBT = (new NetworkLittleEndianNBTStream())->read(substr($this->getBuffer(), $offset), false);
-
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_330){
+	    	if($nbtLen === 0xffff){
+		    	$c = (\ord($this->get(1)));
+		    	if($c !== 1){
+			    	throw new \UnexpectedValueException("Unexpected NBT count $c");
+		    	}
+		    	$decodedNBT = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+		    	if(!($decodedNBT instanceof CompoundTag)){
+			    	throw new \UnexpectedValueException("Unexpected root tag type for itemstack");
+		    	}
 		    	$nbt = $decodedNBT;
-		    	$this->setOffset($offset + $nbt->getOffset());
-			}
+		    }elseif($nbtLen !== 0){
+		    	throw new \UnexpectedValueException("Unexpected fake NBT length $nbtLen");
+		    }
+		}
+		elseif($nbtLen > 0){
+		    $decodedNBT = (new LittleEndianNBTStream())->read($this->get($nbtLen));
+		    if(!($decodedNBT instanceof CompoundTag)){
+			    throw new \UnexpectedValueException("Unexpected root tag type for itemstack");
+		    }
+            if($playerProtocol < ProtocolInfo::PROTOCOL_120 && $id === ItemIds::FILLED_MAP && $decodedNBT->hasTag("map_uuid", StringTag::class)){
+                $decodedNBT->setLong("map_uuid", (int) $decodedNBT->getString("map_uuid"));
+            }
+		    $nbt = $decodedNBT;
 		}
 
 		//TODO
@@ -116,35 +127,81 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->getString();
 		}
 
-        if($playerProtocol >= ProtocolInfo::PROTOCOL_340){
-	    	if($id === ItemIds::SHIELD){
-		    	$this->getVarLong(); //"blocking tick" (ffs mojang)
-	    	}
+		if($id === ItemIds::SHIELD){
+			$this->getVarLong(); //"blocking tick" (ffs mojang)
 		}
 
+		if($nbt !== null){
+			if($nbt->hasTag(self::DAMAGE_TAG, IntTag::class)){
+				$data = $nbt->getInt(self::DAMAGE_TAG);
+				$nbt->removeTag(self::DAMAGE_TAG);
+				if($nbt->count() === 0){
+					$nbt = null;
+					goto end;
+				}
+			}
+			if(($conflicted = $nbt->getTag(self::DAMAGE_TAG_CONFLICT_RESOLUTION)) !== null){
+				$nbt->removeTag(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+				$conflicted->setName(self::DAMAGE_TAG);
+				$nbt->setTag($conflicted);
+			}
+		}
+		end:
 		return ItemFactory::get($id, $data, $cnt, $nbt);
 	}
 
 	public function putSlot(Item $item, int $playerProtocol) : void{
-		if ($item->getId() === 0) {
+		if($item->getId() === 0){
 			$this->putVarInt(0);
 
 			return;
 		}
 
 		$this->putVarInt($item->getId());
-		$this->putVarInt(($item->getDamage() === null ? 0  : ($item->getDamage() << 8)) + $item->getCount());
-		$nbt = $item->getCompoundTag();
-		$this->putLShort(strlen($nbt));
-		$this->put($nbt);
+		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
+		$this->putVarInt($auxValue);
+
+		$nbt = null;
+		if($item->hasCompoundTag()){
+			$nbt = clone $item->getNamedTag();
+		}
+		if($item instanceof Durable and $item->getDamage() > 0){
+			if($nbt !== null){
+				if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
+					$nbt->removeTag(self::DAMAGE_TAG);
+					$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+					$nbt->setTag($existing);
+				}
+			}else{
+				$nbt = new CompoundTag();
+			}
+			$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
+		}
+
+		if($nbt !== null){
+		    if($playerProtocol >= ProtocolInfo::PROTOCOL_330){
+		    	($this->buffer .= (\pack("v", 0xffff)));
+		    	($this->buffer .= \chr(1)); //TODO: some kind of count field? always 1 as of 1.9.0
+		    	($this->buffer .= (new NetworkLittleEndianNBTStream())->write($nbt));
+		    }else{
+                if($playerProtocol < ProtocolInfo::PROTOCOL_120 && $item->getId() === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
+                    $tag = $item->getNamedTag();
+                    $uuid = $tag->getLong("map_uuid");
+                    $nbt->setString("map_uuid", (string) $uuid);
+                }
+                $nbt = (new LittleEndianNBTStream())->write($nbt);
+		    	($this->buffer .= (\pack("v", strlen($nbt))));
+		    	($this->buffer .= $nbt);
+		    }
+		}else{
+			($this->buffer .= (\pack("v", 0)));
+		}
 
 		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 		$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-        if($playerProtocol >= ProtocolInfo::PROTOCOL_340){
-	    	if($item->getId() === ItemIds::SHIELD){
-		    	$this->putVarLong(0); //"blocking tick" (ffs mojang)
-	    	}
+		if($item->getId() === ItemIds::SHIELD){
+			$this->putVarLong(0); //"blocking tick" (ffs mojang)
 		}
 	}
 

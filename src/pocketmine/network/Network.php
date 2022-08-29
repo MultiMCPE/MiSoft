@@ -282,6 +282,7 @@ class Network{
 			case ProtocolInfo::PROTOCOL_331:
 			    return ProtocolInfo::PROTOCOL_331;
 			case ProtocolInfo::PROTOCOL_330:
+			    return ProtocolInfo::PROTOCOL_330;
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
 			    return ProtocolInfo::PROTOCOL_310;
