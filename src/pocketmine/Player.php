@@ -1900,12 +1900,22 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->uuid = UUID::fromString($packet->clientUUID);
 		$this->rawUUID = $this->uuid->toBinary();
 
+        $skinGeometry = "";
+		if (isset($packet->clientData["SkinGeometry"])) {
+			$skinGeometry = base64_decode($packet->clientData["SkinGeometry"]);
+		} elseif (isset($packet->clientData["SkinGeometryData"])) {
+			$skinGeometry = base64_decode($packet->clientData["SkinGeometryData"]);
+			if (strpos($skinGeometry, "null") === 0) {
+				$skinGeometry = "";
+			}
+		}
+
 		$skin = new Skin(
 			$packet->clientData["SkinId"],
 			base64_decode($packet->clientData["SkinData"] ?? ""),
 			base64_decode($packet->clientData["CapeData"] ?? ""),
 			$packet->clientData["SkinGeometryName"] ?? "",
-			base64_decode($packet->clientData["SkinGeometry"] ?? "")
+			$skinGeometry
 		);
 
 		if(!$skin->isValid()){
