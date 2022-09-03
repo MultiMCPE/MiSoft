@@ -79,7 +79,9 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_SIGN_BOOK:
 				$this->title = $this->getString();
 				$this->author = $this->getString();
-				$this->xuid = $this->getString();
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+			    	$this->xuid = $this->getString();
+				}
 				break;
 			default:
 				throw new \UnexpectedValueException("Unknown book edit type $this->type!");
@@ -107,7 +109,9 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_SIGN_BOOK:
 				$this->putString($this->title);
 				$this->putString($this->author);
-				$this->putString($this->xuid);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+			    	$this->putString($this->xuid);
+				}
 				break;
 			default:
 				throw new \InvalidArgumentException("Unknown book edit type $this->type!");

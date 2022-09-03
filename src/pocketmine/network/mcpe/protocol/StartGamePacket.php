@@ -153,6 +153,9 @@ class StartGamePacket extends DataPacket{
 	/** @var array|null string (name) => int16 (legacyID) */
 	public $itemTable = null;
 
+    /** @var string */
+	public $vanillaVersion = "";
+
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
@@ -173,7 +176,9 @@ class StartGamePacket extends DataPacket{
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
 		$this->time = $this->getVarInt();
 		$this->eduMode = (($this->get(1) !== "\x00"));
-		$this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	    	$this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
+		}
 		$this->rainLevel = ((\unpack("g", $this->get(4))[1]));
 		$this->lightningLevel = ((\unpack("g", $this->get(4))[1]));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
@@ -205,27 +210,29 @@ class StartGamePacket extends DataPacket{
 		    $this->platformBroadcastMode = $this->getVarInt();
 		    $this->xboxLiveBroadcastIntent = (($this->get(1) !== "\x00"));
 		}
-		$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
-		$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
-		$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	    	$this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
-	    	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
-	    	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
-	    	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
-		}
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	    	$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
+	    	$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
+	    	$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	    	    $this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
+	    	}
+		    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	        	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
+	        	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
+	    	}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	        	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+	    	}
+        }
 
-		$this->levelId = $this->getString();
-		$this->worldName = $this->getString();
-		$this->premiumWorldTemplateId = $this->getString();
-		$this->isTrial = (($this->get(1) !== "\x00"));
-		$this->currentTick = (Binary::readLLong($this->get(8)));
+	    $this->levelId = $this->getString();
+	    $this->worldName = $this->getString();
+	    $this->premiumWorldTemplateId = $this->getString();
+	   	$this->isTrial = (($this->get(1) !== "\x00"));
+	    $this->currentTick = (Binary::readLLong($this->get(8)));
 
-		$this->enchantmentSeed = $this->getVarInt();
+	    $this->enchantmentSeed = $this->getVarInt();
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
 	    	$this->blockTable = [];
@@ -275,7 +282,9 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));
 		$this->putVarInt($this->time);
 		($this->buffer .= ($this->eduMode ? "\x01" : "\x00"));
-		($this->buffer .= ($this->hasEduFeaturesEnabled ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	    	($this->buffer .= ($this->hasEduFeaturesEnabled ? "\x01" : "\x00"));
+		}
 		($this->buffer .= (\pack("g", $this->rainLevel)));
 		($this->buffer .= (\pack("g", $this->lightningLevel)));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
@@ -307,18 +316,20 @@ class StartGamePacket extends DataPacket{
 	    	$this->putVarInt($this->platformBroadcastMode);
 	    	($this->buffer .= ($this->xboxLiveBroadcastIntent ? "\x01" : "\x00"));
 		}
-		($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
-		($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
-		($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	    	($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
-	    	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
-	    	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
-	    	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	    	($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	        	($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
+	    	}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	        	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
+	        	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
+	    	}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	        	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+	    	}
 		}
 
 		$this->putString($this->levelId);

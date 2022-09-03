@@ -61,25 +61,37 @@ class UpdateBlockPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$runtimeId = $this->getUnsignedVarInt();
-		if ($runtimeId < 0) {
-			$this->blockId = -1;
-			$this->blockMeta = 0;
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+	    	$runtimeId = $this->getUnsignedVarInt();
+	    	if ($runtimeId < 0) {
+	    		$this->blockId = -1;
+		    	$this->blockMeta = 0;
+	    	} else {
+		    	$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
+		    	$this->blockId = $blockData[0];
+		    	$this->blockMeta = $blockData[1];
+	    	}
+	    	$this->flags = $this->getUnsignedVarInt();
+	    	$this->dataLayerId = $this->getUnsignedVarInt();
 		} else {
-			$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
-			$this->blockId = $blockData[0];
-			$this->blockMeta = $blockData[1];
+	    	$this->blockId = $this->getUnsignedVarInt();
+	    	$aux = $this->getUnsignedVarInt();
+	    	$this->blockMeta = $aux & 0x0f;
+	    	$this->flags = $aux >> 4;
 		}
-		$this->flags = $this->getUnsignedVarInt();
-		$this->dataLayerId = $this->getUnsignedVarInt();
 	}
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$runtimeId = self::getBlockRuntimeID($this->blockId, $this->blockMeta, $this->getProtocol());
-		$this->putUnsignedVarInt($runtimeId);
-		$this->putUnsignedVarInt($this->flags);
-		$this->putUnsignedVarInt($this->dataLayerId);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+	    	$runtimeId = self::getBlockRuntimeID($this->blockId, $this->blockMeta, $this->getProtocol());
+	    	$this->putUnsignedVarInt($runtimeId);
+	    	$this->putUnsignedVarInt($this->flags);
+	    	$this->putUnsignedVarInt($this->dataLayerId);
+		} else {
+	    	$this->putUnsignedVarInt($this->blockId);
+	    	$this->putUnsignedVarInt(($this->flags << 4) | $this->blockMeta);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -181,7 +181,9 @@ class AddActorPacket extends DataPacket{
 		$this->motion = $this->getVector3();
 		$this->pitch = ((\unpack("g", $this->get(4))[1]));
 		$this->yaw = ((\unpack("g", $this->get(4))[1]));
-		$this->headYaw = ((\unpack("g", $this->get(4))[1]));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+	    	$this->headYaw = ((\unpack("g", $this->get(4))[1]));
+		}
 
 		$attrCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $attrCount; ++$i){
@@ -223,7 +225,9 @@ class AddActorPacket extends DataPacket{
 		$this->putVector3Nullable($this->motion);
 		($this->buffer .= (\pack("g", $this->pitch)));
 		($this->buffer .= (\pack("g", $this->yaw)));
-		($this->buffer .= (\pack("g", $this->headYaw)));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+	    	($this->buffer .= (\pack("g", $this->headYaw)));
+		}
 
 		$this->putUnsignedVarInt(count($this->attributes));
 		foreach($this->attributes as $attribute){

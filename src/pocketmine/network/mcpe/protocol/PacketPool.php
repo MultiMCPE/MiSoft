@@ -406,6 +406,13 @@ class PacketPool {
 			case ProtocolInfo::PROTOCOL_290:
 			case ProtocolInfo::PROTOCOL_282:
 			case ProtocolInfo::PROTOCOL_280:
+			case ProtocolInfo::PROTOCOL_274:
+			case ProtocolInfo::PROTOCOL_273:
+			case ProtocolInfo::PROTOCOL_271:
+			case ProtocolInfo::PROTOCOL_260:
+			case ProtocolInfo::PROTOCOL_240:
+			case ProtocolInfo::PROTOCOL_221:
+			case ProtocolInfo::PROTOCOL_220:
 				$class = isset(static::$packetPool120[$pid]) ? clone static::$packetPool120[$pid] : null;
 				break;
 			default:

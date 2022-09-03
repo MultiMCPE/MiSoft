@@ -279,6 +279,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $chunkProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 	/** @var int */
 	protected $craftingProtocol = ProtocolInfo::CURRENT_PROTOCOL;
+	/** @var string */
+	protected $vanillaVersion = "";
 	/** @var int */
 	protected $randomClientId;
 	/** @var string */
@@ -1011,6 +1013,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($this->spawnChunkLoadCount !== -1 and ++$this->spawnChunkLoadCount >= $this->spawnThreshold){
 			$this->sendPlayStatus(PlayStatusPacket::PLAYER_SPAWN);
+			if ($this->getProtocol() < ProtocolInfo::PROTOCOL_274) {
+			    $this->doFirstSpawn();
+			}
+
 			$this->spawnChunkLoadCount = -1;
 		}
 	}
@@ -1893,6 +1899,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->locale = $packet->locale;
 		}
 
+        $this->vanillaVersion = $packet->clientData["GameVersion"] ?? "";
+
 		if(count($this->server->getOnlinePlayers()) >= $this->server->getMaxPlayers() and $this->kick("disconnectionScreen.serverFull", false)){
 			return true;
 		}
@@ -2122,6 +2130,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->commandsEnabled = true;
 		$pk->levelId = "";
 		$pk->worldName = $this->server->getMotd();
+		$pk->vanillaVersion = $this->vanillaVersion;
 		$this->dataPacket($pk);
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
@@ -3980,5 +3989,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
     public function getCraftingProtocol() : int{
         return $this->craftingProtocol;
+    }
+
+    public function getVanillaVersion() : string{
+        return $this->vanillaVersion;
     }
 }

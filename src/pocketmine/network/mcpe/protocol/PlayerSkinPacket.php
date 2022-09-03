@@ -50,14 +50,24 @@ class PlayerSkinPacket extends DataPacket{
 		$skinId = $this->getString();
 		$this->newSkinName = $this->getString();
 		$this->oldSkinName = $this->getString();
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+			$this->getLInt(); // num skin data, always 1
+			$this->getLInt();
+		}
 		$skinData = $this->getString();
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+			$this->getLInt();
+			$this->getLInt();
+		}
 		$capeData = $this->getString();
 		$geometryModel = $this->getString();
 		$geometryData = $this->getString();
 
 		$this->skin = new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData);
 
-		$this->premiumSkin = (($this->get(1) !== "\x00"));
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && !$this->feof()) {
+	    	$this->premiumSkin = (($this->get(1) !== "\x00"));
+        }
 	}
 
 	protected function encodePayload(){
@@ -66,12 +76,22 @@ class PlayerSkinPacket extends DataPacket{
 		$this->putString($this->skin->getSkinId());
 		$this->putString($this->newSkinName);
 		$this->putString($this->oldSkinName);
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+			$this->putLInt(1); // num skin data, always 1
+			$this->putLInt(strlen($this->skin->getSkinData()));
+		}
 		$this->putString($this->skin->getSkinData());
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+			$this->putLInt(empty($this->skin->getCapeData()));
+			$this->putLInt(strlen($this->skin->getCapeData()));
+		}
 		$this->putString($this->skin->getCapeData());
 		$this->putString($this->skin->getGeometryName());
 		$this->putString($this->skin->getGeometryData());
 
-		($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260) {
+	    	($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

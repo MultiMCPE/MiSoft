@@ -30,7 +30,7 @@ interface ProtocolInfo {
 	 */
 
 	public const CURRENT_PROTOCOL = 110;
-	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
 	public const MINECRAFT_VERSION = 'v1.x';
 	public const MINECRAFT_VERSION_NETWORK = '1.x';
 
@@ -52,6 +52,19 @@ interface ProtocolInfo {
 	public const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
 	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 	/** 1.2 BETAS */
+	public const PROTOCOL_220 = 220; // 1.2.13.5, 1.2.13.6
+	public const PROTOCOL_221 = 221; // 1.2.13.8
+	public const PROTOCOL_222 = 222; // 1.2.13.10
+	public const PROTOCOL_223 = 223; // 1.2.3, 1.2.4, 1.2.5, 1.2.13.60
+	public const PROTOCOL_224 = 224; // 1.2.13.11
+	public const PROTOCOL_240 = 240; // 1.2.14.2, 1.2.14.3
+	public const PROTOCOL_250 = 250; // 1.2.15.1
+	public const PROTOCOL_260 = 260; // 1.2.20.1, 1.2.20.2
+	public const PROTOCOL_261 = 261; // 1.4.0, 1.4.1, 1.4.2, 1.4.3, 1.4.4
+	public const PROTOCOL_270 = 270; // 1.5.0.0
+	public const PROTOCOL_271 = 271; // 1.5.0.1, 1.5.0.4
+	public const PROTOCOL_273 = 273; // 1.5.0.7
+	public const PROTOCOL_274 = 274; // 1.5.0.10, 1.5.0, 1.5.1, 1.5.2, 1.5.3
 	public const PROTOCOL_280 = 280; // 1.6.0.1
 	public const PROTOCOL_281 = 281; // 1.6.0.5, 1.6.0.6
 	public const PROTOCOL_282 = 282; // 1.6.0.8, 1.6.0.30, 1.6.0, 1.6.1, 1.6.2

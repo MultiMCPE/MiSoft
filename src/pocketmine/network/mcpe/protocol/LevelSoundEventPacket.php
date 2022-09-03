@@ -80,12 +80,16 @@ class LevelSoundEventPacket extends DataPacket{
 	    }
 		$this->sound = SoundEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
-		$runtimeId = $this->getVarInt();
-		if ($runtimeId < 0) {
-			$this->extraData = -1;
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+	    	$runtimeId = $this->getVarInt();
+	    	if ($runtimeId < 0) {
+		    	$this->extraData = -1;
+	    	} else {
+		    	$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
+		    	$this->extraData = $blockData[0];
+	    	}
 		} else {
-			$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
-			$this->extraData = $blockData[0];
+		    $this->extraData = $this->getVarInt();
 		}
 		
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
@@ -108,11 +112,15 @@ class LevelSoundEventPacket extends DataPacket{
 	        ($this->buffer .= \chr($sound));
 	    }
 		$this->putVector3($this->position);
-		if ($this->extraData < 0) {
-			$this->putVarInt($this->extraData);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+	    	if ($this->extraData < 0) {
+		    	$this->putVarInt($this->extraData);
+	    	} else {
+		    	$runtimeId = self::getBlockRuntimeID($this->extraData, 0, $this->getProtocol());
+		    	$this->putVarInt($runtimeId);
+	    	}
 		} else {
-			$runtimeId = self::getBlockRuntimeID($this->extraData, 0, $this->getProtocol());
-			$this->putVarInt($runtimeId);
+		    $this->putVarInt($this->extraData);
 		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
 	    	$this->putString(AddActorPacket::LEGACY_ID_MAP_BC[$this->entityType] ?? ":");

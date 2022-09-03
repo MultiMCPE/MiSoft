@@ -50,21 +50,60 @@ class MoveActorAbsolutePacket extends DataPacket{
 	public $zRot;
 
 	protected function decodePayload(){
-		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->flags = (\ord($this->get(1)));
-		$this->position = $this->getVector3();
-		$this->xRot = $this->getByteRotation();
-		$this->yRot = $this->getByteRotation();
-		$this->zRot = $this->getByteRotation();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
+	        	$this->flags = (\ord($this->get(1)));
+	    	} else {
+		        $this->flags = ((\unpack("g", $this->get(4))[1]));
+	    	}
+	    	$this->position = $this->getVector3();
+	    	$this->xRot = $this->getByteRotation();
+	    	$this->yRot = $this->getByteRotation();
+	    	$this->zRot = $this->getByteRotation();
+		} else {
+	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
+	    	$this->position = $this->getVector3();
+	    	$this->xRot = $this->getByteRotation();
+	    	$this->yRot = $this->getByteRotation();
+	    	$this->zRot = $this->getByteRotation();
+
+	    	$this->flags = 0;
+	    	$onGround = $this->get(1) !== "\x00";
+	    	$isTeleported = $this->get(1) !== "\x00";
+	    	if($onGround){
+	    	    $this->flags |= self::FLAG_GROUND;
+	    	}
+	    	if($isTeleported){
+	    	    $this->flags |= self::FLAG_TELEPORT;
+	    	}
+		}
 	}
 
 	protected function encodePayload(){
-		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= \chr($this->flags));
-		$this->putVector3($this->position);
-		$this->putByteRotation($this->xRot);
-		$this->putByteRotation($this->yRot);
-		$this->putByteRotation($this->zRot);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+	    	$this->putEntityRuntimeId($this->entityRuntimeId);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
+	        	($this->buffer .= \chr($this->flags));
+	    	} else {
+		        ($this->buffer .= (\pack("g", $this->flags)));
+	    	}
+	    	$this->putVector3($this->position);
+	    	$this->putByteRotation($this->xRot);
+	    	$this->putByteRotation($this->yRot);
+	    	$this->putByteRotation($this->zRot);
+		} else {
+	    	$this->putEntityRuntimeId($this->entityRuntimeId);
+	    	$this->putVector3($this->position);
+	    	$this->putByteRotation($this->xRot);
+	    	$this->putByteRotation($this->yRot);
+	    	$this->putByteRotation($this->zRot);
+
+	    	$onGround = ($this->flags & self::FLAG_GROUND) !== 0;
+	    	$isTeleported = ($this->flags & self::FLAG_TELEPORT) !== 0;
+	    	($this->buffer .= ($onGround ? "\x01" : "\x00"));
+	    	($this->buffer .= ($isTeleported ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{
