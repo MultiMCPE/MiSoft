@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\multiversion\SoundEnums;
 use pocketmine\network\mcpe\NetworkSession;
+use function array_search;
 
 class LevelSoundEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_SOUND_EVENT_PACKET;
@@ -88,7 +89,10 @@ class LevelSoundEventPacket extends DataPacket{
 		}
 		
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
-	    	$this->entityType = $this->getString();
+	    	$this->entityType = array_search($t = $this->getString(), AddActorPacket::LEGACY_ID_MAP_BC, true);
+	    	if ($this->entityType === false) {
+	    	    $this->entityType = 1;
+	    	}
 		} else {
 		    $this->entityType = $this->getVarInt();
 		}
