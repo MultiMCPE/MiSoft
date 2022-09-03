@@ -157,6 +157,8 @@ class MetadataConvertor {
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
 			case ProtocolInfo::PROTOCOL_290:
+			case ProtocolInfo::PROTOCOL_282:
+			case ProtocolInfo::PROTOCOL_280:
 				$protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_280];
 				break;
 			default:
@@ -204,6 +206,10 @@ class MetadataConvertor {
 			case ProtocolInfo::PROTOCOL_290:
 			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_290];
 				break;
+			case ProtocolInfo::PROTOCOL_282:
+			case ProtocolInfo::PROTOCOL_280:
+			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_280];
+			    break;
 			default:
 				return $metadata;
 		}

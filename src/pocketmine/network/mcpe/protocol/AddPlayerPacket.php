@@ -111,7 +111,9 @@ class AddPlayerPacket extends DataPacket{
 			$this->links[$i] = $this->getEntityLink();
 		}
 
-		$this->deviceId = $this->getString();
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	    	$this->deviceId = $this->getString();
+        }
 	}
 
 	protected function encodePayload(){
@@ -145,7 +147,9 @@ class AddPlayerPacket extends DataPacket{
 			$this->putEntityLink($link);
 		}
 
-		$this->putString($this->deviceId);
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	    	$this->putString($this->deviceId);
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

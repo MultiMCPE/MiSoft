@@ -227,16 +227,18 @@ class StartGamePacket extends DataPacket{
 
 		$this->enchantmentSeed = $this->getVarInt();
 
-		$this->blockTable = [];
-		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$id = $this->getString();
-			$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-			$unknown = 0;
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-		    	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-			}
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+	    	$this->blockTable = [];
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$id = $this->getString();
+		    	$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+		    	$unknown = 0;
+		    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		        	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+			    }
 
-			$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+		    	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+	    	}
 		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 		    $this->itemTable = [];
@@ -248,7 +250,9 @@ class StartGamePacket extends DataPacket{
 	    	}
 		}
 
-		$this->multiplayerCorrelationId = $this->getString();
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	    	$this->multiplayerCorrelationId = $this->getString();
+        }
 	}
 
 	protected function encodePayload(){
@@ -325,13 +329,17 @@ class StartGamePacket extends DataPacket{
 
 		$this->putVarInt($this->enchantmentSeed);
 
-        $this->put(self::getBlockPalletData($this->getProtocol()));
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+            $this->put(self::getBlockPalletData($this->getProtocol()));
+        }
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 	    	$this->putUnsignedVarInt(0); // item list
 		}
 
-		$this->putString($this->multiplayerCorrelationId);
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	    	$this->putString($this->multiplayerCorrelationId);
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

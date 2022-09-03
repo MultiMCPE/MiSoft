@@ -55,7 +55,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
 			$this->getString();
-			$this->getString();
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+		    	$this->getString();
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
 		    	(($this->get(1) !== "\x00"));
 			}
@@ -68,7 +70,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
 			$this->getString();
-			$this->getString();
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+		    	$this->getString();
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
 		    	(($this->get(1) !== "\x00"));
 			}
@@ -87,7 +91,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
 			$this->putString(""); //TODO: subpack name
-			$this->putString(""); //TODO: content identity
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+		    	$this->putString(""); //TODO: content identity
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
 		    	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: has scripts (?)
 			}
@@ -99,7 +105,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
 			$this->putString(""); //TODO: subpack name
-			$this->putString(""); //TODO: content identity
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+		    	$this->putString(""); //TODO: content identity
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
 		    	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: seems useless for resource packs
 			}

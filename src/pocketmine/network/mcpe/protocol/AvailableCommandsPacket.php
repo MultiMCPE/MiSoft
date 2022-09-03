@@ -90,7 +90,9 @@ class AvailableCommandsPacket extends DataPacket{
 		    ProtocolInfo::PROTOCOL_330 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_311 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_310 => new NetworkBinaryStream(),
-		    ProtocolInfo::PROTOCOL_290 => new NetworkBinaryStream()
+		    ProtocolInfo::PROTOCOL_290 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_282 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_280 => new NetworkBinaryStream()
 		];
 
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore
@@ -200,7 +202,9 @@ class AvailableCommandsPacket extends DataPacket{
 		$additionalDataStream->putUnsignedVarInt(count($commands));
 
 		foreach ($commandsStreams as $protocol => $commandsStream) {
-			$commandsStream->putUnsignedVarInt(0);
+            if ($protocol >= ProtocolInfo::PROTOCOL_280) {
+		    	$commandsStream->putUnsignedVarInt(0);
+            }
 			self::$commandsBuffer[$protocol] = $additionalDataStream->getBuffer() . $commandsStream->getBuffer();
 		}
 
