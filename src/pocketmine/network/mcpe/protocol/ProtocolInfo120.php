@@ -134,5 +134,5 @@ interface ProtocolInfo120 {
 	public const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;			// NEW
 	public const SHOW_PROFILE_PACKET = 0x68;						// NEW
 	public const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;				// NEW
-	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x70;    // NEW
+	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x71;    // NEW
 }

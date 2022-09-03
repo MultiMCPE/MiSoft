@@ -1184,13 +1184,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$this->loadQueue = $newOrder;
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310 && !empty($this->loadQueue) or !empty($unloadChunks)){
-			$pk = new NetworkChunkPublisherUpdatePacket();
-			$pk->x = $this->getFloorX();
-			$pk->y = $this->getFloorY();
-			$pk->z = $this->getFloorZ();
-			$pk->radius = $this->viewDistance * 16; //blocks, not chunks >.>
-			$this->dataPacket($pk);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
+	    	if(!empty($this->loadQueue) or !empty($unloadChunks)){
+		    	$pk = new NetworkChunkPublisherUpdatePacket();
+		    	$pk->x = $this->getFloorX();
+		    	$pk->y = $this->getFloorY();
+		    	$pk->z = $this->getFloorZ();
+		    	$pk->radius = $this->viewDistance * 16; //blocks, not chunks >.>
+		    	$this->dataPacket($pk);
+	    	}
 		}
 
 		Timings::$playerChunkOrderTimer->stopTiming();
