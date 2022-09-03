@@ -855,6 +855,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\multiversion\\ActionEnums' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/ActionEnums.php',
         'pocketmine\\network\\mcpe\\multiversion\\ResourceEnums' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/ResourceEnums.php',
         'pocketmine\\network\\mcpe\\multiversion\\BlockPallet' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/BlockPallet.php',
+        'pocketmine\\network\\mcpe\\multiversion\\MetadataConvertor' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/MetadataConvertor.php',
         'pocketmine\\network\\mcpe\\protocol\\ActorEventPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/ActorEventPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\AddActorPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/AddActorPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\AddItemActorPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/AddItemActorPacket.php',

@@ -64,8 +64,8 @@ class LevelSoundEventPacket extends DataPacket{
 	public $position;
 	/** @var int */
 	public $extraData = -1;
-	/** @var string */
-	public $entityType = ":"; //???
+	/** @var int */
+	public $entityType = 1; //???
 	/** @var bool */
 	public $isBabyMob = false; //...
 	/** @var bool */

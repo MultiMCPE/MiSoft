@@ -38,6 +38,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
@@ -289,7 +290,9 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param array $metadata
 	 */
-	public function putEntityMetadata(array $metadata) : void{
+	public function putEntityMetadata(array $metadata, int $playerProtocol) : void{
+	    $metadata = MetadataConvertor::updateMetadata($metadata, $playerProtocol);
+
 		$this->putUnsignedVarInt(count($metadata));
 		foreach($metadata as $key => $d){
 			$this->putUnsignedVarInt($key); //data key

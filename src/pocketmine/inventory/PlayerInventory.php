@@ -205,12 +205,13 @@ class PlayerInventory extends BaseInventory{
 		}
 		$pk = new InventoryContentPacket();
 		$pk->windowId = ContainerIds::CREATIVE;
+		$pk->items = [];
 
-		if(!$holder->isSpectator()){ //fill it for all gamemodes except spectator
+		/*if(!$holder->isSpectator()){ //fill it for all gamemodes except spectator
 			foreach(Item::getCreativeItems() as $i => $item){
 				$pk->items[$i] = clone $item;
 			}
-		}
+		}*/
 
 		$holder->dataPacket($pk);
 	}

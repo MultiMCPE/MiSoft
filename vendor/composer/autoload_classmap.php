@@ -792,6 +792,7 @@ return array(
     'pocketmine\\network\\mcpe\\multiversion\\ActionEnums' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/ActionEnums.php',
     'pocketmine\\network\\mcpe\\multiversion\\ResourceEnums' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/ResourceEnums.php',
     'pocketmine\\network\\mcpe\\multiversion\\BlockPallet' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/BlockPallet.php',
+    'pocketmine\\network\\mcpe\\multiversion\\MetadataConvertor' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/MetadataConvertor.php',
     'pocketmine\\network\\mcpe\\protocol\\ActorEventPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ActorEventPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\AddActorPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/AddActorPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\AddItemActorPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/AddItemActorPacket.php',

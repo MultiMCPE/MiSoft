@@ -64,7 +64,7 @@ class AddItemActorPacket extends DataPacket{
 		$this->putSlot($this->item, $this->getProtocol());
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-		$this->putEntityMetadata($this->metadata);
+		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		($this->buffer .= ($this->isFromFishing ? "\x01" : "\x00"));
 	}
 

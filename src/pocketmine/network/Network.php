@@ -255,7 +255,7 @@ class Network{
 			case ProtocolInfo::PROTOCOL_310:
 			    return ProtocolInfo::PROTOCOL_310;
 			case ProtocolInfo::PROTOCOL_290:
-			    return ProtocolInfo::PROTOCOL_120;
+			    return ProtocolInfo::PROTOCOL_280;
 			default:
 				return ProtocolInfo::PROTOCOL_110;
 		}
@@ -287,7 +287,7 @@ class Network{
 			case ProtocolInfo::PROTOCOL_310:
 			    return ProtocolInfo::PROTOCOL_310;
 			case ProtocolInfo::PROTOCOL_290:
-			    return ProtocolInfo::PROTOCOL_120;
+			    return ProtocolInfo::PROTOCOL_280;
 			default:
 				return ProtocolInfo::PROTOCOL_110;
 		}

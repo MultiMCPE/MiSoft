@@ -130,7 +130,7 @@ class AddPlayerPacket extends DataPacket{
 		($this->buffer .= (\pack("g", $this->yaw)));
 		($this->buffer .= (\pack("g", $this->headYaw ?? $this->yaw)));
 		$this->putSlot($this->item, $this->getProtocol());
-		$this->putEntityMetadata($this->metadata);
+		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 
 		$this->putUnsignedVarInt($this->uvarint1);
 		$this->putUnsignedVarInt($this->uvarint2);

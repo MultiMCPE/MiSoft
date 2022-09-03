@@ -233,7 +233,7 @@ class AddActorPacket extends DataPacket{
 			($this->buffer .= (\pack("g", $attribute->getMaxValue())));
 		}
 
-		$this->putEntityMetadata($this->metadata);
+		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		$this->putUnsignedVarInt(count($this->links));
 		foreach($this->links as $link){
 			$this->putEntityLink($link);

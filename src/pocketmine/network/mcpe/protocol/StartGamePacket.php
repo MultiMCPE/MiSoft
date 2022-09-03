@@ -231,7 +231,10 @@ class StartGamePacket extends DataPacket{
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$id = $this->getString();
 			$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-			$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+			$unknown = 0;
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		    	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+			}
 
 			$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
 		}

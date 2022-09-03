@@ -44,7 +44,7 @@ class SetActorDataPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putEntityMetadata($this->metadata);
+		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 	}
 
 	public function handle(NetworkSession $session) : bool{
