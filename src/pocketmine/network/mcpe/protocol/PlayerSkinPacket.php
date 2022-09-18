@@ -50,12 +50,12 @@ class PlayerSkinPacket extends DataPacket{
 		$skinId = $this->getString();
 		$this->newSkinName = $this->getString();
 		$this->oldSkinName = $this->getString();
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 			$this->getLInt(); // num skin data, always 1
 			$this->getLInt();
 		}
 		$skinData = $this->getString();
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 			$this->getLInt();
 			$this->getLInt();
 		}
@@ -76,12 +76,12 @@ class PlayerSkinPacket extends DataPacket{
 		$this->putString($this->skin->getSkinId());
 		$this->putString($this->newSkinName);
 		$this->putString($this->oldSkinName);
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 			$this->putLInt(1); // num skin data, always 1
 			$this->putLInt(strlen($this->skin->getSkinData()));
 		}
 		$this->putString($this->skin->getSkinData());
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 			$this->putLInt(empty($this->skin->getCapeData()));
 			$this->putLInt(strlen($this->skin->getCapeData()));
 		}

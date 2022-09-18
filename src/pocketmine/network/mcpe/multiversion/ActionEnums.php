@@ -59,6 +59,28 @@ abstract class ActionEnums {
 			23 => 'START_SPIN_ATTACK',
 			24 => 'STOP_SPIN_ATTACK',
 			25 => 'INTERACT_WITH_BLOCK'
+		],
+		self::GROUP_1 => [
+			-1 => 'UNKNOWN',
+			0 => 'START_DESTROY_BLOCK',
+			1 => 'ABORT_DESTROY_BLOCK',
+			2 => 'STOP_DESTROY_BLOCK',
+			3 => 'GET_UPDATED_BLOCK',
+			4 => 'DROP_ITEM',
+			5 => 'RELEASE_USE_ITEM',
+			6 => 'STOP_SLEEPING',
+			7 => 'RESPAWN',
+			8 => 'START_JUMP',
+			9 => 'START_SPRINTING',
+			10 => 'STOP_SPRINTING',
+			11 => 'START_SNEAKING',
+			12 => 'STOP_SNEAKING',
+			13 => 'CHANGE_DEMENSION',
+			14 => 'CHANGE_DEMENSION_ACK',
+			15 => 'START_GLIDING',
+			16 => 'STOP_GLIDING',
+			17 => 'DENY_DESTROY_BLOCK',
+			18 => 'CRACK_BLOCK',
 		]
 	];
 
@@ -123,6 +145,8 @@ abstract class ActionEnums {
 			case ProtocolInfo::PROTOCOL_240:
 			case ProtocolInfo::PROTOCOL_221:
 			case ProtocolInfo::PROTOCOL_220:
+			case ProtocolInfo::PROTOCOL_200:
+			case ProtocolInfo::PROTOCOL_120:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

@@ -41,6 +41,16 @@ abstract class TextEnums {
 			6 => 'TYPE_SYSTEM',
 			7 => 'TYPE_WHISPER',
 			8 => 'TYPE_ANNOUNCEMENT',
+		],
+		self::GROUP_1 => [
+			0 => 'TYPE_RAW',
+			1 => 'TYPE_CHAT',
+			2 => 'TYPE_TRANSLATION',
+			3 => 'TYPE_POPUP',
+			4 => 'TYPE_TIP',
+			5 => 'TYPE_SYSTEM',
+			6 => 'TYPE_WHISPER',
+			7 => 'TYPE_ANNOUNCEMENT',
 		]
 	];
 
@@ -105,6 +115,8 @@ abstract class TextEnums {
 			case ProtocolInfo::PROTOCOL_240:
 			case ProtocolInfo::PROTOCOL_221:
 			case ProtocolInfo::PROTOCOL_220:
+			case ProtocolInfo::PROTOCOL_200:
+			case ProtocolInfo::PROTOCOL_120:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

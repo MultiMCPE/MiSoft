@@ -83,13 +83,15 @@ class AddPlayerPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
 		$this->username = $this->getString();
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 			$this->thirdPartyName = $this->getString();
 			$this->platform = $this->getVarInt();
 		}
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->platformChatId = $this->getString();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	$this->platformChatId = $this->getString();
+		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
 		$this->pitch = ((\unpack("g", $this->get(4))[1]));
@@ -119,13 +121,15 @@ class AddPlayerPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 			$this->putString($this->thirdPartyName);
 			$this->putVarInt($this->platform);
 		}
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putString($this->platformChatId);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	$this->putString($this->platformChatId);
+		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
 		($this->buffer .= (\pack("g", $this->pitch)));

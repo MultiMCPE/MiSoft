@@ -2670,7 +2670,23 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$item = $this->inventory->getItem($packet->hotbarSlot);
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
+	    	if($packet->inventorySlot === 255){
+		    	$packet->inventorySlot = -1; //Cleared slot
+	    	}else{
+		    	if($packet->inventorySlot < 9){
+			    	$this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
+			    	$this->inventory->sendContents($this);
+			    	return false;
+		    	}
+
+		    	$packet->inventorySlot -= 9; //Get real inventory slot
+	    	}
+		} else {
+		    //$item = $this->inventory->getItem($packet->hotbarSlot);
+		}
+
+        $item = $this->inventory->getItem($packet->inventorySlot);
 
 		if(!$item->equals($packet->item)){
 			$this->server->getLogger()->debug("Tried to equip " . $packet->item . " but have " . $item . " in target slot");
@@ -2678,7 +2694,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		$this->inventory->equipItem($packet->hotbarSlot);
+		$this->inventory->equipItem($packet->hotbarSlot, $packet->inventorySlot);
 
 		$this->setUsingItem(false);
 
@@ -3045,6 +3061,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleBookEdit(BookEditPacket $packet) : bool{
 		/** @var WritableBook $oldBook */
+		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
+		    $packet->inventorySlot -= 9;
+		}
+
 		$oldBook = $this->inventory->getItem($packet->inventorySlot);
 		if($oldBook->getId() !== Item::WRITABLE_BOOK){
 			return false;
@@ -3620,8 +3640,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 
 			if($this->inventory !== null){
-				$this->inventory->setHeldItemIndex(0);
 				$this->inventory->clearAll();
+				$this->inventory->setHeldItemIndex(0);
+				$this->inventory->resetHotbar(true);
 			}
 			if($this->armorInventory !== null){
 				$this->armorInventory->clearAll();

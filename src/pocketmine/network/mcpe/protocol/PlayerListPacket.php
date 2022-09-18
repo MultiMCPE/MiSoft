@@ -58,7 +58,7 @@ class PlayerListPacket extends DataPacket{
 				$entry->uuid = $this->getUUID();
 				$entry->entityUniqueId = $this->getEntityUniqueId();
 				$entry->username = $this->getString();
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 		        	$entry->thirdPartyName = $this->getString();
 		        	$entry->platform = $this->getVarInt();
 				}
@@ -77,7 +77,9 @@ class PlayerListPacket extends DataPacket{
 					$geometryData
 				);
 				$entry->xboxUserId = $this->getString();
-				$entry->platformChatId = $this->getString();
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+			    	$entry->platformChatId = $this->getString();
+				}
 			}else{
 				$entry->uuid = $this->getUUID();
 			}
@@ -94,13 +96,13 @@ class PlayerListPacket extends DataPacket{
 				$this->putUUID($entry->uuid);
 				$this->putEntityUniqueId($entry->entityUniqueId);
 				$this->putString($entry->username);
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 		        	$this->putString($entry->thirdPartyName);
 		        	$this->putVarInt($entry->platform);
 				}
 				$this->putString($entry->skin->getSkinId());
 				
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 				    $this->putLInt(1); // num skins, always 1
 				}
 				
@@ -114,7 +116,7 @@ class PlayerListPacket extends DataPacket{
 				$this->putString($skinData);
 				
 				$capeData = $entry->skin->getCapeData();
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
 					if (!empty($capeData)) {
 						$this->putLInt(1); // isNotEmpty
 						$this->putString($capeData);
@@ -143,7 +145,9 @@ class PlayerListPacket extends DataPacket{
 				$this->putString($this->prepareGeometryDataForOld($skinGeometryData));
 				
 				$this->putString($entry->xboxUserId);
-				$this->putString($entry->platformChatId);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+			    	$this->putString($entry->platformChatId);
+				}
 			}else{
 				$this->putUUID($entry->uuid);
 			}

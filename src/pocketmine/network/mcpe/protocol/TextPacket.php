@@ -72,7 +72,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->sourceName = $this->getString();
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 		        	$this->sourceThirdPartyName = $this->getString();
 		        	$this->sourcePlatform = $this->getVarInt();
 				}
@@ -94,7 +94,9 @@ class TextPacket extends DataPacket{
 		}
 
 		$this->xboxUserId = $this->getString();
-		$this->platformChatId = $this->getString();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	$this->platformChatId = $this->getString();
+		}
 	}
 
 	protected function encodePayload(){
@@ -107,7 +109,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->sourceName);
-				if ($this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
 		        	$this->putString($this->sourceThirdPartyName);
 		        	$this->putVarInt($this->sourcePlatform);
 				}
@@ -129,7 +131,9 @@ class TextPacket extends DataPacket{
 		}
 
 		$this->putString($this->xboxUserId);
-		$this->putString($this->platformChatId);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	$this->putString($this->platformChatId);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{
