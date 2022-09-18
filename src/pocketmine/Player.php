@@ -2670,23 +2670,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
-	    	if($packet->inventorySlot === 255){
-		    	$packet->inventorySlot = -1; //Cleared slot
-	    	}else{
-		    	if($packet->inventorySlot < 9){
-			    	$this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
-			    	$this->inventory->sendContents($this);
-			    	return false;
-		    	}
-
-		    	$packet->inventorySlot -= 9; //Get real inventory slot
-	    	}
-		} else {
-		    //$item = $this->inventory->getItem($packet->hotbarSlot);
-		}
-
-        $item = $this->inventory->getItem($packet->inventorySlot);
+		$item = $this->inventory->getItem($packet->hotbarSlot);
 
 		if(!$item->equals($packet->item)){
 			$this->server->getLogger()->debug("Tried to equip " . $packet->item . " but have " . $item . " in target slot");
@@ -2694,7 +2678,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		$this->inventory->equipItem($packet->hotbarSlot, $packet->inventorySlot);
+		$this->inventory->equipItem($packet->hotbarSlot);
 
 		$this->setUsingItem(false);
 
@@ -3640,9 +3624,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 
 			if($this->inventory !== null){
+			    $this->inventory->setHeldItemIndex(0);
 				$this->inventory->clearAll();
-				$this->inventory->setHeldItemIndex(0);
-				$this->inventory->resetHotbar(true);
 			}
 			if($this->armorInventory !== null){
 				$this->armorInventory->clearAll();
