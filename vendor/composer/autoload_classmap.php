@@ -47,6 +47,7 @@ return array(
     'pocketmine\\ThreadManager' => $baseDir . '/src/pocketmine/ThreadManager.php',
     'pocketmine\\Worker' => $baseDir . '/src/pocketmine/Worker.php',
     'pocketmine\\crafting\\CraftingDataBuildTask' => $baseDir . '/src/pocketmine/crafting/CraftingDataBuildTask.php',
+    'pocketmine\\palette\\PaletteInitTask' => $baseDir . '/src/pocketmine/palette/PaletteInitTask.php',
     'pocketmine\\block\\ActivatorRail' => $baseDir . '/src/pocketmine/block/ActivatorRail.php',
     'pocketmine\\block\\Air' => $baseDir . '/src/pocketmine/block/Air.php',
     'pocketmine\\block\\Anvil' => $baseDir . '/src/pocketmine/block/Anvil.php',

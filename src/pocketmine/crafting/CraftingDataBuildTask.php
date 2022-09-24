@@ -24,13 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\scheduler\AsyncTask;
-
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
-
 use pocketmine\inventory\CraftingManager;
-
 use pocketmine\Server;
 
 class CraftingDataBuildTask extends AsyncTask {

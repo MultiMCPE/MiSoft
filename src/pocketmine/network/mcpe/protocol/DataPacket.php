@@ -40,7 +40,7 @@ use function method_exists;
 abstract class DataPacket extends NetworkBinaryStream{
 
 	public const NETWORK_ID = 0x0;
-	public const PACKET_NAME = "DATA_PACKET"; // xD
+	public const PACKET_NAME = "DATA_PACKET";
 
     public const PID_MASK = 0x3ff;
 
@@ -251,10 +251,12 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
     /**
+     * @param array $palleteData
+     * 
      * @return void
      */
-	public static function initPallet() : void{
-		self::$blockPalletes = BlockPallet::initAll();
+	public static function initPalletes(array $palleteData) : void{
+		self::$blockPalletes = $palleteData;
 	}
 
     /**

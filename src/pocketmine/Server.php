@@ -93,6 +93,7 @@ use pocketmine\plugin\ScriptPluginLoader;
 use pocketmine\resourcepacks\ResourcePackManager;
 use pocketmine\scheduler\AsyncPool;
 use pocketmine\scheduler\SendUsageTask;
+use pocketmine\palette\PaletteInitTask;
 use pocketmine\snooze\SleeperHandler;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\tile\Tile;
@@ -2126,7 +2127,8 @@ class Server{
 	private function start(){
 	    MetadataConvertor::init();
 		DataPacket::initPackets();
-		DataPacket::initPallet();
+		$this->asyncPool->submitTask(new PaletteInitTask());
+
 		if($this->getConfigBool("enable-query", true)){
 			$this->queryHandler = new QueryHandler();
 		}
