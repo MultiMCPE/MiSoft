@@ -146,6 +146,7 @@ use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\Network;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
@@ -1955,9 +1956,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        $this->xuid = $packet->xuid;
-
-        $this->processLogin();
+		if(!$packet->skipVerification){
+			$this->server->getAsyncPool()->submitTask(new VerifyLoginTask($this, $packet));
+		}else{
+			$this->onVerifyCompleted($packet, null, true);
+		}
 
 		return true;
 	}
@@ -1966,6 +1969,43 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new PlayStatusPacket();
 		$pk->status = $status;
 		$this->sendDataPacket($pk, false, $immediate);
+	}
+
+	public function onVerifyCompleted(LoginPacket $packet, ?string $error, bool $signedByMojang) : void{
+		if($this->closed){
+			return;
+		}
+
+		if($error !== null){
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.invalidSession", [$error]));
+			return;
+		}
+
+		$xuid = $packet->xuid;
+
+		if(!$signedByMojang and $xuid !== ""){
+			$this->server->getLogger()->warning($this->getName() . " has an XUID, but their login keychain is not signed by Mojang");
+			$xuid = "";
+		}
+
+		if($xuid === "" or !is_string($xuid)){
+			if($signedByMojang){
+				$this->server->getLogger()->error($this->getName() . " should have an XUID, but none found");
+			}
+
+			if($this->server->requiresAuthentication() and $this->kick("disconnectionScreen.notAuthenticated", false)){ //use kick to allow plugins to cancel this
+				return;
+			}
+
+			$this->server->getLogger()->debug($this->getName() . " is NOT logged into Xbox Live");
+		}else{
+			$this->server->getLogger()->debug($this->getName() . " is logged into Xbox Live");
+			$this->xuid = $xuid;
+		}
+
+		//TODO: encryption
+
+		$this->processLogin();
 	}
 
 	protected function processLogin(){

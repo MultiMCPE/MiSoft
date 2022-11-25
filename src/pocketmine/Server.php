@@ -267,6 +267,9 @@ class Server{
 	private $maxPlayers;
 
 	/** @var bool */
+	private $onlineMode = true;
+
+	/** @var bool */
 	private $autoSave;
 
 	/** @var RCON */
@@ -408,6 +411,24 @@ class Server{
 	 */
 	public function getMaxPlayers() : int{
 		return $this->maxPlayers;
+	}
+
+	/**
+	 * Returns whether the server requires that players be authenticated to Xbox Live. If true, connecting players who
+	 * are not logged into Xbox Live will be disconnected.
+	 *
+	 * @return bool
+	 */
+	public function getOnlineMode() : bool{
+		return $this->onlineMode;
+	}
+
+	/**
+	 * Alias of {@link #getOnlineMode()}.
+	 * @return bool
+	 */
+	public function requiresAuthentication() : bool{
+		return $this->getOnlineMode();
 	}
 
 	/**
@@ -1623,6 +1644,16 @@ class Server{
 			$this->maxPlayers = $this->getConfigInt("max-players", 20);
 			$this->setAutoSave($this->getConfigBool("auto-save", true));
 
+			$this->onlineMode = $this->getConfigBool("xbox-auth", true);
+			if($this->onlineMode){
+				$this->logger->notice($this->getLanguage()->translateString("pocketmine.server.auth.enabled"));
+				$this->logger->notice($this->getLanguage()->translateString("pocketmine.server.authProperty.enabled"));
+			}else{
+				$this->logger->warning($this->getLanguage()->translateString("pocketmine.server.auth.disabled"));
+				$this->logger->warning($this->getLanguage()->translateString("pocketmine.server.authWarning"));
+				$this->logger->warning($this->getLanguage()->translateString("pocketmine.server.authProperty.disabled"));
+			}
+
 			if($this->getConfigBool("hardcore", false) and $this->getDifficulty() < Level::DIFFICULTY_HARD){
 				$this->setConfigInt("difficulty", Level::DIFFICULTY_HARD);
 			}
@@ -1902,9 +1933,10 @@ class Server{
                 $pk->setProtocol($protocol);
 
 		    	foreach($packets as $p){
-		    	    $p->setProtocol($protocol);
+		    	    $packet = clone $p;
+		    	    $packet->setProtocol($protocol);
 
-			    	$pk->addPacket($p);
+			    	$pk->addPacket($packet);
 		    	}
 
 		    	if(Network::$BATCH_THRESHOLD >= 0 and strlen($pk->payload) >= Network::$BATCH_THRESHOLD){
