@@ -2171,6 +2171,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->levelId = "";
 		$pk->worldName = $this->server->getMotd();
 		$pk->vanillaVersion = $this->vanillaVersion;
+		$pk->originalProtocol = $this->originalProtocol;
 		$this->dataPacket($pk);
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
@@ -2764,7 +2765,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$item = $block->getPickedItem();
-		if($packet->addUserData){
+		if($packet->addUserData || $this->protocol < ProtocolInfo::PROTOCOL_120){
 			$tile = $this->getLevel()->getTile($block);
 			if($tile instanceof Tile){
 				$nbt = $tile->getCleanedNBT();

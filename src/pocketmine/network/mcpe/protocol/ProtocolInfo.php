@@ -30,9 +30,9 @@ interface ProtocolInfo {
 	 */
 
 	public const CURRENT_PROTOCOL = 110;
-	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_134, ProtocolInfo::PROTOCOL_135, ProtocolInfo::PROTOCOL_136, ProtocolInfo::PROTOCOL_137, ProtocolInfo::PROTOCOL_140, ProtocolInfo::PROTOCOL_141, ProtocolInfo::PROTOCOL_150, ProtocolInfo::PROTOCOL_160, ProtocolInfo::PROTOCOL_200, ProtocolInfo::PROTOCOL_201, ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_131, ProtocolInfo::PROTOCOL_132, ProtocolInfo::PROTOCOL_133, ProtocolInfo::PROTOCOL_134, ProtocolInfo::PROTOCOL_135, ProtocolInfo::PROTOCOL_136, ProtocolInfo::PROTOCOL_137, ProtocolInfo::PROTOCOL_140, ProtocolInfo::PROTOCOL_141, ProtocolInfo::PROTOCOL_150, ProtocolInfo::PROTOCOL_160, ProtocolInfo::PROTOCOL_200, ProtocolInfo::PROTOCOL_201, ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
 	public const MINECRAFT_VERSION = 'v1.x';
-	public const MINECRAFT_VERSION_NETWORK = '1.x';
+	public const MINECRAFT_VERSION_NETWORK = '1.12.1';
 
 	/** 1.0.x - 1.1.x OLD */
 	public const PROTOCOL_101 = 101; // 1.0.3.0, 1.0.4, 1.0.4.0
@@ -45,6 +45,10 @@ interface ProtocolInfo {
 	public const PROTOCOL_112 = 112; // 1.1.0.9
 	public const PROTOCOL_113 = 113; // 1.1.0, 1.1.1.0, 1.1.1.1, 1.1.1, 1.1.2, 1.1.3.0, 1.1.3.1, 1.1.3, 1.1.4, 1.1.5, 1.1.7
 	/** 1.2 BETAS */
+	public const PROTOCOL_130 = 130; // 1.2.0.2 (beta)
+	public const PROTOCOL_131 = 131; // 1.2.0.7 (beta)
+	public const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
+	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 	public const PROTOCOL_134 = 134; // 1.2.0.20, 1.2.0.22
 	public const PROTOCOL_135 = 135; // 1.2.0.24, 1.2.0.25
 	public const PROTOCOL_136 = 136; // 1.2.0.31
@@ -55,7 +59,6 @@ interface ProtocolInfo {
 	public const PROTOCOL_160 = 160; // 1.2.7, 1.2.8, 1.2.9
 	public const PROTOCOL_200 = 200; // 1.2.10.1
 	public const PROTOCOL_201 = 201; // 1.2.10, 1.2.11
-	
 	public const PROTOCOL_220 = 220; // 1.2.13.5, 1.2.13.6
 	public const PROTOCOL_221 = 221; // 1.2.13.8
 	public const PROTOCOL_222 = 222; // 1.2.13.10
@@ -93,11 +96,6 @@ interface ProtocolInfo {
 
 	/** OUTDATED (supporting will be removed with next release, may didn't work properly)*/
 	public const PROTOCOL_120 = 120; // 1.2.0.xx (beta)
-	public const PROTOCOL_121 = 121; // 1.2.0.xx (beta)
-	public const PROTOCOL_130 = 130; // 1.2.0.xx (beta)
-	public const PROTOCOL_131 = 131; // 1.2.0.xx (beta)
-	public const PROTOCOL_132 = 132; // 1.2.0.15 (beta)
-	public const PROTOCOL_133 = 133; // 1.2.0.18 (beta)
 
 	/**
 	 * Minecraft: PE packets

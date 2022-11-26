@@ -34,6 +34,8 @@ class CommandRequestPacket extends DataPacket{
 
 	/** @var string */
 	public $command;
+	/** @var int */
+	public $playerUniqueId;
 	/** @var CommandOriginData */
 	public $originData;
 	/** @var bool */
@@ -41,14 +43,22 @@ class CommandRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->command = $this->getString();
-		$this->originData = $this->getCommandOriginData();
-		$this->isInternal = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_140) {
+	    	$this->originData = $this->getCommandOriginData();
+	    	$this->isInternal = (($this->get(1) !== "\x00"));
+		} else {
+		    $this->playerUniqueId = $this->getEntityUniqueId();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->command);
-		$this->putCommandOriginData($this->originData);
-		($this->buffer .= ($this->isInternal ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_140) {
+	    	$this->putCommandOriginData($this->originData);
+	    	($this->buffer .= ($this->isInternal ? "\x01" : "\x00"));
+		} else {
+		    $this->putEntityUniqueId($this->playerUniqueId);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -55,7 +55,7 @@ class MoveActorAbsolutePacket extends DataPacket{
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
 	        	$this->flags = (\ord($this->get(1)));
 	    	} else {
-		        $this->flags = ((\unpack("g", $this->get(4))[1]));
+		        $this->flags = (\unpack("v", $this->get(2))[1]);
 	    	}
 	    	$this->position = $this->getVector3();
 	    	$this->xRot = $this->getByteRotation();
@@ -86,7 +86,7 @@ class MoveActorAbsolutePacket extends DataPacket{
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
 	        	($this->buffer .= \chr($this->flags));
 	    	} else {
-		        ($this->buffer .= (\pack("g", $this->flags)));
+		        ($this->buffer .= \pack("v", $this->flags));
 	    	}
 	    	$this->putVector3($this->position);
 	    	$this->putByteRotation($this->xRot);

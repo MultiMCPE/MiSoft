@@ -135,6 +135,11 @@ abstract class ParticleEnums {
 			case ProtocolInfo::PROTOCOL_221:
 			case ProtocolInfo::PROTOCOL_220:
 			case ProtocolInfo::PROTOCOL_200:
+			case ProtocolInfo::PROTOCOL_140:
+			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_133:
+			case ProtocolInfo::PROTOCOL_132:
+			case ProtocolInfo::PROTOCOL_131:
 			case ProtocolInfo::PROTOCOL_120:
 			    return self::$particleIds[ProtocolInfo::PROTOCOL_110];
 			default:

@@ -65,7 +65,10 @@ class PlayerListPacket extends DataPacket{
 
 				$skinId = $this->getString();
 				$skinData = $this->getString();
-				$capeData = $this->getString();
+				$capeData = "";
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			    	$capeData = $this->getString();
+				}
 				$geometryName = $this->getString();
 				$geometryData = $this->getString();
 
@@ -115,16 +118,18 @@ class PlayerListPacket extends DataPacket{
 				}
 				$this->putString($skinData);
 				
-				$capeData = $entry->skin->getCapeData();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-					if (!empty($capeData)) {
-						$this->putLInt(1); // isNotEmpty
-						$this->putString($capeData);
-					} else {
-						$this->putLInt(0); // isEmpty
-					}
-				} else {
-					$this->putString($capeData);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			    	$capeData = $entry->skin->getCapeData();
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+				    	if (!empty($capeData)) {
+					    	$this->putLInt(1); // isNotEmpty
+					    	$this->putString($capeData);
+				    	} else {
+					    	$this->putLInt(0); // isEmpty
+				    	}
+			    	} else {
+				    	$this->putString($capeData);
+			    	}
 				}
 				
 				$skinGeometryName = $entry->skin->getGeometryName();

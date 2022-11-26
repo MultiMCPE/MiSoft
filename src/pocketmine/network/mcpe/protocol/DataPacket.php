@@ -245,6 +245,11 @@ abstract class DataPacket extends NetworkBinaryStream{
 		self::$packetsIds[ProtocolInfo::PROTOCOL_221] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_220] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_200] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_140] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_135] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_133] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_132] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_131] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_120] = $oClass->getConstants();
 		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo110');
 		self::$packetsIds[ProtocolInfo::PROTOCOL_110] = $oClass->getConstants();

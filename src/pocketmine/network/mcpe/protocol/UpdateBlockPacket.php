@@ -72,7 +72,9 @@ class UpdateBlockPacket extends DataPacket{
 		    	$this->blockMeta = $blockData[1];
 	    	}
 	    	$this->flags = $this->getUnsignedVarInt();
-	    	$this->dataLayerId = $this->getUnsignedVarInt();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_240) {
+	        	$this->dataLayerId = $this->getUnsignedVarInt();
+	    	}
 		} else {
 	    	$this->blockId = $this->getUnsignedVarInt();
 	    	$aux = $this->getUnsignedVarInt();
@@ -87,7 +89,9 @@ class UpdateBlockPacket extends DataPacket{
 	    	$runtimeId = self::getBlockRuntimeID($this->blockId, $this->blockMeta, $this->getProtocol());
 	    	$this->putUnsignedVarInt($runtimeId);
 	    	$this->putUnsignedVarInt($this->flags);
-	    	$this->putUnsignedVarInt($this->dataLayerId);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_240) {
+	        	$this->putUnsignedVarInt($this->dataLayerId);
+	    	}
 		} else {
 	    	$this->putUnsignedVarInt($this->blockId);
 	    	$this->putUnsignedVarInt(($this->flags << 4) | $this->blockMeta);

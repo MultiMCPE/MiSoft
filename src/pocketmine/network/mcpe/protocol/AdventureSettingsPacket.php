@@ -82,7 +82,9 @@ class AdventureSettingsPacket extends DataPacket{
 		$this->commandPermission = $this->getUnsignedVarInt();
 		$this->flags2 = $this->getUnsignedVarInt();
 		$this->playerPermission = $this->getUnsignedVarInt();
-		$this->customFlags = $this->getUnsignedVarInt();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	    	$this->customFlags = $this->getUnsignedVarInt();
+		}
 		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 	}
 
@@ -91,7 +93,9 @@ class AdventureSettingsPacket extends DataPacket{
 		$this->putUnsignedVarInt($this->commandPermission);
 		$this->putUnsignedVarInt($this->flags2);
 		$this->putUnsignedVarInt($this->playerPermission);
-		$this->putUnsignedVarInt($this->customFlags);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	    	$this->putUnsignedVarInt($this->customFlags);
+		}
 		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 	}
 

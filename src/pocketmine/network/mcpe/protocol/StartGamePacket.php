@@ -155,6 +155,8 @@ class StartGamePacket extends DataPacket{
 
     /** @var string */
 	public $vanillaVersion = "";
+	/** @var int */
+	public $originalProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
@@ -196,7 +198,9 @@ class StartGamePacket extends DataPacket{
 		$this->isTexturePacksRequired = (($this->get(1) !== "\x00"));
 		$this->gameRules = $this->getGameRules();
 		$this->hasBonusChestEnabled = (($this->get(1) !== "\x00"));
-		$this->hasStartWithMapEnabled = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	    	$this->hasStartWithMapEnabled = (($this->get(1) !== "\x00"));
+		}
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 		    $this->hasTrustPlayersEnabled = (($this->get(1) !== "\x00"));
 		}
@@ -302,7 +306,9 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->isTexturePacksRequired ? "\x01" : "\x00"));
 		$this->putGameRules($this->gameRules);
 		($this->buffer .= ($this->hasBonusChestEnabled ? "\x01" : "\x00"));
-		($this->buffer .= ($this->hasStartWithMapEnabled ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	    	($this->buffer .= ($this->hasStartWithMapEnabled ? "\x01" : "\x00"));
+		}
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 		    ($this->buffer .= ($this->hasTrustPlayersEnabled ? "\x01" : "\x00"));
 		}

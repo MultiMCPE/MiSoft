@@ -101,6 +101,11 @@ class AvailableCommandsPacket extends DataPacket{
 		    ProtocolInfo::PROTOCOL_221 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_220 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_200 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_140 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_135 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_133 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_132 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_131 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_120 => new NetworkBinaryStream()
 		];
 
