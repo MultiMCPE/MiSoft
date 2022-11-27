@@ -29,10 +29,9 @@ abstract class SoundEnums {
 
 	private const GROUP_1 = 1;
 	private const GROUP_2 = 2;
-	private const GROUP_3 = 3;
 
 	private static $levelSoundEvent = [
-		self::GROUP_3 => [
+		self::GROUP_2 => [
 			0 => 'SOUND_USE_ITEM_ON',
 			1 => 'SOUND_HIT',
 			2 => 'SOUND_STEP',
@@ -272,7 +271,7 @@ abstract class SoundEnums {
 			238 => 'SOUND_DEFAULT',
 			239 => 'SOUND_UNDEFINED'
 		],
-		self::GROUP_2 => [
+		self::GROUP_1 => [
 			0 => 'SOUND_USE_ITEM_ON',
 			1 => 'SOUND_HIT',
 			2 => 'SOUND_STEP',
@@ -438,116 +437,6 @@ abstract class SoundEnums {
 			162 => 'SOUND_END_PORTAL_CREATED',
 			163 => 'SOUND_DEFAULT',
 			164 => 'SOUND_UNDEFINED'
-		],
-		self::GROUP_1 => [
-			0 => 'SOUND_USE_ITEM_ON',
-			1 => 'SOUND_HIT',
-			2 => 'SOUND_STEP',
-			3 => 'SOUND_JUMP',
-			4 => 'SOUND_BREAK',
-			5 => 'SOUND_PLACE',
-			6 => 'SOUND_HEAVY_STEP',
-			7 => 'SOUND_GALLOP',
-			8 => 'SOUND_FALL',
-			9 => 'SOUND_AMBIENT',
-			10 => 'SOUND_AMBIENT_BABY',
-			11 => 'SOUND_AMBIENT_IN_WATER',
-			12 => 'SOUND_BREATHE',
-			13 => 'SOUND_DEATH',
-			14 => 'SOUND_DEATH_IN_WATER',
-			15 => 'SOUND_DEATH_TO_ZOMBIE',
-			16 => 'SOUND_HURT',
-			17 => 'SOUND_HURT_IN_WATER',
-			18 => 'SOUND_MAD',
-			19 => 'SOUND_BOOST',
-			20 => 'SOUND_BOW',
-			21 => 'SOUND_SQUISH_BIG',
-			22 => 'SOUND_SQUISH_SMALL',
-			23 => 'SOUND_FALL_BIG',
-			24 => 'SOUND_FALL_SMALL',
-			25 => 'SOUND_SPLASH',
-			26 => 'SOUND_FIZZ',
-			27 => 'SOUND_FLAP',
-			28 => 'SOUND_SWIM',
-			29 => 'SOUND_DRINK',
-			30 => 'SOUND_EAT',
-			31 => 'SOUND_TAKE_OFF',
-			32 => 'SOUND_SHAKE',
-			33 => 'SOUND_PLOP',
-			34 => 'SOUND_LAND',
-			35 => 'SOUND_SADDLE',
-			36 => 'SOUND_ARMOR',
-			37 => 'SOUND_ADD_CHEST',
-			38 => 'SOUND_THROW',
-			39 => 'SOUND_ATTACK',
-			40 => 'SOUND_ATTACK_NO_DAMAGE',
-			41 => 'SOUND_WARN',
-			42 => 'SOUND_SHEAR',
-			43 => 'SOUND_MILK',
-			44 => 'SOUND_THUNDER',
-			45 => 'SOUND_EXPLODE',
-			46 => 'SOUND_FIRE',
-			47 => 'SOUND_IGNITE',
-			48 => 'SOUND_FUSE',
-			49 => 'SOUND_STARE',
-			50 => 'SOUND_SPAWN',
-			51 => 'SOUND_SHOOT',
-			52 => 'SOUND_BREAK_BLOCK',
-			53 => 'SOUND_REMEDY',
-			54 => 'SOUND_UNFECT',
-			55 => 'SOUND_LEVEL_UP',
-			56 => 'SOUND_BOW_HIT',
-			57 => 'SOUND_BULLET_HIT',
-			58 => 'SOUND_EXTINGUISH_FIRE',
-			59 => 'SOUND_ITEM_FIZZ',
-			60 => 'SOUND_CHEST_OPEN',
-			61 => 'SOUND_CHEST_CLOSED',
-			62 => 'SOUND_SHULKER_BOX_OPEN',
-			63 => 'SOUND_SHULKERBOXCLOSED',
-			64 => 'SOUND_POWER_ON',
-			65 => 'SOUND_POWER_OFF',
-			66 => 'SOUND_ATTACH',
-			67 => 'SOUND_DETACH',
-			68 => 'SOUND_DENY',
-			69 => 'SOUND_TRIPOD',
-			70 => 'SOUND_POP',
-			71 => 'SOUND_DROP_SLOT',
-			72 => 'SOUND_NOTE',
-			73 => 'SOUND_THORNS',
-			74 => 'SOUND_PISTON_IN',
-			75 => 'SOUND_PISTON_OUT',
-			76 => 'SOUND_PORTAL',
-			77 => 'SOUND_WATER',
-			78 => 'SOUND_LAVA_POP',
-			79 => 'SOUND_LAVA',
-			80 => 'SOUND_BURP',
-			81 => 'SOUND_BUCKET_FILL_WATER',
-			82 => 'SOUND_BUCKET_FILL_LAVA',
-			83 => 'SOUND_BUCKET_EMPTY_WATER',
-			84 => 'SOUND_BUCKET_EMPTY_LAVA',
-			85 => 'SOUND_GUARDIAN_FLOP',
-			86 => 'SOUND_GUARDIAN_CURSE',
-			87 => 'SOUND_MOB_WARNING',
-			88 => 'SOUND_MOB_WARNING_BABY',
-			89 => 'SOUND_TELEPORT',
-			90 => 'SOUND_SHULKER_OPEN',
-			91 => 'SOUND_SHULKER_CLOSE',
-			92 => 'SOUND_HAGGLE',
-			93 => 'SOUND_HAGGLE_YES',
-			94 => 'SOUND_HAGGLE_NO',
-			95 => 'SOUND_HAGGLE_IDLE',
-			96 => 'SOUND_CHORUS_GROW',
-			97 => 'SOUND_CHORUS_DEATH',
-			98 => 'SOUND_GLASS',
-			99 => 'SOUND_CAST_SPELL',
-			100 => 'SOUND_PREPARE_ATTACK_SPELL',
-			101 => 'SOUND_PREPARE_SUMMON',
-			102 => 'SOUND_PREPARE_WOLOLO',
-			103 => 'SOUND_FANG',
-			104 => 'SOUND_CHARGE',
-			105 => 'SOUND_TAKE_PICTURE',
-			106 => 'SOUND_DEFAULT',
-			107 => 'SOUND_UNDEFINED'
 		]
 	];
 
@@ -612,19 +501,18 @@ abstract class SoundEnums {
 			case ProtocolInfo::PROTOCOL_240:
 			case ProtocolInfo::PROTOCOL_221:
 			case ProtocolInfo::PROTOCOL_220:
-				return self::GROUP_3;
+				return self::GROUP_2;
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
-				return self::GROUP_2;
-			case ProtocolInfo::PROTOCOL_110:
+			case ProtocolInfo::PROTOCOL_130:
 				return self::GROUP_1;
 			default:
-				return self::GROUP_3;
+				return self::GROUP_2;
 		}
 	}
 

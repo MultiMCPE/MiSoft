@@ -52,7 +52,7 @@ abstract class CommandEnums {
 			"ARG_TYPE_JSON" => 0x18,
 			"ARG_TYPE_COMMAND" => 0x1f,
 		],
-		ProtocolInfo::PROTOCOL_120 => [
+		ProtocolInfo::PROTOCOL_130 => [
 			"ARG_TYPE_INT" => 0x01,
 			"ARG_TYPE_FLOAT" => 0x02,
 			"ARG_TYPE_VALUE" => 0x03,

@@ -120,7 +120,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	protected function decodeHeader(){
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             (\ord($this->get(1)));
-            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_120) {
+            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
                 $this->senderSubId = (\ord($this->get(1)));
                 $this->recipientSubId = (\ord($this->get(1)));
                 if ($this->senderSubId > 0x4 || $this->recipientSubId > 0x4) {
@@ -160,7 +160,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	    $pid = self::$packetsIds[$this->packetProtocol][$this::PACKET_NAME];
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             ($this->buffer .= \chr($pid));
-            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_120) {
+            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
                 ($this->buffer .= \chr($this->senderSubId));
                 ($this->buffer .= \chr($this->recipientSubId));
             }
@@ -233,7 +233,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 		self::$packetsIds[ProtocolInfo::PROTOCOL_330] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_311] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_310] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo120');
+		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo130');
 		self::$packetsIds[ProtocolInfo::PROTOCOL_290] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_282] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_280] = $oClass->getConstants();
@@ -247,12 +247,11 @@ abstract class DataPacket extends NetworkBinaryStream{
 		self::$packetsIds[ProtocolInfo::PROTOCOL_200] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_140] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_135] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_134] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_133] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_132] = $oClass->getConstants();
 		self::$packetsIds[ProtocolInfo::PROTOCOL_131] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_120] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo110');
-		self::$packetsIds[ProtocolInfo::PROTOCOL_110] = $oClass->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_130] = $oClass->getConstants();
 	}
 
     /**

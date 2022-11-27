@@ -265,6 +265,7 @@ class Network{
 			case ProtocolInfo::PROTOCOL_135:
 			    return ProtocolInfo::PROTOCOL_135;
 			case ProtocolInfo::PROTOCOL_134:
+			    return ProtocolInfo::PROTOCOL_134;
 			case ProtocolInfo::PROTOCOL_133:
 			    return ProtocolInfo::PROTOCOL_133;
 			case ProtocolInfo::PROTOCOL_132:
@@ -272,9 +273,9 @@ class Network{
 			case ProtocolInfo::PROTOCOL_131:
 			    return ProtocolInfo::PROTOCOL_131;
 			case ProtocolInfo::PROTOCOL_130:
-			    return ProtocolInfo::PROTOCOL_120;
+			    return ProtocolInfo::PROTOCOL_130;
 			default:
-				return ProtocolInfo::PROTOCOL_110;
+				return ProtocolInfo::PROTOCOL_130;
 		}
 	}
 
@@ -314,13 +315,14 @@ class Network{
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
-			    return ProtocolInfo::PROTOCOL_120;
+			case ProtocolInfo::PROTOCOL_130:
+			    return ProtocolInfo::PROTOCOL_130;
 			default:
-				return ProtocolInfo::PROTOCOL_110;
+				return ProtocolInfo::PROTOCOL_130;
 		}
 	}
 
@@ -363,13 +365,14 @@ class Network{
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
-			    return ProtocolInfo::PROTOCOL_120;
+			case ProtocolInfo::PROTOCOL_130:
+			    return ProtocolInfo::PROTOCOL_130;
 			default:
-				return ProtocolInfo::PROTOCOL_110;
+				return ProtocolInfo::PROTOCOL_130;
 		}
 	}
 

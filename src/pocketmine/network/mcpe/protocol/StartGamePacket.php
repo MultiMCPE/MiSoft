@@ -155,8 +155,6 @@ class StartGamePacket extends DataPacket{
 
     /** @var string */
 	public $vanillaVersion = "";
-	/** @var int */
-	public $originalProtocol = ProtocolInfo::CURRENT_PROTOCOL;
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();

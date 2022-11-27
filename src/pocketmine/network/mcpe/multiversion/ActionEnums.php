@@ -148,10 +148,11 @@ abstract class ActionEnums {
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
+			case ProtocolInfo::PROTOCOL_130:
 				return self::GROUP_2;
 			default:
 				return self::GROUP_2;

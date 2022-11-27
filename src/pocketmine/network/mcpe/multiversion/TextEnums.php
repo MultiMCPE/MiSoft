@@ -28,10 +28,9 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class TextEnums {
 
 	private const GROUP_1 = 1;
-	private const GROUP_2 = 2;
 
 	private static $textPacketType = [
-		self::GROUP_2 => [
+		self::GROUP_1 => [
 			0 => 'TYPE_RAW',
 			1 => 'TYPE_CHAT',
 			2 => 'TYPE_TRANSLATION',
@@ -41,16 +40,6 @@ abstract class TextEnums {
 			6 => 'TYPE_SYSTEM',
 			7 => 'TYPE_WHISPER',
 			8 => 'TYPE_ANNOUNCEMENT',
-		],
-		self::GROUP_1 => [
-			0 => 'TYPE_RAW',
-			1 => 'TYPE_CHAT',
-			2 => 'TYPE_TRANSLATION',
-			3 => 'TYPE_POPUP',
-			4 => 'TYPE_TIP',
-			5 => 'TYPE_SYSTEM',
-			6 => 'TYPE_WHISPER',
-			7 => 'TYPE_ANNOUNCEMENT',
 		]
 	];
 
@@ -118,13 +107,14 @@ abstract class TextEnums {
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
-				return self::GROUP_2;
+			case ProtocolInfo::PROTOCOL_130:
+				return self::GROUP_1;
 			default:
-				return self::GROUP_2;
+				return self::GROUP_1;
 		}
 	}
 

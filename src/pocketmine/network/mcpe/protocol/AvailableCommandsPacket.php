@@ -103,10 +103,11 @@ class AvailableCommandsPacket extends DataPacket{
 		    ProtocolInfo::PROTOCOL_200 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_140 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_135 => new NetworkBinaryStream(),
+		    ProtocolInfo::PROTOCOL_134 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_133 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_132 => new NetworkBinaryStream(),
 		    ProtocolInfo::PROTOCOL_131 => new NetworkBinaryStream(),
-		    ProtocolInfo::PROTOCOL_120 => new NetworkBinaryStream()
+		    ProtocolInfo::PROTOCOL_130 => new NetworkBinaryStream()
 		];
 
 		foreach ($commands as $commandName => &$commandData) { // Replace &$commandData with $commandData when alises fix for 1.2 won't be needed anymore

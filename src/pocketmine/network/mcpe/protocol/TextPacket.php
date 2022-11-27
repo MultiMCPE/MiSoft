@@ -81,9 +81,13 @@ class TextPacket extends DataPacket{
 			case self::TYPE_SYSTEM:
 				$this->message = $this->getString();
 				break;
-
-			case self::TYPE_TRANSLATION:
 			case self::TYPE_POPUP:
+			    if ($this->getProtocol() < ProtocolInfo::PROTOCOL_134) {
+			        $this->sourceName = $this->getString();
+			        $this->message = $this->getString();
+			        break;
+			    }
+			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->message = $this->getString();
 				$count = $this->getUnsignedVarInt();
@@ -93,9 +97,11 @@ class TextPacket extends DataPacket{
 				break;
 		}
 
-		$this->xboxUserId = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	$this->platformChatId = $this->getString();
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_134) {
+	    	$this->xboxUserId = $this->getString();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	        	$this->platformChatId = $this->getString();
+	    	}
 		}
 	}
 
@@ -118,7 +124,12 @@ class TextPacket extends DataPacket{
 			case self::TYPE_SYSTEM:
 				$this->putString($this->message);
 				break;
-
+			case self::TYPE_POPUP:
+			    if ($this->getProtocol() < ProtocolInfo::PROTOCOL_134) {
+			        $this->putString($this->sourceName);
+			        $this->putString($this->message);
+			        break;
+			    }
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_POPUP:
 			case self::TYPE_JUKEBOX_POPUP:
@@ -130,9 +141,11 @@ class TextPacket extends DataPacket{
 				break;
 		}
 
-		$this->putString($this->xboxUserId);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	$this->putString($this->platformChatId);
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_134) {
+	    	$this->putString($this->xboxUserId);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	        	$this->putString($this->platformChatId);
+	    	}
 		}
 	}
 

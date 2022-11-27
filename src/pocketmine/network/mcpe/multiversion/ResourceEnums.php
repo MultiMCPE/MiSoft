@@ -28,7 +28,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class ResourceEnums {
 
 	private static $packTypes = [
-		ProtocolInfo::PROTOCOL_110 => [
+		ProtocolInfo::PROTOCOL_130 => [
 			"TYPE_INVALID" => 0,
 			"TYPE_RESOURCE" => 1,
 			"TYPE_BEHAVIOR" => 2,
@@ -48,7 +48,7 @@ abstract class ResourceEnums {
      * @return int
      */
 	public static function getPackTypeId(int $playerProtocol, string $typeName) : int{
-		$key = ProtocolInfo::PROTOCOL_110;
+		$key = ProtocolInfo::PROTOCOL_130;
 
 		return self::$packTypes[$key][$typeName] ?? 0;
 	}

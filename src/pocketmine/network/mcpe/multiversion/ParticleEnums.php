@@ -65,7 +65,7 @@ abstract class ParticleEnums {
 			"TYPE_WITCH_MAGIC" => 40,
 			"TYPE_ICE_CRYSTAL" => 43
 		],
-		ProtocolInfo::PROTOCOL_110 => [
+		ProtocolInfo::PROTOCOL_130 => [
 			"TYPE_BUBBLE" => 1,
 			"TYPE_CRITICAL" => 2,
 			"TYPE_SMOKE" => 4,
@@ -137,11 +137,12 @@ abstract class ParticleEnums {
 			case ProtocolInfo::PROTOCOL_200:
 			case ProtocolInfo::PROTOCOL_140:
 			case ProtocolInfo::PROTOCOL_135:
+			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_120:
-			    return self::$particleIds[ProtocolInfo::PROTOCOL_110];
+			case ProtocolInfo::PROTOCOL_130:
+			    return self::$particleIds[ProtocolInfo::PROTOCOL_130];
 			default:
 				return self::$particleIds[ProtocolInfo::PROTOCOL_360];
 		}

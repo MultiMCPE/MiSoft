@@ -46,17 +46,13 @@ class BlockPickRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->getSignedBlockPosition($this->blockX, $this->blockY, $this->blockZ);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_120) {
-	    	$this->addUserData = (($this->get(1) !== "\x00"));
-		}
+	    $this->addUserData = (($this->get(1) !== "\x00"));
 		$this->hotbarSlot = (\ord($this->get(1)));
 	}
 
 	protected function encodePayload(){
 		$this->putSignedBlockPosition($this->blockX, $this->blockY, $this->blockZ);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_120) {
-	    	($this->buffer .= ($this->addUserData ? "\x01" : "\x00"));
-		}
+	    ($this->buffer .= ($this->addUserData ? "\x01" : "\x00"));
 		($this->buffer .= \chr($this->hotbarSlot));
 	}
 

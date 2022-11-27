@@ -112,7 +112,7 @@ class NetworkBinaryStream extends BinaryStream{
 		    if(!($decodedNBT instanceof CompoundTag)){
 			    throw new \UnexpectedValueException("Unexpected root tag type for itemstack");
 		    }
-            if($playerProtocol < ProtocolInfo::PROTOCOL_120 && $id === ItemIds::FILLED_MAP && $decodedNBT->hasTag("map_uuid", StringTag::class)){
+            if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $id === ItemIds::FILLED_MAP && $decodedNBT->hasTag("map_uuid", StringTag::class)){
                 $decodedNBT->setLong("map_uuid", (int) $decodedNBT->getString("map_uuid"));
             }
 		    $nbt = $decodedNBT;
@@ -185,7 +185,7 @@ class NetworkBinaryStream extends BinaryStream{
 		    	($this->buffer .= \chr(1)); //TODO: some kind of count field? always 1 as of 1.9.0
 		    	($this->buffer .= (new NetworkLittleEndianNBTStream())->write($nbt));
 		    }else{
-                if($playerProtocol < ProtocolInfo::PROTOCOL_120 && $item->getId() === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
+                if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $item->getId() === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
                     $tag = $item->getNamedTag();
                     $uuid = $tag->getLong("map_uuid");
                     $nbt->setString("map_uuid", (string) $uuid);

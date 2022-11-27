@@ -25,7 +25,7 @@
 
 namespace pocketmine\network\mcpe\protocol;
 
-interface ProtocolInfo120 {
+interface ProtocolInfo130 {
 
 	/**
 	 * Minecraft: PE packets
