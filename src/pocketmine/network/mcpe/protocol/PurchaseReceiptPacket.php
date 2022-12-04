@@ -29,7 +29,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use function count;
 
 class PurchaseReceiptPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::PURCHASE_RECEIPT_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PURCHASE_RECEIPT_PACKET;
 	public const PACKET_NAME = "PURCHASE_RECEIPT_PACKET";
 
 	/** @var string[] */

@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class RemoveObjectivePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::REMOVE_OBJECTIVE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::REMOVE_OBJECTIVE_PACKET;
 	public const PACKET_NAME = "REMOVE_OBJECTIVE_PACKET";
 
 	/** @var string */

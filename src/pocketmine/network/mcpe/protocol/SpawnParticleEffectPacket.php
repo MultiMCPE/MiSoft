@@ -30,7 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 
 class SpawnParticleEffectPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::SPAWN_PARTICLE_EFFECT_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SPAWN_PARTICLE_EFFECT_PACKET;
 	public const PACKET_NAME = "SPAWN_PARTICLE_EFFECT_PACKET";
 
 	/** @var int */

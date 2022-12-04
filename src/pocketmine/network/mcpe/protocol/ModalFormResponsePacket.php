@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class ModalFormResponsePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::MODAL_FORM_RESPONSE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::MODAL_FORM_RESPONSE_PACKET;
 	public const PACKET_NAME = "MODAL_FORM_RESPONSE_PACKET";
 
 	/** @var int */

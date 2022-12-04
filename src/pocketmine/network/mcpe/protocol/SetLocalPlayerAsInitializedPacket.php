@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class SetLocalPlayerAsInitializedPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET;
 	public const PACKET_NAME = "SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET";
 
 	/** @var int */

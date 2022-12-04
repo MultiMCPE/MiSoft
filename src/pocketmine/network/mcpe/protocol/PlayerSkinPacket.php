@@ -30,7 +30,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\UUID;
 
 class PlayerSkinPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::PLAYER_SKIN_PACKET;
+	public const NETWORK_ID = ProtocolInfo::PLAYER_SKIN_PACKET;
 	public const PACKET_NAME = "PLAYER_SKIN_PACKET";
 
 	/** @var UUID */

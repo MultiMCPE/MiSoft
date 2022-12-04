@@ -219,39 +219,39 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	public static function initPackets() {
-		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo331');
-		self::$packetsIds[ProtocolInfo::PROTOCOL_361] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_360] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_354] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_351] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_350] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_342] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_340] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_332] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_331] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo310');
-		self::$packetsIds[ProtocolInfo::PROTOCOL_330] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_311] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_310] = $oClass->getConstants();
-		$oClass = new \ReflectionClass ('pocketmine\network\mcpe\protocol\ProtocolInfo130');
-		self::$packetsIds[ProtocolInfo::PROTOCOL_290] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_282] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_280] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_274] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_273] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_271] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_260] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_240] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_221] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_220] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_200] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_140] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_135] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_134] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_133] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_132] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_131] = $oClass->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_130] = $oClass->getConstants();
+		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331'))->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_361] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_360] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_354] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_351] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_350] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_342] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_340] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_332] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_331] = $packetsIds;
+		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds310'))->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_330] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_311] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_310] = $packetsIds;
+		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds130'))->getConstants();
+		self::$packetsIds[ProtocolInfo::PROTOCOL_290] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_282] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_280] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_274] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_273] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_271] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_260] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_240] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_221] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_220] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_200] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_140] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_135] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_134] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_133] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_132] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_131] = $packetsIds;
+		self::$packetsIds[ProtocolInfo::PROTOCOL_130] = $packetsIds;
 	}
 
     /**

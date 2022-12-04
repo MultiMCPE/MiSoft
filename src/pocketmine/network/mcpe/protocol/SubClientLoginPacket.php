@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class SubClientLoginPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::SUB_CLIENT_LOGIN_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SUB_CLIENT_LOGIN_PACKET;
 	public const PACKET_NAME = "SUB_CLIENT_LOGIN_PACKET";
 
 	/** @var string */

@@ -30,7 +30,7 @@ use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
 use function count;
 
 class SetScorePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::SET_SCORE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SET_SCORE_PACKET;
 	public const PACKET_NAME = "SET_SCORE_PACKET";
 
 	public const TYPE_CHANGE = 0;

@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 
 class ShowProfilePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo331::SHOW_PROFILE_PACKET;
+	public const NETWORK_ID = ProtocolInfo::SHOW_PROFILE_PACKET;
 	public const PACKET_NAME = "SHOW_PROFILE_PACKET";
 
 	/** @var string */

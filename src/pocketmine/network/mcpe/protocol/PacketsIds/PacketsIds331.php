@@ -1,8 +1,10 @@
 <?php
 
-namespace pocketmine\network\mcpe\protocol;
+declare(strict_types=0x1);
 
-interface ProtocolInfo331 {
+namespace pocketmine\network\mcpe\protocol\PacketsIds;
+
+final class PacketsIds331 {
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
 	public const CLIENT_TO_SERVER_HANDSHAKE_PACKET = 0x04;

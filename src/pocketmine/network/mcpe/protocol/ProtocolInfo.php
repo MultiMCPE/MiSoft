@@ -23,17 +23,24 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-interface ProtocolInfo {
+/**
+ * Version numbers and packet IDs for the current Minecraft PE protocol
+ */
+interface ProtocolInfo{
+
+	/**
+	 * NOTE TO DEVELOPERS
+	 * Do not waste your time or ours submitting pull requests changing game and/or protocol version numbers.
+	 * Pull requests changing game and/or protocol version numbers will be closed.
+	 *
+	 * This file is generated automatically, do not edit it manually.
+	 */
 
 	/**
 	 * Actual Minecraft: PE protocol version
 	 */
-
 	public const CURRENT_PROTOCOL = 110;
 	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_131, ProtocolInfo::PROTOCOL_132, ProtocolInfo::PROTOCOL_133, ProtocolInfo::PROTOCOL_134, ProtocolInfo::PROTOCOL_135, ProtocolInfo::PROTOCOL_136, ProtocolInfo::PROTOCOL_137, ProtocolInfo::PROTOCOL_140, ProtocolInfo::PROTOCOL_141, ProtocolInfo::PROTOCOL_150, ProtocolInfo::PROTOCOL_160, ProtocolInfo::PROTOCOL_200, ProtocolInfo::PROTOCOL_201, ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
-	public const MINECRAFT_VERSION = 'v1.x';
-	public const MINECRAFT_VERSION_NETWORK = '1.12.1';
-
 	public const PROTOCOL_130 = 130; // 1.2.0.2
 	public const PROTOCOL_131 = 131; // 1.2.0.7
 	public const PROTOCOL_132 = 132; // 1.2.0.15
@@ -82,10 +89,15 @@ interface ProtocolInfo {
 	public const PROTOCOL_354 = 354; // 1.11.0.7, 1.11.0.8, 1.11.0.9, 1.11.0.10, 1.11.0, 1.11.1, 1.11.2, 1.11.3, 1.11.4
 	public const PROTOCOL_360 = 360; // 1.12.0.2
 	public const PROTOCOL_361 = 361; // 1.12.0.3, 1.12.0.4, 1.12.0.6, 1.12.0.9, 1.12.0.10, 1.12.0.11, 1.12.0.12, 1.12.0.13, 1.12.0.14
-
 	/**
-	 * Minecraft: PE packets
+	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
+	public const MINECRAFT_VERSION = 'v1.x';
+	/**
+	 * Version number sent to clients in ping responses.
+	 */
+	public const MINECRAFT_VERSION_NETWORK = '1.12.1';
+
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
 	public const SERVER_TO_CLIENT_HANDSHAKE_PACKET = 0x03;
@@ -220,4 +232,5 @@ interface ProtocolInfo {
 	public const UPDATE_BLOCK_PROPERTIES_PACKET = 0x86;
 	public const CLIENT_CACHE_BLOB_STATUS_PACKET = 0x87;
 	public const CLIENT_CACHE_MISS_RESPONSE_PACKET = 0x88;
+
 }
