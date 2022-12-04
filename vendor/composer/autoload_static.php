@@ -1035,6 +1035,8 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\tile\\Tile' => __DIR__ . '/../..' . '/src/pocketmine/tile/Tile.php',
         'pocketmine\\timings\\Timings' => __DIR__ . '/../..' . '/src/pocketmine/timings/Timings.php',
         'pocketmine\\timings\\TimingsHandler' => __DIR__ . '/../..' . '/src/pocketmine/timings/TimingsHandler.php',
+        'pocketmine\\updater\\AutoUpdater' => __DIR__ . '/../..' . '/src/pocketmine/updater/AutoUpdater.php',
+        'pocketmine\\updater\\UpdateCheckTask' => __DIR__ . '/../..' . '/src/pocketmine/updater/UpdateCheckTask.php',
         'pocketmine\\utils\\Binary' => __DIR__ . '/..' . '/pocketmine/binaryutils/src/Binary.php',
         'pocketmine\\utils\\BinaryDataException' => __DIR__ . '/..' . '/pocketmine/binaryutils/src/BinaryDataException.php',
         'pocketmine\\utils\\BinaryStream' => __DIR__ . '/..' . '/pocketmine/binaryutils/src/BinaryStream.php',

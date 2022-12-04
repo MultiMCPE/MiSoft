@@ -1096,6 +1096,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->spawnToAll();
 
+		if($this->server->getUpdater()->hasUpdate() and $this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE) and $this->server->getProperty("auto-updater.on-update.warn-ops", true)){
+			$this->server->getUpdater()->showPlayerUpdate($this);
+		}
+
 		if($this->getHealth() <= 0){
 			$this->respawn();
 		}
@@ -2792,7 +2796,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
         $action = ActionEnums::getPlayerAction($this->protocol, $packet->action);
-        if (!$this->spawned or (!$this->isAlive() && $action !== "CHANGE_DEMENSION" && $action !== "RESPAWN")) {
+        if (!$this->spawned or (!$this->isAlive() && $action !== "ACTION_DIMENSION_CHANGE_REQUEST" && $action !== "ACTION_RESPAWN")) {
             return false;
         }
 
@@ -2800,7 +2804,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 
 		switch($action){
-			case 'START_DESTROY_BLOCK':
+			case 'ACTION_START_BREAK':
 				if($pos->distanceSquared($this) > 10000){
 					break;
 				}
@@ -2834,37 +2838,37 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				break;
 
-			case 'ABORT_DESTROY_BLOCK':
-			case 'STOP_DESTROY_BLOCK':
+			case 'ACTION_ABORT_BREAK':
+			case 'ACTION_STOP_BREAK':
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_STOP_BREAK);
 				break;
-			case 'STOP_SLEEPING':
+			case 'ACTION_STOP_SLEEPING':
 				$this->stopSleep();
 				break;
-			case 'CHANGE_DEMENSION':
-			case 'RESPAWN':
+			case 'ACTION_DIMENSION_CHANGE_REQUEST':
+			case 'ACTION_RESPAWN':
 				if($this->isAlive()){
 					break;
 				}
 
 				$this->respawn();
 				break;
-			case 'START_JUMP':
+			case 'ACTION_JUMP':
 				$this->jump();
 				return true;
-			case 'START_SPRINTING':
+			case 'ACTION_START_SPRINT':
 				$this->toggleSprint(true);
 				return true;
-			case 'STOP_SPRINTING':
+			case 'ACTION_STOP_SPRINT':
 				$this->toggleSprint(false);
 				return true;
-			case 'START_SNEAKING':
+			case 'ACTION_START_SNEAK':
 				$this->toggleSneak(true);
 				return true;
-			case 'STOP_SNEAKING':
+			case 'ACTION_STOP_SNEAK':
 				$this->toggleSneak(false);
 				return true;
-			case 'CRACK_BLOCK':
+			case 'ACTION_CONTINUE_BREAK':
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $data | ($packet->face << 24));

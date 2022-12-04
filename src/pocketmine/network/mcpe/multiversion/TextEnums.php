@@ -28,20 +28,32 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class TextEnums {
 
 	private const GROUP_1 = 1;
+	private const GROUP_2 = 2;
 
-	private static $textPacketType = [
-		self::GROUP_1 => [
-			0 => 'TYPE_RAW',
-			1 => 'TYPE_CHAT',
-			2 => 'TYPE_TRANSLATION',
-			3 => 'TYPE_POPUP',
-			4 => 'JUKEBOX_POPUP',
-			5 => 'TYPE_TIP',
-			6 => 'TYPE_SYSTEM',
-			7 => 'TYPE_WHISPER',
-			8 => 'TYPE_ANNOUNCEMENT',
-		]
-	];
+    private static $textPacketType = [
+        self::GROUP_2 => [
+            "TYPE_RAW" => 0,
+            "TYPE_CHAT" => 1,
+            "TYPE_TRANSLATION" => 2,
+            "TYPE_POPUP" => 3,
+            "TYPE_JUKEBOX_POPUP" => 4,
+            "TYPE_TIP" => 5,
+            "TYPE_SYSTEM" => 6,
+            "TYPE_WHISPER" => 7,
+            "TYPE_ANNOUNCEMENT" => 8,
+            "TYPE_JSON" => 9
+        ],
+        self::GROUP_1 => [
+            "TYPE_RAW" => 0,
+            "TYPE_CHAT" => 1,
+            "TYPE_TRANSLATION" => 2,
+            "TYPE_POPUP" => 3,
+            "TYPE_TIP" => 4,
+            "TYPE_SYSTEM" => 5,
+            "TYPE_WHISPER" => 6,
+            "TYPE_ANNOUNCEMENT" => 7
+        ]
+    ];
 
     /**
      * @param int $playerProtocol
@@ -51,8 +63,10 @@ abstract class TextEnums {
      */
 	public static function getMessageType(int $playerProtocol, int $typeId) : string{
 		$groupKey = self::getTextKeyByProtocol($playerProtocol);
-		if (!isset(self::$textPacketType[$groupKey][$typeId])) {
-			return self::$textPacketType[$groupKey][0];
+		foreach (self::$textPacketType[$groupKey] as $key => $value) {
+		    if ($value === $typeId) {
+		        return $key;
+		    }
 		}
 
 		return self::$textPacketType[$groupKey][$typeId];
@@ -66,10 +80,8 @@ abstract class TextEnums {
      */
 	public static function getMessageTypeId(int $playerProtocol, string $typeName) : int{
 		$groupKey = self::getTextKeyByProtocol($playerProtocol);
-		foreach (self::$textPacketType[$groupKey] as $key => $value) {
-			if ($value === $typeName) {
-				return $key;
-			}
+		if (isset(self::$textPacketType[$groupKey][$typeName])) {
+		    return self::$textPacketType[$groupKey][$typeName];
 		}
 
 		return 0;
@@ -109,12 +121,13 @@ abstract class TextEnums {
 			case ProtocolInfo::PROTOCOL_135:
 			case ProtocolInfo::PROTOCOL_134:
 			case ProtocolInfo::PROTOCOL_133:
+			    return self::GROUP_2;
 			case ProtocolInfo::PROTOCOL_132:
 			case ProtocolInfo::PROTOCOL_131:
 			case ProtocolInfo::PROTOCOL_130:
 				return self::GROUP_1;
 			default:
-				return self::GROUP_1;
+				return self::GROUP_2;
 		}
 	}
 

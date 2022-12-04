@@ -99,6 +99,7 @@ use pocketmine\snooze\SleeperNotifier;
 use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
 use pocketmine\timings\TimingsHandler;
+use pocketmine\updater\AutoUpdater;
 use pocketmine\utils\Config;
 use pocketmine\utils\Internet;
 use pocketmine\utils\MainLogger;
@@ -215,6 +216,9 @@ class Server{
 
 	/** @var float */
 	private $profilingTickRate = 20;
+
+	/** @var AutoUpdater */
+	private $updater = null;
 
 	/** @var AsyncPool */
 	private $asyncPool;
@@ -670,6 +674,13 @@ class Server{
 	 */
 	public function getLevelMetadata(){
 		return $this->levelMetadata;
+	}
+
+	/**
+	 * @return AutoUpdater
+	 */
+	public function getUpdater(){
+		return $this->updater;
 	}
 
 	/**
@@ -1713,6 +1724,8 @@ class Server{
 			$this->queryRegenerateTask = new QueryRegenerateEvent($this);
 
 			$this->pluginManager->loadPlugins($this->pluginPath);
+
+            $this->updater = new AutoUpdater($this, $this->getProperty("auto-updater.host", "update.pmmp.io"));
 
 			$this->enablePlugins(PluginLoadOrder::STARTUP);
 

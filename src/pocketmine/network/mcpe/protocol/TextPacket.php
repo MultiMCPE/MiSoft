@@ -42,6 +42,7 @@ class TextPacket extends DataPacket{
 	public const TYPE_SYSTEM = "TYPE_SYSTEM";
 	public const TYPE_WHISPER = "TYPE_WHISPER";
 	public const TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT";
+	public const TYPE_JSON = "TYPE_JSON";
 
 	/** @var int */
 	public $type;
@@ -79,6 +80,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON:
 				$this->message = $this->getString();
 				break;
 			case self::TYPE_POPUP:
@@ -87,6 +89,7 @@ class TextPacket extends DataPacket{
 			        $this->message = $this->getString();
 			        break;
 			    }
+			case self::TYPE_POPUP:
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->message = $this->getString();
@@ -122,6 +125,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON:
 				$this->putString($this->message);
 				break;
 			case self::TYPE_POPUP:
@@ -130,8 +134,8 @@ class TextPacket extends DataPacket{
 			        $this->putString($this->message);
 			        break;
 			    }
-			case self::TYPE_TRANSLATION:
 			case self::TYPE_POPUP:
+			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->putString($this->message);
 				$this->putUnsignedVarInt(count($this->parameters));

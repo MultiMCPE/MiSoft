@@ -972,6 +972,8 @@ return array(
     'pocketmine\\tile\\Tile' => $baseDir . '/src/pocketmine/tile/Tile.php',
     'pocketmine\\timings\\Timings' => $baseDir . '/src/pocketmine/timings/Timings.php',
     'pocketmine\\timings\\TimingsHandler' => $baseDir . '/src/pocketmine/timings/TimingsHandler.php',
+    'pocketmine\\updater\\AutoUpdater' => $baseDir . '/src/pocketmine/updater/AutoUpdater.php',
+    'pocketmine\\updater\\UpdateCheckTask' => $baseDir . '/src/pocketmine/updater/UpdateCheckTask.php',
     'pocketmine\\utils\\Binary' => $vendorDir . '/pocketmine/binaryutils/src/Binary.php',
     'pocketmine\\utils\\BinaryDataException' => $vendorDir . '/pocketmine/binaryutils/src/BinaryDataException.php',
     'pocketmine\\utils\\BinaryStream' => $vendorDir . '/pocketmine/binaryutils/src/BinaryStream.php',

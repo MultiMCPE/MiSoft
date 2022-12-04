@@ -206,7 +206,9 @@ class StartGamePacket extends DataPacket{
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 		    $this->xboxLiveBroadcastMode = $this->getVarInt();
 		}
-		$this->serverChunkTickRadius = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	$this->serverChunkTickRadius = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		}
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 		    $this->hasPlatformBroadcast = (($this->get(1) !== "\x00"));
 		    $this->platformBroadcastMode = $this->getVarInt();
@@ -314,7 +316,9 @@ class StartGamePacket extends DataPacket{
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 		    $this->putVarInt($this->xboxLiveBroadcastMode);
 		}
-		($this->buffer .= (\pack("V", $this->serverChunkTickRadius)));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	($this->buffer .= (\pack("V", $this->serverChunkTickRadius)));
+		}
 		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
 	    	($this->buffer .= ($this->hasPlatformBroadcast ? "\x01" : "\x00"));
 	    	$this->putVarInt($this->platformBroadcastMode);

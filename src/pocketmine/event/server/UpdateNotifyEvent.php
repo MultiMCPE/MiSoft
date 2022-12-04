@@ -21,43 +21,23 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\nbt\tag;
+namespace pocketmine\event\server;
 
-use pocketmine\nbt\NBT;
-use pocketmine\nbt\NBTStream;
-use pocketmine\nbt\ReaderTracker;
+use pocketmine\updater\AutoUpdater;
 
-use pocketmine\utils\Binary;
+/**
+ * Called when the AutoUpdater receives notification of an available PocketMine-MP update.
+ * Plugins may use this event to perform actions when an update notification is received.
+ */
+class UpdateNotifyEvent extends ServerEvent{
+	/** @var AutoUpdater */
+	private $updater;
 
-class FloatTag extends NamedTag{
-	/** @var float */
-	private $value;
-
-	/**
-	 * @param string $name
-	 * @param float  $value
-	 */
-	public function __construct(string $name = "", float $value = 0.0){
-		parent::__construct($name);
-		$this->value = $value;
+	public function __construct(AutoUpdater $updater){
+		$this->updater = $updater;
 	}
 
-	public function getType() : int{
-		return NBT::TAG_Float;
-	}
-
-	public function read(NBTStream $nbt, ReaderTracker $tracker) : void{
-		$this->value = $nbt->getFloat();
-	}
-
-	public function write(NBTStream $nbt) : void{
-		$nbt->putFloat($this->value);
-	}
-
-	/**
-	 * @return float
-	 */
-	public function getValue() : float{
-		return $this->value;
+	public function getUpdater() : AutoUpdater{
+		return $this->updater;
 	}
 }
