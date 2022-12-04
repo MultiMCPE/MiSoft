@@ -110,42 +110,13 @@ abstract class ParticleEnums {
      * @return array
      */
     public static function getParticleArrayByProtocol(int $playerProtocol) : array{
-		switch ($playerProtocol) {
-			case ProtocolInfo::PROTOCOL_361:
-			case ProtocolInfo::PROTOCOL_360:
-			    return self::$particleIds[ProtocolInfo::PROTOCOL_360];
-			case ProtocolInfo::PROTOCOL_354:
-			case ProtocolInfo::PROTOCOL_351:
-			case ProtocolInfo::PROTOCOL_350:
-			case ProtocolInfo::PROTOCOL_342:
-			case ProtocolInfo::PROTOCOL_340:
-			case ProtocolInfo::PROTOCOL_332:
-			case ProtocolInfo::PROTOCOL_331:
-			case ProtocolInfo::PROTOCOL_330:
-			case ProtocolInfo::PROTOCOL_311:
-			case ProtocolInfo::PROTOCOL_310:
-			case ProtocolInfo::PROTOCOL_290:
-			case ProtocolInfo::PROTOCOL_282:
-			case ProtocolInfo::PROTOCOL_280:
-			case ProtocolInfo::PROTOCOL_274:
-			case ProtocolInfo::PROTOCOL_273:
-			case ProtocolInfo::PROTOCOL_271:
-			case ProtocolInfo::PROTOCOL_260:
-			case ProtocolInfo::PROTOCOL_240:
-			case ProtocolInfo::PROTOCOL_221:
-			case ProtocolInfo::PROTOCOL_220:
-			case ProtocolInfo::PROTOCOL_200:
-			case ProtocolInfo::PROTOCOL_140:
-			case ProtocolInfo::PROTOCOL_135:
-			case ProtocolInfo::PROTOCOL_134:
-			case ProtocolInfo::PROTOCOL_133:
-			case ProtocolInfo::PROTOCOL_132:
-			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_130:
-			    return self::$particleIds[ProtocolInfo::PROTOCOL_130];
-			default:
-				return self::$particleIds[ProtocolInfo::PROTOCOL_360];
+		foreach (self::$particleIds as $protocol => $types) {
+			if ($playerProtocol >= $protocol) {
+			    return $types;
+			}
 		}
+
+		return [];
     }
 
 }

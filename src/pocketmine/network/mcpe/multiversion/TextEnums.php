@@ -27,11 +27,8 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 abstract class TextEnums {
 
-	private const GROUP_1 = 1;
-	private const GROUP_2 = 2;
-
     private static $textPacketType = [
-        self::GROUP_2 => [
+        ProtocolInfo::PROTOCOL_133 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,
@@ -43,7 +40,7 @@ abstract class TextEnums {
             "TYPE_ANNOUNCEMENT" => 8,
             "TYPE_JSON" => 9
         ],
-        self::GROUP_1 => [
+        ProtocolInfo::PROTOCOL_130 => [ // 130 подойдет для 110
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,
@@ -62,14 +59,14 @@ abstract class TextEnums {
      * @return string
      */
 	public static function getMessageType(int $playerProtocol, int $typeId) : string{
-		$groupKey = self::getTextKeyByProtocol($playerProtocol);
-		foreach (self::$textPacketType[$groupKey] as $key => $value) {
+		$group = self::getTextTypesByProtocol($playerProtocol);
+		foreach ($group as $key => $value) {
 		    if ($value === $typeId) {
 		        return $key;
 		    }
 		}
 
-		return self::$textPacketType[$groupKey][$typeId];
+		return 'TYPE_RAW';
 	}
 
     /**
@@ -79,9 +76,9 @@ abstract class TextEnums {
      * @return int
      */
 	public static function getMessageTypeId(int $playerProtocol, string $typeName) : int{
-		$groupKey = self::getTextKeyByProtocol($playerProtocol);
-		if (isset(self::$textPacketType[$groupKey][$typeName])) {
-		    return self::$textPacketType[$groupKey][$typeName];
+		$group = self::getTextTypesByProtocol($playerProtocol);
+		if (isset($group[$typeName])) {
+		    return $group[$typeName];
 		}
 
 		return 0;
@@ -90,45 +87,16 @@ abstract class TextEnums {
     /**
      * @param int $playerProtocol
      * 
-     * @return int
+     * @return array
      */
-    private static function getTextKeyByProtocol(int $playerProtocol) : int{
-		switch ($playerProtocol) {
-			case ProtocolInfo::PROTOCOL_361:
-			case ProtocolInfo::PROTOCOL_360:
-			case ProtocolInfo::PROTOCOL_354:
-			case ProtocolInfo::PROTOCOL_351:
-			case ProtocolInfo::PROTOCOL_350:
-			case ProtocolInfo::PROTOCOL_342:
-			case ProtocolInfo::PROTOCOL_340:
-			case ProtocolInfo::PROTOCOL_332:
-			case ProtocolInfo::PROTOCOL_331:
-			case ProtocolInfo::PROTOCOL_330:
-			case ProtocolInfo::PROTOCOL_311:
-			case ProtocolInfo::PROTOCOL_310:
-			case ProtocolInfo::PROTOCOL_290:
-			case ProtocolInfo::PROTOCOL_282:
-			case ProtocolInfo::PROTOCOL_280:
-			case ProtocolInfo::PROTOCOL_274:
-			case ProtocolInfo::PROTOCOL_273:
-			case ProtocolInfo::PROTOCOL_271:
-			case ProtocolInfo::PROTOCOL_260:
-			case ProtocolInfo::PROTOCOL_240:
-			case ProtocolInfo::PROTOCOL_221:
-			case ProtocolInfo::PROTOCOL_220:
-			case ProtocolInfo::PROTOCOL_200:
-			case ProtocolInfo::PROTOCOL_140:
-			case ProtocolInfo::PROTOCOL_135:
-			case ProtocolInfo::PROTOCOL_134:
-			case ProtocolInfo::PROTOCOL_133:
-			    return self::GROUP_2;
-			case ProtocolInfo::PROTOCOL_132:
-			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_130:
-				return self::GROUP_1;
-			default:
-				return self::GROUP_2;
+    private static function getTextTypesByProtocol(int $playerProtocol) : array{
+		foreach (self::$textPacketType as $protocol => $types) {
+			if ($playerProtocol >= $protocol) {
+			    return $types;
+			}
 		}
+
+		return [];
 	}
 
 }

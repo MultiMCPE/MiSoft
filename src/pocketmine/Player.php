@@ -99,6 +99,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\PlayerNetworkSessionAdapter;
+use pocketmine\network\mcpe\multiversion\ProtocolConvertor;
 use pocketmine\network\mcpe\multiversion\ActionEnums;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
@@ -147,7 +148,6 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
-use pocketmine\network\Network;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
@@ -1872,7 +1872,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-        $this->protocol = Network::convertProtocol($packet->protocol ?? ProtocolInfo::CURRENT_PROTOCOL);
+        $this->protocol = ProtocolConvertor::convertProtocol($packet->protocol ?? ProtocolInfo::CURRENT_PROTOCOL);
 		if(!$packet->isValidProtocol){
 			if($packet->protocol < ProtocolInfo::CURRENT_PROTOCOL){
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_CLIENT, true);
@@ -1893,8 +1893,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         $this->originalProtocol = $packet->protocol;
-        $this->chunkProtocol = Network::convertChunkProtocol($this->protocol);
-        $this->craftingProtocol = Network::convertCraftingProtocol($this->protocol);
+        $this->chunkProtocol = ProtocolConvertor::convertChunkProtocol($this->protocol);
+        $this->craftingProtocol = ProtocolConvertor::convertCraftingProtocol($this->protocol);
 
 		$this->username = TextFormat::clean($packet->username);
 		$this->displayName = $this->username;
