@@ -35,7 +35,6 @@ use function count;
 
 class AddActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ACTOR_PACKET;
-	public const PACKET_NAME = "ADD_ACTOR_PACKET";
 
 	/*
 	* Thanks dktapps for this hack)

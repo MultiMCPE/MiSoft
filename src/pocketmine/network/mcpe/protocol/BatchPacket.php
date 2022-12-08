@@ -36,7 +36,6 @@ use function zlib_encode;
 
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;
-	public const PACKET_NAME = "BATCH_PACKET";
 
 	/** @var string */
 	public $payload = "";

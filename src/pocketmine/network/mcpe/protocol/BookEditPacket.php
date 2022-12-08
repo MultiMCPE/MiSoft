@@ -29,7 +29,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class BookEditPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BOOK_EDIT_PACKET;
-	public const PACKET_NAME = "BOOK_EDIT_PACKET";
 
 	public const TYPE_REPLACE_PAGE = 0;
 	public const TYPE_ADD_PAGE = 1;

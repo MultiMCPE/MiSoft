@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class AddItemActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ITEM_ACTOR_PACKET;
-	public const PACKET_NAME = "ADD_ITEM_ACTOR_PACKET";
 
 	/** @var int|null */
 	public $entityUniqueId = null; //TODO

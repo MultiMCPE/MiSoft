@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SetCommandsEnabledPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_COMMANDS_ENABLED_PACKET;
-	public const PACKET_NAME = "SET_COMMANDS_ENABLED_PACKET";
 
 	/** @var bool */
 	public $enabled;

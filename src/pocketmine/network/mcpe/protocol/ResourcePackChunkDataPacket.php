@@ -32,7 +32,6 @@ use function strlen;
 
 class ResourcePackChunkDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CHUNK_DATA_PACKET;
-	public const PACKET_NAME = "RESOURCE_PACK_CHUNK_DATA_PACKET";
 
 	/** @var string */
 	public $packId;

@@ -29,7 +29,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class AvailableCommandsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::AVAILABLE_COMMANDS_PACKET;
-	public const PACKET_NAME = "AVAILABLE_COMMANDS_PACKET";
 
 	public const ARG_FLAG_VALID = 0x100000;
 	public const ARG_FLAG_ENUM = 0x200000;

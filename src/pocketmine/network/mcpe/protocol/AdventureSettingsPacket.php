@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 
 class AdventureSettingsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADVENTURE_SETTINGS_PACKET;
-	public const PACKET_NAME = "ADVENTURE_SETTINGS_PACKET";
 
 	public const PERMISSION_NORMAL = 0;
 	public const PERMISSION_OPERATOR = 1;

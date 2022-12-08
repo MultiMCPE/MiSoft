@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ChunkRadiusUpdatedPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CHUNK_RADIUS_UPDATED_PACKET;
-	public const PACKET_NAME = "CHUNK_RADIUS_UPDATED_PACKET";
 
 	/** @var int */
 	public $radius;

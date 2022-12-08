@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SetActorMotionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_ACTOR_MOTION_PACKET;
-	public const PACKET_NAME = "SET_ACTOR_MOTION_PACKET";
 
 	/** @var int */
 	public $entityRuntimeId;

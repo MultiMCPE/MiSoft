@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class RemoveActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::REMOVE_ACTOR_PACKET;
-	public const PACKET_NAME = "REMOVE_ACTOR_PACKET";
 
 	/** @var int */
 	public $entityUniqueId;

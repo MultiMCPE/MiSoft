@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class BlockActorDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BLOCK_ACTOR_DATA_PACKET;
-	public const PACKET_NAME = "BLOCK_ACTOR_DATA_PACKET";
 
 	/** @var int */
 	public $x;

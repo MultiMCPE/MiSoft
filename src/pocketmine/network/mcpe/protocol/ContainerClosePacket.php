@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class ContainerClosePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_CLOSE_PACKET;
-	public const PACKET_NAME = "CONTAINER_CLOSE_PACKET";
 
 	/** @var int */
 	public $windowId;

@@ -28,6 +28,7 @@ use pocketmine\level\Level;
 
 use pocketmine\tile\Spawnable;
 
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
@@ -75,6 +76,8 @@ class ChunkRequestTask extends AsyncTask {
 	}
 
 	public function onRun() {
+	    PacketPool::init();
+
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 
 	    $buffers = [];

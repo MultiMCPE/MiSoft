@@ -33,7 +33,6 @@ use pocketmine\network\mcpe\protocol\types\ContainerIds;
  */
 class PlayerHotbarPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_HOTBAR_PACKET;
-	public const PACKET_NAME = "PLAYER_HOTBAR_PACKET";
 
 	/** @var int */
 	public $selectedHotbarSlot;

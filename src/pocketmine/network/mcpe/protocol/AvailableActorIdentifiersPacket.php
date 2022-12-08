@@ -30,7 +30,6 @@ use function base64_decode;
 
 class AvailableActorIdentifiersPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::AVAILABLE_ACTOR_IDENTIFIERS_PACKET;
-	public const PACKET_NAME = "AVAILABLE_ACTOR_IDENTIFIERS_PACKET";
 
 	/**
 	 * Hardcoded NBT blob extracted from MCPE vanilla server.

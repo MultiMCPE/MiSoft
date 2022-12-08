@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SetSpawnPositionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_SPAWN_POSITION_PACKET;
-	public const PACKET_NAME = "SET_SPAWN_POSITION_PACKET";
 
 	public const TYPE_PLAYER_SPAWN = 0;
 	public const TYPE_WORLD_SPAWN = 1;

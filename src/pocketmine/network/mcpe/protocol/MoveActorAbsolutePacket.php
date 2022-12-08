@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class MoveActorAbsolutePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_ACTOR_ABSOLUTE_PACKET;
-	public const PACKET_NAME = "MOVE_ACTOR_ABSOLUTE_PACKET";
 
 	public const FLAG_GROUND = 0x01;
 	public const FLAG_TELEPORT = 0x02;

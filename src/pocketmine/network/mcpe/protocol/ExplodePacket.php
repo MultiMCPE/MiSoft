@@ -32,7 +32,6 @@ use function count;
 
 class ExplodePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::EXPLODE_PACKET;
-	public const PACKET_NAME = "EXPLODE_PACKET";
 
 	/** @var Vector3 */
 	public $position;

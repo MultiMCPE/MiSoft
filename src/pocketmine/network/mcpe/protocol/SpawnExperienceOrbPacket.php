@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SpawnExperienceOrbPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SPAWN_EXPERIENCE_ORB_PACKET;
-	public const PACKET_NAME = "SPAWN_EXPERIENCE_ORB_PACKET";
 
 	/** @var Vector3 */
 	public $position;

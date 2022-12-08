@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\protocol\types\EntityLink;
 
 class SetActorLinkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_ACTOR_LINK_PACKET;
-	public const PACKET_NAME = "SET_ACTOR_LINK_PACKET";
 
 	/** @var EntityLink */
 	public $link;

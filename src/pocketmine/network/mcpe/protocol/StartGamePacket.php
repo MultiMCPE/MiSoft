@@ -32,7 +32,6 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 
 class StartGamePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::START_GAME_PACKET;
-	public const PACKET_NAME = "START_GAME_PACKET";
 
 	/** @var string|null */
 	private static $blockTableCache = null;

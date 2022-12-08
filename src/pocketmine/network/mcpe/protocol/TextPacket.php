@@ -31,7 +31,6 @@ use function count;
 
 class TextPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TEXT_PACKET;
-	public const PACKET_NAME = "TEXT_PACKET";
 
 	public const TYPE_RAW = "TYPE_RAW";
 	public const TYPE_CHAT = "TYPE_CHAT";

@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class UpdateBlockPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_BLOCK_PACKET;
-	public const PACKET_NAME = "UPDATE_BLOCK_PACKET";
 
 	public const FLAG_NONE      = 0b0000;
 	public const FLAG_NEIGHBORS = 0b0001;

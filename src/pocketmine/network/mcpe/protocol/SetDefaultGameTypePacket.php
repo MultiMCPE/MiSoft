@@ -29,7 +29,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SetDefaultGameTypePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_DEFAULT_GAME_TYPE_PACKET;
-	public const PACKET_NAME = "SET_DEFAULT_GAME_TYPE_PACKET";
 
 	/** @var int */
 	public $gamemode;

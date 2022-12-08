@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 
 class CommandRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::COMMAND_REQUEST_PACKET;
-	public const PACKET_NAME = "COMMAND_REQUEST_PACKET";
 
 	/** @var string */
 	public $command;

@@ -32,7 +32,6 @@ use function count;
 
 class CraftingEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_EVENT_PACKET;
-	public const PACKET_NAME = "CRAFTING_EVENT_PACKET";
 
 	/** @var int */
 	public $windowId;

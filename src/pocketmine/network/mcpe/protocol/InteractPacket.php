@@ -30,7 +30,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class InteractPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::INTERACT_PACKET;
-	public const PACKET_NAME = "INTERACT_PACKET";
 
 	public const ACTION_LEAVE_VEHICLE = 3;
 	public const ACTION_MOUSEOVER = 4;

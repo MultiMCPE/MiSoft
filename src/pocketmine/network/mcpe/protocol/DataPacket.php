@@ -40,7 +40,6 @@ use function method_exists;
 abstract class DataPacket extends NetworkBinaryStream{
 
 	public const NETWORK_ID = 0x0;
-	public const PACKET_NAME = "DATA_PACKET";
 
     public const PID_MASK = 0x3ff;
 
@@ -59,8 +58,6 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $recipientSubId = 0x0;
 	/** @var int|null */
 	private $packetProtocol;
-    /** @var array */
-	protected static $packetsIds = [];
 	/** @var BlockPallet[] */
 	protected static $blockPalletes = [];
 
@@ -153,11 +150,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	protected function encodeHeader(){
-		if (empty(self::$packetsIds)) {
-		    self::initPackets();
-		}
-
-	    $pid = self::$packetsIds[$this->packetProtocol][$this::PACKET_NAME];
+	    $pid = PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
             ($this->buffer .= \chr($pid));
             if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
@@ -216,42 +209,6 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	public function __set($name, $value){
 		throw new \Error("Undefined property: " . get_class($this) . "::\$" . $name);
-	}
-
-	public static function initPackets() {
-		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331'))->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_361] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_360] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_354] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_351] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_350] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_342] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_340] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_332] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_331] = $packetsIds;
-		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds310'))->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_330] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_311] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_310] = $packetsIds;
-		$packetsIds = (new \ReflectionClass ('pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds130'))->getConstants();
-		self::$packetsIds[ProtocolInfo::PROTOCOL_290] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_282] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_280] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_274] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_273] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_271] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_260] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_240] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_221] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_220] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_200] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_140] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_135] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_134] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_133] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_132] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_131] = $packetsIds;
-		self::$packetsIds[ProtocolInfo::PROTOCOL_130] = $packetsIds;
 	}
 
     /**

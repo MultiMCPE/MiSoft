@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class SetTitlePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_TITLE_PACKET;
-	public const PACKET_NAME = "SET_TITLE_PACKET";
 
 	public const TYPE_CLEAR_TITLE = 0;
 	public const TYPE_RESET_TITLE = 1;

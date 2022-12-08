@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
@@ -51,6 +52,8 @@ class CraftingDataBuildTask extends AsyncTask {
 	}
 
 	public function onRun() {
+	    PacketPool::init();
+
 	    $buffers = [];
 	    foreach ($this->protocols as $protocol) {
 	    	$pk = new CraftingDataPacket();

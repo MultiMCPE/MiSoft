@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class MobArmorEquipmentPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOB_ARMOR_EQUIPMENT_PACKET;
-	public const PACKET_NAME = "MOB_ARMOR_EQUIPMENT_PACKET";
 
 	/** @var int */
 	public $entityRuntimeId;

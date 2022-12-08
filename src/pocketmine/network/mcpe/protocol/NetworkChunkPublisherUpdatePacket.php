@@ -29,7 +29,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class NetworkChunkPublisherUpdatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET;
-	public const PACKET_NAME = "NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET";
 
 	/** @var int */
 	public $x;

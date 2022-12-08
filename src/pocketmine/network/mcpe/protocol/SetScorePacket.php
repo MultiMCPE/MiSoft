@@ -31,7 +31,6 @@ use function count;
 
 class SetScorePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_SCORE_PACKET;
-	public const PACKET_NAME = "SET_SCORE_PACKET";
 
 	public const TYPE_CHANGE = 0;
 	public const TYPE_REMOVE = 1;

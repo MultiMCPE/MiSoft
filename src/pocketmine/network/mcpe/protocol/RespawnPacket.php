@@ -31,7 +31,6 @@ use pocketmine\network\mcpe\NetworkSession;
 
 class RespawnPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESPAWN_PACKET;
-	public const PACKET_NAME = "RESPAWN_PACKET";
 
 	/** @var Vector3 */
 	public $position;

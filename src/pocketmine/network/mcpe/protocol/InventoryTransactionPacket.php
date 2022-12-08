@@ -31,7 +31,6 @@ use function count;
 
 class InventoryTransactionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::INVENTORY_TRANSACTION_PACKET;
-	public const PACKET_NAME = "INVENTORY_TRANSACTION_PACKET";
 
 	public const TYPE_NORMAL = 0;
 	public const TYPE_MISMATCH = 1;

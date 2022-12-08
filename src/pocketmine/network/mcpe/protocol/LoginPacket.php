@@ -36,7 +36,6 @@ use function json_decode;
 
 class LoginPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
-	public const PACKET_NAME = "LOGIN_PACKET";
 
 	public const EDITION_POCKET = 0;
 

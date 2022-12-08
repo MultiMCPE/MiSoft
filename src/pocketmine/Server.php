@@ -2171,7 +2171,6 @@ class Server{
 	 */
 	private function start(){
 	    MetadataConvertor::init();
-		DataPacket::initPackets();
 		$this->asyncPool->submitTask(new PaletteInitTask());
 
 		if($this->getConfigBool("enable-query", true)){
