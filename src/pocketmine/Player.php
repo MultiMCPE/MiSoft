@@ -142,6 +142,9 @@ use pocketmine\network\mcpe\protocol\SetTitlePacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
+use pocketmine\network\mcpe\protocol\types\CommandData;
+use pocketmine\network\mcpe\protocol\types\CommandEnum;
+use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
@@ -726,20 +729,39 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function sendCommandData(){
-		$commands = [];
+		$pk = new AvailableCommandsPacket();
 		foreach($this->server->getCommandMap()->getCommands() as $name => $command){
-			if($command->getName() === "help" or !$command->testPermissionSilent($this)){
+			if(isset($pk->commandData[$command->getName()]) or $command->getName() === "help" or !$command->testPermissionSilent($this)){
 				continue;
 			}
 
-			if(count($cmdData = $command->generateCustomCommandData($this)) > 0){
-				$commands[$command->getName()]["versions"][0] = $cmdData;
+			$data = new CommandData();
+			//TODO: commands containing uppercase letters in the name crash 1.9.0 client
+			$data->commandName = strtolower($command->getName());
+			$data->commandDescription = $this->server->getLanguage()->translateString($command->getDescription());
+			$data->flags = 0;
+			$data->permission = 0;
+
+			$parameter = new CommandParameter();
+			$parameter->paramName = "args";
+			$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
+			$parameter->isOptional = true;
+			$data->overloads[0][0] = $parameter;
+
+			$aliases = $command->getAliases();
+			if(!empty($aliases)){
+				if(!in_array($data->commandName, $aliases, true)){
+					//work around a client bug which makes the original name not show when aliases are used
+					$aliases[] = $data->commandName;
+				}
+				$data->aliases = new CommandEnum();
+				$data->aliases->enumName = ucfirst($command->getName()) . "Aliases";
+				$data->aliases->enumValues = $aliases;
 			}
+
+			$pk->commandData[$command->getName()] = $data;
 		}
 
-		AvailableCommandsPacket::prepareCommands($commands);
-		
-		$pk = new AvailableCommandsPacket();
 		$this->dataPacket($pk);
 	}
 

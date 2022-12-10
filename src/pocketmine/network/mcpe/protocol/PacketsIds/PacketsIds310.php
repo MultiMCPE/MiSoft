@@ -64,7 +64,7 @@ final class PacketsIds310 {
 	public const SET_COMMANDS_ENABLED_PACKET = 0x3b;
 	public const SET_DIFFICULTY_PACKET = 0x3c;
 	public const CHANGE_DIMENSION_PACKET = 0x3d;
-	public const SET_PLAYER_GAMETYPE_PACKET = 0x3e;
+	public const SET_PLAYER_GAME_TYPE_PACKET = 0x3e;
 	public const PLAYER_LIST_PACKET = 0x3f;
 	public const SIMPLE_EVENT_PACKET = 0x40;
 	public const TELEMETRY_EVENT_PACKET = 0x41;
