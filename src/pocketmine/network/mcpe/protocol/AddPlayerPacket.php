@@ -99,25 +99,27 @@ class AddPlayerPacket extends DataPacket{
 		$this->item = $this->getSlot($this->getProtocol());
 		$this->metadata = $this->getEntityMetadata();
 
-		$this->uvarint1 = $this->getUnsignedVarInt();
-		$this->uvarint2 = $this->getUnsignedVarInt();
-		$this->uvarint3 = $this->getUnsignedVarInt();
-		$this->uvarint4 = $this->getUnsignedVarInt();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->uvarint5 = $this->getUnsignedVarInt();
-		}
-
-		$this->long1 = (Binary::readLLong($this->get(8)));
-
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
-	    	$linkCount = $this->getUnsignedVarInt();
-	    	for($i = 0; $i < $linkCount; ++$i){
-		    	$this->links[$i] = $this->getEntityLink();
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->uvarint1 = $this->getUnsignedVarInt();
+	    	$this->uvarint2 = $this->getUnsignedVarInt();
+	    	$this->uvarint3 = $this->getUnsignedVarInt();
+	    	$this->uvarint4 = $this->getUnsignedVarInt();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->uvarint5 = $this->getUnsignedVarInt();
 	    	}
-		}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	    	$this->deviceId = $this->getString();
+	    	$this->long1 = (Binary::readLLong($this->get(8)));
+
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	        	$linkCount = $this->getUnsignedVarInt();
+	        	for($i = 0; $i < $linkCount; ++$i){
+		        	$this->links[$i] = $this->getEntityLink();
+	        	}
+	    	}
+
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	        	$this->deviceId = $this->getString();
+            }
         }
 	}
 
@@ -141,25 +143,27 @@ class AddPlayerPacket extends DataPacket{
 		$this->putSlot($this->item, $this->getProtocol());
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 
-		$this->putUnsignedVarInt($this->uvarint1);
-		$this->putUnsignedVarInt($this->uvarint2);
-		$this->putUnsignedVarInt($this->uvarint3);
-		$this->putUnsignedVarInt($this->uvarint4);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->putUnsignedVarInt($this->uvarint5);
-		}
-
-		($this->buffer .= (\pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
-
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
-	    	$this->putUnsignedVarInt(count($this->links));
-	    	foreach($this->links as $link){
-		    	$this->putEntityLink($link);
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->putUnsignedVarInt($this->uvarint1);
+	    	$this->putUnsignedVarInt($this->uvarint2);
+	    	$this->putUnsignedVarInt($this->uvarint3);
+	    	$this->putUnsignedVarInt($this->uvarint4);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->putUnsignedVarInt($this->uvarint5);
 	    	}
-		}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	    	$this->putString($this->deviceId);
+	    	($this->buffer .= (\pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
+
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	        	$this->putUnsignedVarInt(count($this->links));
+	        	foreach($this->links as $link){
+		        	$this->putEntityLink($link);
+	        	}
+	    	}
+
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	        	$this->putString($this->deviceId);
+            }
         }
 	}
 

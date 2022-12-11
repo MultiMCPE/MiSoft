@@ -29,7 +29,7 @@ abstract class ResourceEnums {
 
 	private static $packTypes = [
 	    // 370??
-		ProtocolInfo::PROTOCOL_130 => [
+		ProtocolInfo::PROTOCOL_110 => [
 			"TYPE_INVALID" => 0,
 			"TYPE_RESOURCE" => 1,
 			"TYPE_BEHAVIOR" => 2,

@@ -79,23 +79,27 @@ class AdventureSettingsPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->flags = $this->getUnsignedVarInt();
 		$this->commandPermission = $this->getUnsignedVarInt();
-		$this->flags2 = $this->getUnsignedVarInt();
-		$this->playerPermission = $this->getUnsignedVarInt();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->customFlags = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->flags2 = $this->getUnsignedVarInt();
+	    	$this->playerPermission = $this->getUnsignedVarInt();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->customFlags = $this->getUnsignedVarInt();
+	    	}
+	    	$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 		}
-		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->flags);
 		$this->putUnsignedVarInt($this->commandPermission);
-		$this->putUnsignedVarInt($this->flags2);
-		$this->putUnsignedVarInt($this->playerPermission);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->putUnsignedVarInt($this->customFlags);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->putUnsignedVarInt($this->flags2);
+	    	$this->putUnsignedVarInt($this->playerPermission);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->putUnsignedVarInt($this->customFlags);
+	    	}
+	    	($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 		}
-		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 	}
 
 	public function getFlag(int $flag) : bool{

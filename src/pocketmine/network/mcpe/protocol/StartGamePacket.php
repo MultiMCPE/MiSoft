@@ -183,51 +183,55 @@ class StartGamePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
 	    	$this->hasConfirmedPlatformLockedContent = (($this->get(1) !== "\x00"));
 		}
-		$this->isMultiplayerGame = (($this->get(1) !== "\x00"));
-		$this->hasLANBroadcast = (($this->get(1) !== "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
-	    	$this->xboxLiveBroadcastMode = $this->getVarInt();
-	    	$this->platformBroadcastMode = $this->getVarInt();
-		} else {
-		    $this->hasXboxLiveBroadcast = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->isMultiplayerGame = (($this->get(1) !== "\x00"));
+	    	$this->hasLANBroadcast = (($this->get(1) !== "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	        	$this->xboxLiveBroadcastMode = $this->getVarInt();
+	        	$this->platformBroadcastMode = $this->getVarInt();
+	    	} else {
+	    	    $this->hasXboxLiveBroadcast = (($this->get(1) !== "\x00"));
+	    	}
 		}
 		$this->commandsEnabled = (($this->get(1) !== "\x00"));
 		$this->isTexturePacksRequired = (($this->get(1) !== "\x00"));
 		$this->gameRules = $this->getGameRules();
-		$this->hasBonusChestEnabled = (($this->get(1) !== "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
-	    	$this->hasStartWithMapEnabled = (($this->get(1) !== "\x00"));
-		}
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-		    $this->hasTrustPlayersEnabled = (($this->get(1) !== "\x00"));
-		}
-		$this->defaultPlayerPermission = $this->getVarInt();
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-		    $this->xboxLiveBroadcastMode = $this->getVarInt();
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	$this->serverChunkTickRadius = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
-		}
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-		    $this->hasPlatformBroadcast = (($this->get(1) !== "\x00"));
-		    $this->platformBroadcastMode = $this->getVarInt();
-		    $this->xboxLiveBroadcastIntent = (($this->get(1) !== "\x00"));
-		}
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
-	    	$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
-	    	$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
-	    	$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	    	    $this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->hasBonusChestEnabled = (($this->get(1) !== "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	        	$this->hasStartWithMapEnabled = (($this->get(1) !== "\x00"));
 	    	}
-		    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
-	        	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
-	        	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		        $this->hasTrustPlayersEnabled = (($this->get(1) !== "\x00"));
 	    	}
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
-	        	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+	    	$this->defaultPlayerPermission = $this->getVarInt();
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		        $this->xboxLiveBroadcastMode = $this->getVarInt();
 	    	}
-        }
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	        	$this->serverChunkTickRadius = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	    	}
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		        $this->hasPlatformBroadcast = (($this->get(1) !== "\x00"));
+		        $this->platformBroadcastMode = $this->getVarInt();
+		        $this->xboxLiveBroadcastIntent = (($this->get(1) !== "\x00"));
+	    	}
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	        	$this->hasLockedBehaviorPack = (($this->get(1) !== "\x00"));
+	        	$this->hasLockedResourcePack = (($this->get(1) !== "\x00"));
+	        	$this->isFromLockedWorldTemplate = (($this->get(1) !== "\x00"));
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	    	        $this->useMsaGamertagsOnly = (($this->get(1) !== "\x00"));
+	        	}
+		        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	            	$this->isFromWorldTemplate = (($this->get(1) !== "\x00"));
+	            	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
+	        	}
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	            	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+	        	}
+            }
+		}
 
 	    $this->levelId = $this->getString();
 	    $this->worldName = $this->getString();
@@ -235,33 +239,35 @@ class StartGamePacket extends DataPacket{
 	   	$this->isTrial = (($this->get(1) !== "\x00"));
 	    $this->currentTick = (Binary::readLLong($this->get(8)));
 
-	    $this->enchantmentSeed = $this->getVarInt();
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	        $this->enchantmentSeed = $this->getVarInt();
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
-	    	$this->blockTable = [];
-	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-		    	$id = $this->getString();
-		    	$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-		    	$unknown = 0;
-		    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-		        	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-			    }
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+	        	$this->blockTable = [];
+	        	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		        	$id = $this->getString();
+		        	$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+		        	$unknown = 0;
+		        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		            	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+			        }
 
-		    	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+		        	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+	        	}
 	    	}
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-		    $this->itemTable = [];
-	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-		    	$id = $this->getString();
-		    	$legacyId = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		        $this->itemTable = [];
+	        	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		        	$id = $this->getString();
+		        	$legacyId = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
 
-		    	$this->itemTable[$id] = $legacyId;
+		        	$this->itemTable[$id] = $legacyId;
+	        	}
 	    	}
-		}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	    	$this->multiplayerCorrelationId = $this->getString();
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	        	$this->multiplayerCorrelationId = $this->getString();
+            }
         }
 	}
 
@@ -293,49 +299,53 @@ class StartGamePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
 	    	($this->buffer .= ($this->hasConfirmedPlatformLockedContent ? "\x01" : "\x00"));
 		}
-		($this->buffer .= ($this->isMultiplayerGame ? "\x01" : "\x00"));
-		($this->buffer .= ($this->hasLANBroadcast ? "\x01" : "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
-	    	$this->putVarInt($this->xboxLiveBroadcastMode);
-		    $this->putVarInt($this->platformBroadcastMode);
-		} else {
-		    ($this->buffer .= ($this->hasXboxLiveBroadcast ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	($this->buffer .= ($this->isMultiplayerGame ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->hasLANBroadcast ? "\x01" : "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+	        	$this->putVarInt($this->xboxLiveBroadcastMode);
+		        $this->putVarInt($this->platformBroadcastMode);
+	    	} else {
+		        ($this->buffer .= ($this->hasXboxLiveBroadcast ? "\x01" : "\x00"));
+	    	}
 		}
 		($this->buffer .= ($this->commandsEnabled ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isTexturePacksRequired ? "\x01" : "\x00"));
 		$this->putGameRules($this->gameRules);
-		($this->buffer .= ($this->hasBonusChestEnabled ? "\x01" : "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
-	    	($this->buffer .= ($this->hasStartWithMapEnabled ? "\x01" : "\x00"));
-		}
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-		    ($this->buffer .= ($this->hasTrustPlayersEnabled ? "\x01" : "\x00"));
-		}
-		$this->putVarInt($this->defaultPlayerPermission);
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-		    $this->putVarInt($this->xboxLiveBroadcastMode);
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	($this->buffer .= (\pack("V", $this->serverChunkTickRadius)));
-		}
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
-	    	($this->buffer .= ($this->hasPlatformBroadcast ? "\x01" : "\x00"));
-	    	$this->putVarInt($this->platformBroadcastMode);
-	    	($this->buffer .= ($this->xboxLiveBroadcastIntent ? "\x01" : "\x00"));
-		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
-	    	($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
-	    	($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
-	    	($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	        	($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	($this->buffer .= ($this->hasBonusChestEnabled ? "\x01" : "\x00"));
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+	        	($this->buffer .= ($this->hasStartWithMapEnabled ? "\x01" : "\x00"));
 	    	}
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
-	        	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
-	        	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		        ($this->buffer .= ($this->hasTrustPlayersEnabled ? "\x01" : "\x00"));
 	    	}
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
-	        	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+	    	$this->putVarInt($this->defaultPlayerPermission);
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+		        $this->putVarInt($this->xboxLiveBroadcastMode);
+	    	}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	        	($this->buffer .= (\pack("V", $this->serverChunkTickRadius)));
+	    	}
+	    	if ($this->getProtocol() < ProtocolInfo::PROTOCOL_330) {
+	        	($this->buffer .= ($this->hasPlatformBroadcast ? "\x01" : "\x00"));
+	        	$this->putVarInt($this->platformBroadcastMode);
+	        	($this->buffer .= ($this->xboxLiveBroadcastIntent ? "\x01" : "\x00"));
+	    	}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
+	        	($this->buffer .= ($this->hasLockedBehaviorPack ? "\x01" : "\x00"));
+	        	($this->buffer .= ($this->hasLockedResourcePack ? "\x01" : "\x00"));
+	        	($this->buffer .= ($this->isFromLockedWorldTemplate ? "\x01" : "\x00"));
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
+	            	($this->buffer .= ($this->useMsaGamertagsOnly ? "\x01" : "\x00"));
+	        	}
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_311) {
+	            	($this->buffer .= ($this->isFromWorldTemplate ? "\x01" : "\x00"));
+	            	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
+	        	}
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
+	            	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+	        	}
 	    	}
 		}
 
@@ -345,18 +355,20 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->isTrial ? "\x01" : "\x00"));
 		($this->buffer .= (\pack("VV", $this->currentTick & 0xFFFFFFFF, $this->currentTick >> 32)));
 
-		$this->putVarInt($this->enchantmentSeed);
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->putVarInt($this->enchantmentSeed);
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
-            $this->put(self::getBlockPalletData($this->getProtocol()));
-        }
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+                $this->put(self::getBlockPalletData($this->getProtocol()));
+            }
 
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-	    	$this->putUnsignedVarInt(0); // item list
-		}
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	        	$this->putUnsignedVarInt(0); // item list
+	    	}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	    	$this->putString($this->multiplayerCorrelationId);
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	    	    $this->putString($this->multiplayerCorrelationId);
+            }
         }
 	}
 

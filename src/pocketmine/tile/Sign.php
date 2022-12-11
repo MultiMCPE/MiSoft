@@ -150,7 +150,12 @@ class Sign extends Spawnable{
 		if($nbt->hasTag(self::TAG_TEXT_BLOB, StringTag::class)){
 			$lines = self::fixTextBlob($nbt->getString(self::TAG_TEXT_BLOB));
 		}else{
-			return false;
+			$lines = [
+				$nbt->getString("Text1"),
+				$nbt->getString("Text2"),
+				$nbt->getString("Text3"),
+				$nbt->getString("Text4")
+			];
 		}
 		$size = 0;
 		foreach($lines as $line){

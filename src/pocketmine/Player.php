@@ -141,6 +141,7 @@ use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
 use pocketmine\network\mcpe\protocol\SetTitlePacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
@@ -1994,6 +1995,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function sendPlayStatus(int $status, bool $immediate = false){
 		$pk = new PlayStatusPacket();
 		$pk->status = $status;
+		$pk->setProtocol($this->originalProtocol);
 		$this->sendDataPacket($pk, false, $immediate);
 	}
 
@@ -2284,6 +2286,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 			}
 		}
+
+		return true;
+	}
+
+	public function handleCommandStep(CommandStepPacket $packet) : bool{
+		if($this->spawned === false or !$this->isAlive()){
+			return true;
+		}
+
+		$commandText = $packet->command;
+		if($packet->inputJson !== null){
+			foreach($packet->inputJson as $arg){ //command ordering will be an issue
+				if(!is_object($arg)) //anti bot
+			    	$commandText .= " " . $arg;
+			}
+		}
+
+        $this->chat("/" . $commandText);
 
 		return true;
 	}
@@ -3531,6 +3551,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if($notify and strlen($reason) > 0){
 				$pk = new DisconnectPacket();
 				$pk->message = $reason;
+				$pk->setProtocol($this->originalProtocol);
 				$this->directDataPacket($pk);
 			}
 			$this->interface->close($this, $notify ? $reason : "");

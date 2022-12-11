@@ -80,7 +80,7 @@ abstract class ActionEnums {
             'ACTION_SET_ENCHANTMENT_SEED' => 19,
             'ACTION_RELEASE_ITEM' => 99999
         ],
-        /*ProtocolInfo::PROTOCOL_110 => [
+        ProtocolInfo::PROTOCOL_110 => [
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -100,7 +100,7 @@ abstract class ActionEnums {
             'ACTION_STOP_GLIDE' => 16,
             'ACTION_BUILD_DENIED' => 17,
             'ACTION_CONTINUE_BREAK' => 18
-        ]*/
+        ]
     ];
 
     /**

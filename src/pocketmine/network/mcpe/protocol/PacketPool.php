@@ -35,7 +35,7 @@ class PacketPool {
 	/** @var \SplFixedArray<DataPacket> */
     protected static $pool = null;
 
-    protected const PROTOCOLS = [ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_130];
+    protected const PROTOCOLS = [ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_110];
 
 	public static function init() {
 	    static::$packetPoolFrom = [];
@@ -143,6 +143,13 @@ class PacketPool {
 		static::registerPacket(new NetworkChunkPublisherUpdatePacket());
 		static::registerPacket(new BiomeDefinitionListPacket());
 		static::registerPacket(new LevelSoundEventPacket());
+		// 1.1
+		static::registerPacket(new RemoveBlockPacket());
+		static::registerPacket(new UseItemPacket());
+		static::registerPacket(new DropItemPacket());
+		static::registerPacket(new ContainerSetContentPacket());
+		static::registerPacket(new ContainerSetSlotPacket());
+		static::registerPacket(new CommandStepPacket());
 	}
 
 	/**

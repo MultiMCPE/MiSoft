@@ -65,7 +65,7 @@ abstract class ParticleEnums {
 			"TYPE_WITCH_MAGIC" => 40,
 			"TYPE_ICE_CRYSTAL" => 43
 		],
-		ProtocolInfo::PROTOCOL_130 => [
+		ProtocolInfo::PROTOCOL_110 => [
 			"TYPE_BUBBLE" => 1,
 			"TYPE_CRITICAL" => 2,
 			"TYPE_SMOKE" => 4,

@@ -42,6 +42,39 @@ class PlayerListPacket extends DataPacket{
 	/** @var int */
 	public $type;
 
+    protected const PE_SKIN_PACKS = ["Standard", "BattleAndBeasts", "Skyrim", "GreekMythology", "MagicTheGathering", "Fallout", "ChineseMythology", "PowerRangers", "BiomeSettlers03", "FestiveMashup26", "CampfireTales", "Villains", "Biome2", "StoryMode", "Redstone", "JTTW", "Festive", "PvPWarriors", "Halloween", "CityFolk", "TownFolk"];
+
+    public static function getPESkinId(Skin $skin) : string{
+		$skinId = $skin->getSkinId();
+		if ($skinId !== "Custom") {
+			$id = explode(" ", $skinId);
+			if (count($id) < 2) {
+				$id = explode("_", $skinId);
+				if (count($id) < 2) {
+					throw new \InvalidArgumentException("Invalid skin id: $skinId");
+				}
+			}
+
+			$packId = array_shift($id);
+			if (in_array($packId, self::PE_SKIN_PACKS, true)) {
+				return $skinId;
+			}
+		}
+
+        $type = "Custom";
+		switch ($skin->getGeometryName()) {
+			case "geometry.humanoid.customSlim":
+			    $type = "CustomSlim";
+			    break;
+			case "geometry.humanoid.custom":
+			default:
+			    $type = "Custom";
+			    break;
+		}
+
+		return "Standard_" . $type;
+	}
+
 	public function clean(){
 		$this->entries = [];
 		return parent::clean();
@@ -57,30 +90,40 @@ class PlayerListPacket extends DataPacket{
 				$entry->uuid = $this->getUUID();
 				$entry->entityUniqueId = $this->getEntityUniqueId();
 				$entry->username = $this->getString();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
-		        	$entry->thirdPartyName = $this->getString();
-		        	$entry->platform = $this->getVarInt();
-				}
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		            	$entry->thirdPartyName = $this->getString();
+		            	$entry->platform = $this->getVarInt();
+			    	}
 
-				$skinId = $this->getString();
-				$skinData = $this->getString();
-				$capeData = "";
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-			    	$capeData = $this->getString();
-				}
-				$geometryName = $this->getString();
-				$geometryData = $this->getString();
+			    	$skinId = $this->getString();
+			    	$skinData = $this->getString();
+			    	$capeData = "";
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			        	$capeData = $this->getString();
+			    	}
+			    	$geometryName = $this->getString();
+			    	$geometryData = $this->getString();
 
-				$entry->skin = new Skin(
-					$skinId,
-					$skinData,
-					$capeData,
-					$geometryName,
-					$geometryData
-				);
-				$entry->xboxUserId = $this->getString();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-			    	$entry->platformChatId = $this->getString();
+			    	$entry->skin = new Skin(
+				    	$skinId,
+				    	$skinData,
+				    	$capeData,
+				    	$geometryName,
+				    	$geometryData
+			    	);
+			    	$entry->xboxUserId = $this->getString();
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+			        	$entry->platformChatId = $this->getString();
+			    	}
+				} else {
+			    	$skinId = $this->getString();
+			    	$skinData = $this->getString();
+
+			    	$entry->skin = new Skin(
+				    	$skinId,
+				    	$skinData
+			    	);
 				}
 			}else{
 				$entry->uuid = $this->getUUID();
@@ -98,59 +141,64 @@ class PlayerListPacket extends DataPacket{
 				$this->putUUID($entry->uuid);
 				$this->putEntityUniqueId($entry->entityUniqueId);
 				$this->putString($entry->username);
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
-		        	$this->putString($entry->thirdPartyName);
-		        	$this->putVarInt($entry->platform);
-				}
-				$this->putString($entry->skin->getSkinId());
-				
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-				    $this->putLInt(1); // num skins, always 1
-				}
-				
-				$emptySkin = str_repeat("\x00", 8192);
-			    $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-			    	if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
-				    	$skinData = $this->duplicateArmAndLeg($skinData);
+				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		            	$this->putString($entry->thirdPartyName);
+		            	$this->putVarInt($entry->platform);
 			    	}
-				}
-				$this->putString($skinData);
-				
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-			    	$capeData = $entry->skin->getCapeData();
+			    	$this->putString($entry->skin->getSkinId());
+
 			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-				    	if (!empty($capeData)) {
-					    	$this->putLInt(1); // isNotEmpty
-					    	$this->putString($capeData);
-				    	} else {
-					    	$this->putLInt(0); // isEmpty
-				    	}
-			    	} else {
-				    	$this->putString($capeData);
+				        $this->putLInt(1); // num skins, always 1
 			    	}
-				}
-				
-				$skinGeometryName = $entry->skin->getGeometryName();
-				$skinGeometryData = $entry->skin->getGeometryData();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
-				    $skinGeometryName = strtolower($skinGeometryName);
-			    	$tempData = json_decode($skinGeometryData, true);
-			    	if (is_array($tempData)) {
-				    	foreach ($tempData as $key => $value) {
-					    	unset($tempData[$key]);
-					    	$tempData[strtolower($key)] = $value;
-				    	}
-					    
-				    	$skinGeometryData = json_encode($tempData);
+
+			    	$emptySkin = str_repeat("\x00", 8192);
+			        $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+			        	if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
+				        	$skinData = $this->duplicateArmAndLeg($skinData);
+			        	}
 			    	}
-				}
-				$this->putString($skinGeometryName);
-				$this->putString($this->prepareGeometryDataForOld($skinGeometryData));
-				
-				$this->putString($entry->xboxUserId);
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-			    	$this->putString($entry->platformChatId);
+			    	$this->putString($skinData);
+
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			        	$capeData = $entry->skin->getCapeData();
+			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+				        	if (!empty($capeData)) {
+					        	$this->putLInt(1); // isNotEmpty
+					        	$this->putString($capeData);
+				        	} else {
+					        	$this->putLInt(0); // isEmpty
+				        	}
+			        	} else {
+				        	$this->putString($capeData);
+			        	}
+			    	}
+
+			    	$skinGeometryName = $entry->skin->getGeometryName();
+			    	$skinGeometryData = $entry->skin->getGeometryData();
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+				        $skinGeometryName = strtolower($skinGeometryName);
+			        	$tempData = json_decode($skinGeometryData, true);
+			        	if (is_array($tempData)) {
+				        	foreach ($tempData as $key => $value) {
+					        	unset($tempData[$key]);
+					        	$tempData[strtolower($key)] = $value;
+				        	}
+
+				        	$skinGeometryData = json_encode($tempData);
+			        	}
+			    	}
+			    	$this->putString($skinGeometryName);
+			    	$this->putString($this->prepareGeometryDataForOld($skinGeometryData));
+
+			    	$this->putString($entry->xboxUserId);
+			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+			        	$this->putString($entry->platformChatId);
+			    	}
+				} else {
+				    $this->putString(self::getPESkinId($entry->skin));
+				    $this->putString($entry->skin->getSkinData());
 				}
 			}else{
 				$this->putUUID($entry->uuid);

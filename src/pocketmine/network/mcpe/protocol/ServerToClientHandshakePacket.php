@@ -31,6 +31,9 @@ use pocketmine\network\mcpe\NetworkSession;
 class ServerToClientHandshakePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SERVER_TO_CLIENT_HANDSHAKE_PACKET;
 
+	public $publicKey;
+	public $serverToken;
+
 	/**
 	 * @var string
 	 * Server pubkey and token is contained in the JWT.
@@ -42,11 +45,21 @@ class ServerToClientHandshakePacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->jwt = $this->getString();
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->jwt = $this->getString();
+	    } else {
+	        $this->publicKey = $this->getString();
+	        $this->serverToken = $this->getString();
+	    }
 	}
 
 	protected function encodePayload(){
-		$this->putString($this->jwt);
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	$this->putString($this->jwt);
+	    } else {
+	        $this->putString($this->publicKey);
+	        $this->putString($this->serverToken);
+	    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

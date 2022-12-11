@@ -65,7 +65,9 @@ class TextPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->type = (\ord($this->get(1)));
 		$this->type = TextEnums::getMessageType($this->getProtocol(), $this->type);
-		$this->needsTranslation = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->needsTranslation = (($this->get(1) !== "\x00"));
+		}
 		switch($this->type){
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:
@@ -110,7 +112,9 @@ class TextPacket extends DataPacket{
 	protected function encodePayload(){
 		$typeId = TextEnums::getMessageTypeId($this->getProtocol(), $this->type);
 		($this->buffer .= \chr($typeId));
-		($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
+		}
 		switch($this->type){
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:

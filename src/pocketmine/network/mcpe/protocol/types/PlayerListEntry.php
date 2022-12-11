@@ -41,7 +41,7 @@ class PlayerListEntry{
 	/** @var Skin */
 	public $skin;
 	/** @var string */
-	public $xboxUserId;
+	public $xboxUserId = "";
 	/** @var string */
 	public $platformChatId = "";
 

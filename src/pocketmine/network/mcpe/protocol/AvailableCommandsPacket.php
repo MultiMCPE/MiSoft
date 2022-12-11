@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\multiversion\CommandListJson;
 use pocketmine\network\mcpe\multiversion\CommandEnums;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
@@ -81,7 +82,7 @@ class AvailableCommandsPacket extends DataPacket{
 	public const ARG_FLAG_POSTFIX = 0x1000000;
 
 	/**
-	 * @var array|CommandData[]
+	 * @var string|CommandData[]
 	 * List of command data, including name, description, alias indexes and parameters.
 	 */
 	public $commandData = [];
@@ -93,33 +94,41 @@ class AvailableCommandsPacket extends DataPacket{
 	 */
 	public $softEnums = [];
 
+    /** @var string */
+	public $unknown = "";
+
 	protected function decodePayload(){
-		/** @var string[] $enumValues */
-		$enumValues = [];
-		for($i = 0, $enumValuesCount = $this->getUnsignedVarInt(); $i < $enumValuesCount; ++$i){
-			$enumValues[] = $this->getString();
-		}
-
-		/** @var string[] $postfixes */
-		$postfixes = [];
-		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$postfixes[] = $this->getString();
-		}
-
-		/** @var CommandEnum[] $enums */
-		$enums = [];
-		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$enums[] = $this->getEnum($enumValues);
-		}
-
-		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->commandData[] = $this->getCommandData($enums, $postfixes);
-		}
-
-        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-		    	$this->softEnums[] = $this->getSoftEnum();
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	/** @var string[] $enumValues */
+	    	$enumValues = [];
+	    	for($i = 0, $enumValuesCount = $this->getUnsignedVarInt(); $i < $enumValuesCount; ++$i){
+		    	$enumValues[] = $this->getString();
 	    	}
+
+	    	/** @var string[] $postfixes */
+	    	$postfixes = [];
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$postfixes[] = $this->getString();
+	    	}
+
+	    	/** @var CommandEnum[] $enums */
+	    	$enums = [];
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$enums[] = $this->getEnum($enumValues);
+	    	}
+
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$this->commandData[] = $this->getCommandData($enums, $postfixes);
+	    	}
+
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+	        	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		        	$this->softEnums[] = $this->getSoftEnum();
+	        	}
+	    	}
+		} else {
+		    $this->commandData = $this->getString();
+		    $this->unknown = $this->getString();
 		}
 	}
 
@@ -353,70 +362,75 @@ class AvailableCommandsPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		/** @var int[] $enumValueIndexes */
-		$enumValueIndexes = [];
-		/** @var int[] $postfixIndexes */
-		$postfixIndexes = [];
-		/** @var int[] $enumIndexes */
-		$enumIndexes = [];
-		/** @var CommandEnum[] $enums */
-		$enums = [];
-		foreach($this->commandData as $commandData){
-			if($commandData->aliases !== null){
-				if(!isset($enumIndexes[$commandData->aliases->enumName])){
-					$enums[$enumIndexes[$commandData->aliases->enumName] = count($enumIndexes)] = $commandData->aliases;
-				}
+	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    	/** @var int[] $enumValueIndexes */
+	    	$enumValueIndexes = [];
+	    	/** @var int[] $postfixIndexes */
+	    	$postfixIndexes = [];
+	    	/** @var int[] $enumIndexes */
+	    	$enumIndexes = [];
+	    	/** @var CommandEnum[] $enums */
+	    	$enums = [];
+	    	foreach($this->commandData as $commandData){
+		    	if($commandData->aliases !== null){
+			    	if(!isset($enumIndexes[$commandData->aliases->enumName])){
+				    	$enums[$enumIndexes[$commandData->aliases->enumName] = count($enumIndexes)] = $commandData->aliases;
+			    	}
 
-				foreach($commandData->aliases->enumValues as $str){
-					$enumValueIndexes[$str] = $enumValueIndexes[$str] ?? count($enumValueIndexes); //latest index
-				}
-			}
-			/** @var CommandParameter[] $overload */
-			foreach($commandData->overloads as $overload){
-				/** @var CommandParameter $parameter */
-				foreach($overload as $parameter){
-					if($parameter->enum !== null){
-						if(!isset($enumIndexes[$parameter->enum->enumName])){
-							$enums[$enumIndexes[$parameter->enum->enumName] = count($enumIndexes)] = $parameter->enum;
-						}
-						foreach($parameter->enum->enumValues as $str){
-							$enumValueIndexes[$str] = $enumValueIndexes[$str] ?? count($enumValueIndexes);
-						}
-					}
+			    	foreach($commandData->aliases->enumValues as $str){
+			    		$enumValueIndexes[$str] = $enumValueIndexes[$str] ?? count($enumValueIndexes); //latest index
+			    	}
+		    	}
+		    	/** @var CommandParameter[] $overload */
+		    	foreach($commandData->overloads as $overload){
+			    	/** @var CommandParameter $parameter */
+			    	foreach($overload as $parameter){
+				    	if($parameter->enum !== null){
+					    	if(!isset($enumIndexes[$parameter->enum->enumName])){
+						    	$enums[$enumIndexes[$parameter->enum->enumName] = count($enumIndexes)] = $parameter->enum;
+					    	}
+					    	foreach($parameter->enum->enumValues as $str){
+						    	$enumValueIndexes[$str] = $enumValueIndexes[$str] ?? count($enumValueIndexes);
+					    	}
+				    	}
 
-					if($parameter->postfix !== null){
-						$postfixIndexes[$parameter->postfix] = $postfixIndexes[$parameter->postfix] ?? count($postfixIndexes);
-					}
-				}
-			}
-		}
-
-		$this->putUnsignedVarInt(count($enumValueIndexes));
-		foreach($enumValueIndexes as $enumValue => $index){
-			$this->putString((string) $enumValue); //stupid PHP key casting D:
-		}
-
-		$this->putUnsignedVarInt(count($postfixIndexes));
-		foreach($postfixIndexes as $postfix => $index){
-			$this->putString((string) $postfix); //stupid PHP key casting D:
-		}
-
-		$this->putUnsignedVarInt(count($enums));
-		foreach($enums as $enum){
-			$this->putEnum($enum, $enumValueIndexes);
-		}
-
-		$this->putUnsignedVarInt(count($this->commandData));
-		foreach($this->commandData as $data){
-			$this->putCommandData($data, $enumIndexes, $postfixIndexes);
-		}
-
-        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-	    	$this->putUnsignedVarInt(count($this->softEnums));
-	    	foreach($this->softEnums as $enum){
-		    	$this->putSoftEnum($enum);
+				    	if($parameter->postfix !== null){
+					    	$postfixIndexes[$parameter->postfix] = $postfixIndexes[$parameter->postfix] ?? count($postfixIndexes);
+				    	}
+			    	}
+		    	}
 	    	}
-		}
+
+	    	$this->putUnsignedVarInt(count($enumValueIndexes));
+	    	foreach($enumValueIndexes as $enumValue => $index){
+		    	$this->putString((string) $enumValue); //stupid PHP key casting D:
+	    	}
+
+	    	$this->putUnsignedVarInt(count($postfixIndexes));
+	    	foreach($postfixIndexes as $postfix => $index){
+		    	$this->putString((string) $postfix); //stupid PHP key casting D:
+	    	}
+
+	    	$this->putUnsignedVarInt(count($enums));
+	    	foreach($enums as $enum){
+		    	$this->putEnum($enum, $enumValueIndexes);
+	    	}
+
+	    	$this->putUnsignedVarInt(count($this->commandData));
+	    	foreach($this->commandData as $data){
+		    	$this->putCommandData($data, $enumIndexes, $postfixIndexes);
+	    	}
+
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+	        	$this->putUnsignedVarInt(count($this->softEnums));
+	        	foreach($this->softEnums as $enum){
+		        	$this->putSoftEnum($enum);
+	        	}
+	    	}
+	    } else {
+	        $this->putString(\json_encode(new CommandListJson($this->commandData)));
+	        $this->putString($this->unknown);
+	    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

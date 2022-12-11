@@ -44,9 +44,15 @@ use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\ClientboundMapItemDataPacket;
 use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\ContainerOpenPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetDataPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
+use pocketmine\network\mcpe\protocol\DropItemPacket;
+use pocketmine\network\mcpe\protocol\UseItemPacket;
+use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -302,6 +308,26 @@ abstract class NetworkSession{
 		return false;
 	}
 
+	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleContainerSetContent(ContainerSetContentPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleDropItem(DropItemPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleRemoveBlock(RemoveBlockPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUseItem(UseItemPacket $packet) : bool{
+		return false;
+	}
+
 	public function handleCraftingData(CraftingDataPacket $packet) : bool{
 		return false;
 	}
@@ -387,6 +413,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleCommandRequest(CommandRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCommandStep(CommandStepPacket $packet) : bool{
 		return false;
 	}
 

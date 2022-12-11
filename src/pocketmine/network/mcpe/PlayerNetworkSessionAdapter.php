@@ -34,6 +34,7 @@ use pocketmine\network\mcpe\protocol\BookEditPacket;
 use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -219,6 +220,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleCommandRequest(CommandRequestPacket $packet) : bool{
 		return $this->player->chat($packet->command);
+	}
+
+	public function handleCommandStep(CommandStepPacket $packet) : bool{
+		return $this->player->handleCommandStep($packet);
 	}
 
 	public function handleResourcePackChunkRequest(ResourcePackChunkRequestPacket $packet) : bool{

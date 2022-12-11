@@ -40,7 +40,7 @@ abstract class TextEnums {
             "TYPE_ANNOUNCEMENT" => 8,
             "TYPE_JSON" => 9
         ],
-        ProtocolInfo::PROTOCOL_130 => [ // 130 подойдет для 110
+        ProtocolInfo::PROTOCOL_110 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,

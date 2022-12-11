@@ -43,6 +43,8 @@ class LoginPacket extends DataPacket{
 	public $username;
 	/** @var int */
 	public $protocol;
+	/** @var int */
+	public $gameEdition;
 	/** @var string */
 	public $clientUUID;
 	/** @var int */
@@ -94,6 +96,10 @@ class LoginPacket extends DataPacket{
             $this->isValidProtocol = false;
 
             return;
+        }
+
+        if ($this->protocol < ProtocolInfo::PROTOCOL_130) {
+            $this->gameEdition = (\ord($this->get(1)));
         }
 
 		try{

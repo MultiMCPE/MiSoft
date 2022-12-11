@@ -53,7 +53,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->getString();
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
-			$this->getString();
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+		    	$this->getString();
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
 		    	$this->getString();
 			}
@@ -68,7 +70,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->getString();
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
-			$this->getString();
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+		    	$this->getString();
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
 		    	$this->getString();
 			}
@@ -89,7 +93,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->putString($entry->getPackVersion());
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+		    	$this->putString(""); //TODO: subpack name
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
 		    	$this->putString(""); //TODO: content identity
 			}
@@ -103,7 +109,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->putString($entry->getPackVersion());
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+		    	$this->putString(""); //TODO: subpack name
+			}
 			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
 		    	$this->putString(""); //TODO: content identity
 			}

@@ -51,14 +51,18 @@ class ResourcePackStackPacket extends DataPacket{
 		while($behaviorPackCount-- > 0){
 			$this->getString();
 			$this->getString();
-			$this->getString();
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->getString();
+			}
 		}
 
 		$resourcePackCount = $this->getUnsignedVarInt();
 		while($resourcePackCount-- > 0){
 			$this->getString();
 			$this->getString();
-			$this->getString();
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->getString();
+			}
 		}
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
@@ -73,14 +77,18 @@ class ResourcePackStackPacket extends DataPacket{
 		foreach($this->behaviorPackStack as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			$this->putString(""); //TODO: subpack name
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->putString(""); //TODO: subpack name
+			}
 		}
 
 		$this->putUnsignedVarInt(count($this->resourcePackStack));
 		foreach($this->resourcePackStack as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			$this->putString(""); //TODO: subpack name
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->putString(""); //TODO: subpack name
+			}
 		}
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
