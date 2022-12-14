@@ -65,7 +65,7 @@ class PlayerInventory extends BaseInventory{
 	 *
 	 * @return bool if the equipment change was successful, false if not.
 	 */
-	public function equipItem(int $hotbarSlot) : bool{
+	public function equipItem(int $hotbarSlot, $inventorySlot = null) : bool{
 		if(!$this->isHotbarSlot($hotbarSlot)){
 			$this->sendContents($this->getHolder());
 			return false;

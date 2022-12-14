@@ -25,6 +25,7 @@ namespace pocketmine\network\mcpe;
 
 
 use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
@@ -35,6 +36,10 @@ use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
 use pocketmine\network\mcpe\protocol\CommandStepPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
+use pocketmine\network\mcpe\protocol\DropItemPacket;
+use pocketmine\network\mcpe\protocol\UseItemPacket;
+use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -63,6 +68,7 @@ use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
+use pocketmine\math\Vector3;
 use function base64_encode;
 use function bin2hex;
 use function implode;
@@ -177,7 +183,11 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
-		return true; //this is a broken useless packet, so we don't use it
+	    if($this->player->getProtocol() < ProtocolInfo::PROTOCOL_130){
+	    	return $this->player->handleCraftingEvent($packet); // only <= 1.1
+	    }
+
+	    return true;
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{
@@ -224,6 +234,22 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleCommandStep(CommandStepPacket $packet) : bool{
 		return $this->player->handleCommandStep($packet);
+	}
+
+	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
+		return $this->player->handleContainerSetSlot($packet);
+	}
+
+	public function handleDropItem(DropItemPacket $packet) : bool{
+		return $this->player->handleDropItem($packet);
+	}
+
+	public function handleRemoveBlock(RemoveBlockPacket $packet) : bool{
+		return $this->player->removeBlock(new Vector3($packet->x, $packet->y, $packet->z));
+	}
+
+	public function handleUseItem(UseItemPacket $packet) : bool{
+		return $this->player->handleUseItem($packet);
 	}
 
 	public function handleResourcePackChunkRequest(ResourcePackChunkRequestPacket $packet) : bool{

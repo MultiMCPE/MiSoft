@@ -28,6 +28,9 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\InventorySlotPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
@@ -439,16 +442,25 @@ abstract class BaseInventory implements Inventory{
 			$target = [$target];
 		}
 
-		$pk = new InventoryContentPacket();
-		$pk->items = $this->getContents(true);
+		$items = $this->getContents(true);
 
 		foreach($target as $player){
 			if(($id = $player->getWindowId($this)) === ContainerIds::NONE){
 				$this->close($player);
 				continue;
 			}
-			$pk->windowId = $id;
-			$player->dataPacket($pk);
+			if($player->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+			    $pk = new InventoryContentPacket();
+		    	$pk->items = $items;
+		    	$pk->windowId = $id;
+		    	$player->dataPacket($pk);
+			}else{
+			    $pk = new ContainerSetContentPacket();
+		    	$pk->windowid = $id;
+		    	$pk->targetEid = $player->getId();
+		    	$pk->slots = $items;
+			    $player->dataPacket($pk);
+			}
 		}
 	}
 
@@ -461,17 +473,24 @@ abstract class BaseInventory implements Inventory{
 			$target = [$target];
 		}
 
-		$pk = new InventorySlotPacket();
-		$pk->inventorySlot = $index;
-		$pk->item = $this->getItem($index);
-
 		foreach($target as $player){
 			if(($id = $player->getWindowId($this)) === ContainerIds::NONE){
 				$this->close($player);
 				continue;
 			}
-			$pk->windowId = $id;
-			$player->dataPacket($pk);
+			if($player->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	        	$pk = new InventorySlotPacket();
+	        	$pk->inventorySlot = $index;
+		    	$pk->windowId = $id;
+		    	$pk->item = $this->getItem($index);
+		    	$player->dataPacket($pk);
+			}else{
+        		$pk = new ContainerSetSlotPacket();
+	        	$pk->slot = $index;
+	        	$pk->item = $this->getItem($index);
+	        	$pk->windowid = $id;
+			    $player->dataPacket($pk);
+			}
 		}
 	}
 

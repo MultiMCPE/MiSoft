@@ -33,6 +33,7 @@ use pocketmine\inventory\EnderChestInventory;
 use pocketmine\inventory\EntityInventoryEventProcessor;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\OldPlayerInventory;
 use pocketmine\item\Consumable;
 use pocketmine\item\Durable;
 use pocketmine\item\enchantment\Enchantment;
@@ -616,7 +617,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$this->setPlayerFlag(self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->propertyManager->setBlockPos(self::DATA_PLAYER_BED_POSITION, null);
 
-		$this->inventory = new PlayerInventory($this);
+		$this->inventory = ($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130) ? new OldPlayerInventory($this) : new PlayerInventory($this);
 		$this->enderChestInventory = new EnderChestInventory();
 		$this->initHumanData();
 

@@ -22,7 +22,7 @@ final class PacketsIds110 {
 	public const ADD_ITEM_ACTOR_PACKET = 0x0f;
 	public const ADD_HANGING_ACTOR_PACKET = 0x10;
 	public const TAKE_ITEM_ACTOR_PACKET = 0x11;
-	public const MOVE_ACTOR_PACKET = 0x12;
+	public const MOVE_ACTOR_ABSOLUTE_PACKET = 0x12;
 	public const MOVE_PLAYER_PACKET = 0x13;
 	public const RIDER_JUMP_PACKET = 0x14;
 	public const REMOVE_BLOCK_PACKET = 0x15;

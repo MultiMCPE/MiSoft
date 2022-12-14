@@ -55,7 +55,7 @@ abstract class SoundEnums {
 		    }
 		}
 
-		return array_last_key($group);
+		return array_key_last($group);
 	}
 
     /**

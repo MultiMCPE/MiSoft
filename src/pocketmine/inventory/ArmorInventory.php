@@ -25,6 +25,9 @@ namespace pocketmine\inventory;
 
 use pocketmine\entity\Living;
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\InventorySlotPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
@@ -105,11 +108,19 @@ class ArmorInventory extends BaseInventory{
 			if($player === $this->getHolder()){
 				/** @var Player $player */
 
-				$pk2 = new InventorySlotPacket();
-				$pk2->windowId = $player->getWindowId($this);
-				$pk2->inventorySlot = $index;
-				$pk2->item = $this->getItem($index);
-				$player->dataPacket($pk2);
+                if($player->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    		$pk2 = new InventorySlotPacket();
+			    	$pk2->windowId = $player->getWindowId($this);
+			    	$pk2->inventorySlot = $index;
+			    	$pk2->item = $this->getItem($index);
+			    	$player->dataPacket($pk2);
+                }else{
+        	    	$pk2 = new ContainerSetSlotPacket();
+	            	$pk2->slot = $index;
+	            	$pk2->item = $this->getItem($index);
+	            	$pk2->windowid = $player->getWindowId($this);
+                    $player->dataPacket($pk2);
+                }
 			}else{
 				$player->dataPacket($pk);
 			}
@@ -130,10 +141,18 @@ class ArmorInventory extends BaseInventory{
 
 		foreach($target as $player){
 			if($player === $this->getHolder()){
-				$pk2 = new InventoryContentPacket();
-				$pk2->windowId = $player->getWindowId($this);
-				$pk2->items = $this->getContents(true);
-				$player->dataPacket($pk2);
+			    if($player->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    		$pk2 = new InventoryContentPacket();
+			    	$pk2->windowId = $player->getWindowId($this);
+			    	$pk2->items = $this->getContents(true);
+			    	$player->dataPacket($pk2);
+			    }else{
+			        $pk2 = new ContainerSetContentPacket();
+		        	$pk2->windowid = $player->getWindowId($this);
+		        	$pk2->targetEid = $player->getId();
+		        	$pk2->slots = $this->getContents(true);
+			        $player->dataPacket($pk2);
+			    }
 			}else{
 				$player->dataPacket($pk);
 			}
