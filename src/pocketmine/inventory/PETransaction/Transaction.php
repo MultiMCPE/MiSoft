@@ -167,7 +167,21 @@ class Transaction{
 		$haveItems = [];
 		$needItems = [];
 
-		return $this->matchItems($haveItems, $needItems) and empty($haveItems) and empty($needItems);
+        if($this->matchItems($haveItems, $needItems)){
+            if(empty($haveItems) and empty($needItems)){
+                return true;
+			}elseif($this->source->isCreative(true) and !empty($needItems)){ //Added items from creative inventory
+				foreach($needItems as $item){
+					if(Item::getCreativeItemIndex($item) === -1 and $item->getId() !== Item::AIR){
+						return false;
+					}
+				}
+
+				return true;
+			}
+        }
+
+        return false;
 	}
 
 	/**

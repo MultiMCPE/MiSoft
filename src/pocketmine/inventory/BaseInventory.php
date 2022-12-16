@@ -453,13 +453,13 @@ abstract class BaseInventory implements Inventory{
 			    $pk = new InventoryContentPacket();
 		    	$pk->items = $items;
 		    	$pk->windowId = $id;
-		    	$player->dataPacket($pk);
+		    	$player->dataPacket(clone $pk);
 			}else{
 			    $pk = new ContainerSetContentPacket();
 		    	$pk->windowid = $id;
 		    	$pk->targetEid = $player->getId();
 		    	$pk->slots = $items;
-			    $player->dataPacket($pk);
+			    $player->dataPacket(clone $pk);
 			}
 		}
 	}
@@ -483,13 +483,13 @@ abstract class BaseInventory implements Inventory{
 	        	$pk->inventorySlot = $index;
 		    	$pk->windowId = $id;
 		    	$pk->item = $this->getItem($index);
-		    	$player->dataPacket($pk);
+		    	$player->dataPacket(clone $pk);
 			}else{
         		$pk = new ContainerSetSlotPacket();
 	        	$pk->slot = $index;
 	        	$pk->item = $this->getItem($index);
 	        	$pk->windowid = $id;
-			    $player->dataPacket($pk);
+			    $player->dataPacket(clone $pk);
 			}
 		}
 	}

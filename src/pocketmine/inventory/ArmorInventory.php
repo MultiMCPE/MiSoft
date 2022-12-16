@@ -113,13 +113,13 @@ class ArmorInventory extends BaseInventory{
 			    	$pk2->windowId = $player->getWindowId($this);
 			    	$pk2->inventorySlot = $index;
 			    	$pk2->item = $this->getItem($index);
-			    	$player->dataPacket($pk2);
+			    	$player->dataPacket(clone $pk2);
                 }else{
         	    	$pk2 = new ContainerSetSlotPacket();
 	            	$pk2->slot = $index;
 	            	$pk2->item = $this->getItem($index);
 	            	$pk2->windowid = $player->getWindowId($this);
-                    $player->dataPacket($pk2);
+                    $player->dataPacket(clone $pk2);
                 }
 			}else{
 				$player->dataPacket($pk);
@@ -145,13 +145,13 @@ class ArmorInventory extends BaseInventory{
 		    		$pk2 = new InventoryContentPacket();
 			    	$pk2->windowId = $player->getWindowId($this);
 			    	$pk2->items = $this->getContents(true);
-			    	$player->dataPacket($pk2);
+			    	$player->dataPacket(clone $pk2);
 			    }else{
 			        $pk2 = new ContainerSetContentPacket();
 		        	$pk2->windowid = $player->getWindowId($this);
 		        	$pk2->targetEid = $player->getId();
 		        	$pk2->slots = $this->getContents(true);
-			        $player->dataPacket($pk2);
+			        $player->dataPacket(clone $pk2);
 			    }
 			}else{
 				$player->dataPacket($pk);

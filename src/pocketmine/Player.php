@@ -22,7 +22,7 @@
 declare(strict_types=1);
 
 namespace pocketmine;
-// Планы: сделать норм смену скинов для 1.1, пофиксить крафт для 1.1, пофиксить очивки с печью для 1.1, сделать возможность бить существ на 1.1
+// Планы: пофиксить крафт для 1.1
 use pocketmine\block\Bed;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
@@ -1099,6 +1099,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->spawned = true;
 		$this->setImmobile(false);
 
+		$this->inventory->sendContents($this);
+		$this->armorInventory->sendContents($this);
+		$this->inventory->sendHeldItem($this);
+
 		if($this->hasPermission(Server::BROADCAST_CHANNEL_USERS)){
 			PermissionManager::getInstance()->subscribeToPermission(Server::BROADCAST_CHANNEL_USERS, $this);
 		}
@@ -1470,6 +1474,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}else{
 			Command::broadcastCommandMessage($this, new TranslationContainer("commands.gamemode.success.self", [Server::getGamemodeString($gm)]));
 		}
+
+		$this->inventory->sendContents($this);
+		$this->inventory->sendContents($this->getViewers());
+		$this->inventory->sendHeldItem($this->hasSpawned);
 
 		$this->sendSettings();
 		$this->inventory->sendCreativeContents();
@@ -2350,6 +2358,93 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return true;
     }
 
+    /**
+     * @param Entity $target
+     * 
+     * @return bool
+     */
+    public function attackEntity(Entity $target) : bool{
+		if(!$target->isAlive()){
+			return true;
+		}
+		if($target instanceof ItemEntity or $target instanceof Arrow){
+			$this->kick("Attempting to attack an invalid entity");
+			$this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidEntity", [$this->getName()]));
+			return false;
+		}
+
+		$cancelled = false;
+
+		$heldItem = $this->inventory->getItemInHand();
+
+		if(!$this->canInteract($target, 8)){
+			$cancelled = true;
+		}elseif($target instanceof Player){
+			if(!$this->server->getConfigBool("pvp")){
+				$cancelled = true;
+			}
+		}
+
+		$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $heldItem->getAttackPoints());
+
+		$meleeEnchantmentDamage = 0;
+		/** @var EnchantmentInstance[] $meleeEnchantments */
+		$meleeEnchantments = [];
+		foreach($heldItem->getEnchantments() as $enchantment){
+			$type = $enchantment->getType();
+			if($type instanceof MeleeWeaponEnchantment and $type->isApplicableTo($target)){
+				$meleeEnchantmentDamage += $type->getDamageBonus($enchantment->getLevel());
+				$meleeEnchantments[] = $enchantment;
+			}
+		}
+		$ev->setModifier($meleeEnchantmentDamage, EntityDamageEvent::MODIFIER_WEAPON_ENCHANTMENTS);
+
+		if($cancelled){
+			$ev->setCancelled();
+		}
+
+		if(!$this->isSprinting() and !$this->isFlying() and $this->fallDistance > 0 and !$this->hasEffect(Effect::BLINDNESS) and !$this->isUnderwater()){
+			$ev->setModifier($ev->getFinalDamage() / 2, EntityDamageEvent::MODIFIER_CRITICAL);
+		}
+
+		$target->attack($ev);
+
+		if($ev->isCancelled()){
+			if($heldItem instanceof Durable and $this->isSurvival()){
+				$this->inventory->sendContents($this);
+			}
+			return true;
+		}
+
+		if($ev->getModifier(EntityDamageEvent::MODIFIER_CRITICAL) > 0){
+			$pk = new AnimatePacket();
+			$pk->action = AnimatePacket::ACTION_CRITICAL_HIT;
+			$pk->entityRuntimeId = $target->getId();
+			$this->server->broadcastPacket($target->getViewers(), $pk);
+			if($target instanceof Player){
+				$target->dataPacket($pk);
+			}
+		}
+
+		foreach($meleeEnchantments as $enchantment){
+			$type = $enchantment->getType();
+			assert($type instanceof MeleeWeaponEnchantment);
+			$type->onPostAttack($this, $target, $enchantment->getLevel());
+		}
+
+		if($this->isAlive()){
+			//reactive damage like thorns might cause us to be killed by attacking another mob, which
+			//would mean we'd already have dropped the inventory by the time we reached here
+			if($heldItem->onAttackEntity($target) and $this->isSurvival()){ //always fire the hook, even if we are survival
+				$this->inventory->setItemInHand($heldItem);
+			}
+
+			$this->exhaust(0.3, PlayerExhaustEvent::CAUSE_ATTACK);
+		}
+
+		return true;
+    }
+
 	public function handleCommandStep(CommandStepPacket $packet) : bool{
 		if($this->spawned === false or !$this->isAlive()){
 			return true;
@@ -2420,7 +2515,38 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->doCloseInventory();
 
 		switch($packet->event){
-			case ActorEventPacket::EATING_ITEM:
+			case ActorEventPacket::USE_ITEM: //Eating
+			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+			    	$slot = $this->inventory->getItemInHand();
+
+			    	if($slot instanceof Consumable){
+				    	$ev = new PlayerItemConsumeEvent($this, $slot);
+				    	if($this->hasItemCooldown($slot)){
+					    	$ev->setCancelled();
+				    	}
+				    	$ev->call();
+
+				    	if($ev->isCancelled() or !$this->consumeObject($slot)){
+				    		$this->inventory->sendContents($this);
+					    	return true;
+				    	}
+
+				    	$this->resetItemCooldown($slot);
+
+				    	if($this->isSurvival()){
+				    		$slot->pop();
+					    	$this->inventory->setItemInHand($slot);
+					    	$this->inventory->addItem($slot->getResidue());
+				    	}
+
+                        $this->setUsingItem(false);
+
+				    	return true;
+			    	}
+				}
+
+				break;
+			case ActorEventPacket::EATING_ITEM: // Eating particles
 				if($packet->data === 0){
 					return false;
 				}
@@ -2633,85 +2759,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					case InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_INTERACT:
 						break; //TODO
 					case InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_ATTACK:
-						if(!$target->isAlive()){
-							return true;
-						}
-						if($target instanceof ItemEntity or $target instanceof Arrow){
-							$this->kick("Attempting to attack an invalid entity");
-							$this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidEntity", [$this->getName()]));
-							return false;
-						}
-
-						$cancelled = false;
-
-						$heldItem = $this->inventory->getItemInHand();
-
-						if(!$this->canInteract($target, 8)){
-							$cancelled = true;
-						}elseif($target instanceof Player){
-							if(!$this->server->getConfigBool("pvp")){
-								$cancelled = true;
-							}
-						}
-
-						$ev = new EntityDamageByEntityEvent($this, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $heldItem->getAttackPoints());
-
-						$meleeEnchantmentDamage = 0;
-						/** @var EnchantmentInstance[] $meleeEnchantments */
-						$meleeEnchantments = [];
-						foreach($heldItem->getEnchantments() as $enchantment){
-							$type = $enchantment->getType();
-							if($type instanceof MeleeWeaponEnchantment and $type->isApplicableTo($target)){
-								$meleeEnchantmentDamage += $type->getDamageBonus($enchantment->getLevel());
-								$meleeEnchantments[] = $enchantment;
-							}
-						}
-						$ev->setModifier($meleeEnchantmentDamage, EntityDamageEvent::MODIFIER_WEAPON_ENCHANTMENTS);
-
-						if($cancelled){
-							$ev->setCancelled();
-						}
-
-						if(!$this->isSprinting() and !$this->isFlying() and $this->fallDistance > 0 and !$this->hasEffect(Effect::BLINDNESS) and !$this->isUnderwater()){
-							$ev->setModifier($ev->getFinalDamage() / 2, EntityDamageEvent::MODIFIER_CRITICAL);
-						}
-
-						$target->attack($ev);
-
-						if($ev->isCancelled()){
-							if($heldItem instanceof Durable and $this->isSurvival()){
-								$this->inventory->sendContents($this);
-							}
-							return true;
-						}
-
-						if($ev->getModifier(EntityDamageEvent::MODIFIER_CRITICAL) > 0){
-							$pk = new AnimatePacket();
-							$pk->action = AnimatePacket::ACTION_CRITICAL_HIT;
-							$pk->entityRuntimeId = $target->getId();
-							$this->server->broadcastPacket($target->getViewers(), $pk);
-							if($target instanceof Player){
-								$target->dataPacket($pk);
-							}
-						}
-
-						foreach($meleeEnchantments as $enchantment){
-							$type = $enchantment->getType();
-							assert($type instanceof MeleeWeaponEnchantment);
-							$type->onPostAttack($this, $target, $enchantment->getLevel());
-						}
-
-						if($this->isAlive()){
-							//reactive damage like thorns might cause us to be killed by attacking another mob, which
-							//would mean we'd already have dropped the inventory by the time we reached here
-							if($heldItem->onAttackEntity($target) and $this->isSurvival()){ //always fire the hook, even if we are survival
-								$this->inventory->setItemInHand($heldItem);
-							}
-
-							$this->exhaust(0.3, PlayerExhaustEvent::CAUSE_ATTACK);
-						}
-
-						return true;
+					    return $this->attackEntity($target);
 					default:
 						break; //unknown
 				}
@@ -2862,7 +2910,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		/*if(!empty($packet->input)){
+		if(!empty($packet->input)){
 			$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 		}else{
 			$recipe = $this->server->getCraftingManager()->matchCraftingRecipe($packet->output[0]);
@@ -2889,7 +2937,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($this->currentTransaction->canExecute()){
 			$this->currentTransaction->execute();
-		}*/
+		}
 
 		return true;
 	}
@@ -2964,6 +3012,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		switch($packet->action){
+		    case InteractPacket::ACTION_LEFT_CLICK:
+		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+		            return $this->attackEntity($target);
+		        }
+
+		        break;
 			case InteractPacket::ACTION_LEAVE_VEHICLE:
 			case InteractPacket::ACTION_MOUSEOVER:
 				break; //TODO: handle these
@@ -3253,31 +3307,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->currentTransaction->addAction($action);
 
-		/* TODO: Fix furnace achievement
-		 * $achievements = [];
-			foreach($this->currentTransaction->getTransactions() as $ts){
-				$inv = $ts->getInventory();
-				if($inv instanceof FurnaceInventory){
-					if($ts->getSlot() === 2){
-						switch($inv->getResult()->getId()){
-							case Item::IRON_INGOT:
-								$achievements[] = "acquireIron";
-								break;
-						}
-					}
-				}
-			}
-
-			if($this->currentTransaction->execute()){
-				foreach($achievements as $a){
-					$this->awardAchievement($a);
-				}
-			}
-		 */
-
 		if($this->currentTransaction->canExecute()){
 			$this->currentTransaction->execute();
-			$this->currentTransaction = null;
+	    	$this->currentTransaction = null;
 		}
 
 		return true;
