@@ -78,6 +78,7 @@ use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\RakLibInterface;
+use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\Network;
 use pocketmine\network\query\QueryHandler;
 use pocketmine\network\rcon\RCON;
@@ -1693,6 +1694,8 @@ class Server{
 
 			Timings::init();
 			TimingsHandler::setEnabled((bool) $this->getProperty("settings.enable-profiling", false));
+
+            EncryptionContext::$ENABLED = (bool) $this->getProperty("network.enable-encryption", true);
 
 			$this->commandMap = new SimpleCommandMap($this);
 

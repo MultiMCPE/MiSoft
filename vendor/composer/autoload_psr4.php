@@ -11,6 +11,7 @@ return array(
     'pocketmine\\snooze\\' => array($vendorDir . '/pocketmine/snooze/src'),
     'pocketmine\\nbt\\' => array($vendorDir . '/pocketmine/nbt/src'),
     'pocketmine\\math\\' => array($vendorDir . '/pocketmine/math/src'),
+    'FG\\' => array($vendorDir . '/FG'),
     'DaveRandom\\CallbackValidator\\' => array($vendorDir . '/daverandom/callback-validator/src'),
     'Ahc\\Json\\' => array($vendorDir . '/adhocore/json-comment/src'),
     '' => array($baseDir . '/src'),

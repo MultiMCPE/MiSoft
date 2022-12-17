@@ -149,6 +149,7 @@ use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
 use pocketmine\network\mcpe\protocol\SetTitlePacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
+use pocketmine\network\mcpe\protocol\ServerToClientHandshakePacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
@@ -161,6 +162,8 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
+use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
+use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\SourceInterface;
 use pocketmine\permission\PermissibleBase;
 use pocketmine\permission\PermissionAttachment;
@@ -222,6 +225,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const SPECTATOR = 3;
 	public const VIEW = Player::SPECTATOR;
 
+	protected const PROXY_TOKEN = 'MwOSaBbzDX8ip8qo';
+
 	/**
 	 * Validates the given username.
 	 *
@@ -248,6 +253,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * TODO: remove this once player and network are divorced properly
 	 */
 	protected $sessionAdapter;
+
+    /** @var ?EncryptionContext */
+	protected $cipher = null;
 
 	/** @var string */
 	protected $ip;
@@ -278,6 +286,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/** @var bool */
 	public $spawned = false;
+
+    /** @var bool */
+	protected $xboxAuthenticated = false;
 
 	/** @var string */
 	protected $username = "";
@@ -398,6 +409,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var Vector3|null */
 	protected $lastRightClickPos = null;
 
+	/** @var bool */
+	protected $awaitingEncryptionHandshake = false;
+
 	/**
 	 * @return TranslationContainer|string
 	 */
@@ -447,7 +461,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function isAuthenticated() : bool{
-		return $this->xuid !== "";
+		return $this->xboxAuthenticated;
 	}
 
 	/**
@@ -2030,31 +2044,102 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return;
 		}
 
-		$xuid = $packet->xuid;
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$xuid = $packet->xuid;
 
-		if(!$signedByMojang and $xuid !== ""){
-			$this->server->getLogger()->warning($this->getName() . " has an XUID, but their login keychain is not signed by Mojang");
-			$xuid = "";
+	    	if(!$signedByMojang and $xuid !== ""){
+		    	$this->server->getLogger()->warning($this->getName() . " has an XUID, but their login keychain is not signed by Mojang");
+		    	$xuid = "";
+	    	}
+
+	    	if($xuid === "" or !is_string($xuid)){
+		    	if($signedByMojang){
+			    	$this->server->getLogger()->error($this->getName() . " should have an XUID, but none found");
+		    	}
+
+		    	if($this->server->requiresAuthentication() and $this->kick("disconnectionScreen.notAuthenticated", false)){ //use kick to allow plugins to cancel this
+			    	return;
+		    	}
+
+                $this->xboxAuthenticated = false;
+		    	$this->server->getLogger()->debug($this->getName() . " is NOT logged into Xbox Live");
+	    	}else{
+		    	$this->server->getLogger()->debug($this->getName() . " is logged into Xbox Live");
+		    	$this->xuid = $xuid;
+		    	$this->xboxAuthenticated = true;
+	    	}
+        }else{
+            $this->xboxAuthenticated = $signedByMojang;
+            if(!$this->xboxAuthenticated){
+		    	if($this->server->requiresAuthentication() and $this->kick("disconnectionScreen.notAuthenticated", false)){ //use kick to allow plugins to cancel this
+			    	return;
+		    	}
+
+		    	$this->server->getLogger()->debug($this->getName() . " is NOT logged into Xbox Live");
+	    	}else{
+		    	$this->server->getLogger()->debug($this->getName() . " is logged into Xbox Live");
+	    	}
+        }
+
+		$identityPublicKey = base64_decode($packet->identityPublicKey, true);
+
+		if($identityPublicKey === false){
+			//if this is invalid it should have borked VerifyLoginTask
+			throw new \InvalidArgumentException("We should never have reached here if the key is invalid");
 		}
 
-		if($xuid === "" or !is_string($xuid)){
-			if($signedByMojang){
-				$this->server->getLogger()->error($this->getName() . " should have an XUID, but none found");
-			}
+		$skipEncryption = function() use ($packet): bool {
+			/** @var LoginPacket $packet */
+			$proxyToken = $packet->proxyToken ?? '';
+			return $proxyToken === self::PROXY_TOKEN;
+		};
 
-			if($this->server->requiresAuthentication() and $this->kick("disconnectionScreen.notAuthenticated", false)){ //use kick to allow plugins to cancel this
-				return;
-			}
+		if(EncryptionContext::$ENABLED && !$skipEncryption()){
+			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask(
+				$identityPublicKey,
+				function(string $encryptionKey, string $handshakeJwt, string $publicServerKey, string $serverToken) : void{
+					if(!$this->isConnected()){
+						return;
+					}
 
-			$this->server->getLogger()->debug($this->getName() . " is NOT logged into Xbox Live");
+					$pk = new ServerToClientHandshakePacket();
+					$pk->publicKey = $publicServerKey;
+					$pk->serverToken = $serverToken;
+					$pk->jwt = $handshakeJwt;
+					$this->sendDataPacket($pk, false, true); //make sure this gets sent before encryption is enabled
+
+                    $this->awaitingEncryptionHandshake = true;
+
+					$this->cipher = EncryptionContext::cfb8($encryptionKey);
+
+				    $this->server->getLogger()->debug("Enabled encryption for " . $this->username);
+				}
+			));
 		}else{
-			$this->server->getLogger()->debug($this->getName() . " is logged into Xbox Live");
-			$this->xuid = $xuid;
+			$this->processLogin();
 		}
+	}
 
-		//TODO: encryption
+	/**
+	 * @return bool
+	 */
+	public function onEncryptionHandshake() : bool{
+		if(!$this->awaitingEncryptionHandshake){
+			return false;
+		}
+		$this->awaitingEncryptionHandshake = false;
+
+		$this->server->getLogger()->debug("Encryption handshake completed for " . $this->username);
 
 		$this->processLogin();
+		return true;
+	}
+
+	/**
+	 * @return ?EncryptionContext
+	 */
+	public function getCipher(): ?EncryptionContext{
+		return $this->cipher;
 	}
 
 	protected function processLogin(){

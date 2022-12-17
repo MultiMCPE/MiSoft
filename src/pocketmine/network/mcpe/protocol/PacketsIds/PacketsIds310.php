@@ -7,6 +7,7 @@ namespace pocketmine\network\mcpe\protocol\PacketsIds;
 final class PacketsIds310 {
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
+	public const SERVER_TO_CLIENT_HANDSHAKE_PACKET = 0x03;
 	public const CLIENT_TO_SERVER_HANDSHAKE_PACKET = 0x04;
 	public const DISCONNECT_PACKET = 0x05;
 	public const RESOURCE_PACKS_INFO_PACKET = 0x06;
