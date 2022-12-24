@@ -929,6 +929,7 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\PlayerListPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PlayerListPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\PlayerSkinPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PlayerSkinPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\ProtocolInfo' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ProtocolInfo.php',
+    'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketMagicNumbers' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketMagicNumbers.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds110' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds110.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds130' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds130.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds310' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds310.php',

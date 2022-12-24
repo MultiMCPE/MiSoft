@@ -68,7 +68,6 @@ final class PacketsIds331 {
 	public const SET_PLAYER_GAME_TYPE_PACKET = 0x3e;
 	public const PLAYER_LIST_PACKET = 0x3f;
 	public const SIMPLE_EVENT_PACKET = 0x40;
-	public const TELEMETRY_EVENT_PACKET = 0x41;
 	public const SPAWN_EXPERIENCE_ORB_PACKET = 0x42;
 	public const CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x43;
 	public const MAP_INFO_REQUEST_PACKET = 0x44;
@@ -84,7 +83,6 @@ final class PacketsIds331 {
 	public const COMMAND_BLOCK_UPDATE_PACKET = 0x4e;
 	public const COMMAND_OUTPUT_PACKET = 0x4f;
 	public const UPDATE_TRADE_PACKET = 0x50;
-	public const UPDATE_EQUIPMENT_PACKET = 0x51;
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x52;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x53;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x54;
@@ -98,7 +96,6 @@ final class PacketsIds331 {
 	public const PURCHASE_RECEIPT_PACKET = 0x5c;
 	public const PLAYER_SKIN_PACKET = 0x5d;
 	public const SUB_CLIENT_LOGIN_PACKET = 0x5e;
-	public const INITIATE_WEB_SOCKET_CONNECTION_PACKET = 0x5f;
 	public const SET_LAST_HURT_BY_PACKET = 0x60;
 	public const BOOK_EDIT_PACKET = 0x61;
 	public const NPC_REQUEST_PACKET = 0x62;
@@ -115,7 +112,7 @@ final class PacketsIds331 {
 	public const LAB_TABLE_PACKET = 0x6d;
 	public const UPDATE_BLOCK_SYNCED_PACKET = 0x6e;
 	public const MOVE_ACTOR_DELTA_PACKET = 0x6f;
-	public const SET_SCOREBOARD_IDACTOR_PACKET = 0x70;
+	public const SET_SCOREBOARD_IDENTITY_PACKET = 0x70;
 	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x71;
 	public const UPDATE_SOFT_ENUM_PACKET = 0x72;
 	public const NETWORK_STACK_LATENCY_PACKET = 0x73;

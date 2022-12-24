@@ -225,8 +225,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const SPECTATOR = 3;
 	public const VIEW = Player::SPECTATOR;
 
-	protected const PROXY_TOKEN = 'MwOSaBbzDX8ip8qo';
-
 	/**
 	 * Validates the given username.
 	 *
@@ -2088,13 +2086,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			throw new \InvalidArgumentException("We should never have reached here if the key is invalid");
 		}
 
-		$skipEncryption = function() use ($packet): bool {
-			/** @var LoginPacket $packet */
-			$proxyToken = $packet->proxyToken ?? '';
-			return $proxyToken === self::PROXY_TOKEN;
-		};
-
-		if(EncryptionContext::$ENABLED && !$skipEncryption()){
+		if(EncryptionContext::$ENABLED){
 			$this->server->getAsyncPool()->submitTask(new PrepareEncryptionTask(
 				$identityPublicKey,
 				function(string $encryptionKey, string $handshakeJwt, string $publicServerKey, string $serverToken) : void{

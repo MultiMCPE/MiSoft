@@ -86,7 +86,6 @@ final class PacketsIds110 {
 	public const COMMAND_STEP_PACKET = 0x4f;
 	public const COMMAND_BLOCK_UPDATE_PACKET = 0x50;
 	public const UPDATE_TRADE_PACKET = 0x51;
-	public const UPDATE_EQUIP_PACKET = 0x52;
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x53;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x54;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x55;

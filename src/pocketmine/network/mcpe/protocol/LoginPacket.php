@@ -57,8 +57,6 @@ class LoginPacket extends DataPacket{
 	public $serverAddress;
 	/** @var string */
 	public $locale;
-	/** @var string */
-	public $proxyToken;
 
 	/** @var array (the "chain" index contains one or more JWTs) */
 	public $chainData = [];
@@ -120,7 +118,11 @@ class LoginPacket extends DataPacket{
 	}
 
 	protected function decodeConnectionRequest() : void{
-        $buffer = new BinaryStream($this->getString());
+        if ($this->protocol < ProtocolInfo::PROTOCOL_110) {
+            $buffer = new BinaryStream(\zlib_decode($this->getString(), 0x400 * 0x400 * 0x40));
+        } else {
+            $buffer = new BinaryStream($this->getString());
+        }
 
 		$this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
 
@@ -150,8 +152,6 @@ class LoginPacket extends DataPacket{
 
 		$this->clientDataJwt = $buffer->get($buffer->getLInt());
 		$this->clientData = Utils::decodeJWT($this->clientDataJwt);
-
-		$this->proxyToken = $this->clientData["ProxyToken"] ?? "";
 
 		$this->clientId = $this->clientData["ClientRandomId"] ?? null;
 		$this->serverAddress = $this->clientData["ServerAddress"] ?? null;
