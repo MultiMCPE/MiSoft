@@ -124,10 +124,6 @@ class BatchPacket extends DataPacket{
 
 		foreach($this->getPackets() as $buf){
 			$pk = PacketPool::getPacket($buf, $session->getProtocol());
-			if($pk === null){
-			    continue;
-			}
-
             $pk->setProtocol($session->getProtocol());
 
 			if(!$pk->canBeBatched()){

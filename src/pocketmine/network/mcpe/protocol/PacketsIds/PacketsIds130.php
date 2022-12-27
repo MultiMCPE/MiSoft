@@ -1,10 +1,29 @@
 <?php
 
-declare(strict_types=0x1);
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\PacketsIds;
 
-final class PacketsIds130 {
+final class PacketsIds130{
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
 	public const SERVER_TO_CLIENT_HANDSHAKE_PACKET = 0x03;
@@ -20,6 +39,7 @@ final class PacketsIds130 {
 	public const ADD_ACTOR_PACKET = 0x0d;
 	public const REMOVE_ACTOR_PACKET = 0x0e;
 	public const ADD_ITEM_ACTOR_PACKET = 0x0f;
+	// 0x10 - doesn't exists in client
 	public const TAKE_ITEM_ACTOR_PACKET = 0x11;
 	public const MOVE_ACTOR_ABSOLUTE_PACKET = 0x12;
 	public const MOVE_PLAYER_PACKET = 0x13;
@@ -68,6 +88,7 @@ final class PacketsIds130 {
 	public const SET_PLAYER_GAME_TYPE_PACKET = 0x3e;
 	public const PLAYER_LIST_PACKET = 0x3f;
 	public const SIMPLE_EVENT_PACKET = 0x40;
+	public const EVENT_PACKET = 0x41;
 	public const SPAWN_EXPERIENCE_ORB_PACKET = 0x42;
 	public const CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x43;
 	public const MAP_INFO_REQUEST_PACKET = 0x44;
@@ -83,6 +104,7 @@ final class PacketsIds130 {
 	public const COMMAND_BLOCK_UPDATE_PACKET = 0x4e;
 	public const COMMAND_OUTPUT_PACKET = 0x4f;
 	public const UPDATE_TRADE_PACKET = 0x50;
+	public const UPDATE_EQUIP_PACKET = 0x51;
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x52;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x53;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x54;
@@ -96,6 +118,7 @@ final class PacketsIds130 {
 	public const PURCHASE_RECEIPT_PACKET = 0x5c;
 	public const PLAYER_SKIN_PACKET = 0x5d;
 	public const SUB_CLIENT_LOGIN_PACKET = 0x5e;
+	public const AUTOMATION_CLIENT_CONNECT_PACKET = 0x5f;
 	public const SET_LAST_HURT_BY_PACKET = 0x60;
 	public const BOOK_EDIT_PACKET = 0x61;
 	public const NPC_REQUEST_PACKET = 0x62;
@@ -106,5 +129,12 @@ final class PacketsIds130 {
 	public const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;
 	public const SHOW_PROFILE_PACKET = 0x68;
 	public const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;
-	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x71;
+	public const REMOVE_OBJECTIVE_PACKET = 0x6a;
+	public const SET_DISPLAY_OBJECTIVE_PACKET = 0x6b;
+	public const SET_SCORE_PACKET = 0x6c;
+	public const LAB_TABLE_PACKET = 0x6d;
+	public const UPDATE_BLOCK_SYNCED_PACKET = 0x6e;
+	public const MOVE_ACTOR_DELTA_PACKET = 0x6f;
+	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x70;
+
 }

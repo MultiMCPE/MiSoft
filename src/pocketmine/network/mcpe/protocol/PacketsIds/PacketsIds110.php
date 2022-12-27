@@ -1,10 +1,29 @@
 <?php
 
-declare(strict_types=0x1);
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\PacketsIds;
 
-final class PacketsIds110 {
+final class PacketsIds110{
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
 	public const SERVER_TO_CLIENT_HANDSHAKE_PACKET = 0x03;
@@ -20,7 +39,7 @@ final class PacketsIds110 {
 	public const ADD_ACTOR_PACKET = 0x0d;
 	public const REMOVE_ACTOR_PACKET = 0x0e;
 	public const ADD_ITEM_ACTOR_PACKET = 0x0f;
-	public const ADD_HANGING_ACTOR_PACKET = 0x10;
+	public const ADD_HANGING_ACTOR_PACKET = 0x11;
 	public const TAKE_ITEM_ACTOR_PACKET = 0x11;
 	public const MOVE_ACTOR_ABSOLUTE_PACKET = 0x12;
 	public const MOVE_PLAYER_PACKET = 0x13;
@@ -86,6 +105,7 @@ final class PacketsIds110 {
 	public const COMMAND_STEP_PACKET = 0x4f;
 	public const COMMAND_BLOCK_UPDATE_PACKET = 0x50;
 	public const UPDATE_TRADE_PACKET = 0x51;
+	public const UPDATE_EQUIP_PACKET = 0x52;
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x53;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x54;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x55;
@@ -97,4 +117,5 @@ final class PacketsIds110 {
 	public const STRUCTURE_BLOCK_UPDATE_PACKET = 0x5b;
 	public const SHOW_STORE_OFFER_PACKET = 0x5c;
 	public const PURCHASE_RECEIPT_PACKET = 0x5d;
+
 }

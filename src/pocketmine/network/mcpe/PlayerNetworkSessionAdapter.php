@@ -27,6 +27,8 @@ namespace pocketmine\network\mcpe;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\ActorFallPacket;
+use pocketmine\network\mcpe\protocol\ActorPickRequestPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
@@ -34,6 +36,7 @@ use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
 use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
+use pocketmine\network\mcpe\protocol\CommandBlockUpdatePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
 use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
@@ -47,12 +50,14 @@ use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacketV1;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MapInfoRequestPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
@@ -63,6 +68,7 @@ use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
 use pocketmine\network\mcpe\protocol\SetLocalPlayerAsInitializedPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
+use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\Player;
@@ -142,6 +148,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return $this->player->handleMovePlayer($packet);
 	}
 
+	public function handleLevelSoundEventPacketV1(LevelSoundEventPacketV1 $packet) : bool{
+		return true; //useless leftover from 1.8
+	}
+
 	public function handleActorEvent(ActorEventPacket $packet) : bool{
 		return $this->player->handleEntityEvent($packet);
 	}
@@ -166,8 +176,16 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return $this->player->handleBlockPickRequest($packet);
 	}
 
+	public function handleActorPickRequest(ActorPickRequestPacket $packet) : bool{
+		return false; //TODO
+	}
+
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
 		return $this->player->handlePlayerAction($packet);
+	}
+
+	public function handleActorFall(ActorFallPacket $packet) : bool{
+		return true; //Not used
 	}
 
 	public function handleAnimate(AnimatePacket $packet) : bool{
@@ -228,8 +246,16 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return false; //TODO
 	}
 
+	public function handleShowCredits(ShowCreditsPacket $packet) : bool{
+		return false; //TODO: handle resume
+	}
+
 	public function handleCommandRequest(CommandRequestPacket $packet) : bool{
 		return $this->player->chat($packet->command);
+	}
+
+	public function handleCommandBlockUpdate(CommandBlockUpdatePacket $packet) : bool{
+		return false; //TODO
 	}
 
 	public function handleCommandStep(CommandStepPacket $packet) : bool{
@@ -324,5 +350,9 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		return $this->player->handleLevelSoundEvent($packet);
+	}
+
+	public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet) : bool{
+		return true; //TODO: implement this properly - this is here to silence debug spam from MCPE dev builds
 	}
 }

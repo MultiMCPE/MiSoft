@@ -26,14 +26,18 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds110;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds130;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds280;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds310;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds360;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_360 => PacketsIds360::class,
         ProtocolInfo::PROTOCOL_331 => PacketsIds331::class,
         ProtocolInfo::PROTOCOL_310 => PacketsIds310::class,
+        ProtocolInfo::PROTOCOL_280 => PacketsIds280::class,
         ProtocolInfo::PROTOCOL_130 => PacketsIds130::class,
         ProtocolInfo::PROTOCOL_110 => PacketsIds110::class
     ];
@@ -86,9 +90,11 @@ class PacketPool {
 		self::registerPacket(new TakeItemActorPacket());
 		self::registerPacket(new MoveActorAbsolutePacket());
 		self::registerPacket(new MovePlayerPacket());
+		self::registerPacket(new RiderJumpPacket());
 		self::registerPacket(new UpdateBlockPacket());
 		self::registerPacket(new AddPaintingPacket());
 		self::registerPacket(new ExplodePacket());
+		self::registerPacket(new LevelSoundEventPacketV1());
 		self::registerPacket(new LevelEventPacket());
 		self::registerPacket(new BlockEventPacket());
 		self::registerPacket(new ActorEventPacket());
@@ -99,10 +105,14 @@ class PacketPool {
 		self::registerPacket(new MobArmorEquipmentPacket());
 		self::registerPacket(new InteractPacket());
 		self::registerPacket(new BlockPickRequestPacket());
+		self::registerPacket(new ActorPickRequestPacket());
 		self::registerPacket(new PlayerActionPacket());
+		self::registerPacket(new ActorFallPacket());
+		self::registerPacket(new HurtArmorPacket());
 		self::registerPacket(new SetActorDataPacket());
 		self::registerPacket(new SetActorMotionPacket());
 		self::registerPacket(new SetActorLinkPacket());
+		self::registerPacket(new SetHealthPacket());
 		self::registerPacket(new SetSpawnPositionPacket());
 		self::registerPacket(new AnimatePacket());
 		self::registerPacket(new RespawnPacket());
@@ -114,14 +124,18 @@ class PacketPool {
 		self::registerPacket(new ContainerSetDataPacket());
 		self::registerPacket(new CraftingDataPacket());
 		self::registerPacket(new CraftingEventPacket());
+		self::registerPacket(new GuiDataPickItemPacket());
 		self::registerPacket(new AdventureSettingsPacket());
 		self::registerPacket(new BlockActorDataPacket());
+		self::registerPacket(new PlayerInputPacket());
 		self::registerPacket(new LevelChunkPacket());
 		self::registerPacket(new SetCommandsEnabledPacket());
 		self::registerPacket(new SetDifficultyPacket());
 		self::registerPacket(new ChangeDimensionPacket());
 		self::registerPacket(new SetPlayerGameTypePacket());
 		self::registerPacket(new PlayerListPacket());
+		self::registerPacket(new SimpleEventPacket());
+		self::registerPacket(new EventPacket());
 		self::registerPacket(new SpawnExperienceOrbPacket());
 		self::registerPacket(new ClientboundMapItemDataPacket());
 		self::registerPacket(new MapInfoRequestPacket());
@@ -129,35 +143,67 @@ class PacketPool {
 		self::registerPacket(new ChunkRadiusUpdatedPacket());
 		self::registerPacket(new ItemFrameDropItemPacket());
 		self::registerPacket(new GameRulesChangedPacket());
+		self::registerPacket(new CameraPacket());
 		self::registerPacket(new BossEventPacket());
+		self::registerPacket(new ShowCreditsPacket());
 		self::registerPacket(new AvailableCommandsPacket());
 		self::registerPacket(new CommandRequestPacket());
+		self::registerPacket(new CommandBlockUpdatePacket());
+		self::registerPacket(new CommandOutputPacket());
+		self::registerPacket(new UpdateTradePacket());
+		self::registerPacket(new UpdateEquipPacket());
 		self::registerPacket(new ResourcePackDataInfoPacket());
 		self::registerPacket(new ResourcePackChunkDataPacket());
 		self::registerPacket(new ResourcePackChunkRequestPacket());
 		self::registerPacket(new TransferPacket());
 		self::registerPacket(new PlaySoundPacket());
+		self::registerPacket(new StopSoundPacket());
 		self::registerPacket(new SetTitlePacket());
+		self::registerPacket(new AddBehaviorTreePacket());
+		self::registerPacket(new StructureBlockUpdatePacket());
 		self::registerPacket(new ShowStoreOfferPacket());
 		self::registerPacket(new PurchaseReceiptPacket());
 		self::registerPacket(new PlayerSkinPacket());
 		self::registerPacket(new SubClientLoginPacket());
+		self::registerPacket(new AutomationClientConnectPacket());
+		self::registerPacket(new SetLastHurtByPacket());
 		self::registerPacket(new BookEditPacket());
+		self::registerPacket(new NpcRequestPacket());
+		self::registerPacket(new PhotoTransferPacket());
 		self::registerPacket(new ModalFormRequestPacket());
 		self::registerPacket(new ModalFormResponsePacket());
 		self::registerPacket(new ServerSettingsRequestPacket());
 		self::registerPacket(new ServerSettingsResponsePacket());
+		self::registerPacket(new ShowProfilePacket());
 		self::registerPacket(new SetDefaultGameTypePacket());
 		self::registerPacket(new RemoveObjectivePacket());
 		self::registerPacket(new SetDisplayObjectivePacket());
 		self::registerPacket(new SetScorePacket());
+		self::registerPacket(new LabTablePacket());
+		self::registerPacket(new UpdateBlockSyncedPacket());
+		self::registerPacket(new MoveActorDeltaPacket());
 		self::registerPacket(new SetScoreboardIdentityPacket());
 		self::registerPacket(new SetLocalPlayerAsInitializedPacket());
+		self::registerPacket(new UpdateSoftEnumPacket());
+		self::registerPacket(new NetworkStackLatencyPacket());
+		self::registerPacket(new ScriptCustomEventPacket());
 		self::registerPacket(new SpawnParticleEffectPacket());
 		self::registerPacket(new AvailableActorIdentifiersPacket());
+		self::registerPacket(new LevelSoundEventPacketV2());
 		self::registerPacket(new NetworkChunkPublisherUpdatePacket());
 		self::registerPacket(new BiomeDefinitionListPacket());
 		self::registerPacket(new LevelSoundEventPacket());
+		self::registerPacket(new LevelEventGenericPacket());
+		self::registerPacket(new LecternUpdatePacket());
+		self::registerPacket(new VideoStreamConnectPacket());
+		self::registerPacket(new ClientCacheStatusPacket());
+		self::registerPacket(new OnScreenTextureAnimationPacket());
+		self::registerPacket(new MapCreateLockedCopyPacket());
+		self::registerPacket(new StructureTemplateDataExportRequestPacket());
+		self::registerPacket(new StructureTemplateDataExportResponsePacket());
+		self::registerPacket(new UpdateBlockPropertiesPacket());
+		self::registerPacket(new ClientCacheBlobStatusPacket());
+		self::registerPacket(new ClientCacheMissResponsePacket());
 		// 1.1
 		self::registerPacket(new RemoveBlockPacket());
 		self::registerPacket(new UseItemPacket());
@@ -178,30 +224,22 @@ class PacketPool {
 	 * @param int $pid
 	 * @param int $playerProtocol
 	 *
-	 * @return ?DataPacket
+	 * @return DataPacket
 	 */
-	public static function getPacketById(int $pid, int $playerProtocol) : ?DataPacket{
+	public static function getPacketById(int $pid, int $playerProtocol) : DataPacket{
 		$magicId = self::getPacketMagicById($pid, $playerProtocol);
-		/** @var DataPacket $class */
-		$class = isset(self::$pool[$magicId]) ? clone self::$pool[$magicId] : null;
-
-		return $class;
+		return isset(self::$pool[$magicId]) ? clone self::$pool[$magicId] : new UnknownPacket();
 	}
 
 	/**
 	 * @param string $buffer
 	 * @param int $playerProtocol
 	 * 
-	 * @return ?DataPacket
+	 * @return DataPacket
 	 */
-	public static function getPacket(string $buffer, int $playerProtocol) : ?DataPacket{
+	public static function getPacket(string $buffer, int $playerProtocol) : DataPacket{
 		$offset = 0;
-
 		$pk = self::getPacketById(Binary::readUnsignedVarInt($buffer, $offset), $playerProtocol);
-		if($pk === null){
-		    return null;
-		}
-
 		$pk->setBuffer($buffer, $offset);
 
 		return $pk;
