@@ -27,8 +27,14 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\math\Vector3;
+use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
+use function count;
+use function file_get_contents;
+use function json_decode;
+use const pocketmine\RESOURCE_PATH;
 
 class StartGamePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::START_GAME_PACKET;
@@ -73,6 +79,8 @@ class StartGamePacket extends DataPacket{
 	public $hasAchievementsDisabled = true;
 	/** @var int */
 	public $time = -1;
+	/** @var int */
+	public $eduEditionOffer = 0;
 	/** @var bool */
 	public $eduMode = false;
 	/** @var bool */
@@ -133,6 +141,8 @@ class StartGamePacket extends DataPacket{
 	public $onlySpawnV1Villagers = false;
 
 	/** @var string */
+	public $vanillaVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
+	/** @var string */
 	public $levelId = ""; //base64 string, usually the same as world folder name in vanilla
 	/** @var string */
 	public $worldName;
@@ -140,6 +150,8 @@ class StartGamePacket extends DataPacket{
 	public $premiumWorldTemplateId = "";
 	/** @var bool */
 	public $isTrial = false;
+	/** @var bool */
+	public $isMovementServerAuthoritative = false;
 	/** @var int */
 	public $currentTick = 0; //only used if isTrial is true
 	/** @var int */
@@ -147,13 +159,10 @@ class StartGamePacket extends DataPacket{
 	/** @var string */
 	public $multiplayerCorrelationId = ""; //TODO: this should be filled with a UUID of some sort
 
-	/** @var array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
+	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
 	/** @var array|null string (name) => int16 (legacyID) */
 	public $itemTable = null;
-
-    /** @var string */
-	public $vanillaVersion = "";
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
@@ -174,7 +183,11 @@ class StartGamePacket extends DataPacket{
 		$this->getBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
 		$this->time = $this->getVarInt();
-		$this->eduMode = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+		    $this->eduEditionOffer = $this->getVarInt();
+		}else{
+	    	$this->eduMode = (($this->get(1) !== "\x00"));
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
 	    	$this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
 		}
@@ -230,6 +243,14 @@ class StartGamePacket extends DataPacket{
 	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
 	            	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
 	        	}
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_370) {
+	            	$this->vanillaVersion = $this->getString();
+	        	}
+	        	if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
+	        	    $this->get(1);
+	        	    $this->get(1);
+	        	    $this->getLFloat();
+	        	}
             }
 		}
 
@@ -237,22 +258,33 @@ class StartGamePacket extends DataPacket{
 	    $this->worldName = $this->getString();
 	    $this->premiumWorldTemplateId = $this->getString();
 	   	$this->isTrial = (($this->get(1) !== "\x00"));
+	   	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
+	       	$this->isMovementServerAuthoritative = (($this->get(1) !== "\x00"));
+	   	}
 	    $this->currentTick = (Binary::readLLong($this->get(8)));
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
 	        $this->enchantmentSeed = $this->getVarInt();
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
-	        	$this->blockTable = [];
-	        	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-		        	$id = $this->getString();
-		        	$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-		        	$unknown = 0;
-		        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-		            	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
-			        }
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+	            	$blockTable = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+	            	if(!($blockTable instanceof ListTag)){
+		            	throw new \UnexpectedValueException("Wrong block table root NBT tag type");
+	            	}
+	            	$this->blockTable = $blockTable;
+                }else{
+	            	$this->blockTable = [];
+	            	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		            	$id = $this->getString();
+		            	$data = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+		            	$unknown = 0;
+		            	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		                	$unknown = ((\unpack("v", $this->get(2))[1] << 48 >> 48));
+			            }
 
-		        	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+		            	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+	            	}
 	        	}
 	    	}
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
@@ -290,7 +322,11 @@ class StartGamePacket extends DataPacket{
 		$this->putBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));
 		$this->putVarInt($this->time);
-		($this->buffer .= ($this->eduMode ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+	    	($this->buffer .= ($this->eduMode ? "\x01" : "\x00"));
+		}else{
+		    $this->putVarInt($this->eduEditionOffer);
+		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1') {
 	    	($this->buffer .= ($this->hasEduFeaturesEnabled ? "\x01" : "\x00"));
 		}
@@ -346,6 +382,14 @@ class StartGamePacket extends DataPacket{
 	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_361) {
 	            	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
 	        	}
+	        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_370) {
+	        	    $this->putString($this->vanillaVersion);
+	        	}
+	        	if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
+			    	($this->buffer .= \chr(0));
+			    	($this->buffer .= \chr(1));
+			    	$this->putLFloat(0);
+	        	}
 	    	}
 		}
 
@@ -353,6 +397,9 @@ class StartGamePacket extends DataPacket{
 		$this->putString($this->worldName);
 		$this->putString($this->premiumWorldTemplateId);
 		($this->buffer .= ($this->isTrial ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
+	    	($this->buffer .= ($this->isMovementServerAuthoritative ? "\x01" : "\x00"));
+		}
 		($this->buffer .= (\pack("VV", $this->currentTick & 0xFFFFFFFF, $this->currentTick >> 32)));
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
@@ -363,13 +410,30 @@ class StartGamePacket extends DataPacket{
             }
 
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-	        	$this->putUnsignedVarInt(0); // item list
+	        	if($this->itemTable === null){
+		        	if(self::$itemTableCache === null){
+			        	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));
+		           	}
+		        	($this->buffer .= self::$itemTableCache);
+	        	}else{
+		        	($this->buffer .= self::serializeItemTable($this->itemTable));
+		        }
 	    	}
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
 	    	    $this->putString($this->multiplayerCorrelationId);
             }
         }
+	}
+
+	private static function serializeItemTable(array $table) : string{
+		$stream = new NetworkBinaryStream();
+		$stream->putUnsignedVarInt(count($table));
+		foreach($table as $name => $legacyId){
+			$stream->putString($name);
+			$stream->putLShort($legacyId);
+		}
+		return $stream->getBuffer();
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -23,11 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
-
-use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
+use pocketmine\network\mcpe\protocol\types\SkinData;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use function count;
 
@@ -105,13 +103,13 @@ class PlayerListPacket extends DataPacket{
 			    	$geometryName = $this->getString();
 			    	$geometryData = $this->getString();
 
-			    	$entry->skin = new Skin(
+			    	$entry->skin = SkinAdapterSingleton::get()->toSkinData(new Skin(
 				    	$skinId,
 				    	$skinData,
 				    	$capeData,
 				    	$geometryName,
 				    	$geometryData
-			    	);
+			    	));
 			    	$entry->xboxUserId = $this->getString();
 			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 			        	$entry->platformChatId = $this->getString();

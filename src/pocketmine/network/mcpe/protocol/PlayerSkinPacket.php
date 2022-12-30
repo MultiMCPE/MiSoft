@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\entity\Skin;
+use pocketmine\network\mcpe\protocol\types\SkinData;
+use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\UUID;
 
@@ -38,7 +40,7 @@ class PlayerSkinPacket extends DataPacket{
 	public $oldSkinName = "";
 	/** @var string */
 	public $newSkinName = "";
-	/** @var Skin */
+	/** @var SkinData */
 	public $skin;
 	/** @var bool */
 	public $premiumSkin = false;
@@ -46,55 +48,67 @@ class PlayerSkinPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
 
-		$skinId = $this->getString();
-		$this->newSkinName = $this->getString();
-		$this->oldSkinName = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-			$this->getLInt(); // num skin data, always 1
-			$this->getLInt();
-		}
-		$skinData = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-			$this->getLInt();
-			$this->getLInt();
-		}
-		$capeData = "";
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-	    	$capeData = $this->getString();
-		}
-		$geometryModel = $this->getString();
-		$geometryData = $this->getString();
+        if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
+	    	$skinId = $this->getString();
+	    	$this->newSkinName = $this->getString();
+	    	$this->oldSkinName = $this->getString();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		    	$this->getLInt(); // num skin data, always 1
+		    	$this->getLInt();
+	     	}
+	    	$skinData = $this->getString();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		    	$this->getLInt();
+		    	$this->getLInt();
+	    	}
+	    	$capeData = "";
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+	        	$capeData = $this->getString();
+	    	}
+	    	$geometryModel = $this->getString();
+	    	$geometryData = $this->getString();
 
-		$this->skin = new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData);
+	    	$this->skin = SkinAdapterSingleton::get()->toSkinData(new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData));
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && !$this->feof()) {
-	    	$this->premiumSkin = (($this->get(1) !== "\x00"));
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && !$this->feof()) {
+	        	$this->premiumSkin = (($this->get(1) !== "\x00"));
+            }
+        }else{
+            $this->skin = $this->getSkin();
+	    	$this->newSkinName = $this->getString();
+	    	$this->oldSkinName = $this->getString();
         }
 	}
 
 	protected function encodePayload(){
 		$this->putUUID($this->uuid);
 
-		$this->putString($this->skin->getSkinId());
-		$this->putString($this->newSkinName);
-		$this->putString($this->oldSkinName);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-			$this->putLInt(1); // num skin data, always 1
-			$this->putLInt(strlen($this->skin->getSkinData()));
-		}
-		$this->putString($this->skin->getSkinData());
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-		    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-		    	$this->putLInt(empty($this->skin->getCapeData()));
-		    	$this->putLInt(strlen($this->skin->getCapeData()));
+        if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
+    		$this->putString($this->skin->getSkinId());
+	    	$this->putString($this->newSkinName);
+	    	$this->putString($this->oldSkinName);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		    	$this->putLInt(1); // num skin data, always 1
+		    	$this->putLInt(strlen($this->skin->getSkinData()));
 	    	}
-	    	$this->putString($this->skin->getCapeData());
-		}
-		$this->putString($this->skin->getGeometryName());
-		$this->putString($this->skin->getGeometryData());
+	    	$this->putString($this->skin->getSkinData());
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+		        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+		        	$this->putLInt(empty($this->skin->getCapeData()));
+		        	$this->putLInt(strlen($this->skin->getCapeData()));
+	        	}
+	        	$this->putString($this->skin->getCapeData());
+	    	}
+	    	$this->putString($this->skin->getGeometryName());
+	    	$this->putString($this->skin->getGeometryData());
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260) {
-	    	($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
+            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260) {
+	        	($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
+            }
+        }else{
+            $this->putSkin($this->skin);
+	    	$this->putString($this->newSkinName);
+	    	$this->putString($this->oldSkinName);
         }
 	}
 

@@ -30,10 +30,14 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds280;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds310;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds360;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds385;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds387;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_387 => PacketsIds387::class,
+        ProtocolInfo::PROTOCOL_385 => PacketsIds385::class,
         ProtocolInfo::PROTOCOL_360 => PacketsIds360::class,
         ProtocolInfo::PROTOCOL_331 => PacketsIds331::class,
         ProtocolInfo::PROTOCOL_310 => PacketsIds310::class,
@@ -93,7 +97,7 @@ class PacketPool {
 		self::registerPacket(new RiderJumpPacket());
 		self::registerPacket(new UpdateBlockPacket());
 		self::registerPacket(new AddPaintingPacket());
-		self::registerPacket(new ExplodePacket());
+		self::registerPacket(new TickSyncPacket());
 		self::registerPacket(new LevelSoundEventPacketV1());
 		self::registerPacket(new LevelEventPacket());
 		self::registerPacket(new BlockEventPacket());
@@ -204,6 +208,16 @@ class PacketPool {
 		self::registerPacket(new UpdateBlockPropertiesPacket());
 		self::registerPacket(new ClientCacheBlobStatusPacket());
 		self::registerPacket(new ClientCacheMissResponsePacket());
+		self::registerPacket(new EducationSettingsPacket());
+		self::registerPacket(new EmotePacket());
+		self::registerPacket(new MultiplayerSettingsPacket());
+		self::registerPacket(new SettingsCommandPacket());
+		self::registerPacket(new AnvilDamagePacket());
+		self::registerPacket(new CompletedUsingItemPacket());
+		self::registerPacket(new NetworkSettingsPacket());
+		self::registerPacket(new PlayerAuthInputPacket());
+		// ExplodePacket - TickSyncPacket
+		self::registerPacket(new ExplodePacket());
 		// 1.1
 		self::registerPacket(new RemoveBlockPacket());
 		self::registerPacket(new UseItemPacket());

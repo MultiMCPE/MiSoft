@@ -28,7 +28,18 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class ResourceEnums {
 
 	private static $packTypes = [
-	    // 370??
+		ProtocolInfo::PROTOCOL_370 => [
+			"TYPE_INVALID" => 0,
+			"TYPE_ADDON" => 1,
+			"TYPE_CACHED" => 2,
+			"TYPE_COPY_PROTECTED" => 3,
+			"TYPE_BEHAVIOR" => 4,
+			"TYPE_PERSONA_PIECE" => 5,
+			"TYPE_RESOURCE" => 6,
+			"TYPE_SKINS" => 7,
+			"TYPE_WORLD_TEMPLATE" => 8,
+			"TYPE_COUNT" => 9
+		],
 		ProtocolInfo::PROTOCOL_110 => [
 			"TYPE_INVALID" => 0,
 			"TYPE_RESOURCE" => 1,

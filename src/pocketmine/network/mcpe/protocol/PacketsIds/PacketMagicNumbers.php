@@ -46,7 +46,7 @@ interface PacketMagicNumbers{
 	public const RIDER_JUMP_PACKET = 0x14;
 	public const UPDATE_BLOCK_PACKET = 0x15;
 	public const ADD_PAINTING_PACKET = 0x16;
-	public const EXPLODE_PACKET = 0x17;
+	public const TICK_SYNC_PACKET = 0x17;
 	public const LEVEL_SOUND_EVENT_PACKET_V1 = 0x18;
 	public const LEVEL_EVENT_PACKET = 0x19;
 	public const BLOCK_EVENT_PACKET = 0x1a;
@@ -154,21 +154,31 @@ interface PacketMagicNumbers{
 	public const CLIENT_CACHE_STATUS_PACKET = 0x81;
 	public const ON_SCREEN_TEXTURE_ANIMATION_PACKET = 0x82;
 	public const MAP_CREATE_LOCKED_COPY_PACKET = 0x83;
-	public const STRUCTURE_TEMPLATE_DATA_EXPORT_REQUEST_PACKET = 0x84;
-	public const STRUCTURE_TEMPLATE_DATA_EXPORT_RESPONSE_PACKET = 0x85;
+	public const STRUCTURE_TEMPLATE_DATA_REQUEST_PACKET = 0x84;
+	public const STRUCTURE_TEMPLATE_DATA_RESPONSE_PACKET = 0x85;
 	public const UPDATE_BLOCK_PROPERTIES_PACKET = 0x86;
 	public const CLIENT_CACHE_BLOB_STATUS_PACKET = 0x87;
 	public const CLIENT_CACHE_MISS_RESPONSE_PACKET = 0x88;
+	public const EDUCATION_SETTINGS_PACKET = 0x89;
+	public const EMOTE_PACKET = 0x8a;
+	public const MULTIPLAYER_SETTINGS_PACKET = 0x8b;
+	public const SETTINGS_COMMAND_PACKET = 0x8c;
+	public const ANVIL_DAMAGE_PACKET = 0x8d;
+	public const COMPLETED_USING_ITEM_PACKET = 0x8e;
+	public const NETWORK_SETTINGS_PACKET = 0x8f;
+	public const PLAYER_AUTH_INPUT_PACKET = 0x90;
+	// EXPLODE_PACKET - TICK_SYNC_PACKET
+	public const EXPLODE_PACKET = 0x91;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0x89;
-	public const CONTAINER_SET_CONTENT_PACKET = 0x90;
-	public const DROP_ITEM_PACKET = 0x91;
-	public const USE_ITEM_PACKET = 0x92;
-	public const REMOVE_BLOCK_PACKET = 0x93;
-	public const COMMAND_STEP_PACKET = 0x94;
-	public const ADD_HANGING_ACTOR_PACKET = 0x95;
-	public const INVENTORY_ACTION_PACKET = 0x96;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x97;
-	public const ADD_ITEM_PACKET = 0x98;
+	public const CONTAINER_SET_SLOT_PACKET = 0x92;
+	public const CONTAINER_SET_CONTENT_PACKET = 0x93;
+	public const DROP_ITEM_PACKET = 0x94;
+	public const USE_ITEM_PACKET = 0x95;
+	public const REMOVE_BLOCK_PACKET = 0x96;
+	public const COMMAND_STEP_PACKET = 0x97;
+	public const ADD_HANGING_ACTOR_PACKET = 0x98;
+	public const INVENTORY_ACTION_PACKET = 0x99;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x9a;
+	public const ADD_ITEM_PACKET = 0x9b;
 
 }

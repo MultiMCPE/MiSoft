@@ -136,6 +136,11 @@ class MetadataConvertor {
      */
 	private static function updateMetadataIds(array $metadata, int $playerProtocol) : array{
 		switch ($playerProtocol) {
+			case ProtocolInfo::PROTOCOL_388:
+			case ProtocolInfo::PROTOCOL_387:
+			case ProtocolInfo::PROTOCOL_386:
+			case ProtocolInfo::PROTOCOL_385:
+			case ProtocolInfo::PROTOCOL_370:
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
 			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_360];
@@ -206,6 +211,11 @@ class MetadataConvertor {
 		}
 
 		switch ($playerProtocol) {
+			case ProtocolInfo::PROTOCOL_388:
+			case ProtocolInfo::PROTOCOL_387:
+			case ProtocolInfo::PROTOCOL_386:
+			case ProtocolInfo::PROTOCOL_385:
+			case ProtocolInfo::PROTOCOL_370:
 			case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
 			case ProtocolInfo::PROTOCOL_354:

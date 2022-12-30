@@ -36,10 +36,6 @@ use function count;
 class AddActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ACTOR_PACKET;
 
-	/*
-	* Thanks dktapps for this hack)
-	* By: sssss2281
-	*/
 	public const LEGACY_ID_MAP_BC = [
 		EntityIds::NPC => "minecraft:npc",
 		EntityIds::PLAYER => "minecraft:player",

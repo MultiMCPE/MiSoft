@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Skin;
 use pocketmine\item\Durable;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -42,6 +43,9 @@ use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\SkinData;
+use pocketmine\network\mcpe\protocol\types\SkinImage;
+use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
@@ -77,6 +81,66 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(0))));
 		($this->buffer .= (\pack("V", $uuid->getPart(3))));
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
+	}
+
+	public function getSkin() : SkinData{
+		$skinId = $this->getString();
+		$skinResourcePatch = $this->getString();
+		$skinData = $this->getSkinImage();
+		$animationCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$animations = [];
+		for($i = 0; $i < $animationCount; ++$i){
+			$animations[] = new SkinAnimation(
+				$skinImage = $this->getSkinImage(),
+				$animationType = ((\unpack("V", $this->get(4))[1] << 32 >> 32)),
+				$animationFrames = ((\unpack("g", $this->get(4))[1]))
+			);
+		}
+		$capeData = $this->getSkinImage();
+		$geometryData = $this->getString();
+		$animationData = $this->getString();
+		$premium = (($this->get(1) !== "\x00"));
+		$persona = (($this->get(1) !== "\x00"));
+		$capeOnClassic = (($this->get(1) !== "\x00"));
+		$capeId = $this->getString();
+		$fullSkinId = $this->getString();
+
+		return new SkinData($skinId, $skinResourcePatch, $skinData, $animations, $capeData, $geometryData, $animationData, $premium, $persona, $capeOnClassic, $capeId);
+	}
+
+	public function putSkin(SkinData $skin){
+		$this->putString($skin->getSkinId());
+		$this->putString($skin->getResourcePatch());
+		$this->putSkinImage($skin->getSkinImage());
+		($this->buffer .= (\pack("V", count($skin->getAnimations()))));
+		foreach($skin->getAnimations() as $animation){
+			$this->putSkinImage($animation->getImage());
+			($this->buffer .= (\pack("V", $animation->getType())));
+			($this->buffer .= (\pack("g", $animation->getFrames())));
+		}
+		$this->putSkinImage($skin->getCapeImage());
+		$this->putString($skin->getGeometryData());
+		$this->putString($skin->getAnimationData());
+		($this->buffer .= ($skin->isPremium() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPersona() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPersonaCapeOnClassic() ? "\x01" : "\x00"));
+		$this->putString($skin->getCapeId());
+
+		//this has to be unique or the client will do stupid things
+		$this->putString(UUID::fromRandom()->toString()); //full skin ID
+	}
+
+	private function getSkinImage() : SkinImage{
+		$width = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$height = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$data = $this->getString();
+		return new SkinImage($height, $width, $data);
+	}
+
+	private function putSkinImage(SkinImage $image) : void{
+		($this->buffer .= (\pack("V", $image->getWidth())));
+		($this->buffer .= (\pack("V", $image->getHeight())));
+		$this->putString($image->getData());
 	}
 
 	public function getSlot(int $playerProtocol) : Item{

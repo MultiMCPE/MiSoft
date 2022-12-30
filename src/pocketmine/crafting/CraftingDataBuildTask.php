@@ -42,7 +42,7 @@ class CraftingDataBuildTask extends AsyncTask {
     /** @var int */
     protected $compressionLevel;
     /** @var array */
-    protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+    protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361, ProtocolInfo::PROTOCOL_385];
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel) {
 	    $this->shapelessRecipes = $shapelessRecipes;

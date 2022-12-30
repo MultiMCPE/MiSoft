@@ -27,30 +27,40 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class StructureTemplateDataExportResponsePacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::STRUCTURE_TEMPLATE_DATA_EXPORT_RESPONSE_PACKET;
+class SettingsCommandPacket extends DataPacket/* implements ServerboundPacket*/{
+	public const NETWORK_ID = ProtocolInfo::SETTINGS_COMMAND_PACKET;
 
 	/** @var string */
-	public $structureTemplateName;
-	/** @var string|null */
-	public $namedtag;
+	private $command;
+	/** @var bool */
+	private $suppressOutput;
+
+	public static function create(string $command, bool $suppressOutput) : self{
+		$result = new self;
+		$result->command = $command;
+		$result->suppressOutput = $suppressOutput;
+		return $result;
+	}
+
+	public function getCommand() : string{
+		return $this->command;
+	}
+
+	public function getSuppressOutput() : bool{
+		return $this->suppressOutput;
+	}
 
 	protected function decodePayload() : void{
-		$this->structureTemplateName = $this->getString();
-		if((($this->get(1) !== "\x00"))){
-			$this->namedtag = $this->getRemaining();
-		}
+		$this->command = $this->getString();
+		$this->suppressOutput = (($this->get(1) !== "\x00"));
 	}
 
 	protected function encodePayload() : void{
-		$this->putString($this->structureTemplateName);
-		($this->buffer .= ($this->namedtag !== null ? "\x01" : "\x00"));
-		if($this->namedtag !== null){
-			($this->buffer .= $this->namedtag);
-		}
+		$this->putString($this->command);
+		($this->buffer .= ($this->suppressOutput ? "\x01" : "\x00"));
 	}
 
 	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleStructureTemplateDataExportResponse($this);
+		return $handler->handleSettingsCommand($this);
 	}
 }

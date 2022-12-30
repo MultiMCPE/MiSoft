@@ -55,6 +55,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
 use function array_filter;
@@ -190,7 +191,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	        }else{
 	        	$pk = new PlayerSkinPacket();
 	        	$pk->uuid = $this->getUniqueId();
-	        	$pk->skin = $this->skin;
+	        	$pk->skin = SkinAdapterSingleton::get()->toSkinData($this->skin);
 	        	$target->dataPacket($pk);
 	        }
 	    }
@@ -860,7 +861,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			/* we don't use Server->updatePlayerListData() because that uses batches, which could cause race conditions in async compression mode */
 			$pk = new PlayerListPacket();
 			$pk->type = PlayerListPacket::TYPE_ADD;
-			$pk->entries = [PlayerListEntry::createAdditionEntry($this->uuid, $this->id, $this->getName(), $this->skin)];
+			$pk->entries = [PlayerListEntry::createAdditionEntry($this->uuid, $this->id, $this->getName(), SkinAdapterSingleton::get()->toSkinData($this->skin))];
 			$player->dataPacket($pk);
 		}
 

@@ -78,6 +78,8 @@ class AddPlayerPacket extends DataPacket{
 
 	/** @var string */
 	public $deviceId = ""; //TODO: fill player's device ID (???)
+	/** @var int */
+	public $buildPlatform = -1;
 
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
@@ -115,10 +117,13 @@ class AddPlayerPacket extends DataPacket{
 	        	for($i = 0; $i < $linkCount; ++$i){
 		        	$this->links[$i] = $this->getEntityLink();
 	        	}
-	    	}
 
-            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	        	$this->deviceId = $this->getString();
+                if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	            	$this->deviceId = $this->getString();
+	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+	            	    $this->buildPlatform = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	            	}
+                }
             }
         }
 	}
@@ -159,10 +164,13 @@ class AddPlayerPacket extends DataPacket{
 	        	foreach($this->links as $link){
 		        	$this->putEntityLink($link);
 	        	}
-	    	}
 
-            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
-	        	$this->putString($this->deviceId);
+                if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+	            	$this->putString($this->deviceId);
+	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+	            	    ($this->buffer .= (\pack("V", $this->buildPlatform)));
+	            	}
+                }
             }
         }
 	}

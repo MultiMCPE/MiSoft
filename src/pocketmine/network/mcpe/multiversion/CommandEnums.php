@@ -28,7 +28,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class CommandEnums {
 
     private static $commandArgTypes = [
-        /*ProtocolInfo::PROTOCOL_385 => [ //TODO: на будущее
+        ProtocolInfo::PROTOCOL_385 => [
             "ARG_TYPE_INT" => 0x1,
             "ARG_TYPE_FLOAT" => 0x2,
             "ARG_TYPE_VALUE" => 0x3,
@@ -59,7 +59,7 @@ abstract class CommandEnums {
             "ARG_TYPE_RAWTEXT" => 0x29,
             "ARG_TYPE_JSON" => 0x2c,
             "ARG_TYPE_COMMAND" => 0x33
-        ],*/
+        ],
         ProtocolInfo::PROTOCOL_340 => [
             "ARG_TYPE_INT" => 0x1,
             "ARG_TYPE_FLOAT" => 0x2,
