@@ -95,15 +95,15 @@ class BlockPallet {
 					switch ($state['type']) {
 						case 'byte':
 						case NBT::TAG_Byte:
-							$states->{$stateName} = new ByteTag($stateName, $state['val'] ?? $state['value']);
+						    $states->offsetSet($stateName, new ByteTag($stateName, $state['val'] ?? $state['value']));
 							break;
 						case NBT::TAG_Int:
 						case 'int':
-							$states->{$stateName} = new IntTag($stateName, $state['val'] ?? $state['value']);
+							$states->offsetSet($stateName, new IntTag($stateName, $state['val'] ?? $state['value']));
 							break;
 						case NBT::TAG_String:
 						case 'string':
-							$states->{$stateName} = new StringTag($stateName, $state['val'] ?? $state['value']);
+							$states->offsetSet($stateName, new StringTag($stateName, $state['val'] ?? $state['value']));
 							break;
 						default:
 							var_dump("Block Pallet Initialization Error");
@@ -120,7 +120,7 @@ class BlockPallet {
 					"id" => new ShortTag("id", $blockInfo['id'])
 				]);
 
-				$palletTag->{$runtimeID} = $nbt;
+				$palletTag->offsetSet($runtimeID, $nbt);
 			}
 
 			$this->dataForPackets = (new NetworkLittleEndianNBTStream())->write($palletTag);

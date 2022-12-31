@@ -203,8 +203,8 @@ class PacketPool {
 		self::registerPacket(new ClientCacheStatusPacket());
 		self::registerPacket(new OnScreenTextureAnimationPacket());
 		self::registerPacket(new MapCreateLockedCopyPacket());
-		self::registerPacket(new StructureTemplateDataExportRequestPacket());
-		self::registerPacket(new StructureTemplateDataExportResponsePacket());
+		self::registerPacket(new StructureTemplateDataRequestPacket());
+		self::registerPacket(new StructureTemplateDataResponsePacket());
 		self::registerPacket(new UpdateBlockPropertiesPacket());
 		self::registerPacket(new ClientCacheBlobStatusPacket());
 		self::registerPacket(new ClientCacheMissResponsePacket());

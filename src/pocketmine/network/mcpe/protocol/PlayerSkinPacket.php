@@ -26,8 +26,6 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\entity\Skin;
-use pocketmine\network\mcpe\protocol\types\SkinData;
-use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\UUID;
 
@@ -40,7 +38,7 @@ class PlayerSkinPacket extends DataPacket{
 	public $oldSkinName = "";
 	/** @var string */
 	public $newSkinName = "";
-	/** @var SkinData */
+	/** @var Skin */
 	public $skin;
 	/** @var bool */
 	public $premiumSkin = false;
@@ -68,7 +66,7 @@ class PlayerSkinPacket extends DataPacket{
 	    	$geometryModel = $this->getString();
 	    	$geometryData = $this->getString();
 
-	    	$this->skin = SkinAdapterSingleton::get()->toSkinData(new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData));
+	    	$this->skin = new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData);
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && !$this->feof()) {
 	        	$this->premiumSkin = (($this->get(1) !== "\x00"));

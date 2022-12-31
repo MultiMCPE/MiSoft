@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use Ahc\Json\Comment as CommentedJsonDecoder;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use function implode;
 use function in_array;
 use function json_encode;
@@ -46,6 +47,8 @@ class Skin{
 	private $geometryName;
 	/** @var string */
 	private $geometryData;
+    /** @var SerializedSkin */
+    private $serializedSkin;
 
 	public function __construct(string $skinId, string $skinData, string $capeData = "", string $geometryName = "", string $geometryData = ""){
 		$this->skinId = $skinId;
@@ -119,6 +122,13 @@ class Skin{
 	public function getGeometryData() : string{
 		return $this->geometryData;
 	}
+
+    /**
+     * @return SerializedSkin
+     */
+    public function getSerializedSkin() : SerializedSkin{
+        return $this->serializedSkin ?? ($this->serializedSkin = SerializedSkin::fromSkin($this));
+    }
 
 	/**
 	 * Hack to cut down on network overhead due to skins, by un-pretty-printing geometry JSON.

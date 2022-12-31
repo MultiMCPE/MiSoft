@@ -159,9 +159,8 @@ use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
-use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
-use pocketmine\network\mcpe\protocol\types\SkinData;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -181,6 +180,7 @@ use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\UUID;
+use pocketmine\utils\Color;
 use function abs;
 use function array_merge;
 use function assert;
@@ -1987,26 +1987,41 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 		}
 
-		$animations = [];
-		foreach($packet->clientData["AnimatedImageData"] as $animation){
-			$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"]);
-		}
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+	    	$animations = [];
+	    	foreach($packet->clientData["AnimatedImageData"] as $animation){
+		    	$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"]);
+	    	}
 
-		$skinData = new SkinData(
-			$packet->clientData["SkinId"],
-			base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
-			new SkinImage($packet->clientData["SkinImageHeight"], $packet->clientData["SkinImageWidth"], base64_decode($packet->clientData["SkinData"])),
-			$animations,
-			new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
-			$skinGeometry,
-			base64_decode($packet->clientData["AnimationData"] ?? ""),
-			$packet->clientData["PremiumSkin"] ?? false,
-			$packet->clientData["PersonaSkin"] ?? false,
-			$packet->clientData["CapeOnClassicSkin"] ?? false,
-			$packet->clientData["CapeId"] ?? ""
-		);
+	    	$serializedSkin = new SerializedSkin(
+		    	$packet->clientData["SkinId"],
+		    	new SkinImage($packet->clientData["SkinImageHeight"], $packet->clientData["SkinImageWidth"], base64_decode($packet->clientData["SkinData"])),
+		    	$packet->clientData["CapeId"] ?? "",
+		    	new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
+		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
+		    	$skinGeometry,
+		    	base64_decode($packet->clientData["AnimationData"] ?? ""),
+		    	$animations,
+		    	$packet->clientData["PremiumSkin"] ?? false,
+		    	$packet->clientData["PersonaSkin"] ?? false,
+		    	$packet->clientData["CapeOnClassicSkin"] ?? false,
+		    	"",
+		    	"wide", // armSize
+		    	new Color(0, 0, 0), // skinColor
+		    	\SplFixedArray::fromArray([]), // personaPieces
+		    	\SplFixedArray::fromArray([]) // pieceTintColors
+	    	);
 
-		$skin = SkinAdapterSingleton::get()->fromSkinData($skinData);
+	    	$skin = $serializedSkin->toSkin();
+        }else{
+	    	$skin = new Skin(
+		    	$packet->clientData["SkinId"],
+		    	base64_decode($packet->clientData["SkinData"] ?? ""),
+		    	base64_decode($packet->clientData["CapeData"] ?? ""),
+		    	$packet->clientData["SkinGeometryName"] ?? "",
+		    	$skinGeometry
+	    	);
+        }
 
 		if(!$skin->isValid()){
 			$this->close("", "disconnectionScreen.invalidSkin");

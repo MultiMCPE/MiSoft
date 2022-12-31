@@ -43,12 +43,13 @@ use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
-use pocketmine\network\mcpe\protocol\types\SkinData;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
+use pocketmine\utils\Color;
 use function count;
 use function strlen;
 
@@ -105,15 +106,21 @@ class NetworkBinaryStream extends BinaryStream{
 		$capeId = $this->getString();
 		$fullSkinId = $this->getString();
 
-		return new SkinData($skinId, $skinResourcePatch, $skinData, $animations, $capeData, $geometryData, $animationData, $premium, $persona, $capeOnClassic, $capeId);
+        $armSize = "wide";
+        $skinColor = new Color(0, 0, 0);
+        $personaPieces = \SplFixedArray::fromArray([]);
+        $pieceTintColors = \SplFixedArray::fromArray([]);
+
+        return (new SerializedSkin($skinId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
 	public function putSkin(SkinData $skin){
+	    $skin = SerializedSkin::fromSkin($skin);
 		$this->putString($skin->getSkinId());
 		$this->putString($skin->getResourcePatch());
 		$this->putSkinImage($skin->getSkinImage());
 		($this->buffer .= (\pack("V", count($skin->getAnimations()))));
-		foreach($skin->getAnimations() as $animation){
+		foreach($skin->getAnimationFrames() as $animation){
 			$this->putSkinImage($animation->getImage());
 			($this->buffer .= (\pack("V", $animation->getType())));
 			($this->buffer .= (\pack("g", $animation->getFrames())));
@@ -121,13 +128,11 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putSkinImage($skin->getCapeImage());
 		$this->putString($skin->getGeometryData());
 		$this->putString($skin->getAnimationData());
-		($this->buffer .= ($skin->isPremium() ? "\x01" : "\x00"));
-		($this->buffer .= ($skin->isPersona() ? "\x01" : "\x00"));
-		($this->buffer .= ($skin->isPersonaCapeOnClassic() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPersonaCapeOnClassicSkin() ? "\x01" : "\x00"));
 		$this->putString($skin->getCapeId());
-
-		//this has to be unique or the client will do stupid things
-		$this->putString(UUID::fromRandom()->toString()); //full skin ID
+		$this->putString($skin->getFullSkinId());
 	}
 
 	private function getSkinImage() : SkinImage{

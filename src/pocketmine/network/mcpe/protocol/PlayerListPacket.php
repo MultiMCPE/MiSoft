@@ -23,9 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\SkinAdapterSingleton;
-use pocketmine\network\mcpe\protocol\types\SkinData;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use function count;
 
@@ -94,25 +93,37 @@ class PlayerListPacket extends DataPacket{
 		            	$entry->platform = $this->getVarInt();
 			    	}
 
-			    	$skinId = $this->getString();
-			    	$skinData = $this->getString();
-			    	$capeData = "";
-			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-			        	$capeData = $this->getString();
-			    	}
-			    	$geometryName = $this->getString();
-			    	$geometryData = $this->getString();
+                    if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
+			        	$skinId = $this->getString();
+			        	$skinData = $this->getString();
+			        	$capeData = "";
+			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			            	$capeData = $this->getString();
+			        	}
+			        	$geometryName = $this->getString();
+			        	$geometryData = $this->getString();
 
-			    	$entry->skin = SkinAdapterSingleton::get()->toSkinData(new Skin(
-				    	$skinId,
-				    	$skinData,
-				    	$capeData,
-				    	$geometryName,
-				    	$geometryData
-			    	));
+			        	$entry->skin = new Skin(
+				        	$skinId,
+				        	$skinData,
+				        	$capeData,
+				        	$geometryName,
+				        	$geometryData
+			        	);
+                    }
 			    	$entry->xboxUserId = $this->getString();
 			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 			        	$entry->platformChatId = $this->getString();
+			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+			                	$entry->buildPlatform = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+			        	    }
+			            	$entry->skin = $this->getSkin();
+			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+			                	$entry->isTeacher = (($this->get(1) !== "\x00"));
+			                	$entry->isHost = (($this->get(1) !== "\x00"));
+			            	}
+			        	}
 			    	}
 				} else {
 			    	$skinId = $this->getString();
@@ -144,55 +155,67 @@ class PlayerListPacket extends DataPacket{
 		            	$this->putString($entry->thirdPartyName);
 		            	$this->putVarInt($entry->platform);
 			    	}
-			    	$this->putString($entry->skin->getSkinId());
+			    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
+			        	$this->putString($entry->skin->getSkinId());
 
-			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-				        $this->putLInt(1); // num skins, always 1
-			    	}
-
-			    	$emptySkin = str_repeat("\x00", 8192);
-			        $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
-			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-			        	if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
-				        	$skinData = $this->duplicateArmAndLeg($skinData);
-			        	}
-			    	}
-			    	$this->putString($skinData);
-
-			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
-			        	$capeData = $entry->skin->getCapeData();
 			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-				        	if (!empty($capeData)) {
-					        	$this->putLInt(1); // isNotEmpty
-					        	$this->putString($capeData);
-				        	} else {
-					        	$this->putLInt(0); // isEmpty
-				        	}
-			        	} else {
-				        	$this->putString($capeData);
+				            $this->putLInt(1); // num skins, always 1
 			        	}
-			    	}
 
-			    	$skinGeometryName = $entry->skin->getGeometryName();
-			    	$skinGeometryData = $entry->skin->getGeometryData();
-			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
-				        $skinGeometryName = strtolower($skinGeometryName);
-			        	$tempData = json_decode($skinGeometryData, true);
-			        	if (is_array($tempData)) {
-				        	foreach ($tempData as $key => $value) {
-					        	unset($tempData[$key]);
-					        	$tempData[strtolower($key)] = $value;
-				        	}
-
-				        	$skinGeometryData = json_encode($tempData);
+			        	$emptySkin = str_repeat("\x00", 8192);
+			            $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
+			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+			            	if (empty($entry->skin->getGeometryData()) && strlen($skinData) == 8192) {
+				            	$skinData = $this->duplicateArmAndLeg($skinData);
+			            	}
 			        	}
+			        	$this->putString($skinData);
+
+			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
+			            	$capeData = $entry->skin->getCapeData();
+			            	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
+				            	if (!empty($capeData)) {
+					            	$this->putLInt(1); // isNotEmpty
+					            	$this->putString($capeData);
+				            	} else {
+					            	$this->putLInt(0); // isEmpty
+				            	}
+			            	} else {
+				            	$this->putString($capeData);
+			            	}
+			        	}
+
+			        	$skinGeometryName = $entry->skin->getGeometryName();
+			        	$skinGeometryData = $entry->skin->getGeometryData();
+			        	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+				            $skinGeometryName = strtolower($skinGeometryName);
+			            	$tempData = json_decode($skinGeometryData, true);
+			            	if (is_array($tempData)) {
+				            	foreach ($tempData as $key => $value) {
+					            	unset($tempData[$key]);
+					            	$tempData[strtolower($key)] = $value;
+				            	}
+
+				            	$skinGeometryData = json_encode($tempData);
+			            	}
+			        	}
+			        	$this->putString($skinGeometryName);
+			        	$this->putString($this->prepareGeometryDataForOld($skinGeometryData));
 			    	}
-			    	$this->putString($skinGeometryName);
-			    	$this->putString($this->prepareGeometryDataForOld($skinGeometryData));
 
 			    	$this->putString($entry->xboxUserId);
 			    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 			        	$this->putString($entry->platformChatId);
+			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+			                	($this->buffer .= (\pack("V", $entry->buildPlatform)));
+			        	    }
+			            	$this->putSkin($entry->skinData);
+			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+			                	($this->buffer .= ($entry->isTeacher ? "\x01" : "\x00"));
+			                	($this->buffer .= ($entry->isHost ? "\x01" : "\x00"));
+			            	}
+			        	}
 			    	}
 				} else {
 				    $this->putString(self::getPESkinId($entry->skin));

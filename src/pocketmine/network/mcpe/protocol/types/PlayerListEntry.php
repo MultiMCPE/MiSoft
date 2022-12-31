@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types;
 
 use pocketmine\utils\UUID;
+use pocketmine\entity\Skin;
 
 class PlayerListEntry{
 
@@ -37,8 +38,8 @@ class PlayerListEntry{
 	public $thirdPartyName = "";
 	/** @var int */
 	public $platform = 0;
-	/** @var SkinData */
-	public $skinData;
+	/** @var Skin */
+	public $skin;
 	/** @var string */
 	public $xboxUserId = "";
 	/** @var string */
@@ -57,14 +58,14 @@ class PlayerListEntry{
 		return $entry;
 	}
 
-	public static function createAdditionEntry(UUID $uuid, int $entityUniqueId, string $username, SkinData $skinData, string $xboxUserId = "", string $platformChatId = "", string $thirdPartyName = "", int $platform = 0, int $buildPlatform = -1, bool $isTeacher = false, bool $isHost = false) : PlayerListEntry{
+	public static function createAdditionEntry(UUID $uuid, int $entityUniqueId, string $username, Skin $skin, string $xboxUserId = "", string $platformChatId = "", string $thirdPartyName = "", int $platform = 0, int $buildPlatform = -1, bool $isTeacher = false, bool $isHost = false) : PlayerListEntry{
 		$entry = new PlayerListEntry();
 		$entry->uuid = $uuid;
 		$entry->entityUniqueId = $entityUniqueId;
 		$entry->username = $username;
 		$entry->thirdPartyName = $thirdPartyName;
 		$entry->platform = $platform;
-		$entry->skinData = $skinData;
+		$entry->skin = $skin;
 		$entry->xboxUserId = $xboxUserId;
 		$entry->platformChatId = $platformChatId;
 		$entry->buildPlatform = $buildPlatform;
