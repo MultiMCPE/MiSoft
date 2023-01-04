@@ -361,7 +361,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param array $metadata
 	 */
 	public function putEntityMetadata(array $metadata, int $playerProtocol) : void{
-	    $metadata = MetadataConvertor::updateMetadata($metadata, $playerProtocol);
+	    $metadata = MetadataConvertor::updateMeta($metadata, $playerProtocol);
 
 		$this->putUnsignedVarInt(count($metadata));
 		foreach($metadata as $key => $d){

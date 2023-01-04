@@ -1052,6 +1052,8 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\types\\SkinImage' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/SkinImage.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\StructureSettings' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/StructureSettings.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\WindowTypes' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/WindowTypes.php',
+    'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataFlags' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataFlags.php',
+    'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataProperties' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataProperties.php',
     'pocketmine\\network\\query\\QueryHandler' => $baseDir . '/src/pocketmine/network/query/QueryHandler.php',
     'pocketmine\\network\\rcon\\RCON' => $baseDir . '/src/pocketmine/network/rcon/RCON.php',
     'pocketmine\\network\\rcon\\RCONInstance' => $baseDir . '/src/pocketmine/network/rcon/RCONInstance.php',

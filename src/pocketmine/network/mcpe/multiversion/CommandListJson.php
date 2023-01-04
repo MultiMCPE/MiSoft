@@ -40,6 +40,11 @@ final class CommandListJson implements \JsonSerializable {
 
     public const MAGIC = "overload%d";
 
+    /**
+     * @param int $permission
+     * 
+     * @return string
+     */
     public static function permName(int $permission) : string{
         switch ($permission) {
             case self::PERMISSION_NORMAL:
@@ -55,12 +60,16 @@ final class CommandListJson implements \JsonSerializable {
         throw new \InvalidArgumentException("Permission $permission not exists");
     }
 
+    /** @var array */
     protected $commandData;
 
     public function __construct(array $commandData) {
         $this->commandData = $commandData;
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize() : array{
         $json = [];
 
@@ -71,6 +80,11 @@ final class CommandListJson implements \JsonSerializable {
         return $json;
     }
 
+    /**
+     * @param CommandData $commandData
+     * 
+     * @return array
+     */
     public static function dataJson(CommandData $commandData) : array{
         $data = [
             "description" => $commandData->commandDescription,
@@ -124,6 +138,11 @@ final class CommandListJson implements \JsonSerializable {
         ]];
     }
 
+    /**
+     * @param array $overload
+     * 
+     * @return array
+     */
     public static function overloadJson(array $overload) : array{
         $jsonOverload = [];
 
@@ -134,6 +153,11 @@ final class CommandListJson implements \JsonSerializable {
         return $jsonOverload;
     }
 
+    /**
+     * @param CommandParameter $parameter
+     * 
+     * @return array
+     */
     public static function parameterJson(CommandParameter $parameter) : array{
         $data = ["name" => $parameter->paramName];
         $data["type"] = self::getParameterType($parameter, $data);
@@ -164,6 +188,12 @@ final class CommandListJson implements \JsonSerializable {
         return $data;
     }
 
+    /**
+     * @param CommandParameter $parameter
+     * @param array|null &$data
+     * 
+     * @return string
+     */
     public static function getParameterType(CommandParameter $parameter, ?array &$data = []) : string{
         if ($parameter->enum !== null) {
             if ($parameter->enum->enumName === "Boolean") {

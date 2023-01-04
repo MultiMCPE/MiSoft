@@ -42,6 +42,8 @@ class UpdateTradePacket extends DataPacket{
 	/** @var int */
 	public $thisIsAlwaysZero = 0; //hardcoded to 0
 	/** @var int */
+	public $uvarint;
+	/** @var int */
 	public $tradeTier;
 	/** @var int */
 	public $traderEid;
@@ -60,12 +62,22 @@ class UpdateTradePacket extends DataPacket{
 		$this->windowId = (\ord($this->get(1)));
 		$this->windowType = (\ord($this->get(1)));
 		$this->thisIsAlwaysZero = $this->getVarInt();
-		$this->tradeTier = $this->getVarInt();
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
+		    $this->uvarint = $this->getVarInt();
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
+		        $this->tradeTier = $this->getVarInt();
+		    }
+		    $this->isWilling = (($this->get(1) !== "\x00"));
+		}else{
+		    $this->tradeTier = $this->getVarInt();
+		}
 		$this->traderEid = $this->getEntityUniqueId();
 		$this->playerEid = $this->getEntityUniqueId();
 		$this->displayName = $this->getString();
-		$this->isWilling = (($this->get(1) !== "\x00"));
-		$this->isV2Trading = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
+	    	$this->isWilling = (($this->get(1) !== "\x00"));
+	    	$this->isV2Trading = (($this->get(1) !== "\x00"));
+		}
 		$this->offers = $this->getRemaining();
 	}
 
@@ -73,12 +85,22 @@ class UpdateTradePacket extends DataPacket{
 		($this->buffer .= \chr($this->windowId));
 		($this->buffer .= \chr($this->windowType));
 		$this->putVarInt($this->thisIsAlwaysZero);
-		$this->putVarInt($this->tradeTier);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
+		    $this->putVarInt($this->uvarint);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
+		        $this->putVarInt($this->tradeTier);
+		    }
+		    ($this->buffer .= ($this->isWilling ? "\x01" : "\x00"));
+		}else{
+	    	$this->putVarInt($this->tradeTier);
+		}
 		$this->putEntityUniqueId($this->traderEid);
 		$this->putEntityUniqueId($this->playerEid);
 		$this->putString($this->displayName);
-		($this->buffer .= ($this->isWilling ? "\x01" : "\x00"));
-		($this->buffer .= ($this->isV2Trading ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
+	    	($this->buffer .= ($this->isWilling ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->isV2Trading ? "\x01" : "\x00"));
+		}
 		($this->buffer .= $this->offers);
 	}
 

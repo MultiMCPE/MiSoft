@@ -1123,6 +1123,8 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\types\\SkinImage' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/SkinImage.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\StructureSettings' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/StructureSettings.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\WindowTypes' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/WindowTypes.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataFlags' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataFlags.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataProperties' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataProperties.php',
         'pocketmine\\network\\query\\QueryHandler' => __DIR__ . '/../..' . '/src/pocketmine/network/query/QueryHandler.php',
         'pocketmine\\network\\rcon\\RCON' => __DIR__ . '/../..' . '/src/pocketmine/network/rcon/RCON.php',
         'pocketmine\\network\\rcon\\RCONInstance' => __DIR__ . '/../..' . '/src/pocketmine/network/rcon/RCONInstance.php',

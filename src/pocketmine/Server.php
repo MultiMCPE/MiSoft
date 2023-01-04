@@ -71,7 +71,6 @@ use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\CompressBatchedTask;
-use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
@@ -2173,7 +2172,6 @@ class Server{
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
 	private function start(){
-	    MetadataConvertor::init();
 		$this->asyncPool->submitTask(new PaletteInitTask());
 
 		if($this->getConfigBool("enable-query", true)){

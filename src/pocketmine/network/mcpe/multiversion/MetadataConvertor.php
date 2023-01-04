@@ -23,97 +23,456 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion;
 
-use pocketmine\entity\Entity;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use function array_keys;
+use function decbin;
+use function max;
+use function strlen;
+use function strrev;
 
-class MetadataConvertor {
+final class MetadataConvertor{
 
-    public const FLAGS = [
-        ProtocolInfo::PROTOCOL_110 => ["DATA_FLAG_CAN_CLIMB" => 0x13, "DATA_FLAG_SWIMMER" => 0x14, "DATA_FLAG_CAN_FLY" => 0x15, "DATA_FLAG_RESTING" => 0x16, "DATA_FLAG_SITTING" => 0x17, "DATA_FLAG_ANGRY" => 0x18, "DATA_FLAG_INTERESTED" => 0x19, "DATA_FLAG_CHARGED" => 0x1a, "DATA_FLAG_TAMED" => 0x1b, "DATA_FLAG_LEASHED" => 0x1c, "DATA_FLAG_SHEARED" => 0x1d, "DATA_FLAG_GLIDING" => 0x1e, "DATA_FLAG_ELDER" => 0x1f, "DATA_FLAG_MOVING" => 0x20, "DATA_FLAG_BREATHING" => 0x21, "DATA_FLAG_CHESTED" => 0x22, "DATA_FLAG_STACKABLE" => 0x23, "DATA_FLAG_SHOWBASE" => 0x24, "DATA_FLAG_REARING" => 0x25, "DATA_FLAG_VIBRATING" => 0x26, "DATA_FLAG_IDLING" => 0x27, "DATA_FLAG_EVOKER_SPELL" => 0x28, "DATA_FLAG_CHARGE_ATTACK" => 0x29, "DATA_FLAG_WASD_CONTROLLED" => 0x2a, "DATA_FLAG_CAN_POWER_JUMP" => 0x2b, "DATA_FLAG_LINGER" => 0x2d],
-        ProtocolInfo::PROTOCOL_130 => ["DATA_FLAG_LINGER" => 0x2c, "DATA_FLAG_HAS_COLLISION" => 0x2d, "DATA_FLAG_AFFECTED_BY_GRAVITY" => 0x2e, "DATA_FLAG_FIRE_IMMUNE" => 0x2f, "DATA_FLAG_DANCING" => 0x30],
-        ProtocolInfo::PROTOCOL_221 => ["DATA_FLAG_WALKER" => 0x16, "DATA_FLAG_RESTING" => 0x17, "DATA_FLAG_SITTING" => 0x18, "DATA_FLAG_ANGRY" => 0x19, "DATA_FLAG_INTERESTED" => 0x1a, "DATA_FLAG_CHARGED" => 0x1b, "DATA_FLAG_TAMED" => 0x1c, "DATA_FLAG_LEASHED" => 0x1d, "DATA_FLAG_SHEARED" => 0x1e, "DATA_FLAG_GLIDING" => 0x1f, "DATA_FLAG_ELDER" => 0x20, "DATA_FLAG_MOVING" => 0x21, "DATA_FLAG_BREATHING" => 0x22, "DATA_FLAG_CHESTED" => 0x23, "DATA_FLAG_STACKABLE" => 0x24, "DATA_FLAG_SHOWBASE" => 0x25, "DATA_FLAG_REARING" => 0x26, "DATA_FLAG_VIBRATING" => 0x27, "DATA_FLAG_IDLING" => 0x28, "DATA_FLAG_EVOKER_SPELL" => 0x29, "DATA_FLAG_CHARGE_ATTACK" => 0x2a, "DATA_FLAG_WASD_CONTROLLED" => 0x2b, "DATA_FLAG_CAN_POWER_JUMP" => 0x2c, "DATA_FLAG_LINGER" => 0x2d, "DATA_FLAG_HAS_COLLISION" => 0x2e, "DATA_FLAG_AFFECTED_BY_GRAVITY" => 0x2f, "DATA_FLAG_FIRE_IMMUNE" => 0x30, "DATA_FLAG_DANCING" => 0x31, "DATA_FLAG_ENCHANTED" => 0x32, "DATA_FLAG_SHOW_TRIDENT_ROPE" => 0x33, "DATA_FLAG_CONTAINER_PRIVATE" => 0x34, "DATA_FLAG_TRANSFORMING" => 0x35, "DATA_FLAG_SPIN_ATTACK" => 0x36, "DATA_FLAG_SWIMMING" => 0x37, "DATA_FLAG_BRIBED" => 0x38],
-        ProtocolInfo::PROTOCOL_290 => ["DATA_FLAG_ORPHANED" => 0x1d, "DATA_FLAG_LEASHED" => 0x1e, "DATA_FLAG_SHEARED" => 0x1f, "DATA_FLAG_GLIDING" => 0x20, "DATA_FLAG_ELDER" => 0x21, "DATA_FLAG_MOVING" => 0x22, "DATA_FLAG_BREATHING" => 0x23, "DATA_FLAG_CHESTED" => 0x24, "DATA_FLAG_STACKABLE" => 0x25, "DATA_FLAG_SHOWBASE" => 0x26, "DATA_FLAG_REARING" => 0x27, "DATA_FLAG_VIBRATING" => 0x28, "DATA_FLAG_IDLING" => 0x29, "DATA_FLAG_EVOKER_SPELL" => 0x2a, "DATA_FLAG_CHARGE_ATTACK" => 0x2b, "DATA_FLAG_WASD_CONTROLLED" => 0x2c, "DATA_FLAG_CAN_POWER_JUMP" => 0x2d, "DATA_FLAG_LINGER" => 0x2e, "DATA_FLAG_HAS_COLLISION" => 0x2f, "DATA_FLAG_AFFECTED_BY_GRAVITY" => 0x30, "DATA_FLAG_FIRE_IMMUNE" => 0x31, "DATA_FLAG_DANCING" => 0x32, "DATA_FLAG_ENCHANTED" => 0x33, "DATA_FLAG_SHOW_TRIDENT_ROPE" => 0x34, "DATA_FLAG_CONTAINER_PRIVATE" => 0x35, "DATA_FLAG_TRANSFORMING" => 0x36, "DATA_FLAG_SPIN_ATTACK" => 0x37, "DATA_FLAG_SWIMMING" => 0x38, "DATA_FLAG_BRIBED" => 0x39, "DATA_FLAG_PREGNANT" => 0x3a, "DATA_FLAG_LAYING_EGG" => 0x3b, "DATA_FLAG_RIDER_CAN_PICK" => 0x3c, "DATA_FLAG_TRANSITION_SITTING" => 0x3d, "DATA_FLAG_EATING" => 0x3e, "DATA_FLAG_LAYING_DOWN" => 0x3f, "DATA_FLAG_SNEEZING" => 0x40, "DATA_FLAG_TRUSTING" => 0x41, "DATA_FLAG_ROLLING" => 0x42, "DATA_FLAG_SCARED" => 0x43, "DATA_FLAG_IN_SCAFFOLDING" => 0x44, "DATA_FLAG_OVER_SCAFFOLDING" => 0x45, "DATA_FLAG_FALL_THROUGH_SCAFFOLDING" => 0x46, "DATA_FLAG_BLOCKING" => 0x47, "DATA_FLAG_DISABLE_BLOCKING" => 0x48, "DATA_FLAG_SLEEPING" => 0x4a, "DATA_FLAG_TRADE_INTEREST" => 0x4c, "DATA_FLAG_DOOR_BREAKER" => 0x4d, "DATA_FLAG_BREAKING_OBSTRUCTION" => 0x4e, "DATA_FLAG_DOOR_OPENER" => 0x4f],
-        ProtocolInfo::PROTOCOL_354 => ["DATA_FLAG_SLEEPING" => 0x4b, "DATA_FLAG_TRADE_INTEREST" => 0x4d, "DATA_FLAG_DOOR_BREAKER" => 0x4e, "DATA_FLAG_BREAKING_OBSTRUCTION" => 0x4f, "DATA_FLAG_DOOR_OPENER" => 0x50, "DATA_FLAG_ILLAGER_CAPTAIN" => 0x51, "DATA_FLAG_STUNNED" => 0x52, "DATA_FLAG_ROARING" => 0x53, "DATA_FLAG_DELAYED_ATTACKING" => 0x54, "DATA_FLAG_AVOIDING_MOBS" => 0x55, "DATA_FLAG_RANGED_ATTACK" => 0x56, "DATA_FLAG_STALK_AND_POUNCE_ON_TARGET" => 0x59, "DATA_FLAG_EMOTING_STATUS" => 0x5a, "DATA_FLAG_RAIDER_CELEBRATION" => 0x5b]
-    ];
-    
-    public const METADATA = [
-        ProtocolInfo::PROTOCOL_110 => ["DATA_NPC_SKIN_INDEX" => 0x29, "DATA_NPC_ACTIONS" => 0x2a, "DATA_MAX_AIR" => 0x2b, "DATA_MARK_VARIANT" => 0x2c, "DATA_BLOCK_TARGET" => 0x30, "DATA_WITHER_INVULNERABLE_TICKS" => 0x31, "DATA_WITHER_TARGET_1" => 0x32, "DATA_WITHER_TARGET_2" => 0x33, "DATA_WITHER_TARGET_3" => 0x34, "DATA_BOUNDING_BOX_WIDTH" => 0x36, "DATA_BOUNDING_BOX_HEIGHT" => 0x37, "DATA_FUSE_LENGTH" => 0x38, "DATA_RIDER_SEAT_POSITION" => 0x39, "DATA_RIDER_ROTATION_LOCKED" => 0x3a, "DATA_RIDER_MAX_ROTATION" => 0x3b, "DATA_RIDER_MIN_ROTATION" => 0x3c, "DATA_AREA_EFFECT_CLOUD_RADIUS" => 0x3d, "DATA_AREA_EFFECT_CLOUD_WAITING" => 0x3e, "DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 0x3f, "DATA_SHULKER_ATTACH_FACE" => 0x41, "DATA_SHULKER_ATTACH_POS" => 0x43, "DATA_TRADING_PLAYER_EID" => 0x44, "DATA_COMMAND_BLOCK_COMMAND" => 0x47, "DATA_COMMAND_BLOCK_LAST_OUTPUT" => 0x48, "DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 0x49, "DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 0x4a, "DATA_STRENGTH" => 0x4b, "DATA_MAX_STRENGTH" => 0x4c],
-        ProtocolInfo::PROTOCOL_220 => ["DATA_ENTITY_AGE" => 0x18, "DATA_PLAYER_FLAGS" => 0x1a, "DATA_PLAYER_INDEX" => 0x1b, "DATA_PLAYER_BED_POSITION" => 0x1c, "DATA_FIREBALL_POWER_X" => 0x1d, "DATA_FIREBALL_POWER_Y" => 0x1e, "DATA_FIREBALL_POWER_Z" => 0x1f, "DATA_POTION_AUX_VALUE" => 0x24, "DATA_LEAD_HOLDER_EID" => 0x25, "DATA_SCALE" => 0x26, "DATA_INTERACTIVE_TAG" => 0x27, "DATA_NPC_SKIN_INDEX" => 0x28, "DATA_NPC_ACTIONS" => 0x29, "DATA_MAX_AIR" => 0x2a, "DATA_MARK_VARIANT" => 0x2b, "DATA_CONTAINER_TYPE" => 0x2c, "DATA_CONTAINER_BASE_SIZE" => 0x2d, "DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 0x2e, "DATA_BLOCK_TARGET" => 0x2f, "DATA_WITHER_INVULNERABLE_TICKS" => 0x30, "DATA_WITHER_TARGET_1" => 0x31, "DATA_WITHER_TARGET_2" => 0x32, "DATA_WITHER_TARGET_3" => 0x33, "DATA_BOUNDING_BOX_WIDTH" => 0x35, "DATA_BOUNDING_BOX_HEIGHT" => 0x36, "DATA_FUSE_LENGTH" => 0x37, "DATA_RIDER_SEAT_POSITION" => 0x38, "DATA_RIDER_ROTATION_LOCKED" => 0x39, "DATA_RIDER_MAX_ROTATION" => 0x3a, "DATA_RIDER_MIN_ROTATION" => 0x3b, "DATA_AREA_EFFECT_CLOUD_RADIUS" => 0x3c, "DATA_AREA_EFFECT_CLOUD_WAITING" => 0x3d, "DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 0x3e, "DATA_SHULKER_ATTACH_FACE" => 0x40, "DATA_SHULKER_ATTACH_POS" => 0x42, "DATA_TRADING_PLAYER_EID" => 0x43, "DATA_COMMAND_BLOCK_COMMAND" => 0x46, "DATA_COMMAND_BLOCK_LAST_OUTPUT" => 0x47, "DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 0x48, "DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 0x49, "DATA_STRENGTH" => 0x4a, "DATA_MAX_STRENGTH" => 0x4b, "DATA_LIMITED_LIFE" => 0x4d, "DATA_ARMOR_STAND_POSE_INDEX" => 0x4e, "DATA_ENDER_CRYSTAL_TIME_OFFSET" => 0x4f, "DATA_ALWAYS_SHOW_NAMETAG" => 0x50, "DATA_COLOR_2" => 0x51, "DATA_SCORE_TAG" => 0x53, "DATA_BALLOON_ATTACHED_ENTITY" => 0x54, "DATA_PUFFERFISH_SIZE" => 0x55, "DATA_BOAT_BUBBLE_TIME" => 0x56, "DATA_PLAYER_AGENT_EID" => 0x57, "DATA_EAT_COUNTER" => 0x5a, "DATA_FLAGS2" => 0x5b, "DATA_AREA_EFFECT_CLOUD_DURATION" => 0x5e, "DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 0x5f, "DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 0x60, "DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 0x61, "DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 0x62],
-        ProtocolInfo::PROTOCOL_340 => ["DATA_HAS_NPC_COMPONENT" => 0x27, "DATA_INTERACTIVE_TAG" => 0x63, "DATA_TRADE_TIER" => 0x64, "DATA_MAX_TRADE_TIER" => 0x65, "DATA_TRADE_XP" => 0x66],
-        ProtocolInfo::PROTOCOL_354 => ["DATA_SKIN_ID" => 0x28, "DATA_NPC_SKIN_INDEX" => 0x29, "DATA_NPC_ACTIONS" => 0x2a, "DATA_MAX_AIR" => 0x2b, "DATA_MARK_VARIANT" => 0x2c, "DATA_CONTAINER_TYPE" => 0x2d, "DATA_CONTAINER_BASE_SIZE" => 0x2e, "DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 0x2f, "DATA_BLOCK_TARGET" => 0x30, "DATA_WITHER_INVULNERABLE_TICKS" => 0x31, "DATA_WITHER_TARGET_1" => 0x32, "DATA_WITHER_TARGET_2" => 0x33, "DATA_WITHER_TARGET_3" => 0x34, "DATA_BOUNDING_BOX_WIDTH" => 0x36, "DATA_BOUNDING_BOX_HEIGHT" => 0x37, "DATA_FUSE_LENGTH" => 0x38, "DATA_RIDER_SEAT_POSITION" => 0x39, "DATA_RIDER_ROTATION_LOCKED" => 0x3a, "DATA_RIDER_MAX_ROTATION" => 0x3b, "DATA_RIDER_MIN_ROTATION" => 0x3c, "DATA_AREA_EFFECT_CLOUD_RADIUS" => 0x3d, "DATA_AREA_EFFECT_CLOUD_WAITING" => 0x3e, "DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 0x3f, "DATA_SHULKER_ATTACH_FACE" => 0x41, "DATA_SHULKER_ATTACH_POS" => 0x43, "DATA_TRADING_PLAYER_EID" => 0x44, "DATA_COMMAND_BLOCK_COMMAND" => 0x47, "DATA_COMMAND_BLOCK_LAST_OUTPUT" => 0x48, "DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 0x49, "DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 0x4a, "DATA_STRENGTH" => 0x4b, "DATA_MAX_STRENGTH" => 0x4c, "DATA_LIMITED_LIFE" => 0x4e, "DATA_ARMOR_STAND_POSE_INDEX" => 0x4f, "DATA_ENDER_CRYSTAL_TIME_OFFSET" => 0x50, "DATA_ALWAYS_SHOW_NAMETAG" => 0x51, "DATA_COLOR_2" => 0x52, "DATA_SCORE_TAG" => 0x54, "DATA_BALLOON_ATTACHED_ENTITY" => 0x55, "DATA_PUFFERFISH_SIZE" => 0x56, "DATA_BOAT_BUBBLE_TIME" => 0x57, "DATA_PLAYER_AGENT_EID" => 0x58, "DATA_EAT_COUNTER" => 0x5b, "DATA_FLAGS2" => 0x5c, "DATA_AREA_EFFECT_CLOUD_DURATION" => 0x5f, "DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 0x60, "DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 0x61, "DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 0x62, "DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 0x63, "DATA_INTERACTIVE_TAG" => 0x64, "DATA_TRADE_TIER" => 0x65, "DATA_MAX_TRADE_TIER" => 0x66, "DATA_TRADE_XP" => 0x67],
-        ProtocolInfo::PROTOCOL_360 => ["DATA_NPC_SKIN_INDEX" => 0x28, "DATA_NPC_ACTIONS" => 0x29, "DATA_MAX_AIR" => 0x2a, "DATA_MARK_VARIANT" => 0x2b, "DATA_CONTAINER_TYPE" => 0x2c, "DATA_CONTAINER_BASE_SIZE" => 0x2d, "DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 0x2e, "DATA_BLOCK_TARGET" => 0x2f, "DATA_WITHER_INVULNERABLE_TICKS" => 0x30, "DATA_WITHER_TARGET_1" => 0x31, "DATA_WITHER_TARGET_2" => 0x32, "DATA_WITHER_TARGET_3" => 0x33, "DATA_BOUNDING_BOX_WIDTH" => 0x35, "DATA_BOUNDING_BOX_HEIGHT" => 0x36, "DATA_FUSE_LENGTH" => 0x37, "DATA_RIDER_SEAT_POSITION" => 0x38, "DATA_RIDER_ROTATION_LOCKED" => 0x39, "DATA_RIDER_MAX_ROTATION" => 0x3a, "DATA_RIDER_MIN_ROTATION" => 0x3b, "DATA_AREA_EFFECT_CLOUD_RADIUS" => 0x3c, "DATA_AREA_EFFECT_CLOUD_WAITING" => 0x3d, "DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 0x3e, "DATA_SHULKER_ATTACH_FACE" => 0x40, "DATA_SHULKER_ATTACH_POS" => 0x42, "DATA_TRADING_PLAYER_EID" => 0x43, "DATA_COMMAND_BLOCK_COMMAND" => 0x46, "DATA_COMMAND_BLOCK_LAST_OUTPUT" => 0x47, "DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 0x48, "DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 0x49, "DATA_STRENGTH" => 0x4a, "DATA_MAX_STRENGTH" => 0x4b, "DATA_LIMITED_LIFE" => 0x4d, "DATA_ARMOR_STAND_POSE_INDEX" => 0x4e, "DATA_ENDER_CRYSTAL_TIME_OFFSET" => 0x4f, "DATA_ALWAYS_SHOW_NAMETAG" => 0x50, "DATA_COLOR_2" => 0x51, "DATA_SCORE_TAG" => 0x53, "DATA_BALLOON_ATTACHED_ENTITY" => 0x54, "DATA_PUFFERFISH_SIZE" => 0x55, "DATA_BOAT_BUBBLE_TIME" => 0x56, "DATA_PLAYER_AGENT_EID" => 0x57, "DATA_EAT_COUNTER" => 0x5a, "DATA_FLAGS2" => 0x5b, "DATA_AREA_EFFECT_CLOUD_DURATION" => 0x5e, "DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 0x5f, "DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 0x60, "DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 0x61, "DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 0x62, "DATA_INTERACTIVE_TAG" => 0x63, "DATA_TRADE_TIER" => 0x64, "DATA_MAX_TRADE_TIER" => 0x65, "DATA_TRADE_XP" => 0x66, "DATA_SKIN_ID" => 0x67, "DATA_COMMAND_BLOCK_TICK_DELAY" => 0x69, "DATA_COMMAND_BLOCK_EXECUTE_ON_FIRST_TICK" => 0x6a, "DATA_AMBIENT_SOUND_INTERVAL_MIN" => 0x6b, "DATA_AMBIENT_SOUND_INTERVAL_RANGE" => 0x6c, "DATA_AMBIENT_SOUND_EVENT" => 0x6d]
-    ];
+	public const METADATA = [
+		ProtocolInfo::PROTOCOL_110 => [
+			"DATA_NPC_SKIN_INDEX" => 41,
+			"DATA_NPC_ACTIONS" => 42,
+			"DATA_MAX_AIR" => 43,
+			"DATA_MARK_VARIANT" => 44,
 
-    protected static $protocolFlags = [];
-    protected static $protocolMetadata = [];
+			"DATA_BLOCK_TARGET" => 48,
+			"DATA_WITHER_INVULNERABLE_TICKS" => 49,
+			"DATA_WITHER_TARGET_1" => 50,
+			"DATA_WITHER_TARGET_2" => 51,
+			"DATA_WITHER_TARGET_3" => 52,
 
-	public static function init() : void{
-		$oClass = new \ReflectionClass('pocketmine\entity\Entity');
-		$initialMetadata = $oClass->getConstants();
+			"DATA_BOUNDING_BOX_WIDTH" => 54,
+			"DATA_BOUNDING_BOX_HEIGHT" => 55,
+			"DATA_FUSE_LENGTH" => 56,
+			"DATA_RIDER_SEAT_POSITION" => 57,
+			"DATA_RIDER_ROTATION_LOCKED" => 58,
+			"DATA_RIDER_MAX_ROTATION" => 59,
+			"DATA_RIDER_MIN_ROTATION" => 60,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS" => 61,
+			"DATA_AREA_EFFECT_CLOUD_WAITING" => 62,
+			"DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 63,
 
-        $flags = self::FLAGS;
-        $metadata = self::METADATA;
+			"DATA_SHULKER_ATTACH_FACE" => 65,
 
-		foreach ($flags[ProtocolInfo::PROTOCOL_110] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolFlags[ProtocolInfo::PROTOCOL_110][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_SHULKER_ATTACH_POS" => 67,
+			"DATA_TRADING_PLAYER_EID" => 68,
 
-		foreach ($flags[ProtocolInfo::PROTOCOL_130] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolFlags[ProtocolInfo::PROTOCOL_130][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_COMMAND_BLOCK_COMMAND" => 71,
+			"DATA_COMMAND_BLOCK_LAST_OUTPUT" => 72,
+			"DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 73,
+			"DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 74,
+			"DATA_STRENGTH" => 75,
+			"DATA_MAX_STRENGTH" => 76
+		],
+		ProtocolInfo::PROTOCOL_220 => [
+			"DATA_ENTITY_AGE" => 24,
 
-		foreach ($flags[ProtocolInfo::PROTOCOL_221] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolFlags[ProtocolInfo::PROTOCOL_221][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_PLAYER_FLAGS" => 26,
+			"DATA_PLAYER_INDEX" => 27,
+			"DATA_PLAYER_BED_POSITION" => 28,
+			"DATA_FIREBALL_POWER_X" => 29,
+			"DATA_FIREBALL_POWER_Y" => 30,
+			"DATA_FIREBALL_POWER_Z" => 31,
 
-		foreach ($flags[ProtocolInfo::PROTOCOL_290] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolFlags[ProtocolInfo::PROTOCOL_290][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_POTION_AUX_VALUE" => 36,
+			"DATA_LEAD_HOLDER_EID" => 37,
+			"DATA_SCALE" => 38,
+			"DATA_INTERACTIVE_TAG" => 39,
+			"DATA_NPC_SKIN_INDEX" => 40,
+			"DATA_NPC_ACTIONS" => 41,
+			"DATA_MAX_AIR" => 42,
+			"DATA_MARK_VARIANT" => 43,
+			"DATA_CONTAINER_TYPE" => 44,
+			"DATA_CONTAINER_BASE_SIZE" => 45,
+			"DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 46,
+			"DATA_BLOCK_TARGET" => 47,
+			"DATA_WITHER_INVULNERABLE_TICKS" => 48,
+			"DATA_WITHER_TARGET_1" => 49,
+			"DATA_WITHER_TARGET_2" => 50,
+			"DATA_WITHER_TARGET_3" => 51,
 
-		foreach ($flags[ProtocolInfo::PROTOCOL_354] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolFlags[ProtocolInfo::PROTOCOL_354][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_BOUNDING_BOX_WIDTH" => 53,
+			"DATA_BOUNDING_BOX_HEIGHT" => 54,
+			"DATA_FUSE_LENGTH" => 55,
+			"DATA_RIDER_SEAT_POSITION" => 56,
+			"DATA_RIDER_ROTATION_LOCKED" => 57,
+			"DATA_RIDER_MAX_ROTATION" => 58,
+			"DATA_RIDER_MIN_ROTATION" => 59,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS" => 60,
+			"DATA_AREA_EFFECT_CLOUD_WAITING" => 61,
+			"DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 62,
 
-		foreach ($metadata[ProtocolInfo::PROTOCOL_110] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolMetadata[ProtocolInfo::PROTOCOL_110][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_SHULKER_ATTACH_FACE" => 64,
 
-		foreach ($metadata[ProtocolInfo::PROTOCOL_220] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolMetadata[ProtocolInfo::PROTOCOL_220][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_SHULKER_ATTACH_POS" => 66,
+			"DATA_TRADING_PLAYER_EID" => 67,
 
-		foreach ($metadata[ProtocolInfo::PROTOCOL_340] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolMetadata[ProtocolInfo::PROTOCOL_340][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_COMMAND_BLOCK_COMMAND" => 70,
+			"DATA_COMMAND_BLOCK_LAST_OUTPUT" => 71,
+			"DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 72,
+			"DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 73,
+			"DATA_STRENGTH" => 74,
+			"DATA_MAX_STRENGTH" => 75,
 
-		foreach ($metadata[ProtocolInfo::PROTOCOL_354] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolMetadata[ProtocolInfo::PROTOCOL_354][$initialMetadata[$key]] = $value;
-			}
-		}
+			"DATA_LIMITED_LIFE" => 77,
+			"DATA_ARMOR_STAND_POSE_INDEX" => 78,
+			"DATA_ENDER_CRYSTAL_TIME_OFFSET" => 79,
+			"DATA_ALWAYS_SHOW_NAMETAG" => 80,
+			"DATA_COLOR_2" => 81,
 
-		foreach ($metadata[ProtocolInfo::PROTOCOL_360] as $key => $value) {
-			if (isset($initialMetadata[$key])) {
-				self::$protocolMetadata[ProtocolInfo::PROTOCOL_360][$initialMetadata[$key]] = $value;
-			}
-		}
-	}
+			"DATA_SCORE_TAG" => 83,
+			"DATA_BALLOON_ATTACHED_ENTITY" => 84,
+			"DATA_PUFFERFISH_SIZE" => 85,
+			"DATA_BOAT_BUBBLE_TIME" => 86,
+			"DATA_PLAYER_AGENT_EID" => 87,
+
+			"DATA_EAT_COUNTER" => 90,
+			"DATA_FLAGS2" => 91,
+
+			"DATA_AREA_EFFECT_CLOUD_DURATION" => 94,
+			"DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 95,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 96,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 97,
+			"DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 98
+		],
+		ProtocolInfo::PROTOCOL_340 => [
+			"DATA_HAS_NPC_COMPONENT" => 39,
+
+			"DATA_INTERACTIVE_TAG" => 99,
+			"DATA_TRADE_TIER" => 100,
+			"DATA_MAX_TRADE_TIER" => 101,
+			"DATA_TRADE_XP" => 102
+		],
+		ProtocolInfo::PROTOCOL_354 => [
+			"DATA_SKIN_ID" => 40,
+			"DATA_NPC_SKIN_INDEX" => 41,
+			"DATA_NPC_ACTIONS" => 42,
+			"DATA_MAX_AIR" => 43,
+			"DATA_MARK_VARIANT" => 44,
+			"DATA_CONTAINER_TYPE" => 45,
+			"DATA_CONTAINER_BASE_SIZE" => 46,
+			"DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 47,
+			"DATA_BLOCK_TARGET" => 48,
+			"DATA_WITHER_INVULNERABLE_TICKS" => 49,
+			"DATA_WITHER_TARGET_1" => 50,
+			"DATA_WITHER_TARGET_2" => 51,
+			"DATA_WITHER_TARGET_3" => 52,
+
+			"DATA_BOUNDING_BOX_WIDTH" => 54,
+			"DATA_BOUNDING_BOX_HEIGHT" => 55,
+			"DATA_FUSE_LENGTH" => 56,
+			"DATA_RIDER_SEAT_POSITION" => 57,
+			"DATA_RIDER_ROTATION_LOCKED" => 58,
+			"DATA_RIDER_MAX_ROTATION" => 59,
+			"DATA_RIDER_MIN_ROTATION" => 60,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS" => 61,
+			"DATA_AREA_EFFECT_CLOUD_WAITING" => 62,
+			"DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 63,
+
+			"DATA_SHULKER_ATTACH_FACE" => 65,
+
+			"DATA_SHULKER_ATTACH_POS" => 67,
+			"DATA_TRADING_PLAYER_EID" => 68,
+
+			"DATA_COMMAND_BLOCK_COMMAND" => 71,
+			"DATA_COMMAND_BLOCK_LAST_OUTPUT" => 72,
+			"DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 73,
+			"DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 74,
+			"DATA_STRENGTH" => 75,
+			"DATA_MAX_STRENGTH" => 76,
+
+			"DATA_LIMITED_LIFE" => 78,
+			"DATA_ARMOR_STAND_POSE_INDEX" => 79,
+			"DATA_ENDER_CRYSTAL_TIME_OFFSET" => 80,
+			"DATA_ALWAYS_SHOW_NAMETAG" => 81,
+			"DATA_COLOR_2" => 82,
+
+			"DATA_SCORE_TAG" => 84,
+			"DATA_BALLOON_ATTACHED_ENTITY" => 85,
+			"DATA_PUFFERFISH_SIZE" => 86,
+			"DATA_BOAT_BUBBLE_TIME" => 87,
+			"DATA_PLAYER_AGENT_EID" => 88,
+
+			"DATA_EAT_COUNTER" => 91,
+			"DATA_FLAGS2" => 92,
+
+			"DATA_AREA_EFFECT_CLOUD_DURATION" => 95,
+			"DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 96,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 97,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 98,
+			"DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 99,
+			"DATA_INTERACTIVE_TAG" => 100,
+			"DATA_TRADE_TIER" => 101,
+			"DATA_MAX_TRADE_TIER" => 102,
+			"DATA_TRADE_XP" => 103
+		],
+		ProtocolInfo::PROTOCOL_360 => [
+			"DATA_NPC_SKIN_INDEX" => 40,
+			"DATA_NPC_ACTIONS" => 41,
+			"DATA_MAX_AIR" => 42,
+			"DATA_MARK_VARIANT" => 43,
+			"DATA_CONTAINER_TYPE" => 44,
+			"DATA_CONTAINER_BASE_SIZE" => 45,
+			"DATA_CONTAINER_EXTRA_SLOTS_PER_STRENGTH" => 46,
+			"DATA_BLOCK_TARGET" => 47,
+			"DATA_WITHER_INVULNERABLE_TICKS" => 48,
+			"DATA_WITHER_TARGET_1" => 49,
+			"DATA_WITHER_TARGET_2" => 50,
+			"DATA_WITHER_TARGET_3" => 51,
+
+			"DATA_BOUNDING_BOX_WIDTH" => 53,
+			"DATA_BOUNDING_BOX_HEIGHT" => 54,
+			"DATA_FUSE_LENGTH" => 55,
+			"DATA_RIDER_SEAT_POSITION" => 56,
+			"DATA_RIDER_ROTATION_LOCKED" => 57,
+			"DATA_RIDER_MAX_ROTATION" => 58,
+			"DATA_RIDER_MIN_ROTATION" => 59,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS" => 60,
+			"DATA_AREA_EFFECT_CLOUD_WAITING" => 61,
+			"DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 62,
+
+			"DATA_SHULKER_ATTACH_FACE" => 64,
+
+			"DATA_SHULKER_ATTACH_POS" => 66,
+			"DATA_TRADING_PLAYER_EID" => 67,
+
+			"DATA_COMMAND_BLOCK_COMMAND" => 70,
+			"DATA_COMMAND_BLOCK_LAST_OUTPUT" => 71,
+			"DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 72,
+			"DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 73,
+			"DATA_STRENGTH" => 74,
+			"DATA_MAX_STRENGTH" => 75,
+
+			"DATA_LIMITED_LIFE" => 77,
+			"DATA_ARMOR_STAND_POSE_INDEX" => 78,
+			"DATA_ENDER_CRYSTAL_TIME_OFFSET" => 79,
+			"DATA_ALWAYS_SHOW_NAMETAG" => 80,
+			"DATA_COLOR_2" => 81,
+
+			"DATA_SCORE_TAG" => 83,
+			"DATA_BALLOON_ATTACHED_ENTITY" => 84,
+			"DATA_PUFFERFISH_SIZE" => 85,
+			"DATA_BOAT_BUBBLE_TIME" => 86,
+			"DATA_PLAYER_AGENT_EID" => 87,
+
+			"DATA_EAT_COUNTER" => 90,
+			"DATA_FLAGS2" => 91,
+
+			"DATA_AREA_EFFECT_CLOUD_DURATION" => 94,
+			"DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 95,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 96,
+			"DATA_AREA_EFFECT_CLOUD_RADIUS_CHANGE_ON_PICKUP" => 97,
+			"DATA_AREA_EFFECT_CLOUD_PICKUP_COUNT" => 98,
+			"DATA_INTERACTIVE_TAG" => 99,
+			"DATA_TRADE_TIER" => 100,
+			"DATA_MAX_TRADE_TIER" => 101,
+			"DATA_TRADE_XP" => 102,
+			"DATA_SKIN_ID" => 103,
+
+			"DATA_COMMAND_BLOCK_TICK_DELAY" => 105,
+			"DATA_COMMAND_BLOCK_EXECUTE_ON_FIRST_TICK" => 106,
+			"DATA_AMBIENT_SOUND_INTERVAL_MIN" => 107,
+			"DATA_AMBIENT_SOUND_INTERVAL_RANGE" => 108,
+			"DATA_AMBIENT_SOUND_EVENT" => 109
+		]
+	];
+
+	public const FLAGS = [
+		ProtocolInfo::PROTOCOL_110 => [
+			"DATA_FLAG_CAN_CLIMB" => 19,
+			"DATA_FLAG_SWIMMER" => 20,
+			"DATA_FLAG_CAN_FLY" => 21,
+			"DATA_FLAG_RESTING" => 22,
+			"DATA_FLAG_SITTING" => 23,
+			"DATA_FLAG_ANGRY" => 24,
+			"DATA_FLAG_INTERESTED" => 25,
+			"DATA_FLAG_CHARGED" => 26,
+			"DATA_FLAG_TAMED" => 27,
+			"DATA_FLAG_LEASHED" => 28,
+			"DATA_FLAG_SHEARED" => 29,
+			"DATA_FLAG_GLIDING" => 30,
+			"DATA_FLAG_ELDER" => 31,
+			"DATA_FLAG_MOVING" => 32,
+			"DATA_FLAG_BREATHING" => 33,
+			"DATA_FLAG_CHESTED" => 34,
+			"DATA_FLAG_STACKABLE" => 35,
+			"DATA_FLAG_SHOWBASE" => 36,
+			"DATA_FLAG_REARING" => 37,
+			"DATA_FLAG_VIBRATING" => 38,
+			"DATA_FLAG_IDLING" => 39,
+			"DATA_FLAG_EVOKER_SPELL" => 40,
+			"DATA_FLAG_CHARGE_ATTACK" => 41,
+			"DATA_FLAG_WASD_CONTROLLED" => 42,
+			"DATA_FLAG_CAN_POWER_JUMP" => 43,
+
+			"DATA_FLAG_LINGER" => 45
+		],
+		ProtocolInfo::PROTOCOL_130 => [
+			"DATA_FLAG_LINGER" => 44,
+			"DATA_FLAG_HAS_COLLISION" => 45,
+			"DATA_FLAG_AFFECTED_BY_GRAVITY" => 46,
+			"DATA_FLAG_FIRE_IMMUNE" => 47,
+			"DATA_FLAG_DANCING" => 48
+		],
+		ProtocolInfo::PROTOCOL_221 => [
+			"DATA_FLAG_WALKER" => 22,
+			"DATA_FLAG_RESTING" => 23,
+			"DATA_FLAG_SITTING" => 24,
+			"DATA_FLAG_ANGRY" => 25,
+			"DATA_FLAG_INTERESTED" => 26,
+			"DATA_FLAG_CHARGED" => 27,
+			"DATA_FLAG_TAMED" => 28,
+			"DATA_FLAG_LEASHED" => 29,
+			"DATA_FLAG_SHEARED" => 30,
+			"DATA_FLAG_GLIDING" => 31,
+			"DATA_FLAG_ELDER" => 32,
+			"DATA_FLAG_MOVING" => 33,
+			"DATA_FLAG_BREATHING" => 34,
+			"DATA_FLAG_CHESTED" => 35,
+			"DATA_FLAG_STACKABLE" => 36,
+			"DATA_FLAG_SHOWBASE" => 37,
+			"DATA_FLAG_REARING" => 38,
+			"DATA_FLAG_VIBRATING" => 39,
+			"DATA_FLAG_IDLING" => 40,
+			"DATA_FLAG_EVOKER_SPELL" => 41,
+			"DATA_FLAG_CHARGE_ATTACK" => 42,
+			"DATA_FLAG_WASD_CONTROLLED" => 43,
+			"DATA_FLAG_CAN_POWER_JUMP" => 44,
+			"DATA_FLAG_LINGER" => 45,
+			"DATA_FLAG_HAS_COLLISION" => 46,
+			"DATA_FLAG_AFFECTED_BY_GRAVITY" => 47,
+			"DATA_FLAG_FIRE_IMMUNE" => 48,
+			"DATA_FLAG_DANCING" => 49,
+			"DATA_FLAG_ENCHANTED" => 50,
+			"DATA_FLAG_SHOW_TRIDENT_ROPE" => 51,
+			"DATA_FLAG_CONTAINER_PRIVATE" => 52,
+			"DATA_FLAG_TRANSFORMING" => 53,
+			"DATA_FLAG_SPIN_ATTACK" => 54,
+			"DATA_FLAG_SWIMMING" => 55,
+			"DATA_FLAG_BRIBED" => 56
+		],
+		ProtocolInfo::PROTOCOL_290 => [
+			"DATA_FLAG_ORPHANED" => 29,
+			"DATA_FLAG_LEASHED" => 30,
+			"DATA_FLAG_SHEARED" => 31,
+			"DATA_FLAG_GLIDING" => 32,
+			"DATA_FLAG_ELDER" => 33,
+			"DATA_FLAG_MOVING" => 34,
+			"DATA_FLAG_BREATHING" => 35,
+			"DATA_FLAG_CHESTED" => 36,
+			"DATA_FLAG_STACKABLE" => 37,
+			"DATA_FLAG_SHOWBASE" => 38,
+			"DATA_FLAG_REARING" => 39,
+			"DATA_FLAG_VIBRATING" => 40,
+			"DATA_FLAG_IDLING" => 41,
+			"DATA_FLAG_EVOKER_SPELL" => 42,
+			"DATA_FLAG_CHARGE_ATTACK" => 43,
+			"DATA_FLAG_WASD_CONTROLLED" => 44,
+			"DATA_FLAG_CAN_POWER_JUMP" => 45,
+			"DATA_FLAG_LINGER" => 46,
+			"DATA_FLAG_HAS_COLLISION" => 47,
+			"DATA_FLAG_AFFECTED_BY_GRAVITY" => 48,
+			"DATA_FLAG_FIRE_IMMUNE" => 49,
+			"DATA_FLAG_DANCING" => 50,
+			"DATA_FLAG_ENCHANTED" => 51,
+			"DATA_FLAG_SHOW_TRIDENT_ROPE" => 52,
+			"DATA_FLAG_CONTAINER_PRIVATE" => 53,
+			"DATA_FLAG_TRANSFORMING" => 54,
+			"DATA_FLAG_SPIN_ATTACK" => 55,
+			"DATA_FLAG_SWIMMING" => 56,
+			"DATA_FLAG_BRIBED" => 57,
+			"DATA_FLAG_PREGNANT" => 58,
+			"DATA_FLAG_LAYING_EGG" => 59,
+			"DATA_FLAG_RIDER_CAN_PICK" => 60,
+			"DATA_FLAG_TRANSITION_SITTING" => 61,
+			"DATA_FLAG_EATING" => 62,
+			"DATA_FLAG_LAYING_DOWN" => 63,
+			"DATA_FLAG_SNEEZING" => 64,
+			"DATA_FLAG_TRUSTING" => 65,
+			"DATA_FLAG_ROLLING" => 66,
+			"DATA_FLAG_SCARED" => 67,
+			"DATA_FLAG_IN_SCAFFOLDING" => 68,
+			"DATA_FLAG_OVER_SCAFFOLDING" => 69,
+			"DATA_FLAG_FALL_THROUGH_SCAFFOLDING" => 70,
+			"DATA_FLAG_BLOCKING" => 71,
+			"DATA_FLAG_DISABLE_BLOCKING" => 72,
+
+			"DATA_FLAG_SLEEPING" => 74,
+
+			"DATA_FLAG_TRADE_INTEREST" => 76,
+			"DATA_FLAG_DOOR_BREAKER" => 77,
+			"DATA_FLAG_BREAKING_OBSTRUCTION" => 78,
+			"DATA_FLAG_DOOR_OPENER" => 79
+		],
+		ProtocolInfo::PROTOCOL_354 => [
+			"DATA_FLAG_SLEEPING" => 75,
+
+			"DATA_FLAG_TRADE_INTEREST" => 77,
+			"DATA_FLAG_DOOR_BREAKER" => 78,
+			"DATA_FLAG_BREAKING_OBSTRUCTION" => 79,
+			"DATA_FLAG_DOOR_OPENER" => 80,
+			"DATA_FLAG_ILLAGER_CAPTAIN" => 81,
+			"DATA_FLAG_STUNNED" => 82,
+			"DATA_FLAG_ROARING" => 83,
+			"DATA_FLAG_DELAYED_ATTACKING" => 84,
+			"DATA_FLAG_AVOIDING_MOBS" => 85,
+			"DATA_FLAG_RANGED_ATTACK" => 86,
+			//"UNKNOWN_1" => 87,
+			//"UNKNOWN_2" => 88,
+			"DATA_FLAG_STALK_AND_POUNCE_ON_TARGET" => 89,
+			"DATA_FLAG_EMOTING_STATUS" => 90,
+			"DATA_FLAG_RAIDER_CELEBRATION" => 91
+		]
+	];
+
+    /** @var \SplFixedArray<int>[] */
+    protected static $protocolMetadata;
+    /** @var \SplFixedArray<int>[] */
+    protected static $protocolFlags;
+
+    protected static function init() : void{
+        $magicNetworkMetadataProperties = (new \ReflectionClass(EntityMetadataProperties::class))->getConstants();
+        $magicNetworkFlags = (new \ReflectionClass(EntityMetadataFlags::class))->getConstants();
+
+        self::$protocolMetadata = [];
+        foreach(array_keys(self::METADATA) as $protocol){
+            $protocolMagicMetadataProperties = self::METADATA[$protocol];
+            self::$protocolMetadata[$protocol] = new \SplFixedArray(max($magicNetworkMetadataProperties) + 1);
+
+            foreach($protocolMagicMetadataProperties as $magicName => $magicId){
+                if(isset($magicNetworkMetadataProperties[$magicName])){
+                    self::$protocolMetadata[$protocol][$magicNetworkMetadataProperties[$magicName]] = $magicId;
+                }
+            }
+        }
+
+        self::$protocolFlags = [];
+        foreach(array_keys(self::FLAGS) as $protocol){
+            $protocolMagicFlags = self::FLAGS[$protocol];
+            self::$protocolFlags[$protocol] = new \SplFixedArray(max($magicNetworkFlags) + 1);
+
+            foreach($protocolMagicFlags as $magicName => $magicId){
+                if(isset($magicNetworkFlags[$magicName])){
+                    self::$protocolFlags[$protocol][$magicNetworkFlags[$magicName]] = $magicId;
+                }
+            }
+        }
+
+        krsort(self::$protocolMetadata);
+        krsort(self::$protocolFlags);
+    }
+
+    protected static function lazyInit() : void{
+        if(!isset(self::$protocolMetadata) || !isset(self::$protocolFlags)){
+            self::init();
+        }
+    }
 
     /**
      * @param array $metadata
@@ -121,160 +480,118 @@ class MetadataConvertor {
      * 
      * @return array
      */
-	public static function updateMetadata(array $metadata, int $playerProtocol) : array{
-		$metadata = self::updateEntityFlags($metadata, $playerProtocol);
-		$metadata = self::updateMetadataIds($metadata, $playerProtocol);
+    public static function updateMeta(array $metadata, int $playerProtocol) : array{
+        self::lazyInit();
 
-		return $metadata;
-	}
+        $flags = $flags2 = null;
+
+        if(isset($metadata[EntityMetadataProperties::DATA_FLAGS])){
+            $flags = $metadata[EntityMetadataProperties::DATA_FLAGS][1];
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS][1]);
+        }
+
+        if(isset($metadata[EntityMetadataProperties::DATA_FLAGS2])){
+            $flags2 = $metadata[EntityMetadataProperties::DATA_FLAGS2][1];
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS2][1]);
+        }
+
+        self::convertMetadataFlags($flags, $flags2, $playerProtocol);
+        if($flags !== null){
+            $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;
+        }
+
+        if($flags2 !== null){
+            $metadata[EntityMetadataProperties::DATA_FLAGS2][1] = $flags2;
+        }
+
+        if($playerProtocol < ProtocolInfo::PROTOCOL_370 && isset($metadata[EntityMetadataProperties::DATA_TARGET_EID]) && $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] === 0){
+            $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] = -1;
+        }
+
+        return self::convertMetadataProperties($metadata, $playerProtocol);
+    }
 
     /**
-     * @param array $metadata
+     * @param array $metadataProperties
      * @param int $playerProtocol
      * 
      * @return array
      */
-	private static function updateMetadataIds(array $metadata, int $playerProtocol) : array{
-		switch ($playerProtocol) {
-			case ProtocolInfo::PROTOCOL_388:
-			case ProtocolInfo::PROTOCOL_387:
-			case ProtocolInfo::PROTOCOL_386:
-			case ProtocolInfo::PROTOCOL_385:
-			case ProtocolInfo::PROTOCOL_370:
-			case ProtocolInfo::PROTOCOL_361:
-			case ProtocolInfo::PROTOCOL_360:
-			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_360];
-			    break;
-			case ProtocolInfo::PROTOCOL_354:
-			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_354];
-			    break;
-			case ProtocolInfo::PROTOCOL_351:
-			case ProtocolInfo::PROTOCOL_350:
-			case ProtocolInfo::PROTOCOL_342:
-			case ProtocolInfo::PROTOCOL_340:
-			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_340];
-			    break;
-			case ProtocolInfo::PROTOCOL_332:
-			case ProtocolInfo::PROTOCOL_331:
-			case ProtocolInfo::PROTOCOL_330:
-			case ProtocolInfo::PROTOCOL_311:
-			case ProtocolInfo::PROTOCOL_310:
-			case ProtocolInfo::PROTOCOL_290:
-			case ProtocolInfo::PROTOCOL_282:
-			case ProtocolInfo::PROTOCOL_280:
-			case ProtocolInfo::PROTOCOL_274:
-			case ProtocolInfo::PROTOCOL_273:
-			case ProtocolInfo::PROTOCOL_271:
-			case ProtocolInfo::PROTOCOL_260:
-			case ProtocolInfo::PROTOCOL_240:
-			case ProtocolInfo::PROTOCOL_221:
-			case ProtocolInfo::PROTOCOL_220:
-				$protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_220];
+	public static function convertMetadataProperties(array $metadataProperties, int $playerProtocol) : array{
+		foreach(self::$protocolMetadata as $metadataProtocol => $protocolMetadataProperties){
+			if($playerProtocol >= $metadataProtocol){
 				break;
-			case ProtocolInfo::PROTOCOL_200:
-			case ProtocolInfo::PROTOCOL_140:
-			case ProtocolInfo::PROTOCOL_135:
-			case ProtocolInfo::PROTOCOL_134:
-			case ProtocolInfo::PROTOCOL_133:
-			case ProtocolInfo::PROTOCOL_132:
-			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_130:
-			case ProtocolInfo::PROTOCOL_110:
-			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_110];
-			    break;
-			default:
-			    $protocolMetadata = self::$protocolMetadata[ProtocolInfo::PROTOCOL_360];
-			    break;
-		}
-
-		$newMetadata = [];
-		foreach ($metadata as $key => $value) {
-			if (isset($protocolMetadata[$key])) {
-				$newMetadata[$protocolMetadata[$key]] = $value;
-			} else {
-				$newMetadata[$key] = $value;
 			}
 		}
 
-		return $newMetadata;
+		if(!isset($protocolMetadataProperties)){
+			return $metadataProperties;
+		}
+
+		/** @var int $magic */
+		foreach($metadataProperties as $magic => $value){
+			if(isset($protocolMetadataProperties[$magic])){
+				$metadataProperties[$protocolMetadataProperties[$magic]] = $value;
+			}
+		}
+
+		return $metadataProperties;
 	}
 
     /**
-     * @param array $metadata
+     * @param ?int &$flags
+     * @param ?int &$flags2
      * @param int $playerProtocol
      * 
-     * @return array
+     * @return void
      */
-	private static function updateEntityFlags(array $metadata, int $playerProtocol) : array{
-		if (!isset($metadata[Entity::DATA_FLAGS])) {
-			return $metadata;
-		}
-
-		switch ($playerProtocol) {
-			case ProtocolInfo::PROTOCOL_388:
-			case ProtocolInfo::PROTOCOL_387:
-			case ProtocolInfo::PROTOCOL_386:
-			case ProtocolInfo::PROTOCOL_385:
-			case ProtocolInfo::PROTOCOL_370:
-			case ProtocolInfo::PROTOCOL_361:
-			case ProtocolInfo::PROTOCOL_360:
-			case ProtocolInfo::PROTOCOL_354:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_354];
-			    break;
-			case ProtocolInfo::PROTOCOL_351:
-			case ProtocolInfo::PROTOCOL_350:
-			case ProtocolInfo::PROTOCOL_342:
-			case ProtocolInfo::PROTOCOL_340:
-			case ProtocolInfo::PROTOCOL_332:
-			case ProtocolInfo::PROTOCOL_331:
-			case ProtocolInfo::PROTOCOL_330:
-			case ProtocolInfo::PROTOCOL_311:
-			case ProtocolInfo::PROTOCOL_310:
-			case ProtocolInfo::PROTOCOL_290:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_290];
+	public static function convertMetadataFlags(?int &$flags, ?int $flags2, int $playerProtocol) : void{
+		foreach(self::$protocolFlags as $metadataProtocol => $protocolMetadataFlags){
+			if($playerProtocol >= $metadataProtocol){
 				break;
-			case ProtocolInfo::PROTOCOL_282:
-			case ProtocolInfo::PROTOCOL_280:
-			case ProtocolInfo::PROTOCOL_274:
-			case ProtocolInfo::PROTOCOL_273:
-			case ProtocolInfo::PROTOCOL_271:
-			case ProtocolInfo::PROTOCOL_260:
-			case ProtocolInfo::PROTOCOL_240:
-			case ProtocolInfo::PROTOCOL_221:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_221];
-			    break;
-			case ProtocolInfo::PROTOCOL_220:
-			case ProtocolInfo::PROTOCOL_200:
-			case ProtocolInfo::PROTOCOL_140:
-			case ProtocolInfo::PROTOCOL_135:
-			case ProtocolInfo::PROTOCOL_134:
-			case ProtocolInfo::PROTOCOL_133:
-			case ProtocolInfo::PROTOCOL_132:
-			case ProtocolInfo::PROTOCOL_131:
-			case ProtocolInfo::PROTOCOL_130:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_130];
-			    break;
-			case ProtocolInfo::PROTOCOL_110:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_110];
-			    break;
-			default:
-			    $protocolFlags = self::$protocolFlags[ProtocolInfo::PROTOCOL_354];
-			    break;
-		}
-
-        $newFlags = 0;
-
-		$flags = strrev(decbin($metadata[Entity::DATA_FLAGS][1]));
-		$flagsLength = strlen($flags);
-		for ($i = 0; $i < $flagsLength; $i++) {
-			if ($flags[$i] === '1') {
-				$newFlags |= 1 << (isset($protocolFlags[$i]) ? $protocolFlags[$i] : $i);
 			}
 		}
 
-		$metadata[Entity::DATA_FLAGS][1] = $newFlags;
+		if(!isset($protocolMetadataFlags)){
+		    return;
+		}
 
-		return $metadata;
+		$newFlags = null;
+		$newFlags2 = null;
+		if($flags !== null){
+			$newFlags = 0;
+			$flagsBinary = strrev(decbin($flags));
+
+			for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
+				if($flagsBinary[$i] === "1"){
+				    $flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
+				    if($flag >= 64){
+					    $newFlags2 |= (1 << ($flag % 64));
+				    }else{
+					    $newFlags |= (1 << $flag);
+			    	}
+				}
+			}
+		}
+
+		if($flags2 !== null){
+			$newFlags2 = 0;
+			$flagsBinary = strrev(decbin($flags2));
+
+			for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
+				if($flagsBinary[$i] === "1"){
+					$flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
+				    if($flag >= 64){
+					    $newFlags2 |= (1 << ($flag % 64));
+					}else{
+					    $newFlags |= (1 << $flag);
+				    }
+				}
+			}
+		}
+
+		$flags = $newFlags;
+		$flags2 = $newFlags2;
 	}
 
 }
