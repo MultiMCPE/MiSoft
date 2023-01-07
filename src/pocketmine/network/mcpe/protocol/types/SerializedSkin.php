@@ -136,7 +136,6 @@ class SerializedSkin{
             if($decodedData === \false){
                 throw new \InvalidArgumentException("Invalid geometry data (" . json_last_error_msg() . ")");
             }
-
             $geometryData = json_encode($decodedData);
         }
 

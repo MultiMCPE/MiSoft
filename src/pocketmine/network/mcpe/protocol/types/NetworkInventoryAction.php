@@ -37,6 +37,7 @@ class NetworkInventoryAction{
 
 	public const SOURCE_WORLD = 2; //drop/pickup item entity
 	public const SOURCE_CREATIVE = 3;
+	public const SOURCE_UNTRACKED_INTERACTION_UI = 100;
 	public const SOURCE_TODO = 99999;
 
 	/**
@@ -108,6 +109,7 @@ class NetworkInventoryAction{
 				break;
 			case self::SOURCE_CREATIVE:
 				break;
+			case self::SOURCE_UNTRACKED_INTERACTION_UI:
 			case self::SOURCE_TODO:
 				$this->windowId = $packet->getVarInt();
 				break;
@@ -137,6 +139,7 @@ class NetworkInventoryAction{
 				break;
 			case self::SOURCE_CREATIVE:
 				break;
+			case self::SOURCE_UNTRACKED_INTERACTION_UI:
 			case self::SOURCE_TODO:
 				$packet->putVarInt($this->windowId);
 				break;
@@ -211,7 +214,7 @@ class NetworkInventoryAction{
 				}
 
 				return new CreativeInventoryAction($this->oldItem, $this->newItem, $type);
-			case self::SOURCE_CRAFTING_GRID:
+			case self::SOURCE_UNTRACKED_INTERACTION_UI:
 			case self::SOURCE_TODO:
 				//These types need special handling.
 				switch($this->windowId){

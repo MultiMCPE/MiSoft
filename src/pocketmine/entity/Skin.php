@@ -130,6 +130,13 @@ class Skin{
         return $this->serializedSkin ?? ($this->serializedSkin = SerializedSkin::fromSkin($this));
     }
 
+    /**
+     * @param SerializedSkin
+     */
+    public function setSerializedSkin(SerializedSkin $skin) : void{
+        $this->serializedSkin = $skin;
+    }
+
 	/**
 	 * Hack to cut down on network overhead due to skins, by un-pretty-printing geometry JSON.
 	 *

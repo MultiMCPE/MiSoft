@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\NetworkSession;

@@ -1977,16 +1977,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->uuid = UUID::fromString($packet->clientUUID);
 		$this->rawUUID = $this->uuid->toBinary();
 
-        $skinGeometry = "";
-		if (isset($packet->clientData["SkinGeometry"])) {
-			$skinGeometry = base64_decode($packet->clientData["SkinGeometry"]);
-		} elseif (isset($packet->clientData["SkinGeometryData"])) {
-			$skinGeometry = base64_decode($packet->clientData["SkinGeometryData"]);
-			if (strpos($skinGeometry, "null") === 0) {
-				$skinGeometry = "";
-			}
-		}
-
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	    	$animations = [];
 	    	foreach($packet->clientData["AnimatedImageData"] as $animation){
@@ -1999,7 +1989,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$packet->clientData["CapeId"] ?? "",
 		    	new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
 		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
-		    	$skinGeometry,
+		    	base64_decode($packet->clientData["SkinGeometryData"] ?? ""),
 		    	base64_decode($packet->clientData["AnimationData"] ?? ""),
 		    	$animations,
 		    	$packet->clientData["PremiumSkin"] ?? false,
@@ -2014,6 +2004,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	    	$skin = $serializedSkin->toSkin();
         }else{
+            $skinGeometry = "";
+	    	if (isset($packet->clientData["SkinGeometry"])) {
+		    	$skinGeometry = base64_decode($packet->clientData["SkinGeometry"]);
+	    	} elseif (isset($packet->clientData["SkinGeometryData"])) {
+		    	$skinGeometry = base64_decode($packet->clientData["SkinGeometryData"]);
+		    	if (strpos($skinGeometry, "null") === 0) {
+			    	$skinGeometry = "";
+		    	}
+	    	}
+
 	    	$skin = new Skin(
 		    	$packet->clientData["SkinId"],
 		    	base64_decode($packet->clientData["SkinData"] ?? ""),
@@ -2822,27 +2822,27 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					case InventoryTransactionPacket::USE_ITEM_ACTION_BREAK_BLOCK:
 					    return $this->removeBlock($blockVector);
 					case InventoryTransactionPacket::USE_ITEM_ACTION_CLICK_AIR:
-						if($this->isUsingItem()){
-							$slot = $this->inventory->getItemInHand();
-							if($slot instanceof Consumable){
-								$ev = new PlayerItemConsumeEvent($this, $slot);
-								if($this->hasItemCooldown($slot)){
-									$ev->setCancelled();
-								}
-								$ev->call();
-								if($ev->isCancelled() or !$this->consumeObject($slot)){
-									$this->inventory->sendContents($this);
+					    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_386 && $this->isUsingItem()){
+						    $slot = $this->inventory->getItemInHand();
+						    if($slot instanceof Consumable){
+							   	$ev = new PlayerItemConsumeEvent($this, $slot);
+							   	if($this->hasItemCooldown($slot)){
+								    $ev->setCancelled();
+							   	}
+							    $ev->call();
+							    if($ev->isCancelled() or !$this->consumeObject($slot)){
+								    $this->inventory->sendContents($this);
 									return true;
-								}
-								$this->resetItemCooldown($slot);
-								if($this->isSurvival()){
-									$slot->pop();
-									$this->inventory->setItemInHand($slot);
+							    }
+							   	$this->resetItemCooldown($slot);
+							    if($this->isSurvival()){
+								    $slot->pop();
+								    $this->inventory->setItemInHand($slot);
 									$this->inventory->addItem($slot->getResidue());
-								}
-								$this->setUsingItem(false);
-							}
-						}
+							    }
+							    $this->setUsingItem(false);
+						   	}
+					    }
 
 						$directionVector = $this->getDirectionVector();
 
@@ -2919,6 +2919,35 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							}
 
 							return true;
+						case InventoryTransactionPacket::RELEASE_ITEM_ACTION_CONSUME:
+						    if($this->getProtocol() < ProtocolInfo::PROTOCOL_386){
+					    		$slot = $this->inventory->getItemInHand();
+
+						    	if($slot instanceof Consumable){
+							    	$ev = new PlayerItemConsumeEvent($this, $slot);
+							    	if($this->hasItemCooldown($slot)){
+								    	$ev->setCancelled();
+							    	}
+							    	$ev->call();
+
+							    	if($ev->isCancelled() or !$this->consumeObject($slot)){
+								    	$this->inventory->sendContents($this);
+								    	return true;
+							    	}
+
+							    	$this->resetItemCooldown($slot);
+
+							    	if($this->isSurvival()){
+								    	$slot->pop();
+								    	$this->inventory->setItemInHand($slot);
+								    	$this->inventory->addItem($slot->getResidue());
+							    	}
+
+							    	return true;
+						    	}
+						    }
+
+							break;
 						default:
 							break;
 					}

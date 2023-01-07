@@ -210,7 +210,7 @@ class PlayerListPacket extends DataPacket{
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	($this->buffer .= (\pack("V", $entry->buildPlatform)));
 			        	    }
-			            	$this->putSkin($entry->skinData);
+			            	$this->putSkin($entry->skin);
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	($this->buffer .= ($entry->isTeacher ? "\x01" : "\x00"));
 			                	($this->buffer .= ($entry->isHost ? "\x01" : "\x00"));

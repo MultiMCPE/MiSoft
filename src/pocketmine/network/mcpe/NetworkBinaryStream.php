@@ -84,7 +84,7 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
 	}
 
-	public function getSkin() : SkinData{
+	public function getSkin() : Skin{
 		$skinId = $this->getString();
 		$skinResourcePatch = $this->getString();
 		$skinData = $this->getSkinImage();
@@ -114,12 +114,12 @@ class NetworkBinaryStream extends BinaryStream{
         return (new SerializedSkin($skinId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
-	public function putSkin(SkinData $skin){
+	public function putSkin(Skin $skin){
 	    $skin = SerializedSkin::fromSkin($skin);
 		$this->putString($skin->getSkinId());
 		$this->putString($skin->getResourcePatch());
 		$this->putSkinImage($skin->getSkinImage());
-		($this->buffer .= (\pack("V", count($skin->getAnimations()))));
+		($this->buffer .= (\pack("V", count($skin->getAnimationFrames()))));
 		foreach($skin->getAnimationFrames() as $animation){
 			$this->putSkinImage($animation->getImage());
 			($this->buffer .= (\pack("V", $animation->getType())));
@@ -130,7 +130,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putString($skin->getAnimationData());
 		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
 		($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
-		($this->buffer .= ($skin->isPersonaCapeOnClassicSkin() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
 		$this->putString($skin->getCapeId());
 		$this->putString($skin->getFullSkinId());
 	}
