@@ -3049,7 +3049,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!empty($packet->input)){
 			$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
 		}else{
-			$recipe = $this->server->getCraftingManager()->matchCraftingRecipe($packet->output[0]);
+			$recipe = $this->server->getCraftingManager()->matchRecipe($packet->output[0]);
 		}
 
 		if($recipe === null){
