@@ -583,6 +583,13 @@ class Item implements ItemIds, \JsonSerializable{
 		return $this->cachedNBT ?? ($this->cachedNBT = self::parseCompoundTag($this->tags));
 	}
 
+    /**
+     * @return bool
+     */
+    public function hasNamedTag() : bool{
+        return $this->getNamedTag()->count() > 0;
+    }
+
 	/**
 	 * Sets the Item's NBT from the supplied CompoundTag object.
 	 *

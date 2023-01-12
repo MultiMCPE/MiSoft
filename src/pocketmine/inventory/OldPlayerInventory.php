@@ -271,7 +271,8 @@ class OldPlayerInventory extends PlayerInventory{
 
 		$pk = new ContainerSetContentPacket();
 		$pk->slots = [];
-		for($i = 0; $i < $this->getSize(); ++$i){
+
+		for($i = 0; $i < $this->getSize(); ++$i){ //Do not send armor by error here
 			$pk->slots[$i] = $this->getItem($i);
 		}
 

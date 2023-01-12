@@ -22,7 +22,7 @@
 declare(strict_types=1);
 
 namespace pocketmine;
-// Планы: пофиксить крафт для 1.1
+
 use pocketmine\block\Bed;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
@@ -54,6 +54,7 @@ use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
+use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerJumpEvent;
 use pocketmine\event\player\PlayerKickEvent;
@@ -71,13 +72,21 @@ use pocketmine\form\Form;
 use pocketmine\form\FormValidationException;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\Inventory;
-use pocketmine\inventory\PETransaction\CraftItemAction as PECraftItemAction;
-use pocketmine\inventory\PETransaction\DropItemAction as PEDropItemAction;
-use pocketmine\inventory\PETransaction\EquipItemAction as PEEquipItemAction;
-use pocketmine\inventory\PETransaction\SlotChangeAction as PESlotChangeAction;
-use pocketmine\inventory\PETransaction\Transaction as PETransaction;
+
+use pocketmine\inventory\BaseInventory;
+use pocketmine\inventory\PETransaction\BaseTransaction;
+use pocketmine\inventory\PETransaction\SimpleTransactionGroup;
+/*use pocketmine\inventory\BigShapedRecipe;
+use pocketmine\inventory\BigShapelessRecipe;*/
+use pocketmine\inventory\FurnaceInventory;
+//use pocketmine\inventory\Inventory;
+use pocketmine\inventory\PlayerInventory;
+/*use pocketmine\inventory\ShapedRecipe;
+use pocketmine\inventory\ShapelessRecipe;*/
+
 use pocketmine\inventory\PlayerCursorInventory;
 use pocketmine\inventory\transaction\action\InventoryAction;
+use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionValidationException;
@@ -326,7 +335,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $craftingGrid = null;
 	/** @var CraftingTransaction|null */
 	protected $craftingTransaction = null;
-	/** @var PETransaction */
+	/** @var SimpleTransactionGroup */
 	protected $currentTransaction = null;
 	/** @var int */
 	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
@@ -1494,7 +1503,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$this->inventory->sendContents($this);
-		$this->inventory->sendContents($this->getViewers());
 		$this->inventory->sendHeldItem($this->hasSpawned);
 
 		$this->sendSettings();
@@ -2649,6 +2657,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				    		$slot->pop();
 					    	$this->inventory->setItemInHand($slot);
 					    	$this->inventory->addItem($slot->getResidue());
+					    	$this->inventory->sendHeldItem($this);
+					    	$this->inventory->sendHeldItem($this->getViewers());
 				    	}
 
                         $this->setUsingItem(false);
@@ -3046,36 +3056,117 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		if(!empty($packet->input)){
-			$recipe = $this->server->getCraftingManager()->getRecipe($packet->id);
-		}else{
-			$recipe = $this->server->getCraftingManager()->matchRecipe($packet->output[0]);
-		}
+        $recipes = $this->server->getCraftingManager()->matchRecipeByOutputs($packet->output);
+        $inventory = $this->getCraftingGrid();
+        if(count($packet->input) > 0){
+            foreach($packet->input as $item){
+                if($item->isNull()){
+                    continue;
+                }
 
-		if($recipe === null){
-			$this->server->getLogger()->debug("Can't find matching crafting recipe for player " . $this->getName()
-				. ", got " . implode(", ", $packet->output) . ", using " . implode(", ", $packet->input));
+                elseif($item->getMeta() === 0x7fff){
+                    $item = ItemFactory::get($item->getId(), -1, $item->getCount(), $item->getNamedTag());
+                }
 
-			$this->inventory->sendContents($this);
-			return false;
-		}
+                if($this->getInventory()->contains($item)){
+                    $inventory->addItem($item);
+                    $this->getInventory()->removeItem($item);
+                }else{
+                    throw new \Exception("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
+                }
+            }
+        }
 
-		if(($recipe instanceof BigShapelessRecipe or $recipe instanceof BigShapedRecipe) and $this->craftingType === 0){
-			$this->inventory->sendContents($this);
-			return false;
-		}
+        $actions = [];
+        $currentRecipe = null;
+        foreach($recipes as $recipe){
+            $contents = $inventory->getContents();
+            $actions  = [];
+            $canCraft = true;
 
-		if($this->currentTransaction === null){
-			$this->currentTransaction = new PETransaction($this);
-		}
+            foreach($recipe->getIngredientList() as $ingredient){
+                $count = max(1, $ingredient->getCount());
+                $damage = !$ingredient->hasAnyDamageValue();
+                $namedtag = $ingredient->hasNamedTag();
 
-		$this->currentTransaction->addAction(new PECraftItemAction($recipe));
+                foreach($contents as $slot => $item){
+                    if($ingredient->equals($item, $damage, $namedtag)){
+                        $reduce = min($count, $item->getCount());
+                        $count -= $reduce;
+                        $newItem = (clone $item)->setCount($item->getCount() - $reduce);
 
-		if($this->currentTransaction->canExecute()){
-			$this->currentTransaction->execute();
-		}
+                        if($newItem->getCount() === 0){
+                            $newItem = ItemFactory::air();
+                        }
 
-		return true;
+                        $actions[] = new SlotChangeAction($inventory, $slot, $item, $newItem);
+                        $contents[$slot] = $newItem;
+                        if($count === 0){
+                            break;
+                        }
+
+                        elseif($count < 0){
+                            throw new \Exception("Wait... this is illegally $count $reduce");
+                        }
+                    }
+                }
+
+                /*if($count > 0){
+                    $canCraft = false;
+                    break;
+                }*/
+            }
+
+            if($canCraft === true){
+                $currentRecipe = $recipe;
+                break;
+            }
+        }
+
+        if($currentRecipe === null){
+            throw new \Exception("Recipe not founded");
+        }
+
+        $baseInventory = new class([], 36) extends BaseInventory{
+        	public function getName() : string{
+	        	return "null";
+        	}
+
+        	public function getDefaultSize() : int{
+	        	return 36;
+        	}
+        };
+        foreach($packet->output as $slot => $item){
+            $actions[] = new SlotChangeAction($baseInventory, $slot, $baseInventory->getItem($slot), $item);
+        }
+
+        $this->setCraftingGrid($inventory);
+        if($this->craftingTransaction === null){
+            $this->craftingTransaction = new CraftingTransaction($this, $actions);
+        }
+
+        try{
+            $this->craftingTransaction->execute();
+        }catch(TransactionValidationException $exception){
+            $this->server->getLogger()->debug("Failed to execute crafting transaction: " . $exception->getMessage());
+            return false;
+        }finally{
+            $this->craftingTransaction = null;
+        }
+
+        if(count($packet->input) === 0){
+            $items = $inventory->addItem(...$baseInventory->getContents());
+        }else{
+            $items = $this->getInventory()->addItem(...$baseInventory->getContents());
+        }
+
+        if(count($items) > 0){
+            foreach($items as $item){
+                $this->dropItem($item);
+            }
+        }
+
+        return true;
 	}
 
 	public function handleMobEquipment(MobEquipmentPacket $packet) : bool{
@@ -3096,26 +3187,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    }else{
 	    	if($packet->inventorySlot === 255){
 		    	$packet->inventorySlot = -1; //Cleared slot
-		    }else{
+	    	}else{
 		    	if($packet->inventorySlot < 9){
 			    	$this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
 			    	$this->inventory->sendContents($this);
 			    	return false;
 		    	}
 		    	$packet->inventorySlot -= 9; //Get real inventory slot
-
-		    	if($this->currentTransaction !== null){ //Part of the ongoing transaction
-			    	$this->currentTransaction->addAction(new PEEquipItemAction($packet->hotbarSlot, $packet->inventorySlot, $packet->item));
-			    	return true;
-		    	}
-
-		    	$item = $this->inventory->getItem($packet->inventorySlot);
-
-		    	if(!$item->equals($packet->item)){
-			    	$this->server->getLogger()->debug("Tried to equip " . $packet->item . " but have " . $item . " in target slot");
-			    	$this->inventory->sendContents($this);
-			    	return false;
-		    	}
 	    	}
 
 	    	$this->inventory->equipItem($packet->hotbarSlot, $packet->inventorySlot);
@@ -3342,16 +3420,29 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		if($this->currentTransaction === null){
-			$this->currentTransaction = new PETransaction($this);
+		if($packet->item->getId() === Item::AIR){
+			// Windows 10 Edition drops the contents of the crafting grid on container close - including air.
+			return true;
 		}
 
-		$this->currentTransaction->addAction(new PEDropItemAction($packet->item));
+        if(!$this->isCreative()){
+            if(!$this->inventory->contains($packet->item)){
+                return true;
+            }
+        }
 
-		if($this->currentTransaction->canExecute()){
-			$this->currentTransaction->execute();
-			$this->currentTransaction = null;
+		$item = $packet->item;
+		$ev = new PlayerDropItemEvent($this, $item);
+		$this->server->getPluginManager()->callEvent($ev);
+		if($ev->isCancelled()){
+			$this->inventory->sendContents($this);
+			return true;
 		}
+
+        $this->inventory->removeItem($item);
+        $this->dropItem($item);
+
+		$this->setGenericFlag(self::DATA_FLAG_ACTION, false);
 
 		return true;
 	}
@@ -3386,6 +3477,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         $this->craftingType = 0;
+        $this->currentTransaction = null;
 
 		$this->doCloseInventory();
 
@@ -3416,14 +3508,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					return false;
 				}
 
-				$action = new PESlotChangeAction($this->inventory, $packet->slot, $packet->item);
+				$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
 				break;
 			case ContainerIds::ARMOR: //Armour change
 				if($packet->slot >= 4){
 					return false;
 				}
 
-				$action = new PESlotChangeAction($this->armorInventory, $packet->slot, $packet->item);
+				$transaction = new BaseTransaction($this->armorInventory, $packet->slot, $this->armorInventory->getItem($packet->slot), $packet->item);
 				break;
 			case ContainerIds::HOTBAR: //Hotbar link update
 				//hotbarSlot 0-8, slot 9-44
@@ -3435,26 +3527,52 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 
 				$this->craftingType = 0;
-
-				$inventory = $this->windowIndex[$packet->windowid];
-				$action = new PESlotChangeAction($inventory, $packet->slot, $packet->item);
+				$inv = $this->windowIndex[$packet->windowid];
+				$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
 				break;
 		}
 
-		if($this->currentTransaction === null and $action->getInventory()->getItem($action->getChangedSlot())->equalsExact($action->getTargetItem())){
+		if($transaction->getSourceItem()->equals($transaction->getTargetItem()) and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
 			//No changes, just a local inventory update sent by the client
 			return true;
 		}
 
-		if($this->currentTransaction === null){
-			$this->currentTransaction = new PETransaction($this);
+		if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 8)){
+			if($this->currentTransaction !== null){
+				foreach($this->currentTransaction->getInventories() as $inventory){
+					if($inventory instanceof PlayerInventory){
+						$this->armorInventory->sendContents($this);
+					}
+					$inventory->sendContents($this);
+				}
+			}
+			$this->currentTransaction = new SimpleTransactionGroup($this);
 		}
 
-		$this->currentTransaction->addAction($action);
+		$this->currentTransaction->addTransaction($transaction);
 
 		if($this->currentTransaction->canExecute()){
-			$this->currentTransaction->execute();
-	    	$this->currentTransaction = null;
+			$achievements = [];
+			foreach($this->currentTransaction->getTransactions() as $ts){
+				$inv = $ts->getInventory();
+				if($inv instanceof FurnaceInventory){
+					if($ts->getSlot() === 2){
+						switch($inv->getResult()->getId()){
+							case Item::IRON_INGOT:
+								$achievements[] = "acquireIron";
+								break;
+						}
+					}
+				}
+			}
+
+			if($this->currentTransaction->execute()){
+				foreach($achievements as $a){
+					$this->awardAchievement($a);
+				}
+			}
+
+			$this->currentTransaction = null;
 		}
 
 		return true;
@@ -4325,7 +4443,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->cursorInventory = new PlayerCursorInventory($this);
 		$this->addWindow($this->cursorInventory, ContainerIds::UI, true);
 
-		$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
+		$this->craftingGrid = new CraftingGrid($this, 6/*CraftingGrid::SIZE_SMALL*/);
 
 		//TODO: more windows
 	}
@@ -4361,7 +4479,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		if($this->craftingGrid->getGridWidth() > CraftingGrid::SIZE_SMALL){
-			$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
+			$this->craftingGrid = new CraftingGrid($this, 6/*CraftingGrid::SIZE_SMALL*/);
 		}
 	}
 
