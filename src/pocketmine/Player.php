@@ -167,6 +167,8 @@ use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
+use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
@@ -1991,6 +1993,28 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"]);
 	    	}
 
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	        	$personaPieces = [];
+	        	foreach($packet->clientData["PersonaPieces"] as $piece){
+		        	$personaPieces[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
+	        	}
+
+	        	$pieceTintColors = [];
+	        	foreach($packet->clientData["PieceTintColors"] as $tintColor){
+		        	$pieceTintColors[] = new PersonaPieceTintColor($tintColor["PieceType"], $tintColor["Colors"]);
+	        	}
+
+		    	$armSize = $packet->clientData["ArmSize"] ?? "wide";
+		    	$skinColor = $packet->clientData["SkinColor"] ?? new Color(0, 0, 0);
+		    	$personaPieces = \SplFixedArray::fromArray($personaPieces);
+		    	$pieceTintColors = \SplFixedArray::fromArray($pieceTintColors);
+	    	}else{
+	    	    $armSize = "wide";
+	    	    $skinColor = new Color(0, 0, 0);
+		    	$personaPieces = \SplFixedArray::fromArray([]);
+		    	$pieceTintColors = \SplFixedArray::fromArray([]);
+	    	}
+
 	    	$serializedSkin = new SerializedSkin(
 		    	$packet->clientData["SkinId"],
 		    	new SkinImage($packet->clientData["SkinImageHeight"], $packet->clientData["SkinImageWidth"], base64_decode($packet->clientData["SkinData"])),
@@ -2004,10 +2028,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$packet->clientData["PersonaSkin"] ?? false,
 		    	$packet->clientData["CapeOnClassicSkin"] ?? false,
 		    	"",
-		    	"wide", // armSize
-		    	new Color(0, 0, 0), // skinColor
-		    	\SplFixedArray::fromArray([]), // personaPieces
-		    	\SplFixedArray::fromArray([]) // pieceTintColors
+		    	$armSize,
+		    	$skinColor,
+		    	$personaPieces,
+		    	$pieceTintColors
 	    	);
 
 	    	$skin = $serializedSkin->toSkin();

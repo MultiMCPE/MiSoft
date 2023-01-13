@@ -1037,6 +1037,8 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\types\\InputMode' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/InputMode.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\MapTrackedObject' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/MapTrackedObject.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\NetworkInventoryAction' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/NetworkInventoryAction.php',
+    'pocketmine\\network\\mcpe\\protocol\\types\\PersonaPieceTintColor' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php',
+    'pocketmine\\network\\mcpe\\protocol\\types\\PersonaSkinPiece' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/PersonaSkinPiece.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\PlayMode' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/PlayMode.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\PlayerListEntry' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/PlayerListEntry.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\PlayerPermissions' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/PlayerPermissions.php',

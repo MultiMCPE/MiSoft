@@ -72,9 +72,12 @@ class PlayerSkinPacket extends DataPacket{
 	        	$this->premiumSkin = (($this->get(1) !== "\x00"));
             }
         }else{
-            $this->skin = $this->getSkin();
+            $this->skin = $this->getSkin($this->getProtocol());
 	    	$this->newSkinName = $this->getString();
 	    	$this->oldSkinName = $this->getString();
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	    	    $this->skin->getSerializedSkin()->setIsTrustedSkin((($this->get(1) !== "\x00")));
+	    	}
         }
 	}
 
@@ -104,9 +107,12 @@ class PlayerSkinPacket extends DataPacket{
 	        	($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
             }
         }else{
-            $this->putSkin($this->skin);
+            $this->putSkin($this->skin, $this->getProtocol());
 	    	$this->putString($this->newSkinName);
 	    	$this->putString($this->oldSkinName);
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	    	    ($this->buffer .= ($this->skin->getSerializedSkin()->isTrustedSkin() ? "\x01" : "\x00"));
+	    	}
         }
 	}
 

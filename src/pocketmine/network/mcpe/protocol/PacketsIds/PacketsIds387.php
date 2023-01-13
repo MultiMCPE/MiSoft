@@ -168,6 +168,6 @@ final class PacketsIds387{
 	public const COMPLETED_USING_ITEM_PACKET = 0x8e;
 	public const NETWORK_SETTINGS_PACKET = 0x8f;
 	public const PLAYER_AUTH_INPUT_PACKET = 0x90;
-	//public const CREATIVE_ITEMS_LIST_PACKET = 0x91; // Added in 392
+	public const CREATIVE_CONTENT_PACKET = 0x91; // Added in 392
 
 }

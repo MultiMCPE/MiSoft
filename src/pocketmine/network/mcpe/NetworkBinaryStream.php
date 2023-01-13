@@ -43,6 +43,8 @@ use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
+use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
@@ -84,7 +86,7 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
 	}
 
-	public function getSkin() : Skin{
+	public function getSkin(int $playerProtocol) : Skin{
 		$skinId = $this->getString();
 		$skinResourcePatch = $this->getString();
 		$skinData = $this->getSkinImage();
@@ -106,15 +108,45 @@ class NetworkBinaryStream extends BinaryStream{
 		$capeId = $this->getString();
 		$fullSkinId = $this->getString();
 
-        $armSize = "wide";
-        $skinColor = new Color(0, 0, 0);
-        $personaPieces = \SplFixedArray::fromArray([]);
-        $pieceTintColors = \SplFixedArray::fromArray([]);
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
+	    	$armSize = $this->getString();
+	    	$skinColor = $this->getString();
+	    	$personaPieceCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+    		$personaPieces = [];
+	    	for($i = 0; $i < $personaPieceCount; ++$i){
+		    	$personaPieces[] = new PersonaSkinPiece(
+			    	$pieceId = $this->getString(),
+			    	$pieceType = $this->getString(),
+			    	$packId = $this->getString(),
+			    	$isDefaultPiece = (($this->get(1) !== "\x00")),
+			    	$productId = $this->getString()
+		    	);
+	    	}
+	    	$pieceTintColorCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	    	$pieceTintColors = [];
+	    	for($i = 0; $i < $pieceTintColorCount; ++$i){
+		    	$pieceType = $this->getString();
+		    	$colorCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		    	$colors = [];
+		    	for($j = 0; $j < $colorCount; ++$j){
+			    	$colors[] = $this->getString();
+		    	}
+		    	$pieceTintColors[] = new PersonaPieceTintColor(
+			    	$pieceType,
+			    	$colors
+		    	);
+	    	}
+		}else{
+            $armSize = "wide";
+            $skinColor = new Color(0, 0, 0);
+            $personaPieces = \SplFixedArray::fromArray([]);
+            $pieceTintColors = \SplFixedArray::fromArray([]);
+		}
 
         return (new SerializedSkin($skinId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
-	public function putSkin(Skin $skin){
+	public function putSkin(Skin $skin, int $playerProtocol){
 	    $skin = SerializedSkin::fromSkin($skin);
 		$this->putString($skin->getSkinId());
 		$this->putString($skin->getResourcePatch());
@@ -133,6 +165,26 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
 		$this->putString($skin->getCapeId());
 		$this->putString($skin->getFullSkinId());
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
+	    	$this->putString($skin->getArmSize());
+	    	$this->putString($skin->getSkinColor());
+	    	($this->buffer .= (\pack("V", count($skin->getPersonaPieces()))));
+	    	foreach($skin->getPersonaPieces() as $piece){
+		    	$this->putString($piece->getPieceId());
+		    	$this->putString($piece->getPieceType());
+		    	$this->putString($piece->getPackId());
+		    	($this->buffer .= ($piece->isDefaultPiece() ? "\x01" : "\x00"));
+		    	$this->putString($piece->getProductId());
+	    	}
+	    	($this->buffer .= (\pack("V", count($skin->getPieceTintColors()))));
+	    	foreach($skin->getPieceTintColors() as $tint){
+		    	$this->putString($tint->getPieceType());
+		    	($this->buffer .= (\pack("V", count($tint->getColors()))));
+		    	foreach($tint->getColors() as $color){
+			    	$this->putString($color);
+		    	}
+	    	}
+		}
 	}
 
 	private function getSkinImage() : SkinImage{

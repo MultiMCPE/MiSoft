@@ -167,18 +167,19 @@ interface PacketMagicNumbers{
 	public const COMPLETED_USING_ITEM_PACKET = 0x8e;
 	public const NETWORK_SETTINGS_PACKET = 0x8f;
 	public const PLAYER_AUTH_INPUT_PACKET = 0x90;
+	public const CREATIVE_CONTENT_PACKET = 0x91;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0x91;
+	public const EXPLODE_PACKET = 0x92;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0x92;
-	public const CONTAINER_SET_CONTENT_PACKET = 0x93;
-	public const DROP_ITEM_PACKET = 0x94;
-	public const USE_ITEM_PACKET = 0x95;
-	public const REMOVE_BLOCK_PACKET = 0x96;
-	public const COMMAND_STEP_PACKET = 0x97;
-	public const ADD_HANGING_ACTOR_PACKET = 0x98;
-	public const INVENTORY_ACTION_PACKET = 0x99;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x9a;
-	public const ADD_ITEM_PACKET = 0x9b;
+	public const CONTAINER_SET_SLOT_PACKET = 0x93;
+	public const CONTAINER_SET_CONTENT_PACKET = 0x94;
+	public const DROP_ITEM_PACKET = 0x95;
+	public const USE_ITEM_PACKET = 0x96;
+	public const REMOVE_BLOCK_PACKET = 0x97;
+	public const COMMAND_STEP_PACKET = 0x98;
+	public const ADD_HANGING_ACTOR_PACKET = 0x99;
+	public const INVENTORY_ACTION_PACKET = 0x9a;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x9b;
+	public const ADD_ITEM_PACKET = 0x9c;
 
 }

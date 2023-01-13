@@ -118,7 +118,7 @@ class PlayerListPacket extends DataPacket{
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	$entry->buildPlatform = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
 			        	    }
-			            	$entry->skin = $this->getSkin();
+			            	$entry->skin = $this->getSkin($this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	$entry->isTeacher = (($this->get(1) !== "\x00"));
 			                	$entry->isHost = (($this->get(1) !== "\x00"));
@@ -139,6 +139,13 @@ class PlayerListPacket extends DataPacket{
 			}
 
 			$this->entries[$i] = $entry;
+		}
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	    	if($this->type === self::TYPE_ADD){
+		    	for($i = 0; $i < $count; ++$i){
+			    	$this->entries[$i]->skin->getSerializedSkin()->setIsTrustedSkin((($this->get(1) !== "\x00")));
+		    	}
+			}
 		}
 	}
 
@@ -210,7 +217,7 @@ class PlayerListPacket extends DataPacket{
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	($this->buffer .= (\pack("V", $entry->buildPlatform)));
 			        	    }
-			            	$this->putSkin($entry->skin);
+			            	$this->putSkin($entry->skin, $this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	($this->buffer .= ($entry->isTeacher ? "\x01" : "\x00"));
 			                	($this->buffer .= ($entry->isHost ? "\x01" : "\x00"));
@@ -223,6 +230,13 @@ class PlayerListPacket extends DataPacket{
 				}
 			}else{
 				$this->putUUID($entry->uuid);
+			}
+		}
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	    	if($this->type === self::TYPE_ADD){
+		    	foreach($this->entries as $entry){
+			    	($this->buffer .= ($entry->skin->getSerializedSkin()->isTrustedSkin() ? "\x01" : "\x00"));
+		    	}
 			}
 		}
 	}

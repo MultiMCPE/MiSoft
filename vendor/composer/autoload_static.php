@@ -1108,6 +1108,8 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\types\\InputMode' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/InputMode.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\MapTrackedObject' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/MapTrackedObject.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\NetworkInventoryAction' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/NetworkInventoryAction.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\PersonaPieceTintColor' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\PersonaSkinPiece' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PersonaSkinPiece.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PlayMode' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PlayMode.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PlayerListEntry' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PlayerListEntry.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PlayerPermissions' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PlayerPermissions.php',
