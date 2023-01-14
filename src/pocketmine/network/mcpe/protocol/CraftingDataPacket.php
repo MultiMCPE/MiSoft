@@ -100,9 +100,12 @@ class CraftingDataPacket extends DataPacket{
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
 				    	$entry["block"] = $this->getString();
-					}
-					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-				    	$entry["priority"] = $this->getVarInt();
+				    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				        	$entry["priority"] = $this->getVarInt();
+				        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+				        	    $entry["net_id"] = $this->readGenericTypeNetworkId();
+				        	}
+				    	}
 					}
 
 					break;
@@ -131,9 +134,12 @@ class CraftingDataPacket extends DataPacket{
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
 				    	$entry["block"] = $this->getString();
-					}
-					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-				    	$entry["priority"] = $this->getVarInt();
+				    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				        	$entry["priority"] = $this->getVarInt();
+				        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+				        	    $entry["net_id"] = $this->readGenericTypeNetworkId();
+				        	}
+				    	}
 					}
 
 					break;
@@ -163,6 +169,9 @@ class CraftingDataPacket extends DataPacket{
 					break;
 				case self::ENTRY_MULTI:
 					$entry["uuid"] = $this->getUUID()->toString();
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+					    $entry["net_id"] = $this->readGenericTypeNetworkId();
+					}
 					break;
 				default:
 					throw new \UnexpectedValueException("Unhandled recipe type $recipeType!"); //do not continue attempting to decode
@@ -221,9 +230,12 @@ class CraftingDataPacket extends DataPacket{
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		}
-		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
-	    	$stream->putVarInt(50); //TODO: priority
+	    	if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	        	$stream->putVarInt(50); //TODO: priority
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	}
+	    	}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
@@ -256,9 +268,12 @@ class CraftingDataPacket extends DataPacket{
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		}
-		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
-	    	$stream->putVarInt(50); //TODO: priority
+	    	if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	        	$stream->putVarInt(50); //TODO: priority
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	}
+	    	}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;

@@ -307,7 +307,6 @@ class SerializedSkin{
 
                 unset($skinGeometryData["minecraft:geometry"]);
             }
-
             $skinGeometryData = json_encode($skinGeometryData);
         }else{
             unset($skinGeometryData);

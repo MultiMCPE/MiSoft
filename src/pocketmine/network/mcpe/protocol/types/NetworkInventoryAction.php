@@ -29,6 +29,7 @@ use pocketmine\inventory\transaction\action\DropItemAction;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\Player;
 
@@ -121,6 +122,10 @@ class NetworkInventoryAction{
 		$this->oldItem = $packet->getSlot($packet->getProtocol());
 		$this->newItem = $packet->getSlot($packet->getProtocol());
 
+        if($packet->getProtocol() === ProtocolInfo::PROTOCOL_392){
+            $packet->get(1);
+        }
+
 		return $this;
 	}
 
@@ -150,6 +155,10 @@ class NetworkInventoryAction{
 		$packet->putUnsignedVarInt($this->inventorySlot);
 		$packet->putSlot($this->oldItem, $packet->getProtocol());
 		$packet->putSlot($this->newItem, $packet->getProtocol());
+
+		if($packet->getProtocol() === ProtocolInfo::PROTOCOL_392){
+		    ($packet->buffer .= (\chr(0)));
+		}
 	}
 
 	/**

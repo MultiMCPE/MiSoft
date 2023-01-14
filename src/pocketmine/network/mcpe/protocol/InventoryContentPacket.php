@@ -48,7 +48,15 @@ class InventoryContentPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->windowId);
 		$this->putUnsignedVarInt(count($this->items));
+		$index = 1;
 		foreach($this->items as $item){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+				if($item->getId() === 0){
+					$this->putUnsignedVarInt(0);
+				}else{
+					$this->putUnsignedVarInt($index++ << 1);
+				}
+			}
 			$this->putSlot($item, $this->getProtocol());
 		}
 	}

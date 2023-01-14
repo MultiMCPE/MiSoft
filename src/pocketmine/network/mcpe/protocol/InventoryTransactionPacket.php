@@ -72,7 +72,28 @@ class InventoryTransactionPacket extends DataPacket{
 	public $trData;
 
 	protected function decodePayload(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+            if($this->getUnsignedVarInt() !== 0){
+                $inventoriesCount = $this->getUnsignedVarInt();
+                while($inventoriesCount --> 0){
+                    $inventoryId = $this->getUnsignedVarInt();
+                    if(isset($this->knownInventories[$inventoryId])){
+                        throw new \InvalidArgumentException("Inventory $inventoryId already set");
+                    }
+
+                    $this->knownInventories[$inventoryId] = [];
+                    $slotsCount = $this->getUnsignedVarInt();
+                    while($slotsCount --> 0){
+                        $this->knownInventories[$inventoryId][] = $this->getUnsignedVarInt();
+                    }
+                }
+            }
+        }
+
 		$this->transactionType = $this->getUnsignedVarInt();
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393){
+            $this->get(1);
+        }
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$this->actions[] = $action = (new NetworkInventoryAction())->read($this);

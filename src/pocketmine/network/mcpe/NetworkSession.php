@@ -64,6 +64,7 @@ use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
+use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\ClientCacheBlobStatusPacket;
 use pocketmine\network\mcpe\protocol\ClientCacheMissResponsePacket;
 use pocketmine\network\mcpe\protocol\ClientCacheStatusPacket;
@@ -386,6 +387,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCreativeContent(CreativeContentPacket $packet) : bool{
 		return false;
 	}
 

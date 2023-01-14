@@ -110,7 +110,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
 	    	$armSize = $this->getString();
-	    	$skinColor = $this->getString();
+	    	$skinColor = Color::fromHexString($this->getString());
 	    	$personaPieceCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
     		$personaPieces = [];
 	    	for($i = 0; $i < $personaPieceCount; ++$i){
@@ -136,6 +136,8 @@ class NetworkBinaryStream extends BinaryStream{
 			    	$colors
 		    	);
 	    	}
+	    	$personaPieces = \SplFixedArray::fromArray($personaPieces);
+	    	$pieceTintColors = \SplFixedArray::fromArray($pieceTintColors);
 		}else{
             $armSize = "wide";
             $skinColor = new Color(0, 0, 0);
@@ -167,7 +169,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putString($skin->getFullSkinId());
 		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
 	    	$this->putString($skin->getArmSize());
-	    	$this->putString($skin->getSkinColor());
+	    	$this->putString($skin->getSkinColor()->toHexString());
 	    	($this->buffer .= (\pack("V", count($skin->getPersonaPieces()))));
 	    	foreach($skin->getPersonaPieces() as $piece){
 		    	$this->putString($piece->getPieceId());
@@ -511,7 +513,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Reads and returns an EntityUniqueID
 	 * @return int
 	 */
-	public function getEntityUniqueId() : int{
+	final public function getEntityUniqueId() : int{
 		return $this->getVarLong();
 	}
 
@@ -528,7 +530,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Reads and returns an EntityRuntimeID
 	 * @return int
 	 */
-	public function getEntityRuntimeId() : int{
+	final public function getEntityRuntimeId() : int{
 		return $this->getUnsignedVarLong();
 	}
 
@@ -783,6 +785,14 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= \chr($structureSettings->mirror));
 		($this->buffer .= (\pack("G", $structureSettings->integrityValue)));
 		($this->buffer .= (\pack("N", $structureSettings->integritySeed)));
+	}
+
+	public function readGenericTypeNetworkId() : int{
+		return $this->getVarInt();
+	}
+
+	public function writeGenericTypeNetworkId(int $id) : void{
+		$this->putVarInt($id);
 	}
 
 	protected function duplicateArmAndLeg(string $skinData) : string{

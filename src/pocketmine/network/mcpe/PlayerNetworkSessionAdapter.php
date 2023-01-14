@@ -45,6 +45,7 @@ use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
+use pocketmine\network\mcpe\protocol\ClientCacheStatusPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
@@ -72,6 +73,7 @@ use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
+use pocketmine\network\mcpe\protocol\TickSyncPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
@@ -169,6 +171,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return true; //Not used
 	}
 
+	public function handleTickSync(TickSyncPacket $packet) : bool{
+		return true; //Not used
+	}
+
 	public function handleInteract(InteractPacket $packet) : bool{
 		return $this->player->handleInteract($packet);
 	}
@@ -211,6 +217,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	    }
 
 	    return true;
+	}
+
+	public function handleClientCacheStatus(ClientCacheStatusPacket $packet) : bool{
+		return true; // Not used
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{

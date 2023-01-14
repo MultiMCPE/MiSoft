@@ -128,6 +128,7 @@ use pocketmine\network\mcpe\protocol\BookEditPacket;
 use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
+use pocketmine\network\mcpe\protocol\ContainerOpenPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\DropItemPacket;
 use pocketmine\network\mcpe\protocol\UseItemPacket;
@@ -166,6 +167,7 @@ use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
 use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
@@ -2005,7 +2007,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	        	}
 
 		    	$armSize = $packet->clientData["ArmSize"] ?? "wide";
-		    	$skinColor = $packet->clientData["SkinColor"] ?? new Color(0, 0, 0);
+		    	$skinColor = isset($packet->clientData["SkinColor"]) ? Color::fromHexString($packet->clientData["SkinColor"]) : new Color(0, 0, 0);
 		    	$personaPieces = \SplFixedArray::fromArray($personaPieces);
 		    	$pieceTintColors = \SplFixedArray::fromArray($pieceTintColors);
 	    	}else{
@@ -2373,6 +2375,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->level->sendTime($this);
 
+        $this->inventory->sendCreativeContents();
+
 		$this->sendAttributes(true);
 		$this->setNameTagVisible();
 		$this->setNameTagAlwaysVisible();
@@ -2400,7 +2404,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->sendData($this);
 
 		$this->sendAllInventories();
-		$this->inventory->sendCreativeContents();
 		$this->inventory->sendHeldItem($this);
 
         $this->server->getCraftingManager()->sendCraftingData($this);
@@ -3250,6 +3253,22 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		switch($packet->action){
+		    case InteractPacket::ACTION_OPEN_INVENTORY:
+		        if($target !== $this){
+		            return false;
+		        }
+
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+			        $pk = new ContainerOpenPacket();
+			    	$pk->windowId = ContainerIds::INVENTORY;
+			    	$pk->type = ContainerIds::NONE;
+			    	$pk->x = (int) $this->x;
+			    	$pk->y = (int) $this->y;
+			    	$pk->z = (int) $this->z;
+			    	$this->sendDataPacket($pk);
+		    	}
+
+		        break;
 		    case InteractPacket::ACTION_LEFT_CLICK:
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 		            return $this->attackEntity($target);
@@ -3496,7 +3515,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
-		if(!$this->spawned or $packet->windowId === 0){
+		if(!$this->spawned){
 			return true;
 		}
 
@@ -3505,7 +3524,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->doCloseInventory();
 
-		if(isset($this->windowIndex[$packet->windowId])){
+		if($packet->windowId === ContainerIds::INVENTORY){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		        $pk = new ContainerClosePacket();
+		        $pk->windowId = ContainerIds::INVENTORY;
+		        $this->sendDataPacket($pk);
+		    }
+		    return true;
+		}elseif(isset($this->windowIndex[$packet->windowId])){
 			(new InventoryCloseEvent($this->windowIndex[$packet->windowId], $this))->call();
 			$this->removeWindow($this->windowIndex[$packet->windowId]);
 			return true;
