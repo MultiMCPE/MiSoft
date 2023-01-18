@@ -23,22 +23,27 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkSession;
 
 class HurtArmorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::HURT_ARMOR_PACKET;
 
 	/** @var int */
+	public $cause;
+	/** @var int */
 	public $health;
 
 	protected function decodePayload(){
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	        $this->cause = $this->getVarInt();
+	    }
 		$this->health = $this->getVarInt();
 	}
 
 	protected function encodePayload(){
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	        $this->putVarInt($this->cause);
+	    }
 		$this->putVarInt($this->health);
 	}
 

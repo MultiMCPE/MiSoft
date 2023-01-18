@@ -140,7 +140,7 @@ class PlayerListPacket extends DataPacket{
 
 			$this->entries[$i] = $entry;
 		}
-		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	if($this->type === self::TYPE_ADD){
 		    	for($i = 0; $i < $count; ++$i){
 			    	$this->entries[$i]->skin->getSerializedSkin()->setIsTrustedSkin((($this->get(1) !== "\x00")));
@@ -232,7 +232,7 @@ class PlayerListPacket extends DataPacket{
 				$this->putUUID($entry->uuid);
 			}
 		}
-		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	if($this->type === self::TYPE_ADD){
 		    	foreach($this->entries as $entry){
 			    	($this->buffer .= ($entry->skin->getSerializedSkin()->isTrustedSkin() ? "\x01" : "\x00"));

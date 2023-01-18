@@ -32,12 +32,21 @@ class EducationSettingsPacket extends DataPacket{
 
 	/** @var string */
 	private $codeBuilderDefaultUri;
+	/** @var string */
+	private $codeBuilderTitle;
+	/** @var bool */
+	private $canResizeCodeBuilder;
+	/** @var string|null */
+	private $codeBuilderOverrideUri;
 	/** @var bool */
 	private $hasQuiz;
 
-	public static function create(string $codeBuilderDefaultUri, bool $hasQuiz) : self{
+	public static function create(string $codeBuilderDefaultUri, string $codeBuilderTitle, bool $canResizeCodeBuilder, ?string $codeBuilderOverrideUri, bool $hasQuiz) : self{
 		$result = new self;
 		$result->codeBuilderDefaultUri = $codeBuilderDefaultUri;
+		$result->codeBuilderTitle = $codeBuilderTitle;
+		$result->canResizeCodeBuilder = $canResizeCodeBuilder;
+		$result->codeBuilderOverrideUri = $codeBuilderOverrideUri;
 		$result->hasQuiz = $hasQuiz;
 		return $result;
 	}
@@ -46,12 +55,33 @@ class EducationSettingsPacket extends DataPacket{
 		return $this->codeBuilderDefaultUri;
 	}
 
+	public function getCodeBuilderTitle() : string{
+		return $this->codeBuilderTitle;
+	}
+
+	public function canResizeCodeBuilder() : bool{
+		return $this->canResizeCodeBuilder;
+	}
+
+	public function getCodeBuilderOverrideUri() : ?string{
+		return $this->codeBuilderOverrideUri;
+	}
+
 	public function getHasQuiz() : bool{
 		return $this->hasQuiz;
 	}
 
 	protected function decodePayload() : void{
 		$this->codeBuilderDefaultUri = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	$this->codeBuilderTitle = $this->getString();
+	    	$this->canResizeCodeBuilder = (($this->get(1) !== "\x00"));
+	    	if((($this->get(1) !== "\x00"))){
+		    	$this->codeBuilderOverrideUri = $this->getString();
+	    	}else{
+		    	$this->codeBuilderOverrideUri = null;
+	    	}
+		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	    	$this->hasQuiz = (($this->get(1) !== "\x00"));
 		}
@@ -59,6 +89,14 @@ class EducationSettingsPacket extends DataPacket{
 
 	protected function encodePayload() : void{
 		$this->putString($this->codeBuilderDefaultUri);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	$this->putString($this->codeBuilderTitle);
+	    	($this->buffer .= ($this->canResizeCodeBuilder ? "\x01" : "\x00"));
+	    	($this->buffer .= ($this->codeBuilderOverrideUri !== null ? "\x01" : "\x00"));
+	    	if($this->codeBuilderOverrideUri !== null){
+		    	$this->putString($this->codeBuilderOverrideUri);
+	    	}
+		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	    	($this->buffer .= ($this->hasQuiz ? "\x01" : "\x00"));
 		}

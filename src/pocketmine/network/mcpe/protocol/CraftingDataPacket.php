@@ -181,9 +181,18 @@ class CraftingDataPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$input = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$inputMeta = $this->getVarInt();
+		    	}
 		    	$ingredient = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$ingredientMeta = $this->getVarInt();
+		    	}
 		    	$output = $this->getVarInt();
-		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $ingredient, $output);
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$outputMeta = $this->getVarInt();
+		    	}
+		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta, $ingredient, $ingredientMeta, $output, $outputMeta);
 	    	}
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$input = $this->getVarInt();
@@ -324,9 +333,18 @@ class CraftingDataPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	    	$this->putUnsignedVarInt(count($this->potionTypeRecipes));
 	    	foreach($this->potionTypeRecipes as $recipe){
-		    	$this->putVarInt($recipe->getInputPotionType());
+		    	$this->putVarInt($recipe->getInputItemId());
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($recipe->getInputItemMeta());
+		    	}
 		    	$this->putVarInt($recipe->getIngredientItemId());
-		    	$this->putVarInt($recipe->getOutputPotionType());
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($recipe->getIngredientItemMeta());
+		    	}
+		    	$this->putVarInt($recipe->getOutputItemId());
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($recipe->getOutputItemMeta());
+		    	}
 	    	}
 	    	$this->putUnsignedVarInt(count($this->potionContainerRecipes));
 	    	foreach($this->potionContainerRecipes as $recipe){

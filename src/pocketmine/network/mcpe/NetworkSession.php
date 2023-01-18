@@ -173,6 +173,17 @@ use pocketmine\network\mcpe\protocol\UpdateEquipPacket;
 use pocketmine\network\mcpe\protocol\UpdateSoftEnumPacket;
 use pocketmine\network\mcpe\protocol\UpdateTradePacket;
 use pocketmine\network\mcpe\protocol\VideoStreamConnectPacket;
+use pocketmine\network\mcpe\protocol\UpdatePlayerGameTypePacket;
+use pocketmine\network\mcpe\protocol\PositionTrackingDBClientRequestPacket;
+use pocketmine\network\mcpe\protocol\PositionTrackingDBServerBroadcastPacket;
+use pocketmine\network\mcpe\protocol\PlayerEnchantOptionsPacket;
+use pocketmine\network\mcpe\protocol\PlayerArmorDamagePacket;
+use pocketmine\network\mcpe\protocol\PacketViolationWarningPacket;
+use pocketmine\network\mcpe\protocol\ItemStackRequestPacket;
+use pocketmine\network\mcpe\protocol\ItemStackResponsePacket;
+use pocketmine\network\mcpe\protocol\DebugInfoPacket;
+use pocketmine\network\mcpe\protocol\CodeBuilderPacket;
+use pocketmine\network\mcpe\protocol\EmoteListPacket;
 
 abstract class NetworkSession{
 
@@ -387,10 +398,6 @@ abstract class NetworkSession{
 	}
 
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
-		return false;
-	}
-
-	public function handleCreativeContent(CreativeContentPacket $packet) : bool{
 		return false;
 	}
 
@@ -771,6 +778,54 @@ abstract class NetworkSession{
 	}
 
 	public function handlePlayerAuthInput(PlayerAuthInputPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCreativeContent(CreativeContentPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerEnchantOptions(PlayerEnchantOptionsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleItemStackRequest(ItemStackRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleItemStackResponse(ItemStackResponsePacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerArmorDamage(PlayerArmorDamagePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCodeBuilder(CodeBuilderPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUpdatePlayerGameType(UpdatePlayerGameTypePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleEmoteList(EmoteListPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePositionTrackingDBServerBroadcast(PositionTrackingDBServerBroadcastPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePositionTrackingDBClientRequest(PositionTrackingDBClientRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleDebugInfo(DebugInfoPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePacketViolationWarning(PacketViolationWarningPacket $packet) : bool{
 		return false;
 	}
 }

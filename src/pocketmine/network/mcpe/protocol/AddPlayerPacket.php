@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\utils\UUID;
 use function count;
@@ -79,7 +80,7 @@ class AddPlayerPacket extends DataPacket{
 	/** @var string */
 	public $deviceId = ""; //TODO: fill player's device ID (???)
 	/** @var int */
-	public $buildPlatform = -1;
+	public $buildPlatform = DeviceOS::UNKNOWN;
 
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
@@ -115,7 +116,7 @@ class AddPlayerPacket extends DataPacket{
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
 	        	$linkCount = $this->getUnsignedVarInt();
 	        	for($i = 0; $i < $linkCount; ++$i){
-		        	$this->links[$i] = $this->getEntityLink();
+		        	$this->links[$i] = $this->getEntityLink($this->getProtocol());
 	        	}
 
                 if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
@@ -162,7 +163,7 @@ class AddPlayerPacket extends DataPacket{
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
 	        	$this->putUnsignedVarInt(count($this->links));
 	        	foreach($this->links as $link){
-		        	$this->putEntityLink($link);
+		        	$this->putEntityLink($link, $this->getProtocol());
 	        	}
 
                 if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {

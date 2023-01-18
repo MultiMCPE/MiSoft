@@ -41,6 +41,7 @@ class InventoryContentPacket extends DataPacket{
 		$this->windowId = $this->getUnsignedVarInt();
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
+		    $this->getVarInt();
 			$this->items[] = $this->getSlot($this->getProtocol());
 		}
 	}
@@ -52,9 +53,13 @@ class InventoryContentPacket extends DataPacket{
 		foreach($this->items as $item){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 				if($item->getId() === 0){
-					$this->putUnsignedVarInt(0);
+					$this->putVarInt(0);
 				}else{
-					$this->putUnsignedVarInt($index++ << 1);
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+				        $this->putVarInt(1);
+				    }else{
+				    	$this->putVarInt($index++);
+				    }
 				}
 			}
 			$this->putSlot($item, $this->getProtocol());

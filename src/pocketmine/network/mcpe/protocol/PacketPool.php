@@ -32,10 +32,12 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds360;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds385;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds387;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds406;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_406 => PacketsIds406::class,
         ProtocolInfo::PROTOCOL_387 => PacketsIds387::class,
         ProtocolInfo::PROTOCOL_385 => PacketsIds385::class,
         ProtocolInfo::PROTOCOL_360 => PacketsIds360::class,
@@ -59,13 +61,13 @@ class PacketPool {
 		$magicNumbers = (new \ReflectionClass(PacketMagicNumbers::class))->getConstants();
 		self::$magicPoolTo = [];
 		self::$magicPoolFrom = [];
-	    self::$pool = new \SplFixedArray(256);
+	    self::$pool = new \SplFixedArray(356);
 		self::$protocolList = array_keys(self::PROTOCOL_POOL);
 		foreach(self::$protocolList as $protocol){
 			$protocolInfoClass = self::PROTOCOL_POOL[$protocol];
 			$protocolMagicNumbers = (new \ReflectionClass($protocolInfoClass))->getConstants();
-			self::$magicPoolTo[$protocol] = new \SplFixedArray(256);
-			self::$magicPoolFrom[$protocol] = new \SplFixedArray(256);
+			self::$magicPoolTo[$protocol] = new \SplFixedArray(356);
+			self::$magicPoolFrom[$protocol] = new \SplFixedArray(356);
 			foreach($protocolMagicNumbers as $name => $magic){
 				if(isset($magicNumbers[$name])){
 					self::$magicPoolTo[$protocol][$magicNumbers[$name]] = $magic;
@@ -216,6 +218,18 @@ class PacketPool {
 		self::registerPacket(new CompletedUsingItemPacket());
 		self::registerPacket(new NetworkSettingsPacket());
 		self::registerPacket(new PlayerAuthInputPacket());
+		self::registerPacket(new CreativeContentPacket());
+		self::registerPacket(new PlayerEnchantOptionsPacket());
+		self::registerPacket(new ItemStackRequestPacket());
+		self::registerPacket(new ItemStackResponsePacket());
+		self::registerPacket(new PlayerArmorDamagePacket());
+		self::registerPacket(new CodeBuilderPacket());
+		self::registerPacket(new UpdatePlayerGameTypePacket());
+		self::registerPacket(new EmoteListPacket());
+		self::registerPacket(new PositionTrackingDBServerBroadcastPacket());
+		self::registerPacket(new PositionTrackingDBClientRequestPacket());
+		self::registerPacket(new DebugInfoPacket());
+		self::registerPacket(new PacketViolationWarningPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

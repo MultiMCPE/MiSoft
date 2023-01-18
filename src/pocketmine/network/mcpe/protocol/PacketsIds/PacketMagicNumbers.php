@@ -168,18 +168,29 @@ interface PacketMagicNumbers{
 	public const NETWORK_SETTINGS_PACKET = 0x8f;
 	public const PLAYER_AUTH_INPUT_PACKET = 0x90;
 	public const CREATIVE_CONTENT_PACKET = 0x91;
+	public const PLAYER_ENCHANT_OPTIONS_PACKET = 0x92;
+	public const ITEM_STACK_REQUEST_PACKET = 0x93;
+	public const ITEM_STACK_RESPONSE_PACKET = 0x94;
+	public const PLAYER_ARMOR_DAMAGE_PACKET = 0x95;
+	public const CODE_BUILDER_PACKET = 0x96;
+	public const UPDATE_PLAYER_GAME_TYPE_PACKET = 0x97;
+	public const EMOTE_LIST_PACKET = 0x98;
+	public const POSITION_TRACKING_D_B_SERVER_BROADCAST_PACKET = 0x99;
+	public const POSITION_TRACKING_D_B_CLIENT_REQUEST_PACKET = 0x9a;
+	public const DEBUG_INFO_PACKET = 0x9b;
+	public const PACKET_VIOLATION_WARNING_PACKET = 0x9c;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0x92;
+	public const EXPLODE_PACKET = 0x9d;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0x93;
-	public const CONTAINER_SET_CONTENT_PACKET = 0x94;
-	public const DROP_ITEM_PACKET = 0x95;
-	public const USE_ITEM_PACKET = 0x96;
-	public const REMOVE_BLOCK_PACKET = 0x97;
-	public const COMMAND_STEP_PACKET = 0x98;
-	public const ADD_HANGING_ACTOR_PACKET = 0x99;
-	public const INVENTORY_ACTION_PACKET = 0x9a;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x9b;
-	public const ADD_ITEM_PACKET = 0x9c;
+	public const CONTAINER_SET_SLOT_PACKET = 0x9e;
+	public const CONTAINER_SET_CONTENT_PACKET = 0x9f;
+	public const DROP_ITEM_PACKET = 0x100;
+	public const USE_ITEM_PACKET = 0x101;
+	public const REMOVE_BLOCK_PACKET = 0x102;
+	public const COMMAND_STEP_PACKET = 0x103;
+	public const ADD_HANGING_ACTOR_PACKET = 0x104;
+	public const INVENTORY_ACTION_PACKET = 0x105;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x106;
+	public const ADD_ITEM_PACKET = 0x107;
 
 }

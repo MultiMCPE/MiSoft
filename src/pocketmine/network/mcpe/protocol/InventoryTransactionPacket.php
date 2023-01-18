@@ -99,24 +99,38 @@ class InventoryTransactionPacket extends DataPacket{
 			$this->actions[] = $action = (new NetworkInventoryAction())->read($this);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-		    	if(
-			    	$action->sourceType === NetworkInventoryAction::SOURCE_CONTAINER and
-			    	$action->windowId === ContainerIds::UI and
-			    	$action->inventorySlot === 50 and
-			    	!$action->oldItem->equalsExact($action->newItem)
-		    	){
-			    	$this->isCraftingPart = true;
-			    	if(!$action->oldItem->isNull() and $action->newItem->isNull()){
-				    	$this->isFinalCraftingPart = true;
+                if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
+		        	if(
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_CONTAINER and
+			        	$action->windowId === ContainerIds::UI and
+			        	$action->inventorySlot === 50 and
+			        	!$action->oldItem->equalsExact($action->newItem)
+		        	){
+			        	$this->isCraftingPart = true;
+			        	if(!$action->oldItem->isNull() and $action->newItem->isNull()){
+				        	$this->isFinalCraftingPart = true;
+			        	}
+		        	}elseif(
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_TODO and (
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+			        	)
+		        	){
+			        	$this->isCraftingPart = true;
+		        	}
+                }else{
+                    if(
+			        	$networkInventoryAction->sourceType === NetworkInventoryAction::SOURCE_TODO and (
+				        	$networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
+				        	$networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+			        	)
+		        	){
+			        	$this->isCraftingPart = true;
+			        	if($networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT){
+				        	$this->isFinalCraftingPart = true;
+			        	}
 			    	}
-		     	}elseif(
-			    	$action->sourceType === NetworkInventoryAction::SOURCE_TODO and (
-				    	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
-				    	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
-			    	)
-		    	){
-			    	$this->isCraftingPart = true;
-		    	}
+                }
 	    	}else{
                 if((
                     $action->sourceType === NetworkInventoryAction::SOURCE_TODO ||

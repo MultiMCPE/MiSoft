@@ -36,11 +36,11 @@ class SetActorLinkPacket extends DataPacket{
 	public $link;
 
 	protected function decodePayload(){
-		$this->link = $this->getEntityLink();
+		$this->link = $this->getEntityLink($this->getProtocol());
 	}
 
 	protected function encodePayload(){
-		$this->putEntityLink($this->link);
+		$this->putEntityLink($this->link, $this->getProtocol());
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -43,11 +43,13 @@ use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\GameRuleType;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
 use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
+use pocketmine\network\mcpe\protocol\types\StructureEditorData;
 use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
@@ -108,7 +110,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$capeId = $this->getString();
 		$fullSkinId = $this->getString();
 
-		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
 	    	$armSize = $this->getString();
 	    	$skinColor = Color::fromHexString($this->getString());
 	    	$personaPieceCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
@@ -167,7 +169,7 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
 		$this->putString($skin->getCapeId());
 		$this->putString($skin->getFullSkinId());
-		if($playerProtocol === ProtocolInfo::PROTOCOL_390){
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
 	    	$this->putString($skin->getArmSize());
 	    	$this->putString($skin->getSkinColor()->toHexString());
 	    	($this->buffer .= (\pack("V", count($skin->getPersonaPieces()))));
@@ -661,13 +663,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$type = $this->getUnsignedVarInt();
 			$value = null;
 			switch($type){
-				case 1:
+				case GameRuleType::BOOL:
 					$value = (($this->get(1) !== "\x00"));
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$value = $this->getUnsignedVarInt();
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					$value = ((\unpack("g", $this->get(4))[1]));
 					break;
 			}
@@ -690,13 +692,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->putString($name);
 			$this->putUnsignedVarInt($rule[0]);
 			switch($rule[0]){
-				case 1:
+				case GameRuleType::BOOL:
 					($this->buffer .= ($rule[1] ? "\x01" : "\x00"));
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$this->putUnsignedVarInt($rule[1]);
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					($this->buffer .= (\pack("g", $rule[1])));
 					break;
 			}
@@ -704,27 +706,36 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	/**
+	 * @param int $playerProtocol
+	 * 
 	 * @return EntityLink
 	 */
-	protected function getEntityLink() : EntityLink{
+	protected function getEntityLink(int $playerProtocol) : EntityLink{
 		$link = new EntityLink();
 
 		$link->fromEntityUniqueId = $this->getEntityUniqueId();
 		$link->toEntityUniqueId = $this->getEntityUniqueId();
 		$link->type = (\ord($this->get(1)));
 		$link->immediate = (($this->get(1) !== "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		    $link->causedByRider = (($this->get(1) !== "\x00"));
+		}
 
 		return $link;
 	}
 
 	/**
 	 * @param EntityLink $link
+	 * @param int $playerProtocol
 	 */
-	protected function putEntityLink(EntityLink $link) : void{
+	protected function putEntityLink(EntityLink $link, int $playerProtocol) : void{
 		$this->putEntityUniqueId($link->fromEntityUniqueId);
 		$this->putEntityUniqueId($link->toEntityUniqueId);
 		($this->buffer .= \chr($link->type));
 		($this->buffer .= ($link->immediate ? "\x01" : "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		    ($this->buffer .= ($link->causedByRider ? "\x01" : "\x00"));
+		}
 	}
 
 	protected function getCommandOriginData() : CommandOriginData{
@@ -785,6 +796,34 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= \chr($structureSettings->mirror));
 		($this->buffer .= (\pack("G", $structureSettings->integrityValue)));
 		($this->buffer .= (\pack("N", $structureSettings->integritySeed)));
+	}
+
+	protected function getStructureEditorData() : StructureEditorData{
+		$result = new StructureEditorData();
+
+		$result->structureName = $this->getString();
+		$result->structureDataField = $this->getString();
+
+		$result->includePlayers = (($this->get(1) !== "\x00"));
+		$result->showBoundingBox = (($this->get(1) !== "\x00"));
+
+		$result->structureBlockType = $this->getVarInt();
+		$result->structureSettings = $this->getStructureSettings();
+		$result->structureRedstoneSaveMove = $this->getVarInt();
+
+		return $result;
+	}
+
+	protected function putStructureEditorData(StructureEditorData $structureEditorData) : void{
+		$this->putString($structureEditorData->structureName);
+		$this->putString($structureEditorData->structureDataField);
+
+		($this->buffer .= ($structureEditorData->includePlayers ? "\x01" : "\x00"));
+		($this->buffer .= ($structureEditorData->showBoundingBox ? "\x01" : "\x00"));
+
+		$this->putVarInt($structureEditorData->structureBlockType);
+		$this->putStructureSettings($structureEditorData->structureSettings);
+		$this->putVarInt($structureEditorData->structureRedstoneSaveMove);
 	}
 
 	public function readGenericTypeNetworkId() : int{

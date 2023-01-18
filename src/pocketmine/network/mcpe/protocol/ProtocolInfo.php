@@ -42,7 +42,7 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	 * Actual Minecraft: PE protocol version
 	 */
 	public const CURRENT_PROTOCOL = ProtocolInfo::PROTOCOL_110;
-	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_111, ProtocolInfo::PROTOCOL_112, ProtocolInfo::PROTOCOL_113, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_131, ProtocolInfo::PROTOCOL_132, ProtocolInfo::PROTOCOL_133, ProtocolInfo::PROTOCOL_134, ProtocolInfo::PROTOCOL_135, ProtocolInfo::PROTOCOL_136, ProtocolInfo::PROTOCOL_137, ProtocolInfo::PROTOCOL_140, ProtocolInfo::PROTOCOL_141, ProtocolInfo::PROTOCOL_150, ProtocolInfo::PROTOCOL_160, ProtocolInfo::PROTOCOL_200, ProtocolInfo::PROTOCOL_201, ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361, ProtocolInfo::PROTOCOL_370, ProtocolInfo::PROTOCOL_371, ProtocolInfo::PROTOCOL_385, ProtocolInfo::PROTOCOL_386, ProtocolInfo::PROTOCOL_387, ProtocolInfo::PROTOCOL_388, ProtocolInfo::PROTOCOL_389, ProtocolInfo::PROTOCOL_390, ProtocolInfo::PROTOCOL_391, ProtocolInfo::PROTOCOL_392, ProtocolInfo::PROTOCOL_393, ProtocolInfo::PROTOCOL_394, ProtocolInfo::PROTOCOL_395, ProtocolInfo::PROTOCOL_396];
+	public const ACCEPTED_PROTOCOLS = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_111, ProtocolInfo::PROTOCOL_112, ProtocolInfo::PROTOCOL_113, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_131, ProtocolInfo::PROTOCOL_132, ProtocolInfo::PROTOCOL_133, ProtocolInfo::PROTOCOL_134, ProtocolInfo::PROTOCOL_135, ProtocolInfo::PROTOCOL_136, ProtocolInfo::PROTOCOL_137, ProtocolInfo::PROTOCOL_140, ProtocolInfo::PROTOCOL_141, ProtocolInfo::PROTOCOL_150, ProtocolInfo::PROTOCOL_160, ProtocolInfo::PROTOCOL_200, ProtocolInfo::PROTOCOL_201, ProtocolInfo::PROTOCOL_220, ProtocolInfo::PROTOCOL_221, ProtocolInfo::PROTOCOL_222, ProtocolInfo::PROTOCOL_223, ProtocolInfo::PROTOCOL_224, ProtocolInfo::PROTOCOL_240, ProtocolInfo::PROTOCOL_250, ProtocolInfo::PROTOCOL_260, ProtocolInfo::PROTOCOL_261, ProtocolInfo::PROTOCOL_270, ProtocolInfo::PROTOCOL_271, ProtocolInfo::PROTOCOL_273, ProtocolInfo::PROTOCOL_274, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_281, ProtocolInfo::PROTOCOL_282, ProtocolInfo::PROTOCOL_290, ProtocolInfo::PROTOCOL_291, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_311, ProtocolInfo::PROTOCOL_312, ProtocolInfo::PROTOCOL_313, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_332, ProtocolInfo::PROTOCOL_340, ProtocolInfo::PROTOCOL_342, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_351, ProtocolInfo::PROTOCOL_352, ProtocolInfo::PROTOCOL_353, ProtocolInfo::PROTOCOL_354, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361, ProtocolInfo::PROTOCOL_370, ProtocolInfo::PROTOCOL_371, ProtocolInfo::PROTOCOL_385, ProtocolInfo::PROTOCOL_386, ProtocolInfo::PROTOCOL_387, ProtocolInfo::PROTOCOL_388, ProtocolInfo::PROTOCOL_389, ProtocolInfo::PROTOCOL_390, ProtocolInfo::PROTOCOL_391, ProtocolInfo::PROTOCOL_392, ProtocolInfo::PROTOCOL_393, ProtocolInfo::PROTOCOL_394, ProtocolInfo::PROTOCOL_395, ProtocolInfo::PROTOCOL_396, ProtocolInfo::PROTOCOL_400, ProtocolInfo::PROTOCOL_401, ProtocolInfo::PROTOCOL_402, ProtocolInfo::PROTOCOL_403, ProtocolInfo::PROTOCOL_404, ProtocolInfo::PROTOCOL_405, ProtocolInfo::PROTOCOL_406, ProtocolInfo::PROTOCOL_407, ProtocolInfo::PROTOCOL_408, ProtocolInfo::PROTOCOL_409, ProtocolInfo::PROTOCOL_410, ProtocolInfo::PROTOCOL_411, ProtocolInfo::PROTOCOL_412, ProtocolInfo::PROTOCOL_413];
 	public const PROTOCOL_110 = 110; // 1.1.0.0, 1.1.0.1, 1.1.0.2, 1.1.0.3, 1.1.0.4, 1.1.0.5
 	public const PROTOCOL_111 = 111; // 1.1.0.8
 	public const PROTOCOL_112 = 112; // 1.1.0.9
@@ -109,6 +109,41 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	public const PROTOCOL_394 = 394; // 1.15.0.54
 	public const PROTOCOL_395 = 395; // 1.15.0.55
 	public const PROTOCOL_396 = 396; // 1.15.0.56
+    public const PROTOCOL_400 = 400; // 1.16.0.51
+	public const PROTOCOL_401 = 401; // 1.16.0.53, 1.16.0.58, 1.16.0.59
+	public const PROTOCOL_402 = 402; // 1.16.0.55
+	public const PROTOCOL_403 = 403; // 1.16.0.57
+	public const PROTOCOL_404 = 404; // 1.16.0.60
+	public const PROTOCOL_405 = 405; // 1.16.0.61
+	public const PROTOCOL_406 = 406; // 1.16.0.63
+	public const PROTOCOL_407 = 407; // 1.16.0.64
+	public const PROTOCOL_408 = 408; // 1.16.20.53, 1.16.20.54, 1.16.20
+	public const PROTOCOL_409 = 409; // 1.16.100.50
+    public const PROTOCOL_410 = 410; // 1.16.100.51
+    public const PROTOCOL_411 = 411; // 1.16.100.52
+	public const PROTOCOL_412 = 412; // 1.16.100.53
+	public const PROTOCOL_413 = 413; // 1.16.100.54
+
+	public const PROTOCOL_414 = 414; // 1.16.100.55
+	public const PROTOCOL_415 = 415; // 1.16.100.56
+	public const PROTOCOL_416 = 416; // 1.16.100.57
+	public const PROTOCOL_417 = 417; // 1.16.100.58
+	public const PROTOCOL_418 = 418; // 1.16.100.59
+	public const PROTOCOL_419 = 419; // 1.16.200.51
+	public const PROTOCOL_420 = 420; // 1.16.200.52
+	public const PROTOCOL_421 = 421; // 1.16.100.60, 1.16.100, 1.16.101
+	public const PROTOCOL_422 = 422; // 1.16.200.56
+	public const PROTOCOL_423 = 423; // 1.16.210.50, 1.16.210.51
+	public const PROTOCOL_424 = 424; // 1.16.210.53
+	public const PROTOCOL_425 = 425; // 1.16.210.54, 1.16.210.55
+	public const PROTOCOL_427 = 427; // 1.16.210.56, 1.16.210.57
+	public const PROTOCOL_428 = 428; // 1.16.210.58, 1.16.210.59, 1.16.210.60, 1.16.210.61, 1.16.210
+	public const PROTOCOL_429 = 429; // 1.16.220.50
+	public const PROTOCOL_430 = 430; // 1.16.220.51
+	public const PROTOCOL_431 = 431; // 1.16.220.52, 1.16.220, 1.16.221
+	public const PROTOCOL_433 = 433; // 1.16.230.50
+	public const PROTOCOL_434 = 434; // 1.16.230.52
+	public const PROTOCOL_435 = 435; // 1.16.230.54, 1.16.230.56
 	/**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
