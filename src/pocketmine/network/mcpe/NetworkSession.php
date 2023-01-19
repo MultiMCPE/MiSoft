@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\protocol\AddPaintingPacket;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
+use pocketmine\network\mcpe\protocol\AnimateEntityPacket;
 use pocketmine\network\mcpe\protocol\AnvilDamagePacket;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
@@ -59,6 +60,7 @@ use pocketmine\network\mcpe\protocol\ContainerSetDataPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\CameraPacket;
+use pocketmine\network\mcpe\protocol\CameraShakePacket;
 use pocketmine\network\mcpe\protocol\DropItemPacket;
 use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
@@ -68,6 +70,7 @@ use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\ClientCacheBlobStatusPacket;
 use pocketmine\network\mcpe\protocol\ClientCacheMissResponsePacket;
 use pocketmine\network\mcpe\protocol\ClientCacheStatusPacket;
+use pocketmine\network\mcpe\protocol\CorrectPlayerMovePredictionPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
 use pocketmine\network\mcpe\protocol\EducationSettingsPacket;
@@ -80,6 +83,7 @@ use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\InventorySlotPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\mcpe\protocol\LabTablePacket;
 use pocketmine\network\mcpe\protocol\LecternUpdatePacket;
@@ -100,6 +104,7 @@ use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\MoveActorDeltaPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\MotionPredictionHintsPacket;
 use pocketmine\network\mcpe\protocol\MultiplayerSettingsPacket;
 use pocketmine\network\mcpe\protocol\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
@@ -108,6 +113,7 @@ use pocketmine\network\mcpe\protocol\NpcRequestPacket;
 use pocketmine\network\mcpe\protocol\OnScreenTextureAnimationPacket;
 use pocketmine\network\mcpe\protocol\PhotoTransferPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
+use pocketmine\network\mcpe\protocol\PlayerFogPacket;
 use pocketmine\network\mcpe\protocol\PlayerAuthInputPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
@@ -826,6 +832,30 @@ abstract class NetworkSession{
 	}
 
 	public function handlePacketViolationWarning(PacketViolationWarningPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleMotionPredictionHints(MotionPredictionHintsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleAnimateEntity(AnimateEntityPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCameraShake(CameraShakePacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerFog(PlayerFogPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCorrectPlayerMovePrediction(CorrectPlayerMovePredictionPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleItemComponent(ItemComponentPacket $packet) : bool{
 		return false;
 	}
 }

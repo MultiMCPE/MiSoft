@@ -35,15 +35,23 @@ class SetActorDataPacket extends DataPacket{
 	public $entityRuntimeId;
 	/** @var array */
 	public $metadata;
+	/** @var int */
+	public $tick = 0;
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->metadata = $this->getEntityMetadata();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    $this->tick = $this->getUnsignedVarLong();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    $this->putUnsignedVarLong($this->tick);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

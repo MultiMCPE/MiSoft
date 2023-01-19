@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\resourcepacks\ResourcePack;
 use function count;
 
@@ -46,6 +47,8 @@ class ResourcePackStackPacket extends DataPacket{
 	public $isExperimental = false;
 	/** @var string */
 	public $baseGameVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
+	/** @var Experiments */
+	public $experiments;
 
 	protected function decodePayload(){
 		$this->mustAccept = (($this->get(1) !== "\x00"));
@@ -68,9 +71,14 @@ class ResourcePackStackPacket extends DataPacket{
 		}
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	    	$this->isExperimental = (($this->get(1) !== "\x00"));
+		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
+	        	$this->isExperimental = (($this->get(1) !== "\x00"));
+		    }
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	        	$this->baseGameVersion = $this->getString();
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	        	    $this->experiments = Experiments::read($this);
+	        	}
 	    	}
 		}
 	}
@@ -97,9 +105,14 @@ class ResourcePackStackPacket extends DataPacket{
 		}
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
-	    	($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
+		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
+	        	($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
+		    }
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	        	$this->putString($this->baseGameVersion);
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	        	    $this->experiments->write($this);
+	        	}
 	    	}
 		}
 	}

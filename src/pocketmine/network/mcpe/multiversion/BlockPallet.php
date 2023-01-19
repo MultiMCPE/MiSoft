@@ -53,8 +53,8 @@ class BlockPallet {
 		$folderPath = \pocketmine\RESOURCE_PATH . "/vanilla/palette/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
 
-		foreach ($palletFiles as $fileName) {
-			if (strpos($fileName, "BlockPallet") !== 0) {
+		foreach($palletFiles as $fileName){
+			if(strpos($fileName, "BlockPallet") !== 0){
 				continue;
 			}
 
@@ -73,37 +73,53 @@ class BlockPallet {
      * @param string $path
      * @param int $protocolNumber
      */
-	public function __construct(string $path, int $protocolNumber) {
+	public function __construct(string $path, int $protocolNumber){
 		$palletData = json_decode(file_get_contents($path), true);
 
-		if ($protocolNumber === ProtocolInfo::PROTOCOL_370 && empty(self::$blockNamesIds)) {
-			foreach ($palletData as $blockInfo) {
+		if($protocolNumber === ProtocolInfo::PROTOCOL_370 && empty(self::$blockNamesIds)){
+			foreach($palletData as $blockInfo){
 				self::$blockNamesIds[$blockInfo['name']] = $blockInfo['id'];
 			}
 		}
 
-		if ($protocolNumber >= ProtocolInfo::PROTOCOL_370) {
+		if($protocolNumber >= ProtocolInfo::PROTOCOL_419){
+			$palletData = $palletData['blocks'];
+		}
+
+		if($protocolNumber >= ProtocolInfo::PROTOCOL_370){
 		    $data = [];
-			foreach ($palletData as $runtimeID => $blockInfo) {
-				if (isset($blockInfo['data'])) {
+			$lastData = null;
+			$currentId = null;
+			foreach($palletData as $runtimeID => $blockInfo){
+				if($protocolNumber >= ProtocolInfo::PROTOCOL_419){
+			        $blockInfo['id'] = self::$blockNamesIds[$blockInfo['name']] ?? -1;
+			       	if($blockInfo['id'] !== $currentId){
+				        $currentId = $blockInfo['id'];
+				    	$lastData = -1;
+				    	$blockInfo['data'] = -1;
+			        }
+			    	$blockInfo['data'] = ++$lastData;
+				}
+
+				if(isset($blockInfo['data'])){
 					$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
 					$this->palletReverted[$runtimeID] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
 				}
 
 				$states = new CompoundTag("states", []);
-				foreach ($blockInfo['states'] as $stateName => $state) {
-					switch ($state['type']) {
+				foreach($blockInfo['states'] as $stateName => $state){
+					switch($state['type']){
 						case 'byte':
 						case NBT::TAG_Byte:
-							$states->offsetSet($stateName, new ByteTag($stateName, $state['val'] ?? $state['value']));
+							$states->offsetSet((string) $stateName, new ByteTag((string) $stateName, $state['val'] ?? $state['value']));
 							break;
 						case NBT::TAG_Int:
 						case 'int':
-							$states->offsetSet($stateName, new IntTag($stateName, $state['val'] ?? $state['value']));
+							$states->offsetSet((string) $stateName, new IntTag((string) $stateName, $state['val'] ?? $state['value']));
 							break;
 						case NBT::TAG_String:
 						case 'string':
-							$states->offsetSet($stateName, new StringTag($stateName, $state['val'] ?? $state['value']));
+							$states->offsetSet((string) $stateName, new StringTag((string) $stateName, $state['val'] ?? $state['value']));
 							break;
 						default:
 							var_dump("Block Pallet Initialization Error");
@@ -123,25 +139,25 @@ class BlockPallet {
 				$data[$runtimeID] = $nbt;
 			}
 
-            $palletTag =  new ListTag("", $data);
+            $palletTag = new ListTag("", $data);
 
 			$this->dataForPackets = (new NetworkLittleEndianNBTStream())->write($palletTag);
 		} else {
 	    	$bs = new NetworkBinaryStream();
 	    	$bs->putUnsignedVarInt(count($palletData));
 
-	    	foreach ($palletData as $runtimeID => $blockInfo) {
-		    	if (isset($blockInfo['runtimeID'])) {
+	    	foreach($palletData as $runtimeID => $blockInfo){
+		    	if(isset($blockInfo['runtimeID'])){
 			    	$this->pallet[$blockInfo['id']][$blockInfo['data']] = $blockInfo['runtimeID'];
 		    		$this->palletReverted[$blockInfo['runtimeID']] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
-		    	} else {
+		    	}else{
 			    	$this->pallet[$blockInfo['id']][$blockInfo['data']] = $runtimeID;
 			     	$this->palletReverted[$runtimeID] = [$blockInfo['id'], $blockInfo['data'], $blockInfo['name']];
 		    	}
 
 		    	$bs->putString($blockInfo['name']);
 		    	$bs->putLShort($blockInfo['data']);
-		    	if ($protocolNumber >= ProtocolInfo::PROTOCOL_360) {
+		    	if($protocolNumber >= ProtocolInfo::PROTOCOL_360){
 		        	$bs->putLShort($blockInfo['id']);
 		    	}
 			}
@@ -156,7 +172,7 @@ class BlockPallet {
      * @return array
      */
 	public function getBlockDataByRuntimeID(int $runtimeID) : array{
-		if (isset($this->palletReverted[$runtimeID])) {
+		if(isset($this->palletReverted[$runtimeID])){
 			return $this->palletReverted[$runtimeID];
 		}
 
@@ -170,7 +186,7 @@ class BlockPallet {
      * @return int
      */
 	public function getBlockRuntimeIDByData(int $id, int $meta) : int{
-		if (isset($this->pallet[$id][$meta])) {
+		if(isset($this->pallet[$id][$meta])){
 			return $this->pallet[$id][$meta];
 		}
 

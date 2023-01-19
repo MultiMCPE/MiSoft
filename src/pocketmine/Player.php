@@ -136,6 +136,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
+use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -169,6 +170,7 @@ use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameMode;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
 use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
@@ -1997,7 +1999,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	    	$animations = [];
 	    	foreach($packet->clientData["AnimatedImageData"] as $animation){
-		    	$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"]);
+		    	$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"], ($this->getProtocol() >= ProtocolInfo::PROTOCOL_419) ? $animation["AnimationExpression"] : 0);
 	    	}
 
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
@@ -2305,7 +2307,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$pk = new ResourcePackStackPacket();
 				$manager = $this->server->getResourcePackManager();
 				$pk->resourcePackStack = $manager->getResourceStack();
-				$pk->mustAccept = $manager->resourcePacksRequired();
+				//we don't force here, because it doesn't have user-facing effects
+				//but it does have an annoying side-effect when true: it makes
+				//the client remove its own non-server-supplied resource packs.
+				$pk->mustAccept = false;
+				$pk->experiments = new Experiments([], false);
 				$this->dataPacket($pk);
 				break;
 			case ResourcePackClientResponsePacket::STATUS_COMPLETED:
@@ -2369,10 +2375,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->commandsEnabled = true;
 		$pk->levelId = "";
 		$pk->worldName = $this->server->getMotd();
+		$pk->experiments = new Experiments([], false);
 		$pk->vanillaVersion = $this->vanillaVersion;
 		$this->dataPacket($pk);
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+                $this->sendDataPacket(new ItemComponentPacket());
+            }
 	    	$this->sendDataPacket(new AvailableActorIdentifiersPacket());
 	    	$this->sendDataPacket(new BiomeDefinitionListPacket());
         }
@@ -3403,8 +3413,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				
 				//TODO: destroy-progress level event
 				break;
+			case 'ACTION_START_SWIMMING':
+				break; //TODO
+			case 'ACTION_STOP_SWIMMING':
+				//TODO: handle this when it doesn't spam every damn tick (yet another spam bug!!)
+				break;
+			case 'ACTION_INTERACT_BLOCK': //TODO: ignored (for now)
+				break;
+			case 'ACTION_CREATIVE_PLAYER_DESTROY_BLOCK':
+				//TODO: do we need to handle this?
+				break;
 			default:
-			    break;
+				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());
+				return false;
 		}
 
 		$this->setUsingItem(false);
@@ -3516,6 +3537,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return true;
 	}
 
+	/** @var int|null */
+	private $closingWindowId = null;
+
+	/** @internal */
+	public function getClosingWindowId() : ?int{ return $this->closingWindowId; }
+
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
 		if(!$this->spawned){
 			return true;
@@ -3530,12 +3557,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 		        $pk = new ContainerClosePacket();
 		        $pk->windowId = ContainerIds::INVENTORY;
+		        $pk->server = false;
 		        $this->sendDataPacket($pk);
 		    }
 		    return true;
 		}elseif(isset($this->windowIndex[$packet->windowId])){
+		    $this->closingWindowId = $packet->windowId;
 			(new InventoryCloseEvent($this->windowIndex[$packet->windowId], $this))->call();
 			$this->removeWindow($this->windowIndex[$packet->windowId]);
+			$this->closingWindowId = null;
 			return true;
 		}elseif($packet->windowId === 255){
 			//Closed a fake window

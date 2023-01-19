@@ -39,6 +39,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\NamedTag;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
@@ -98,7 +99,8 @@ class NetworkBinaryStream extends BinaryStream{
 			$animations[] = new SkinAnimation(
 				$skinImage = $this->getSkinImage(),
 				$animationType = ((\unpack("V", $this->get(4))[1] << 32 >> 32)),
-				$animationFrames = ((\unpack("g", $this->get(4))[1]))
+				$animationFrames = ((\unpack("g", $this->get(4))[1])),
+				$expressionType = ($this->getProtocol() >= ProtocolInfo::PROTOCOL_419 ? ((\unpack("V", $this->get(4))[1] << 32 >> 32)) : 0)
 			);
 		}
 		$capeData = $this->getSkinImage();
@@ -160,6 +162,9 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->putSkinImage($animation->getImage());
 			($this->buffer .= (\pack("V", $animation->getType())));
 			($this->buffer .= (\pack("g", $animation->getFrames())));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+			    ($this->buffer .= (\pack("V", $animation->getExpressionType())));
+			}
 		}
 		$this->putSkinImage($skin->getCapeImage());
 		$this->putString($skin->getGeometryData());
@@ -824,6 +829,25 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putVarInt($structureEditorData->structureBlockType);
 		$this->putStructureSettings($structureEditorData->structureSettings);
 		$this->putVarInt($structureEditorData->structureRedstoneSaveMove);
+	}
+
+	public function getNbtRoot() : NamedTag{
+		$offset = $this->getOffset();
+		try{
+			$result = (new NetworkLittleEndianNBTStream())->read($this->getBuffer(), false, $offset, 512);
+			assert($result instanceof NamedTag, "doMultiple is false so we should definitely have a NamedTag here");
+			return $result;
+		}finally{
+			$this->setOffset($offset);
+		}
+	}
+
+	public function getNbtCompoundRoot() : CompoundTag{
+		$root = $this->getNbtRoot();
+		if(!($root instanceof CompoundTag)){
+			throw new \UnexpectedValueException("Expected TAG_Compound root");
+		}
+		return $root;
 	}
 
 	public function readGenericTypeNetworkId() : int{

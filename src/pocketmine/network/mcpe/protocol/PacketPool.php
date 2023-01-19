@@ -33,10 +33,12 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds360;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds385;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds387;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds406;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds419;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_419 => PacketsIds419::class,
         ProtocolInfo::PROTOCOL_406 => PacketsIds406::class,
         ProtocolInfo::PROTOCOL_387 => PacketsIds387::class,
         ProtocolInfo::PROTOCOL_385 => PacketsIds385::class,
@@ -230,6 +232,12 @@ class PacketPool {
 		self::registerPacket(new PositionTrackingDBClientRequestPacket());
 		self::registerPacket(new DebugInfoPacket());
 		self::registerPacket(new PacketViolationWarningPacket());
+		self::registerPacket(new MotionPredictionHintsPacket());
+		self::registerPacket(new AnimateEntityPacket());
+		self::registerPacket(new CameraShakePacket());
+		self::registerPacket(new PlayerFogPacket());
+		self::registerPacket(new CorrectPlayerMovePredictionPacket());
+		self::registerPacket(new ItemComponentPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

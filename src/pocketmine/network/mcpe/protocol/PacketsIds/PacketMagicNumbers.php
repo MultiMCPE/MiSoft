@@ -179,18 +179,24 @@ interface PacketMagicNumbers{
 	public const POSITION_TRACKING_D_B_CLIENT_REQUEST_PACKET = 0x9a;
 	public const DEBUG_INFO_PACKET = 0x9b;
 	public const PACKET_VIOLATION_WARNING_PACKET = 0x9c;
+	public const MOTION_PREDICTION_HINTS_PACKET = 0x9d;
+	public const ANIMATE_ENTITY_PACKET = 0x9e;
+	public const CAMERA_SHAKE_PACKET = 0x9f;
+	public const PLAYER_FOG_PACKET = 0xa0;
+	public const CORRECT_PLAYER_MOVE_PREDICTION_PACKET = 0xa1;
+	public const ITEM_COMPONENT_PACKET = 0xa2;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0x9d;
+	public const EXPLODE_PACKET = 0xa3;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0x9e;
-	public const CONTAINER_SET_CONTENT_PACKET = 0x9f;
-	public const DROP_ITEM_PACKET = 0x100;
-	public const USE_ITEM_PACKET = 0x101;
-	public const REMOVE_BLOCK_PACKET = 0x102;
-	public const COMMAND_STEP_PACKET = 0x103;
-	public const ADD_HANGING_ACTOR_PACKET = 0x104;
-	public const INVENTORY_ACTION_PACKET = 0x105;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x106;
-	public const ADD_ITEM_PACKET = 0x107;
+	public const CONTAINER_SET_SLOT_PACKET = 0xa4;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xa5;
+	public const DROP_ITEM_PACKET = 0xa6;
+	public const USE_ITEM_PACKET = 0xa7;
+	public const REMOVE_BLOCK_PACKET = 0xa8;
+	public const COMMAND_STEP_PACKET = 0xa9;
+	public const ADD_HANGING_ACTOR_PACKET = 0xaa;
+	public const INVENTORY_ACTION_PACKET = 0xab;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xac;
+	public const ADD_ITEM_PACKET = 0xad;
 
 }
