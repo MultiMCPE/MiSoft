@@ -192,7 +192,7 @@ class Transaction{
             }
         }
 
-        $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem());
+        $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem(), false);
 
         return true;
     }
