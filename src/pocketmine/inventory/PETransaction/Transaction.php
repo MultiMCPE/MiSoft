@@ -158,9 +158,9 @@ class Transaction{
 	 */
     public function execute(TransactionQueue $transactionQueue) : bool{
         $player = $transactionQueue->getPlayer();
-        if(!$player->isCreative(true)){
-            $change = $this->getChange();
-            if($change !== null){ //No changes to make, ignore this transaction
+        $change = $this->getChange();
+        if($change !== null){ //No changes to make, ignore this transaction
+            if(!$player->isCreative(true)){
                 /* Verify that we have the required items */
                 if($change["out"] instanceof Item){
                     if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
@@ -180,6 +180,12 @@ class Transaction{
                 }
                 if($change["in"] instanceof Item){
                     $transactionQueue->getInventory()->removeItem($change["in"]);
+                }
+            }else{
+                if(!$transactionQueue->getInventory()->contains($change["in"])){
+                    if(!Item::isCreativeItem($change["in"])){
+                        return $this->error("Creative items list not contains " . $change["in"]);
+                    }
                 }
             }
         }
