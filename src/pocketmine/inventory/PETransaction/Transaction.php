@@ -160,36 +160,27 @@ class Transaction{
         $player = $transactionQueue->getPlayer();
         if(!$player->isCreative(true)){
             $change = $this->getChange();
-            if($change === null){ //No changes to make, ignore this transaction
-                $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem(), false);
-                return true;
-            }
-
-            /* Verify that we have the required items */
-            if($change["out"] instanceof Item){
-                if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
-                    return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
+            if($change !== null){ //No changes to make, ignore this transaction
+                /* Verify that we have the required items */
+                if($change["out"] instanceof Item){
+                    if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
+                        return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
+                    }
                 }
-            }
-            if($change["in"] instanceof Item){
-                if(!$transactionQueue->getInventory()->contains($change["in"])){
-
-                }elseif($this->getInventory()->contains($change["in"])){
-                    $player->getServer()->getLogger()->debug("Transaction: " . $change["in"] . " not founded in transaction inventory, but founded in player inventory. Move to transaction inventory...");
-                    $this->getInventory()->removeItem($change["in"]);
-                    $transactionQueue->getInventory()->addItem($change["in"]);
-                }else{
-                    return $this->error("Player transaction inventory and inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()) . ", Inventory contents: " . implode("; ", $player->getInventory()->getContents()));
+                if($change["in"] instanceof Item){
+                    if(!$transactionQueue->getInventory()->contains($change["in"])){
+                        return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
+                    }
                 }
-            }
 
-			/* All checks passed, make changes to floating inventory
-			* This will not be reached unless all requirements are met */
-            if($change["out"] instanceof Item){
-                $transactionQueue->getInventory()->addItem($change["out"]);
-            }
-            if($change["in"] instanceof Item){
-                $transactionQueue->getInventory()->removeItem($change["in"]);
+		    	/* All checks passed, make changes to floating inventory
+		    	* This will not be reached unless all requirements are met */
+                if($change["out"] instanceof Item){
+                    $transactionQueue->getInventory()->addItem($change["out"]);
+                }
+                if($change["in"] instanceof Item){
+                    $transactionQueue->getInventory()->removeItem($change["in"]);
+                }
             }
         }
 

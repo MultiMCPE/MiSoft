@@ -203,21 +203,6 @@ abstract class BaseInventory implements Inventory{
 		return false;
 	}
 
-	/**
-	 * @param      $slot
-	 * @param Item $item
-	 * @param bool $matchCount
-	 *
-	 * @return bool
-	 */
-	public function slotContains($slot, Item $item, $matchCount = false){
-		if($matchCount){
-			return $this->getItem($slot)->equals($item, true, true, true);
-		}else{
-			return $this->getItem($slot)->equals($item) and $this->getItem($slot)->getCount() >= $item->getCount();
-		}
-	}
-
 	public function all(Item $item) : array{
 		$slots = [];
 		$checkDamage = !$item->hasAnyDamageValue();
