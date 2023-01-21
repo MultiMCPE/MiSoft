@@ -2719,6 +2719,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$this->spawned or !$this->isAlive()){
 			return false;
 		}
+		
+		if(count($packet->trData->getActions()) > 100){
+		        throw new PacketHandlingException("Too many actions in inventory transaction");
+		} // не тестил
 
 		if($this->isSpectator()){
 			$this->sendAllInventories();
