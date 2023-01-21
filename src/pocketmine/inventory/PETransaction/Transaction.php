@@ -182,9 +182,11 @@ class Transaction{
                     $transactionQueue->getInventory()->removeItem($change["in"]);
                 }
             }else{
-                if(!$transactionQueue->getInventory()->contains($change["in"])){
-                    if(!Item::isCreativeItem($change["in"])){
-                        return $this->error("Creative items list not contains " . $change["in"]);
+                if($change["in"] instanceof Item){
+                    if(!$transactionQueue->getInventory()->contains($change["in"])){
+                        if(!Item::isCreativeItem($change["in"])){
+                            return $this->error("Creative items list not contains " . $change["in"]);
+                        }
                     }
                 }
             }
