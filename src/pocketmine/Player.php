@@ -54,6 +54,7 @@ use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
+use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerJumpEvent;
@@ -72,18 +73,10 @@ use pocketmine\form\Form;
 use pocketmine\form\FormValidationException;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\Inventory;
-
 use pocketmine\inventory\BaseInventory;
-use pocketmine\inventory\PETransaction\BaseTransaction;
-use pocketmine\inventory\PETransaction\SimpleTransactionGroup;
-/*use pocketmine\inventory\BigShapedRecipe;
-use pocketmine\inventory\BigShapelessRecipe;*/
-use pocketmine\inventory\FurnaceInventory;
-//use pocketmine\inventory\Inventory;
-use pocketmine\inventory\PlayerInventory;
-/*use pocketmine\inventory\ShapedRecipe;
-use pocketmine\inventory\ShapelessRecipe;*/
-
+use pocketmine\inventory\PETransaction\DropItemTransaction;
+use pocketmine\inventory\PETransaction\Transaction;
+use pocketmine\inventory\PETransaction\TransactionQueue;
 use pocketmine\inventory\PlayerCursorInventory;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
@@ -343,10 +336,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $craftingGrid = null;
 	/** @var CraftingTransaction|null */
 	protected $craftingTransaction = null;
-	/** @var SimpleTransactionGroup */
-	protected $currentTransaction = null;
-	/** @var int */
-	public $craftingType = 0; //0 = 2x2 crafting, 1 = 3x3 crafting, 2 = stonecutter
 
 	/** @var int */
 	protected $messageCounter = 2;
@@ -1847,6 +1836,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->checkNearEntities();
 				Timings::$playerCheckNearEntitiesTimer->stopTiming();
 			}
+
+            if($this->getTransactionQueue() !== null){
+                $this->getTransactionQueue()->execute();
+            }
 		}
 
 		$this->timings->stopTiming();
@@ -2437,8 +2430,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-        $this->craftingType = 0;
-
 		$this->doCloseInventory();
 
 		$message = TextFormat::clean($message, $this->removeFormat);
@@ -2478,8 +2469,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * @return bool
      */
     public function removeBlock(Vector3 $blockVector) : bool{
-        $this->craftingType = 0;
-
 		$this->doCloseInventory();
 
 		$item = $this->inventory->getItemInHand();
@@ -2609,8 +2598,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        $this->craftingType = 0;
-
 		$commandText = $packet->command;
 		if($packet->inputJson !== null){
 			foreach($packet->inputJson as $arg){ //command ordering will be an issue
@@ -2668,8 +2655,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$this->spawned or !$this->isAlive()){
 			return true;
 		}
-
-		$this->craftingType = 0;
 
 		$this->doCloseInventory();
 
@@ -3023,8 +3008,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
 		$facePos = new Vector3($packet->fx, $packet->fy, $packet->fz);
 
-		$this->craftingType = 0;
-
 		if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
 			$this->setGenericFlag(self::DATA_FLAG_ACTION, false);
 
@@ -3096,14 +3079,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         $recipes = $this->server->getCraftingManager()->matchRecipeByOutputs($packet->output);
-        $inventory = $this->getCraftingGrid();
+        $this->transactionQueue->execute();
+        $inventory = $this->transactionQueue->getInventory();
         if(count($packet->input) > 0){
             foreach($packet->input as $item){
                 if($item->isNull()){
                     continue;
-                }
-
-                elseif($item->getMeta() === 0x7fff){
+                }elseif($item->getMeta() === 0x7fff){
                     $item = ItemFactory::get($item->getId(), -1, $item->getCount(), $item->getNamedTag());
                 }
 
@@ -3111,7 +3093,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                     $inventory->addItem($item);
                     $this->getInventory()->removeItem($item);
                 }else{
-                    throw new \Exception("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
+                    throw new \InvalidArgumentException("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
                 }
             }
         }
@@ -3142,18 +3124,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                         $contents[$slot] = $newItem;
                         if($count === 0){
                             break;
-                        }
-
-                        elseif($count < 0){
-                            throw new \Exception("Wait... this is illegally $count $reduce");
+                        }elseif($count < 0){
+                            throw new \InvalidArgumentException("Wait... this is illegally $count $reduce");
                         }
                     }
                 }
 
-                /*if($count > 0){
+                if($count > 0){
                     $canCraft = false;
                     break;
-                }*/
+                }
             }
 
             if($canCraft === true){
@@ -3163,7 +3143,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         }
 
         if($currentRecipe === null){
-            throw new \Exception("Recipe not founded");
+            throw new \InvalidArgumentException("Recipe not founded");
         }
 
         $baseInventory = new class([], 36) extends BaseInventory{
@@ -3213,35 +3193,54 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	$item = $this->inventory->getItem($packet->hotbarSlot);
+        if($this->getProtocol() < ProtocolInfo::PROTOCOL_200){
+            if($packet->inventorySlot === 0 || $packet->inventorySlot === 255){
+                $packet->inventorySlot =- 1;
+            }else{
+                if($packet->inventorySlot < 9){
+                    $this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
+                    $this->sendAllInventories();
 
-	    	if(!$item->equals($packet->item)){
-		    	$this->server->getLogger()->debug("Tried to equip " . $packet->item . " but have " . $item . " in target slot");
-		    	$this->inventory->sendContents($this);
-		    	return false;
-	    	}
+                    return false;
+                }
 
-	    	$this->inventory->equipItem($packet->hotbarSlot);
-	    }else{
-	    	if($packet->inventorySlot === 255){
-		    	$packet->inventorySlot = -1; //Cleared slot
-	    	}else{
-		    	if($packet->inventorySlot < 9){
-			    	$this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
-			    	$this->inventory->sendContents($this);
-			    	return false;
-		    	}
-		    	$packet->inventorySlot -= 9; //Get real inventory slot
-	    	}
-
-	    	$this->inventory->equipItem($packet->hotbarSlot, $packet->inventorySlot);
+                $packet->inventorySlot -= 9;
+            }
         }
 
+        if(!$this->selectHotbarSlot($packet->hotbarSlot, $packet->inventorySlot)){
+            $this->inventory->sendHeldItem($this);
+        }
+
+        return true;
+	}
+
+    /**
+     * @param int $hotbarSlot
+     * @param ?int $inventorySlot
+     * 
+     * @return bool
+     */
+    public function selectHotbarSlot(int $hotbarSlot, ?int $inventorySlot = null) : bool{
+        if(!$this->inventory->isHotbarSlot($hotbarSlot)){
+            return false;
+        }
+
+        if($hotbarSlot === $this->inventory->getHeldItemIndex() && ($inventorySlot === null || $this->inventory->getHeldItemSlot() === $inventorySlot)){
+            return true;
+        }
+
+        $ev = new PlayerItemHeldEvent($this, $this->inventory->getItem($hotbarSlot), $hotbarSlot);
+        $ev->call();
+        if($ev->isCancelled()){
+            return false;
+        }
+
+        $this->inventory->setHeldItemIndex($hotbarSlot, false, $inventorySlot);
         $this->setUsingItem(false);
 
-		return true;
-	}
+        return true;
+    }
 
 	public function handleInteract(InteractPacket $packet) : bool{
 		if(!$this->spawned or !$this->isAlive()){
@@ -3254,8 +3253,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			//when it wasn't.
 			return true;
 		}
-
-        $this->craftingType = 0;
 
 		$this->doCloseInventory();
 
@@ -3491,24 +3488,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        if(!$this->isCreative()){
-            if(!$this->inventory->contains($packet->item)){
-                return true;
-            }
-        }
-
-		$item = $packet->item;
-		$ev = new PlayerDropItemEvent($this, $item);
-		$this->server->getPluginManager()->callEvent($ev);
-		if($ev->isCancelled()){
-			$this->inventory->sendContents($this);
-			return true;
-		}
-
-        $this->inventory->removeItem($item);
-        $this->dropItem($item);
-
-		$this->setGenericFlag(self::DATA_FLAG_ACTION, false);
+        $this->transactionQueue->addTransaction(new DropItemTransaction($packet->item));
 
 		return true;
 	}
@@ -3548,8 +3528,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        $this->craftingType = 0;
-        $this->currentTransaction = null;
+        if($this->transactionQueue instanceof TransactionQueue){
+            $this->transactionQueue->onCloseWindow();
+        }
 
 		$this->doCloseInventory();
 
@@ -3576,86 +3557,39 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
-		if($this->spawned === false or !$this->isAlive()){
-			return true;
-		}
+        if($packet->slot < 0){
+            throw new \InvalidArgumentException("Slot " . $packet->slot . " is invalid");
+        }
 
-		if($packet->slot < 0){
-			return false;
-		}
+        switch($packet->windowid){
+            case ContainerIds::INVENTORY:
+                if($packet->slot >= $this->inventory->getSize()){
+                    throw new \InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                }
 
-		switch($packet->windowid){
-			case ContainerIds::INVENTORY: //Normal inventory change
-				if($packet->slot >= $this->inventory->getSize()){
-					return false;
-				}
+                $transaction = new Transaction($this->inventory, $packet->slot, $packet->item);
+                break;
+            case ContainerIds::ARMOR:
+                if($packet->slot >= 4){
+                    throw new \InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                }
 
-				$transaction = new BaseTransaction($this->inventory, $packet->slot, $this->inventory->getItem($packet->slot), $packet->item);
-				break;
-			case ContainerIds::ARMOR: //Armour change
-				if($packet->slot >= 4){
-					return false;
-				}
+                $transaction = new Transaction($this->armorInventory, $packet->slot, $packet->item);
+                break;
+            case ContainerIds::HOTBAR:
+                $this->inventory->setHotbarSlotIndex($packet->hotbarSlot, $packet->slot - 9);
+                return true;
+            default:
+                $inventory = $this->getWindow($packet->windowid);
+                if(!($inventory instanceof Inventory)){
+                    throw new \InvalidArgumentException("Inventory " . $packet->windowid . " not founded");
+                }
 
-				$transaction = new BaseTransaction($this->armorInventory, $packet->slot, $this->armorInventory->getItem($packet->slot), $packet->item);
-				break;
-			case ContainerIds::HOTBAR: //Hotbar link update
-				//hotbarSlot 0-8, slot 9-44
-				$this->inventory->setHotbarSlotIndex($packet->hotbarSlot, $packet->slot - 9);
-				return true;
-			default:
-				if(!isset($this->windowIndex[$packet->windowid])){
-					return false; //unknown windowID and/or not matching any open windows
-				}
+                $transaction = new Transaction($inventory, $packet->slot, $packet->item);
+                break;
+        }
 
-				$this->craftingType = 0;
-				$inv = $this->windowIndex[$packet->windowid];
-				$transaction = new BaseTransaction($inv, $packet->slot, $inv->getItem($packet->slot), $packet->item);
-				break;
-		}
-
-		if($transaction->getSourceItem()->equals($transaction->getTargetItem()) and $transaction->getTargetItem()->getCount() === $transaction->getSourceItem()->getCount()){ //No changes!
-			//No changes, just a local inventory update sent by the client
-			return true;
-		}
-
-		if($this->currentTransaction === null or $this->currentTransaction->getCreationTime() < (microtime(true) - 8)){
-			if($this->currentTransaction !== null){
-				foreach($this->currentTransaction->getInventories() as $inventory){
-					if($inventory instanceof PlayerInventory){
-						$this->armorInventory->sendContents($this);
-					}
-					$inventory->sendContents($this);
-				}
-			}
-			$this->currentTransaction = new SimpleTransactionGroup($this);
-		}
-
-		$this->currentTransaction->addTransaction($transaction);
-
-		if($this->currentTransaction->canExecute()){
-			$achievements = [];
-			foreach($this->currentTransaction->getTransactions() as $ts){
-				$inv = $ts->getInventory();
-				if($inv instanceof FurnaceInventory){
-					if($ts->getSlot() === 2){
-						switch($inv->getResult()->getId()){
-							case Item::IRON_INGOT:
-								$achievements[] = "acquireIron";
-								break;
-						}
-					}
-				}
-			}
-
-			if($this->currentTransaction->execute()){
-				foreach($achievements as $a){
-					$this->awardAchievement($a);
-				}
-			}
-
-			$this->currentTransaction = null;
-		}
+        $this->transactionQueue->addTransaction($transaction);
 
 		return true;
 	}
@@ -3698,8 +3632,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$this->spawned or !$this->isAlive()){
 			return true;
 		}
-
-		$this->craftingType = 0;
 
 		$this->doCloseInventory();
 
@@ -4280,8 +4212,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->perm->clearPermissions();
 				$this->perm = null;
 			}
-
-			$this->currentTransaction = null;
 		}
 	}
 
@@ -4394,8 +4324,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->setBanned(true);
 			return;
 		}
-
-        $this->craftingType = 0;
 
 		$ev = new PlayerRespawnEvent($this, $this->getSpawn());
 		$ev->call();

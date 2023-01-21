@@ -34,6 +34,7 @@ use pocketmine\inventory\EntityInventoryEventProcessor;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\OldPlayerInventory;
+use pocketmine\inventory\PETransaction\TransactionQueue;
 use pocketmine\item\Consumable;
 use pocketmine\item\Durable;
 use pocketmine\item\enchantment\Enchantment;
@@ -78,6 +79,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	/** @var EnderChestInventory */
 	protected $enderChestInventory;
+
+    /** @var TransactionQueue */
+    protected $transactionQueue = null;
 
 	/** @var UUID */
 	protected $uuid;
@@ -608,6 +612,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		return $this->enderChestInventory;
 	}
 
+    public function getTransactionQueue() : ?TransactionQueue{
+        return $this->transactionQueue;
+    }
+
 	/**
 	 * For Human entities which are not players, sets their properties such as nametag, skin and UUID from NBT.
 	 */
@@ -627,6 +635,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 		$this->inventory = ($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130) ? new OldPlayerInventory($this) : new PlayerInventory($this);
 		$this->enderChestInventory = new EnderChestInventory();
+		if($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+            $this->transactionQueue = new TransactionQueue($this);
+		}
 		$this->initHumanData();
 
 		$inventoryTag = $this->namedtag->getListTag("Inventory");

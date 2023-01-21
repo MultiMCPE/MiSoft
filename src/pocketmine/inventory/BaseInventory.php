@@ -25,6 +25,7 @@ namespace pocketmine\inventory;
 
 use pocketmine\event\inventory\InventoryOpenEvent;
 use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\item\ItemFactory;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
@@ -459,6 +460,12 @@ abstract class BaseInventory implements Inventory{
 		    	$pk->windowid = $id;
 		    	$pk->targetEid = $player->getId();
 		    	$pk->slots = $items;
+                if($this instanceof PlayerInventory){
+                    for($i = 0; $i < $this->getHotbarSize(); $i++){
+                        $pk->slots[] = ItemFactory::get(ItemIds::AIR, 0);
+                        $pk->hotbar[$i] = $this->getHotbarSize() + $this->getHotbarSlotIndex($i);
+                    }
+                }
 			    $player->dataPacket(clone $pk);
 			}
 		}
