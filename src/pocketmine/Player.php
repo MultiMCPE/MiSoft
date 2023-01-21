@@ -3085,7 +3085,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             foreach($packet->input as $item){
                 if($item->isNull()){
                     continue;
-                }elseif($item->getMeta() === 0x7fff){
+                }elseif($item->getDamage() === 0x7fff){
                     $item = ItemFactory::get($item->getId(), -1, $item->getCount(), $item->getNamedTag());
                 }
 
