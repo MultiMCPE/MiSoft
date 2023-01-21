@@ -3118,7 +3118,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                         $newItem = (clone $item)->setCount($item->getCount() - $reduce);
 
                         if($newItem->getCount() === 0){
-                            $newItem = ItemFactory::air();
+                            $newItem = ItemFactory::get(Item::AIR, 0);
                         }
 
                         $actions[] = new SlotChangeAction($inventory, $slot, $item, $newItem);
