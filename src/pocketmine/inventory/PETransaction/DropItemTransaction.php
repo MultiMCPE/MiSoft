@@ -50,12 +50,16 @@ class DropItemTransaction extends Transaction{
     public function execute(TransactionQueue $transactionQueue) : bool{
         $player = $transactionQueue->getPlayer();
         $item = $this->getTargetItem();
-        if(!$player->isCreative()){
-            if(!$player->getInventory()->contains($item)){
+        if(!$player->isCreative(true)){
+            if(!$transactionQueue->getInventory()->contains($item)){
                 return $this->error("Player transaction inventory not contains $item");
             }
 
-            $player->getInventory()->removeItem($item);
+            $transactionQueue->getInventory()->removeItem($item);
+        }else{
+            if(!Item::isCreativeItem($item)){
+                return $this->error("Creative items list not contains $item");
+            }
         }
 
         $ev = new PlayerDropItemEvent($player, $item);

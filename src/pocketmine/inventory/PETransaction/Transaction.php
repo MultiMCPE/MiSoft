@@ -158,9 +158,10 @@ class Transaction{
 	 */
     public function execute(TransactionQueue $transactionQueue) : bool{
         $player = $transactionQueue->getPlayer();
-        if(!$player->isCreative()){
+        if(!$player->isCreative(true)){
             $change = $this->getChange();
             if($change === null){ //No changes to make, ignore this transaction
+                $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem(), false);
                 return true;
             }
 
@@ -171,7 +172,7 @@ class Transaction{
                 }
             }
             if($change["in"] instanceof Item){
-                if($transactionQueue->getInventory()->contains($change["in"])){
+                if(!$transactionQueue->getInventory()->contains($change["in"])){
 
                 }elseif($this->getInventory()->contains($change["in"])){
                     $player->getServer()->getLogger()->debug("Transaction: " . $change["in"] . " not founded in transaction inventory, but founded in player inventory. Move to transaction inventory...");
