@@ -550,7 +550,7 @@ class Level implements ChunkManager, Metadatable{
 	 * @param bool    $isBabyMob
 	 * @param bool    $disableRelativeVolume If true, all players receiving this sound-event will hear the sound at full volume regardless of distance
 	 */
-	public function broadcastLevelSoundEvent(Vector3 $pos, string $soundName, int $extraData = -1, int $entityTypeId = -1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
+	public function broadcastLevelSoundEvent(Vector3 $pos, string $soundName, int $extraData = -1, int $entityTypeId = 1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
 		$pk = new LevelSoundEventPacket();
 		$pk->sound = $soundName;
 		$pk->extraData = $extraData;

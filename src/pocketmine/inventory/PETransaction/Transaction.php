@@ -160,34 +160,30 @@ class Transaction{
         $player = $transactionQueue->getPlayer();
         $change = $this->getChange();
         if($change !== null){ //No changes to make, ignore this transaction
-            if(!$player->isCreative(true)){
-                /* Verify that we have the required items */
-                if($change["out"] instanceof Item){
-                    if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
-                        return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
-                    }
+            /* Verify that we have the required items */
+            if($change["out"] instanceof Item){
+                if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
+                    return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
                 }
-                if($change["in"] instanceof Item){
-                    if(!$transactionQueue->getInventory()->contains($change["in"])){
+            }
+            if($change["in"] instanceof Item){
+                if(!$transactionQueue->getInventory()->contains($change["in"])){
+                    if(!$player->isCreative(true)){
                         return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
+                    }elseif(!Item::isCreativeItem($change["in"])){
+                        return $this->error("Creative items list not contains " . $change["in"]);
                     }
                 }
+            }
 
-		    	/* All checks passed, make changes to floating inventory
-		    	* This will not be reached unless all requirements are met */
+            if(!$player->isCreative(true)){
+		        /* All checks passed, make changes to floating inventory
+		        * This will not be reached unless all requirements are met */
                 if($change["out"] instanceof Item){
                     $transactionQueue->getInventory()->addItem($change["out"]);
                 }
                 if($change["in"] instanceof Item){
                     $transactionQueue->getInventory()->removeItem($change["in"]);
-                }
-            }else{
-                if($change["in"] instanceof Item){
-                    if(!$transactionQueue->getInventory()->contains($change["in"])){
-                        if(!Item::isCreativeItem($change["in"])){
-                            return $this->error("Creative items list not contains " . $change["in"]);
-                        }
-                    }
                 }
             }
         }
