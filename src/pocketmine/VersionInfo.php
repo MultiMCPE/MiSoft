@@ -30,6 +30,6 @@ const _VERSION_INFO_INCLUDED = true;
 
 
 const NAME = "IronSoft";
-const BASE_VERSION = "0.9.0";
+const BASE_VERSION = "0.9.1";
 const IS_DEVELOPMENT_BUILD = true;
 const BUILD_NUMBER = 0;
