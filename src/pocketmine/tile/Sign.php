@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\tile;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
@@ -140,6 +141,11 @@ class Sign extends Spawnable{
 
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setString(self::TAG_TEXT_BLOB, implode("\n", $this->text));
+
+		for($i = 1; $i <= 4; ++$i){ //Backwards-compatibility
+			$textKey = sprintf(self::TAG_TEXT_LINE, $i);
+			$nbt->setString($textKey, $this->getLine($i - 1));
+		}
 	}
 
 	public function updateCompoundTag(CompoundTag $nbt, Player $player) : bool{
@@ -147,9 +153,10 @@ class Sign extends Spawnable{
 			return false;
 		}
 
+        $lines = [];
 		if($nbt->hasTag(self::TAG_TEXT_BLOB, StringTag::class)){
 			$lines = self::fixTextBlob($nbt->getString(self::TAG_TEXT_BLOB));
-		}else{
+		}elseif($player->getProtocol() < ProtocolInfo::PROTOCOL_130){
 			$lines = [
 				$nbt->getString("Text1"),
 				$nbt->getString("Text2"),

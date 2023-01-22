@@ -721,9 +721,11 @@ class NetworkBinaryStream extends BinaryStream{
 		$link->fromEntityUniqueId = $this->getEntityUniqueId();
 		$link->toEntityUniqueId = $this->getEntityUniqueId();
 		$link->type = (\ord($this->get(1)));
-		$link->immediate = (($this->get(1) !== "\x00"));
-		if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
-		    $link->causedByRider = (($this->get(1) !== "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
+	    	$link->immediate = (($this->get(1) !== "\x00"));
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		        $link->causedByRider = (($this->get(1) !== "\x00"));
+	    	}
 		}
 
 		return $link;
@@ -737,9 +739,11 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putEntityUniqueId($link->fromEntityUniqueId);
 		$this->putEntityUniqueId($link->toEntityUniqueId);
 		($this->buffer .= \chr($link->type));
-		($this->buffer .= ($link->immediate ? "\x01" : "\x00"));
-		if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
-		    ($this->buffer .= ($link->causedByRider ? "\x01" : "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
+	    	($this->buffer .= ($link->immediate ? "\x01" : "\x00"));
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		        ($this->buffer .= ($link->causedByRider ? "\x01" : "\x00"));
+	    	}
 		}
 	}
 

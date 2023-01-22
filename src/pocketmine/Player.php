@@ -2719,14 +2719,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$this->spawned or !$this->isAlive()){
 			return false;
 		}
-		
-		if(count($packet->trData->getActions()) > 100){
-		        throw new PacketHandlingException("Too many actions in inventory transaction");
-		} // не тестил
 
 		if($this->isSpectator()){
 			$this->sendAllInventories();
 			return true;
+		}
+
+		if(count($packet->actions) > 100){
+		    throw new \UnexpectedValueException("Too many actions in inventory transaction");
 		}
 
 		/** @var InventoryAction[] $actions */
@@ -3344,6 +3344,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 
 		switch($action){
+		    case 'ACTION_RELEASE_ITEM':
+		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+					if($this->isUsingItem()){
+						$item = $this->inventory->getItemInHand();
+						if($this->hasItemCooldown($item)){
+							$this->inventory->sendContents($this);
+							return false;
+						}
+						if($item->onReleaseUsing($this)){
+							$this->resetItemCooldown($item);
+							$this->inventory->setItemInHand($item);
+						}
+					}else{
+						break;
+					}
+		        }
+
+		        break;
 			case 'ACTION_START_BREAK':
 				if($pos->distanceSquared($this) > 10000){
 					break;
@@ -3600,7 +3618,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{
-		if($packet->entityUniqueId !== $this->getId()){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130 && $packet->entityUniqueId !== $this->getId()){
 			return false; //TODO
 		}
 
