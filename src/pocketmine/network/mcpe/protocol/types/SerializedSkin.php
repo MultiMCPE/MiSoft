@@ -45,6 +45,7 @@ class SerializedSkin{
     public static function fromSkin(Skin $skin) : SerializedSkin{
         return new self(
             $skin->getSkinId(),
+            "",
             SkinImage::fromLegacy($skin->getSkinData()),
             "",
             $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
@@ -79,6 +80,8 @@ class SerializedSkin{
 
     /** @var string */
     protected $skinId;
+	/** @var string */
+	protected $playFabId;
     /** @var SkinImage */
     protected $skinImage;
     /** @var string */
@@ -114,6 +117,7 @@ class SerializedSkin{
 
 	/**
 	 * @param string          $skinId
+	 * @param string          $playFabId
 	 * @param SkinImage       $skinImage
 	 * @param string          $capeId
 	 * @param SkinImage       $capeImage
@@ -130,7 +134,7 @@ class SerializedSkin{
 	 * @param \SplFixedArray  $personaPieces
 	 * @param \SplFixedArray  $pieceTintColors
 	 */
-    public function __construct(string $skinId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, \SplFixedArray $personaPieces, \SplFixedArray $pieceTintColors){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, \SplFixedArray $personaPieces, \SplFixedArray $pieceTintColors){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === \false){
@@ -146,6 +150,7 @@ class SerializedSkin{
 
         $resourcePatch = json_encode($decodedPatch);
         $this->skinId = $skinId;
+        $this->playFabId = $playFabId;
         $this->skinImage = $skinImage;
         $this->capeId = $capeId;
         $this->capeImage = $capeImage;
@@ -168,6 +173,13 @@ class SerializedSkin{
      */
     public function getSkinId() : string{
         return $this->skinId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlayFabId() : string{
+        return $this->playFabId;
     }
 
     /**

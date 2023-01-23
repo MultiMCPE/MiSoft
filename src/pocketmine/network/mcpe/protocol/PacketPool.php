@@ -35,10 +35,12 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds387;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds406;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds419;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds422;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds428;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_428 => PacketsIds428::class,
         ProtocolInfo::PROTOCOL_422 => PacketsIds422::class,
         ProtocolInfo::PROTOCOL_419 => PacketsIds419::class,
         ProtocolInfo::PROTOCOL_406 => PacketsIds406::class,
@@ -241,6 +243,7 @@ class PacketPool {
 		self::registerPacket(new CorrectPlayerMovePredictionPacket());
 		self::registerPacket(new ItemComponentPacket());
 		self::registerPacket(new FilterTextPacket());
+		self::registerPacket(new ClientboundDebugRendererPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

@@ -91,6 +91,9 @@ class NetworkBinaryStream extends BinaryStream{
 
 	public function getSkin(int $playerProtocol) : Skin{
 		$skinId = $this->getString();
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_425){
+	    	$skinPlayFabId = $this->getString();
+		}
 		$skinResourcePatch = $this->getString();
 		$skinData = $this->getSkinImage();
 		$animationCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
@@ -149,12 +152,15 @@ class NetworkBinaryStream extends BinaryStream{
             $pieceTintColors = \SplFixedArray::fromArray([]);
 		}
 
-        return (new SerializedSkin($skinId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
+        return (new SerializedSkin($skinId, $skinPlayFabId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
 	public function putSkin(Skin $skin, int $playerProtocol){
 	    $skin = SerializedSkin::fromSkin($skin);
 		$this->putString($skin->getSkinId());
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_425){
+		    $this->putString($skin->getPlayFabId());
+		}
 		$this->putString($skin->getResourcePatch());
 		$this->putSkinImage($skin->getSkinImage());
 		($this->buffer .= (\pack("V", count($skin->getAnimationFrames()))));

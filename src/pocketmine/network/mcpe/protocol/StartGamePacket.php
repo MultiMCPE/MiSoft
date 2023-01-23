@@ -36,7 +36,7 @@ use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
 use pocketmine\network\mcpe\protocol\types\GeneratorType;
 use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
-use pocketmine\network\mcpe\protocol\types\PlayerMovementType;
+use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
 use function count;
@@ -170,8 +170,8 @@ class StartGamePacket extends DataPacket{
 	public $premiumWorldTemplateId = "";
 	/** @var bool */
 	public $isTrial = false;
-	/** @var int */
-	public $playerMovementType = PlayerMovementType::LEGACY;
+	/** @var PlayerMovementSettings */
+	public $playerMovementSettings;
 	/** @var bool */
 	public $isMovementServerAuthoritative = false;
 	/** @var int */
@@ -316,7 +316,7 @@ class StartGamePacket extends DataPacket{
 	   	$this->isTrial = (($this->get(1) !== "\x00"));
 	   	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
 	   	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	   	        $this->playerMovementType = $this->getVarInt();
+	   	        $this->playerMovementSettings = PlayerMovementSettings::read($this);
 	   	    }else{
 	         	$this->isMovementServerAuthoritative = (($this->get(1) !== "\x00"));
 	   	    }
@@ -493,7 +493,7 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->isTrial ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        $this->putVarInt($this->playerMovementType);
+		        $this->playerMovementSettings->write($this);
 		    }else{
 	        	($this->buffer .= ($this->isMovementServerAuthoritative ? "\x01" : "\x00"));
 		    }

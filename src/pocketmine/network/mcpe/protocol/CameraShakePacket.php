@@ -33,18 +33,24 @@ class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
 	public const TYPE_POSITIONAL = 0;
 	public const TYPE_ROTATIONAL = 1;
 
+	public const ACTION_ADD = 0;
+	public const ACTION_STOP = 1;
+
 	/** @var float */
 	private $intensity;
 	/** @var float */
 	private $duration;
 	/** @var int */
 	private $shakeType;
+	/** @var int */
+	private $shakeAction;
 
-	public static function create(float $intensity, float $duration, int $shakeType) : self{
+	public static function create(float $intensity, float $duration, int $shakeType, int $shakeAction) : self{
 		$result = new self;
 		$result->intensity = $intensity;
 		$result->duration = $duration;
 		$result->shakeType = $shakeType;
+		$result->shakeAction = $shakeAction;
 		return $result;
 	}
 
@@ -54,16 +60,24 @@ class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
 
 	public function getShakeType() : int{ return $this->shakeType; }
 
+	public function getShakeAction() : int{ return $this->shakeAction; }
+
 	protected function decodePayload() : void{
 		$this->intensity = ((\unpack("g", $this->get(4))[1]));
 		$this->duration = ((\unpack("g", $this->get(4))[1]));
 		$this->shakeType = (\ord($this->get(1)));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
+		    $this->shakeAction = (\ord($this->get(1)));
+		}
 	}
 
 	protected function encodePayload() : void{
 		($this->buffer .= (\pack("g", $this->intensity)));
 		($this->buffer .= (\pack("g", $this->duration)));
 		($this->buffer .= \chr($this->shakeType));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
+		    ($this->buffer .= \chr($this->shakeAction));
+		}
 	}
 
 	public function handle(NetworkSession $handler) : bool{
