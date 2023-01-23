@@ -92,13 +92,15 @@ class NetworkInventoryAction{
 	public $oldItem;
 	/** @var Item */
 	public $newItem;
+	/** @var int|null */
+	public $newItemStackId = null;
 
 	/**
 	 * @param InventoryTransactionPacket $packet
 	 *
 	 * @return $this
 	 */
-	public function read(InventoryTransactionPacket $packet){
+	public function read(InventoryTransactionPacket $packet, bool $hasItemStackIds){
 		$this->sourceType = $packet->getUnsignedVarInt();
 
 		switch($this->sourceType){
@@ -122,8 +124,10 @@ class NetworkInventoryAction{
 		$this->oldItem = $packet->getSlot($packet->getProtocol());
 		$this->newItem = $packet->getSlot($packet->getProtocol());
 
-        if($packet->getProtocol() === ProtocolInfo::PROTOCOL_392){
-            $packet->get(1);
+        if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+	    	if($hasItemStackIds){
+		    	$this->newItemStackId = $packet->readGenericTypeNetworkId();
+	    	}
         }
 
 		return $this;
@@ -132,7 +136,7 @@ class NetworkInventoryAction{
 	/**
 	 * @param InventoryTransactionPacket $packet
 	 */
-	public function write(InventoryTransactionPacket $packet){
+	public function write(InventoryTransactionPacket $packet, bool $hasItemStackIds){
 		$packet->putUnsignedVarInt($this->sourceType);
 
 		switch($this->sourceType){
@@ -156,8 +160,13 @@ class NetworkInventoryAction{
 		$packet->putSlot($this->oldItem, $packet->getProtocol());
 		$packet->putSlot($this->newItem, $packet->getProtocol());
 
-		if($packet->getProtocol() === ProtocolInfo::PROTOCOL_392){
-		    ($packet->buffer .= (\chr(0)));
+		if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+	    	if($hasItemStackIds){
+		    	if($this->newItemStackId === null){
+			    	throw new \InvalidStateException("Item stack ID for newItem must be provided");
+		    	}
+		    	$packet->writeGenericTypeNetworkId($this->newItemStackId);
+	    	}
 		}
 	}
 

@@ -293,6 +293,13 @@ class SerializedSkin{
      * @return Skin
      */
     public function toSkin() : Skin{
+		if($this->isPersonaSkin()){
+			return new Skin(
+			    "Standard_Custom",
+			    str_repeat(random_bytes(3) . "\xff", 2048)
+			);
+		}
+
         $skinGeometryData = (new Comment())->decode($this->geometryData, true);
         if(isset($skinGeometryData["format_version"])){
             unset($skinGeometryData["format_version"]);

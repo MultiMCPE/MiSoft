@@ -34,6 +34,12 @@ abstract class ProtocolConvertor {
      */
 	public final static function convertProtocol(int $playerProtocol) : int{
 		switch ($playerProtocol) {
+			case ProtocolInfo::PROTOCOL_427:
+			case ProtocolInfo::PROTOCOL_425:
+			case ProtocolInfo::PROTOCOL_424:
+			case ProtocolInfo::PROTOCOL_423:
+			case ProtocolInfo::PROTOCOL_422:
+			    return ProtocolInfo::PROTOCOL_422;
 			case ProtocolInfo::PROTOCOL_421:
 			case ProtocolInfo::PROTOCOL_420:
 			case ProtocolInfo::PROTOCOL_419:
@@ -177,9 +183,11 @@ abstract class ProtocolConvertor {
      */
 	public static function convertChunkProtocol(int $playerProtocol) : int{
 		switch ($playerProtocol) {
+            case ProtocolInfo::PROTOCOL_422:
 			case ProtocolInfo::PROTOCOL_419:
 			case ProtocolInfo::PROTOCOL_407:
 			case ProtocolInfo::PROTOCOL_406:
+			    return ProtocolInfo::PROTOCOL_406;
 			case ProtocolInfo::PROTOCOL_400:
 			case ProtocolInfo::PROTOCOL_393:
 			case ProtocolInfo::PROTOCOL_392:
@@ -238,6 +246,7 @@ abstract class ProtocolConvertor {
      */
 	public static function convertCraftingProtocol(int $playerProtocol) : int{
 		switch ($playerProtocol) {
+		    case ProtocolInfo::PROTOCOL_422:
 			case ProtocolInfo::PROTOCOL_419:
 			case ProtocolInfo::PROTOCOL_407:
 			case ProtocolInfo::PROTOCOL_406:

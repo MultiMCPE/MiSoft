@@ -51,6 +51,8 @@ class InventoryTransactionPacket extends DataPacket{
 
 	/** @var int */
 	public $transactionType;
+	/** @var bool */
+	public $hasItemStackIds;
 
 	/**
 	 * @var bool
@@ -92,11 +94,11 @@ class InventoryTransactionPacket extends DataPacket{
 
 		$this->transactionType = $this->getUnsignedVarInt();
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393){
-            $this->get(1);
+            $this->hasItemStackIds = (($this->get(1) !== "\x00"));
         }
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->actions[] = $action = (new NetworkInventoryAction())->read($this);
+			$this->actions[] = $action = (new NetworkInventoryAction())->read($this, $this->hasItemStackIds ?? false);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
                 if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
@@ -120,13 +122,13 @@ class InventoryTransactionPacket extends DataPacket{
 		        	}
                 }else{
                     if(
-			        	$networkInventoryAction->sourceType === NetworkInventoryAction::SOURCE_TODO and (
-				        	$networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
-				        	$networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_TODO and (
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
 			        	)
 		        	){
 			        	$this->isCraftingPart = true;
-			        	if($networkInventoryAction->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT){
+			        	if($action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT){
 				        	$this->isFinalCraftingPart = true;
 			        	}
 			    	}
@@ -187,10 +189,13 @@ class InventoryTransactionPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->transactionType);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393){
+            ($this->buffer .= ($this->hasItemStackIds ? "\x01" : "\x00"));
+		}
 
 		$this->putUnsignedVarInt(count($this->actions));
 		foreach($this->actions as $action){
-			$action->write($this);
+			$action->write($this, $this->hasItemStackIds ?? false);
 		}
 
 		switch($this->transactionType){
