@@ -130,8 +130,8 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
-use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
+use pocketmine\network\mcpe\protocol\ItemComponentPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
@@ -2381,7 +2381,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    	$this->sendDataPacket(new BiomeDefinitionListPacket());
         }
 
-		$this->level->sendTime($this);
+		//$this->level->sendTime($this);
 
 		$this->sendAttributes(true);
 		$this->setNameTagVisible();
@@ -2410,8 +2410,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->sendData($this);
 
 		$this->sendAllInventories();
-		$this->inventory->sendCreativeContents();
-		$this->inventory->sendHeldItem($this);
+		//$this->inventory->sendCreativeContents();
+		//$this->inventory->sendHeldItem($this);
         $this->server->getCraftingManager()->sendCraftingData($this);
 
 		$this->server->addOnlinePlayer($this);
@@ -4475,7 +4475,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->cursorInventory = new PlayerCursorInventory($this);
 		$this->addWindow($this->cursorInventory, ContainerIds::UI, true);
 
-		$this->craftingGrid = new CraftingGrid($this, 6/*CraftingGrid::SIZE_SMALL*/);
+		$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
 
 		//TODO: more windows
 	}

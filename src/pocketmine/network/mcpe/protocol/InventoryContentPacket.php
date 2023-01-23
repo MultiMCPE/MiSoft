@@ -55,11 +55,7 @@ class InventoryContentPacket extends DataPacket{
 				if($item->getId() === 0){
 					$this->putVarInt(0);
 				}else{
-				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-				        $this->putVarInt(1);
-				    }else{
-				    	$this->putVarInt($index++);
-				    }
+			     	$this->putVarInt($index++);
 				}
 			}
 			$this->putSlot($item, $this->getProtocol());

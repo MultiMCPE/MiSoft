@@ -486,8 +486,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 * @param bool $value
 	 */
 	public function setNameTagAlwaysVisible(bool $value = true) : void{
-	    $this->setGenericFlag(self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, $value);
-		$this->propertyManager->setByte(self::DATA_ALWAYS_SHOW_NAMETAG, $value ? 1 : 0);
+	    $this->propertyManager->setByte(self::DATA_ALWAYS_SHOW_NAMETAG, $value ? 1 : 0);
 	}
 
 	/**

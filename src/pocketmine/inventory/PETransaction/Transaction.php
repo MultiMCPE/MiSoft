@@ -176,15 +176,13 @@ class Transaction{
                 }
             }
 
-            if(!$player->isCreative(true)){
-		        /* All checks passed, make changes to floating inventory
-		        * This will not be reached unless all requirements are met */
-                if($change["out"] instanceof Item){
-                    $transactionQueue->getInventory()->addItem($change["out"]);
-                }
-                if($change["in"] instanceof Item){
-                    $transactionQueue->getInventory()->removeItem($change["in"]);
-                }
+		    /* All checks passed, make changes to floating inventory
+		    * This will not be reached unless all requirements are met */
+            if($change["out"] instanceof Item){
+                $transactionQueue->getInventory()->addItem($change["out"]);
+            }
+            if($change["in"] instanceof Item){
+                $transactionQueue->getInventory()->removeItem($change["in"]);
             }
         }
 

@@ -221,9 +221,7 @@ class StartGamePacket extends DataPacket{
 	    	$this->eduMode = (($this->get(1) !== "\x00"));
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
-		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
-	        	$this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
-		    }
+	        $this->hasEduFeaturesEnabled = (($this->get(1) !== "\x00"));
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	        	$this->eduProductUUID = $this->getString();
 	    	}
@@ -238,9 +236,7 @@ class StartGamePacket extends DataPacket{
 	    	$this->hasLANBroadcast = (($this->get(1) !== "\x00"));
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	        	$this->xboxLiveBroadcastMode = $this->getVarInt();
-	        	if($this->getProtocol() < ProtocolInfo::PROTOCOL_406 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	                $this->platformBroadcastMode = $this->getVarInt();
-	        	}
+	            $this->platformBroadcastMode = $this->getVarInt();
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() < ProtocolInfo::PROTOCOL_400){
 	        	    $this->get(1);
 	        	}
@@ -398,9 +394,9 @@ class StartGamePacket extends DataPacket{
 		    if($this->getProtocol() === ProtocolInfo::PROTOCOL_400){
 		        ($this->buffer .= (\chr(0)));
 		    }
-	    	($this->buffer .= ($this->eduMode ? "\x01" : "\x00"));
-		}else{
 		    $this->putVarInt($this->eduEditionOffer);
+		}else{
+		    ($this->buffer .= ($this->eduMode ? "\x01" : "\x00"));
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
 	    	($this->buffer .= ($this->hasEduFeaturesEnabled ? "\x01" : "\x00"));
@@ -418,9 +414,7 @@ class StartGamePacket extends DataPacket{
 	    	($this->buffer .= ($this->hasLANBroadcast ? "\x01" : "\x00"));
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	        	$this->putVarInt($this->xboxLiveBroadcastMode);
-	        	if($this->getProtocol() < ProtocolInfo::PROTOCOL_406 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		            $this->putVarInt($this->platformBroadcastMode);
-	        	}
+		        $this->putVarInt($this->platformBroadcastMode);
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() < ProtocolInfo::PROTOCOL_400){
 		            ($this->buffer .= (\chr(0)));
 	        	}
@@ -507,23 +501,22 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= (\pack("VV", $this->currentTick & 0xFFFFFFFF, $this->currentTick >> 32)));
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		       	$this->putUnsignedVarInt(0);
-	        }
 	    	$this->putVarInt($this->enchantmentSeed);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
                 if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
                     $this->put(self::getBlockPalletData($this->getProtocol()));
+                }else{
+                    $this->putUnsignedVarInt(0);
                 }
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	            	if($this->itemTable === null){
 		            	if(self::$itemTableCache === null){
-			            	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));
+			            	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true), $this->getProtocol());
 		              	}
 		            	($this->buffer .= self::$itemTableCache);
 	            	}else{
-		            	($this->buffer .= self::serializeItemTable($this->itemTable));
+		            	($this->buffer .= self::serializeItemTable($this->itemTable, $this->getProtocol()));
 	            	}
 		        }
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
@@ -536,13 +529,15 @@ class StartGamePacket extends DataPacket{
         }
 	}
 
-	private static function serializeItemTable(array $table) : string{
+	private static function serializeItemTable(array $table, int $playerProtocol) : string{
 		$stream = new NetworkBinaryStream();
 		$stream->putUnsignedVarInt(count($table));
 		foreach($table as $name => $legacyId){
 			$stream->putString($name);
 			$stream->putLShort($legacyId);
-			$stream->buffer .= "\x00"; // bool
+			if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		    	$stream->buffer .= "\x00"; // bool
+			}
 		}
 		return $stream->getBuffer();
 	}

@@ -194,9 +194,13 @@ class CreativeContentPacket extends DataPacket{
         $index = 1;
         $this->putUnsignedVarInt(count($this->items));
         foreach($this->items as $item){
-            $this->putUnsignedVarInt($index++);
-            if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
-                $this->putUnsignedVarInt($knownGroups[$item->getId()] ?? 0xffffffff);
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+                $this->putVarInt($index++);
+            }else{
+                $this->putUnsignedVarInt($index++);
+                if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
+                    $this->putUnsignedVarInt($knownGroups[$item->getId()] ?? 0xffffffff);
+                }
             }
 
             $this->putSlot($item, $this->getProtocol());

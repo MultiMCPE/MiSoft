@@ -495,6 +495,10 @@ final class MetadataConvertor{
             unset($metadata[EntityMetadataProperties::DATA_FLAGS2][1]);
         }
 
+        if(((isset($metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG])) ? $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG][1] === 1 : true) === true){
+            $flags ^= 1 << (EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG % 64);
+        }
+
         self::convertMetadataFlags($flags, $flags2, $playerProtocol);
         if($flags !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;

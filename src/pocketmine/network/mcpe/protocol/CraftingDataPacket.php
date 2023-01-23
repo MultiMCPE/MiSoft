@@ -192,7 +192,7 @@ class CraftingDataPacket extends DataPacket{
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 		        	$outputMeta = $this->getVarInt();
 		    	}
-		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta, $ingredient, $ingredientMeta, $output, $outputMeta);
+		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta ?? 0, $ingredient, $ingredientMeta ?? 0, $output, $outputMeta ?? 0);
 	    	}
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$input = $this->getVarInt();
