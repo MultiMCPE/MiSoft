@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\BlockPallet;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\utils\Utils;
+use pocketmine\block\BlockIds;
 use function bin2hex;
 use function get_class;
 use function is_object;
@@ -242,7 +243,30 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public static function getBlockRuntimeID(int $id, int $meta, int $playerProtocol) : int{
 		$pallet = self::getPallet($playerProtocol);
 
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+			$meta = self::getActualMeta($id, $meta);
+		}
+
 		return is_null($pallet) ? 0 : $pallet->getBlockRuntimeIDByData($id, $meta);
+	}
+
+    /**
+     * @param int $id
+     * @param int $meta
+     * 
+     * @return int
+     */
+	public static function getActualMeta(int $id, int $meta) : int{
+		if($id === BlockIds::ITEM_FRAME_BLOCK){
+			$array = [3 => 8, 4 => 5, 5 => 4];
+			return $array[$meta] ?? $meta;
+		}
+
+		if($id === BlockIds::LEAVES2 && $meta > 7){
+			return 7;
+		}
+
+		return $meta;
 	}
 
     /**

@@ -124,7 +124,7 @@ class NetworkInventoryAction{
 		$this->oldItem = $packet->getSlot($packet->getProtocol());
 		$this->newItem = $packet->getSlot($packet->getProtocol());
 
-        if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+        if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $packet->getProtocol() < ProtocolInfo::PROTOCOL_429){
 	    	if($hasItemStackIds){
 		    	$this->newItemStackId = $packet->readGenericTypeNetworkId();
 	    	}
@@ -160,7 +160,7 @@ class NetworkInventoryAction{
 		$packet->putSlot($this->oldItem, $packet->getProtocol());
 		$packet->putSlot($this->newItem, $packet->getProtocol());
 
-		if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $packet->getProtocol() < ProtocolInfo::PROTOCOL_429){
 	    	if($hasItemStackIds){
 		    	if($this->newItemStackId === null){
 			    	throw new \InvalidStateException("Item stack ID for newItem must be provided");

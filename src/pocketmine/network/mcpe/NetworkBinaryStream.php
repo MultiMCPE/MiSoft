@@ -40,6 +40,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\NamedTag;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
@@ -225,6 +226,10 @@ class NetworkBinaryStream extends BinaryStream{
 		$data = $auxValue >> 8;
 		$cnt = $auxValue & 0xff;
 
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+            [$id, $data] = ItemPalette::getLegacyFromRuntimeId($id, $data);
+        }
+
 		$nbtLen = ((\unpack("v", $this->get(2))[1]));
 
 		/** @var CompoundTag|null $nbt */
@@ -295,8 +300,15 @@ class NetworkBinaryStream extends BinaryStream{
 			return;
 		}
 
-		$this->putVarInt($item->getId());
-		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
+        $id = $item->getId();
+        $damage = $item->getDamage();
+
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+        }
+
+		$this->putVarInt($id);
+		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
 		$this->putVarInt($auxValue);
 
 		$nbt = null;
@@ -338,30 +350,44 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 		$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-		if($item->getId() === ItemIds::SHIELD){
+		if($id === ItemIds::SHIELD){
 			$this->putVarLong(0); //"blocking tick" (ffs mojang)
 		}
 	}
 
-	public function getRecipeIngredient() : Item{
+	public function getRecipeIngredient(int $playerProtocol) : Item{
 		$id = $this->getVarInt();
 		if($id === 0){
 			return ItemFactory::get(ItemIds::AIR, 0, 0);
 		}
 		$meta = $this->getVarInt();
-		if($meta === 0x7fff){
-			$meta = -1;
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		    [$id, $meta] = ItemPalette::getLegacyFromRuntimeId($id, $meta);
+		}elseif($meta === 0x7fff){
+		    $meta = -1;
 		}
 		$count = $this->getVarInt();
 		return ItemFactory::get($id, $meta, $count);
 	}
 
-	public function putRecipeIngredient(Item $item) : void{
+	public function putRecipeIngredient(Item $item, int $playerProtocol) : void{
 		if($item->isNull()){
 			$this->putVarInt(0);
 		}else{
-			$this->putVarInt($item->getId());
-			$this->putVarInt($item->getDamage() & 0x7fff);
+		    $id = $item->getId();
+		    $damage = $item->getDamage();
+		    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		        if($item->hasAnyDamageValue()){
+		            [$id, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		            $damage = 0x7fff;
+		        }else{
+		            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+		        }
+		    }else{
+		        $damage = $damage & 0x7fff;
+		    }
+			$this->putVarInt($id);
+			$this->putVarInt($damage);
 			$this->putVarInt($item->getCount());
 		}
 	}

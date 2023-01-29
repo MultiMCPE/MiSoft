@@ -33,6 +33,7 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\PotionContainerChangeRecipe;
 use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
 use function count;
@@ -86,7 +87,7 @@ class CraftingDataPacket extends DataPacket{
 					$entry["input"] = [];
 					for($j = 0; $j < $ingredientCount; ++$j){
 					   	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system because it isn't always 1
 					   	} else {
 					   	    $entry["input"][] = $this->getSlot($this->getProtocol());
@@ -120,7 +121,7 @@ class CraftingDataPacket extends DataPacket{
 					$entry["input"] = [];
 					for($j = 0; $j < $count; ++$j){
 					    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system
 					    } else {
 					        $entry["input"][] = $this->getSlot($this->getProtocol());
@@ -146,12 +147,21 @@ class CraftingDataPacket extends DataPacket{
 				case self::ENTRY_FURNACE:
 				case self::ENTRY_FURNACE_DATA:
 					$inputId = $this->getVarInt();
-					$inputData = -1;
-					if($recipeType === self::ENTRY_FURNACE_DATA){
-						$inputData = $this->getVarInt();
-						if($inputData === 0x7fff){
-							$inputData = -1;
-						}
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+				    	if($recipeType === self::ENTRY_FURNACE){
+					    	[$inputId, $inputData] = ItemPalette::getLegacyFromRuntimeIdWildcard($inputId, 0x7fff);
+				    	}else{
+					    	$inputData = $this->getVarInt();
+					    	[$inputId, $inputData] = ItemPalette::getLegacyFromRuntimeIdWildcard($inputId, $inputData);
+				    	}
+					}else{
+				    	$inputData = -1;
+				    	if($recipeType === self::ENTRY_FURNACE_DATA){
+					    	$inputData = $this->getVarInt();
+					    	if($inputData === 0x7fff){
+						    	$inputData = -1;
+					    	}
+				    	}
 					}
 					$entry["input"] = ItemFactory::get($inputId, $inputData);
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
@@ -224,7 +234,7 @@ class CraftingDataPacket extends DataPacket{
 		$stream->putUnsignedVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){
 		    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-		    	$stream->putRecipeIngredient($item);
+		    	$stream->putRecipeIngredient($item, $playerProtocol);
 		    } else {
 		        $stream->putSlot($item, $playerProtocol);
 		    }
@@ -261,7 +271,7 @@ class CraftingDataPacket extends DataPacket{
 			for($x = 0; $x < $recipe->getWidth(); ++$x){
 			    $ingredient = $recipe->getIngredient($x, $z);
 			    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-			    	$stream->putRecipeIngredient($ingredient);
+			    	$stream->putRecipeIngredient($ingredient, $playerProtocol);
 			    } else {
 			        $stream->putSlot($ingredient, $playerProtocol);
 			    }
@@ -289,11 +299,26 @@ class CraftingDataPacket extends DataPacket{
 	}
 
 	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, NetworkBinaryStream $stream, int $playerProtocol){
-		$stream->putVarInt($recipe->getInput()->getId());
-		$result = CraftingDataPacket::ENTRY_FURNACE;
-		if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
-			$stream->putVarInt($recipe->getInput()->getDamage());
-			$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+	    $id = $recipe->getInput()->getId();
+	    $damage = $recipe->getInput()->getDamage();
+	    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+	    	if($recipe->getInput()->hasAnyDamageValue()){
+		    	[$netId, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		    	$damage = 0x7fff;
+	    	}else{
+		    	[$netId, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+	    	}
+		}
+		$stream->putVarInt($id);
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		    $stream->putVarInt($damage);
+		    $result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+		}else{
+	    	$result = CraftingDataPacket::ENTRY_FURNACE;
+	    	if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
+		     	$stream->putVarInt($damage);
+		    	$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+	    	}
 		}
 		$stream->putSlot($recipe->getResult(), $playerProtocol);
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {

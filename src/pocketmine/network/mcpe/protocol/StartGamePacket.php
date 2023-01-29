@@ -31,6 +31,7 @@ use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
@@ -510,14 +511,15 @@ class StartGamePacket extends DataPacket{
                     $this->putUnsignedVarInt(0);
                 }
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
-	            	if($this->itemTable === null){
+	        	    $this->put(ItemPalette::getEncodedPalette());
+	            	/*if($this->itemTable === null){
 		            	if(self::$itemTableCache === null){
 			            	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true), $this->getProtocol());
 		              	}
 		            	($this->buffer .= self::$itemTableCache);
 	            	}else{
 		            	($this->buffer .= self::serializeItemTable($this->itemTable, $this->getProtocol()));
-	            	}
+	            	}*/
 		        }
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
 	    	        $this->putString($this->multiplayerCorrelationId);
@@ -529,7 +531,7 @@ class StartGamePacket extends DataPacket{
         }
 	}
 
-	private static function serializeItemTable(array $table, int $playerProtocol) : string{
+	/*private static function serializeItemTable(array $table, int $playerProtocol) : string{
 		$stream = new NetworkBinaryStream();
 		$stream->putUnsignedVarInt(count($table));
 		foreach($table as $name => $legacyId){
@@ -540,7 +542,7 @@ class StartGamePacket extends DataPacket{
 			}
 		}
 		return $stream->getBuffer();
-	}
+	}*/
 
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleStartGame($this);

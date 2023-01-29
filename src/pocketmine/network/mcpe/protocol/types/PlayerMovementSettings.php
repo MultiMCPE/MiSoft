@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 final class PlayerMovementSettings{
 	/** @var int */
@@ -48,14 +49,18 @@ final class PlayerMovementSettings{
 
 	public static function read(DataPacket $in) : self{
 		$movementType = $in->getVarInt();
-		$rewindHistorySize = $in->getVarInt();
-		$serverAuthBlockBreaking = $in->getBool();
-		return new self($movementType, $rewindHistorySize, $serverAuthBlockBreaking);
+		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_428){
+	    	$rewindHistorySize = $in->getVarInt();
+	    	$serverAuthBlockBreaking = $in->getBool();
+    	}
+		return new self($movementType, $rewindHistorySize ?? 0, $serverAuthBlockBreaking ?? false);
 	}
 
 	public function write(DataPacket $out) : void{
 		$out->putVarInt($this->movementType);
-		$out->putVarInt($this->rewindHistorySize);
-		$out->putBool($this->serverAuthoritativeBlockBreaking);
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_428){
+	    	$out->putVarInt($this->rewindHistorySize);
+	    	$out->putBool($this->serverAuthoritativeBlockBreaking);
+		}
 	}
 }

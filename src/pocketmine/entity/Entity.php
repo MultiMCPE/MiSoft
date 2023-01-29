@@ -1191,7 +1191,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 * @return int|null
 	 */
 	public function getDirection() : ?int{
-		$rotation = ($this->yaw - 90) % 360;
+		$rotation = fmod($this->yaw - 90, 360);
 		if($rotation < 0){
 			$rotation += 360.0;
 		}

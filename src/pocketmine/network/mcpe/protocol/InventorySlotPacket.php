@@ -43,7 +43,7 @@ class InventorySlotPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->windowId = $this->getUnsignedVarInt();
 		$this->inventorySlot = $this->getUnsignedVarInt();
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() <= ProtocolInfo::PROTOCOL_428){
 		    $this->isNullItem = $this->getVarInt();
 		}
 		$this->item = $this->getSlot($this->getProtocol());
@@ -52,7 +52,7 @@ class InventorySlotPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->windowId);
 		$this->putUnsignedVarInt($this->inventorySlot);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() <= ProtocolInfo::PROTOCOL_428){
 	    	$this->putVarInt($this->item->isNull() ? 0 : 1);
 		}
 		$this->putSlot($this->item, $this->getProtocol());
