@@ -153,7 +153,7 @@ class NetworkBinaryStream extends BinaryStream{
             $pieceTintColors = \SplFixedArray::fromArray([]);
 		}
 
-        return (new SerializedSkin($skinId, $skinPlayFabId, $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
+        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
 	public function putSkin(Skin $skin, int $playerProtocol){

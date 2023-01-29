@@ -62,7 +62,7 @@ class CraftingManager{
 		$itemDeserializerFunc = \Closure::fromCallable([Item::class, 'jsonDeserialize']);
 		foreach($recipes as $recipe){
 			switch($recipe["type"]){
-				/*case "shapeless":
+				case "shapeless":
 					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
 						break;
 					}
@@ -70,7 +70,7 @@ class CraftingManager{
 						array_map($itemDeserializerFunc, $recipe["input"]),
 						array_map($itemDeserializerFunc, $recipe["output"])
 					));
-					break;*/
+					break;
 				case "shaped":
 					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
 						break;
@@ -82,14 +82,6 @@ class CraftingManager{
 					));
 					break;
 				case "smelting":
-					/*if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
-						break;
-					}
-					$this->registerRecipe(new FurnaceRecipe(
-						Item::jsonDeserialize($recipe["output"]),
-						Item::jsonDeserialize($recipe["input"]))
-					);
-					break;*/
 					$result = $recipe["output"];
 					$resultItem = Item::jsonDeserialize($result);
 					$this->registerRecipe(new FurnaceRecipe($resultItem, Item::get($recipe["inputId"], $recipe["inputDamage"] ?? -1, 1)));

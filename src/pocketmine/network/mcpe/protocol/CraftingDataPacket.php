@@ -303,10 +303,10 @@ class CraftingDataPacket extends DataPacket{
 	    $damage = $recipe->getInput()->getDamage();
 	    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
 	    	if($recipe->getInput()->hasAnyDamageValue()){
-		    	[$netId, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		    	[$id, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
 		    	$damage = 0x7fff;
 	    	}else{
-		    	[$netId, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+		    	[$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
 	    	}
 		}
 		$stream->putVarInt($id);
