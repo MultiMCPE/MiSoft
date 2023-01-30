@@ -8,7 +8,6 @@
 + Хопперы
 + Фейерверки
 + Эндер-кристалы
-+ Сделать загрузку фолдерплагинов в ядре
 + Допилить CraftingDataPacket (с зельями)
 
 https://www.youtube.com/watch?v=u8S0zdnks4M
