@@ -1505,6 +1505,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->inventory->sendContents($this);
 		$this->inventory->sendHeldItem($this->hasSpawned);
+		if($this->transactionQueue instanceof TransactionQueue){
+	    	$this->transactionQueue->getInventory()->clearAll();
+		}
 
 		$this->sendSettings();
 		$this->inventory->sendCreativeContents();
@@ -3202,6 +3205,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
+        if($packet->windowId === ContainerIds::OFFHAND){
+            if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+                $this->transactionQueue->addTransaction(new Transaction($this->getOffHandInventory(), 0, $packet->item));
+            }
+            return true;
+        }
+
         if($this->getProtocol() < ProtocolInfo::PROTOCOL_200){
             if($packet->inventorySlot === 0 || $packet->inventorySlot === 255){
                 $packet->inventorySlot =- 1;
@@ -3555,8 +3565,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        if($this->transactionQueue instanceof TransactionQueue){
-            $this->transactionQueue->onCloseWindow();
+        if($this->isSurvival(true)){
+            if($this->transactionQueue instanceof TransactionQueue){
+                $this->transactionQueue->onCloseWindow();
+            }
         }
 
 		$this->doCloseInventory();
@@ -4473,6 +4485,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	protected function addDefaultWindows(){
 		$this->addWindow($this->getInventory(), ContainerIds::INVENTORY, true);
+
+        $this->addWindow($this->getOffHandInventory(), ContainerIds::OFFHAND, true);
 
 		$this->addWindow($this->getArmorInventory(), ContainerIds::ARMOR, true);
 

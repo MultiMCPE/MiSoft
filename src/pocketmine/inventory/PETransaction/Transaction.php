@@ -24,8 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\inventory\PETransaction;
 
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\AnvilInventory;
+use pocketmine\inventory\EnchantInventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
+use pocketmine\Player;
 use function abs;
 
 class Transaction{
@@ -40,6 +43,8 @@ class Transaction{
     protected $targetItem;
     /** @var int */
     protected $failures = 0;
+	/** @var bool */
+	protected $wasSuccessful = false;
     /** @var string[] */
     protected $errorLog = [];
 
@@ -102,6 +107,41 @@ class Transaction{
     public function addFailure() : int{
         return ++$this->failures;
     }
+
+	/**
+	 * @return bool
+	 */
+	public function succeeded() : bool{
+		return $this->wasSuccessful;
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function setSuccess(bool $value = true) : void{
+		$this->wasSuccessful = $value;
+	}
+
+	/**
+	 * @param Player $source
+	 *
+	 * Sends a slot update to inventory viewers
+	 * For successful transactions, update non-source viewers (source does not need updating)
+	 * For failed transactions, update the source (non-source viewers will see nothing anyway)
+	 */
+	public function sendSlotUpdate(Player $source){
+		if($this->getInventory() instanceof AnvilInventory || $this->getInventory() instanceof EnchantInventory){
+			return;
+		}
+
+		if($this->wasSuccessful){
+			$targets = $this->getInventory()->getViewers();
+			unset($targets[spl_object_hash($source)]);
+		}else{
+			$targets = [$source];
+		}
+		$this->inventory->sendSlot($this->slot, $targets);
+	}
 
 	/**
 	 * Returns the change in inventory resulting from this transaction
@@ -176,15 +216,13 @@ class Transaction{
                 }
             }
 
-            if(!$player->isCreative(true)){
-		        /* All checks passed, make changes to floating inventory
-		        * This will not be reached unless all requirements are met */
-                if($change["out"] instanceof Item){
-                    $transactionQueue->getInventory()->addItem($change["out"]);
-                }
-                if($change["in"] instanceof Item){
-                    $transactionQueue->getInventory()->removeItem($change["in"]);
-                }
+		    /* All checks passed, make changes to floating inventory
+		    * This will not be reached unless all requirements are met */
+            if($change["out"] instanceof Item){
+                $transactionQueue->getInventory()->addItem($change["out"]);
+            }
+            if($change["in"] instanceof Item){
+                $transactionQueue->getInventory()->removeItem($change["in"]);
             }
         }
 

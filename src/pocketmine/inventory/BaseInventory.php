@@ -34,6 +34,7 @@ use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\InventorySlotPacket;
+use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\Player;
 use function array_slice;
@@ -455,6 +456,13 @@ abstract class BaseInventory implements Inventory{
 		    	$pk->items = $items;
 		    	$pk->windowId = $id;
 		    	$player->dataPacket(clone $pk);
+		    	if($this instanceof PlayerInventory && $player->getProtocol() < ProtocolInfo::PROTOCOL_200){
+	               	$pk = new PlayerHotbarPacket();
+	               	$pk->windowId = ContainerIds::INVENTORY;
+	               	$pk->selectedHotbarSlot = $this->getHeldItemIndex();
+	               	$pk->slots = range(0, $this->getHotbarSize() - 1, 1);
+	                $player->dataPacket($pk);
+		    	}
 			}else{
 			    $pk = new ContainerSetContentPacket();
 		    	$pk->windowid = $id;

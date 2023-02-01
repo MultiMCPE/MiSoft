@@ -604,6 +604,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\inventory\\MultiRecipe' => __DIR__ . '/../..' . '/src/pocketmine/inventory/MultiRecipe.php',
         'pocketmine\\inventory\\PlayerCursorInventory' => __DIR__ . '/../..' . '/src/pocketmine/inventory/PlayerCursorInventory.php',
         'pocketmine\\inventory\\PlayerInventory' => __DIR__ . '/../..' . '/src/pocketmine/inventory/PlayerInventory.php',
+        'pocketmine\\inventory\\PlayerOffHandInventory' => __DIR__ . '/../..' . '/src/pocketmine/inventory/PlayerOffHandInventory.php',
         'pocketmine\\inventory\\OldPlayerInventory' => __DIR__ . '/../..' . '/src/pocketmine/inventory/OldPlayerInventory.php',
         'pocketmine\\inventory\\Recipe' => __DIR__ . '/../..' . '/src/pocketmine/inventory/Recipe.php',
         'pocketmine\\inventory\\ShapedRecipe' => __DIR__ . '/../..' . '/src/pocketmine/inventory/ShapedRecipe.php',

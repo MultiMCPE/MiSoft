@@ -85,6 +85,9 @@ class TransactionQueue{
     }
 
     public function execute() : void{
+		/** @var Transaction[] */
+		$failed = [];
+
         for($i = 0; $i < $this->transactions->getSize(); $i++){
             $transactionQueue = $this->transactions[$i];
             if($transactionQueue->isEmpty()){
@@ -95,11 +98,19 @@ class TransactionQueue{
                 $transaction = $transactionQueue->dequeue();
                 if(!$transaction->execute($this)){
                     $this->player->getServer()->getLogger()->debug("Can't execute " . get_class($transaction) . ": " . $transaction->getLastError());
-                    if($transaction->addFailure() < self::DEFAULT_ALLOWED_RETRIES){
+                    if($transaction->addFailure() >= self::DEFAULT_ALLOWED_RETRIES){
+                        /* Transaction failed completely after several retries, hold onto it to send a slot update */
+                        $failed[] = $transaction;
+                    }else{
+                        /* Add the transaction to the back of the queue to be retried on the next tick */
                         $this->addTransaction($transaction);
                     }
                 }
             }
         }
+
+		foreach($failed as $f){
+			$f->sendSlotUpdate($this->player);
+		}
     }
 }

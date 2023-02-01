@@ -533,6 +533,7 @@ return array(
     'pocketmine\\inventory\\MultiRecipe' => $baseDir . '/src/pocketmine/inventory/MultiRecipe.php',
     'pocketmine\\inventory\\PlayerCursorInventory' => $baseDir . '/src/pocketmine/inventory/PlayerCursorInventory.php',
     'pocketmine\\inventory\\PlayerInventory' => $baseDir . '/src/pocketmine/inventory/PlayerInventory.php',
+    'pocketmine\\inventory\\PlayerOffHandInventory' => $baseDir . '/src/pocketmine/inventory/PlayerOffHandInventory.php',
     'pocketmine\\inventory\\OldPlayerInventory' => $baseDir . '/src/pocketmine/inventory/OldPlayerInventory.php',
     'pocketmine\\inventory\\Recipe' => $baseDir . '/src/pocketmine/inventory/Recipe.php',
     'pocketmine\\inventory\\ShapedRecipe' => $baseDir . '/src/pocketmine/inventory/ShapedRecipe.php',

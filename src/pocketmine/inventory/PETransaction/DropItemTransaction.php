@@ -25,6 +25,7 @@ namespace pocketmine\inventory\PETransaction;
 
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\item\Item;
+use pocketmine\Player;
 
 class DropItemTransaction extends Transaction{
 
@@ -42,6 +43,13 @@ class DropItemTransaction extends Transaction{
         return self::PRIORITY_MIN;
     }
 
+	/**
+	 * @param Player $source
+	 */
+	public function sendSlotUpdate(Player $source) : void{
+		//Nothing to update
+	}
+
     /**
      * @param TransactionQueue $transactionQueue
      * 
@@ -51,10 +59,13 @@ class DropItemTransaction extends Transaction{
         $player = $transactionQueue->getPlayer();
         $item = $this->getTargetItem();
 
-        if(!$player->isCreative(true)){
-            if(!$transactionQueue->getInventory()->contains($item)){
+        if(!$transactionQueue->getInventory()->contains($item)){
+            if(!$player->isCreative(true)){
                 return $this->error("Player transaction inventory not contains $item");
+            }elseif(!Item::isCreativeItem($item)){
+                return $this->error("Creative items list not contains " . $item);
             }
+        }else{
             $transactionQueue->getInventory()->removeItem($item);
         }
 
