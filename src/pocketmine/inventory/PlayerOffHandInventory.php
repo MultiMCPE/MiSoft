@@ -49,30 +49,17 @@ class PlayerOffHandInventory extends BaseInventory{
 	}
 
 	public function onSlotChange(int $index, Item $before, bool $send) : void{
-		foreach($this->viewers as $viewer){
-			$this->sendContents($viewer); // Sync contents of this inventory instead of slot... #blamemojang?
+	    if($send === true){
+	    	foreach($this->viewers as $viewer){
+		    	$this->sendContents($viewer); // Sync contents of this inventory instead of slot... #blamemojang?
+	    	}
+	    	foreach($this->holder->getViewers() as $viewer){
+		    	$this->sendOffhand($viewer);
+	    	}
 		}
-		foreach($this->holder->getViewers() as $viewer){
-			$this->sendOffhand($viewer);
-		}
-		/*if($this->holder instanceof Player){
-    		$this->sendOffhand($this->holder);
-		}*/
 	}
 
     public function sendOffhand(Player $target) : void{
-        if($target === $this->holder){
-            if($target->getProtocol() < ProtocolInfo::PROTOCOL_130){
-            	$packet = new ContainerSetContentPacket();
-                $packet->targetEid = $this->holder->getId();
-                $packet->windowid = 119;
-                $packet->slots = [$this->getItemInHand()];
-                $target->sendDataPacket(clone $packet);
-
-                return;
-            }
-        }
-
 		$pk = new MobEquipmentPacket();
 		$pk->entityRuntimeId = $this->holder->getId();
 		$pk->item = $this->getItemInHand();

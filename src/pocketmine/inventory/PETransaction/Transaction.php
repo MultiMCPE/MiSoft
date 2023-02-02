@@ -43,8 +43,6 @@ class Transaction{
     protected $targetItem;
     /** @var int */
     protected $failures = 0;
-	/** @var bool */
-	protected $wasSuccessful = false;
     /** @var string[] */
     protected $errorLog = [];
 
@@ -109,38 +107,14 @@ class Transaction{
     }
 
 	/**
-	 * @return bool
-	 */
-	public function succeeded() : bool{
-		return $this->wasSuccessful;
-	}
-
-	/**
-	 * @param bool $value
-	 */
-	public function setSuccess(bool $value = true) : void{
-		$this->wasSuccessful = $value;
-	}
-
-	/**
 	 * @param Player $source
-	 *
-	 * Sends a slot update to inventory viewers
-	 * For successful transactions, update non-source viewers (source does not need updating)
-	 * For failed transactions, update the source (non-source viewers will see nothing anyway)
 	 */
-	public function sendSlotUpdate(Player $source){
+	public function revert(Player $source) : void{
 		if($this->getInventory() instanceof AnvilInventory || $this->getInventory() instanceof EnchantInventory){
 			return;
 		}
 
-		if($this->wasSuccessful){
-			$targets = $this->getInventory()->getViewers();
-			unset($targets[spl_object_hash($source)]);
-		}else{
-			$targets = [$source];
-		}
-		$this->inventory->sendSlot($this->slot, $targets);
+		$this->inventory->sendSlot($this->slot, [$source]);
 	}
 
 	/**
@@ -198,31 +172,29 @@ class Transaction{
 	 */
     public function execute(TransactionQueue $transactionQueue) : bool{
         $player = $transactionQueue->getPlayer();
-        $change = $this->getChange();
-        if($change !== null){ //No changes to make, ignore this transaction
-            /* Verify that we have the required items */
-            if($change["out"] instanceof Item){
-                if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
-                    return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
-                }
-            }
-            if($change["in"] instanceof Item){
-                if(!$transactionQueue->getInventory()->contains($change["in"])){
-                    if(!$player->isCreative(true)){
-                        return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
-                    }elseif(!Item::isCreativeItem($change["in"])){
-                        return $this->error("Creative items list not contains " . $change["in"]);
+        if(!$player->isCreative()){
+            $change = $this->getChange();
+            if($change !== null){ //No changes to make, ignore this transaction
+                /* Verify that we have the required items */
+                if($change["out"] instanceof Item){
+                    if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
+                        return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
                     }
                 }
-            }
+                if($change["in"] instanceof Item){
+                    if(!$transactionQueue->getInventory()->contains($change["in"])){
+                        return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
+                    }
+                }
 
-		    /* All checks passed, make changes to floating inventory
-		    * This will not be reached unless all requirements are met */
-            if($change["out"] instanceof Item){
-                $transactionQueue->getInventory()->addItem($change["out"]);
-            }
-            if($change["in"] instanceof Item){
-                $transactionQueue->getInventory()->removeItem($change["in"]);
+		        /* All checks passed, make changes to floating inventory
+		        * This will not be reached unless all requirements are met */
+                if($change["out"] instanceof Item){
+                    $transactionQueue->getInventory()->addItem($change["out"]);
+                }
+                if($change["in"] instanceof Item){
+                    $transactionQueue->getInventory()->removeItem($change["in"]);
+                }
             }
         }
 

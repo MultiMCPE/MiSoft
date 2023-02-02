@@ -1505,9 +1505,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->inventory->sendContents($this);
 		$this->inventory->sendHeldItem($this->hasSpawned);
-		if($this->transactionQueue instanceof TransactionQueue){
-	    	$this->transactionQueue->getInventory()->clearAll();
-		}
 
 		$this->sendSettings();
 		$this->inventory->sendCreativeContents();
@@ -3565,10 +3562,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        if($this->isSurvival(true)){
-            if($this->transactionQueue instanceof TransactionQueue){
-                $this->transactionQueue->onCloseWindow();
-            }
+        if($this->transactionQueue instanceof TransactionQueue){
+            $this->transactionQueue->onCloseWindow();
         }
 
 		$this->doCloseInventory();
@@ -4341,6 +4336,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 			if($this->armorInventory !== null){
 				$this->armorInventory->clearAll();
+			}
+			if($this->offHandInventory !== null){
+				$this->offHandInventory->clearAll();
 			}
 		}
 

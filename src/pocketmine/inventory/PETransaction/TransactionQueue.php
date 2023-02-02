@@ -110,7 +110,7 @@ class TransactionQueue{
         }
 
 		foreach($failed as $f){
-			$f->sendSlotUpdate($this->player);
+			$f->revert($this->player);
 		}
     }
 }

@@ -48,15 +48,17 @@ class PlayerListPacket extends DataPacket{
 			if(count($id) < 2){
 				$id = explode("_", $skinId);
 				if(count($id) < 2){
-					throw new \InvalidArgumentException("Invalid skin id: $skinId");
+					goto end;
 				}
 			}
 
 			$packId = array_shift($id);
 			if(in_array($packId, self::PE_SKIN_PACKS, true)){
-				return $skinId;
+			    return $skinId;
 			}
 		}
+
+        end:
 
         $type = "Custom";
 		switch ($skin->getGeometryName()){

@@ -556,6 +556,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function onPickupXp(int $xpValue) : void{
 		static $mainHandIndex = -1;
+		static $offHandIndex = -2;
 
 		//TODO: replace this with a more generic equipment getting/setting interface
 		/** @var Durable[] $equipment */
@@ -564,7 +565,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if(($item = $this->inventory->getItemInHand()) instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
 			$equipment[$mainHandIndex] = $item;
 		}
-		//TODO: check offhand
+		if(($item = $this->offHandInventory->getItem(0)) instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
+		    $equipment[$offHandIndex] = $item;
+		}
 		foreach($this->armorInventory->getContents() as $k => $item){
 			if($item instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
 				$equipment[$k] = $item;
@@ -580,6 +583,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 				if($k === $mainHandIndex){
 					$this->inventory->setItemInHand($repairItem);
+				}elseif($k === $offHandIndex){
+				    $this->offHandInventory->setItem(0, $repairItem);
 				}else{
 					$this->armorInventory->setItem($k, $repairItem);
 				}
@@ -773,7 +778,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 		$type = $source->getCause();
 		if($type !== EntityDamageEvent::CAUSE_SUICIDE and $type !== EntityDamageEvent::CAUSE_VOID
-			and $this->inventory->getItemInHand() instanceof Totem){ //TODO: check offhand as well (when it's implemented)
+			and ($this->inventory->getItemInHand() instanceof Totem || $this->offHandInventory->getItem(0) instanceof Totem)){
 
 			$compensation = $this->getHealth() - $source->getFinalDamage() - 1;
 			if($compensation < 0){
@@ -799,6 +804,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			if($hand instanceof Totem){
 				$hand->pop(); //Plugins could alter max stack size
 				$this->inventory->setItemInHand($hand);
+			}elseif(($offHand = $this->offHandInventory->getItem(0)) instanceof Totem){
+				$offHand->pop();
+				$this->offHandInventory->setItem(0, $offHand);
 			}
 		}
 	}
@@ -926,6 +934,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			if($this->inventory !== null){
 				$this->inventory->removeAllViewers(true);
 				$this->inventory = null;
+			}
+			if($this->offHandInventory !== null){
+			    $this->offHandInventory->removeAllViewers(true);
+			    $this->offHandInventory = null;
 			}
 			if($this->enderChestInventory !== null){
 				$this->enderChestInventory->removeAllViewers(true);

@@ -46,8 +46,8 @@ class DropItemTransaction extends Transaction{
 	/**
 	 * @param Player $source
 	 */
-	public function sendSlotUpdate(Player $source) : void{
-		//Nothing to update
+	public function revert(Player $source) : void{
+
 	}
 
     /**
@@ -59,13 +59,10 @@ class DropItemTransaction extends Transaction{
         $player = $transactionQueue->getPlayer();
         $item = $this->getTargetItem();
 
-        if(!$transactionQueue->getInventory()->contains($item)){
-            if(!$player->isCreative(true)){
+        if(!$player->isCreative()){
+            if(!$transactionQueue->getInventory()->contains($item)){
                 return $this->error("Player transaction inventory not contains $item");
-            }elseif(!Item::isCreativeItem($item)){
-                return $this->error("Creative items list not contains " . $item);
             }
-        }else{
             $transactionQueue->getInventory()->removeItem($item);
         }
 

@@ -202,12 +202,22 @@ class CraftingDataPacket extends DataPacket{
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 		        	$outputMeta = $this->getVarInt();
 		    	}
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    	    [$input, $inputMeta] = ItemPalette::getLegacyFromRuntimeId($input, $inputMeta);
+		    	    [$ingredient, $ingredientMeta] = ItemPalette::getLegacyFromRuntimeId($ingredient, $ingredientMeta);
+		    	    [$output, $outputMeta] = ItemPalette::getLegacyFromRuntimeId($output, $outputMeta);
+		    	}
 		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta ?? 0, $ingredient, $ingredientMeta ?? 0, $output, $outputMeta ?? 0);
 	    	}
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$input = $this->getVarInt();
 		    	$ingredient = $this->getVarInt();
 		    	$output = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    	    [$input, ] = ItemPalette::getLegacyFromRuntimeId($input, 0);
+		    	    [$ingredient, ] = ItemPalette::getLegacyFromRuntimeId($ingredient, 0);
+		    	    [$output, ] = ItemPalette::getLegacyFromRuntimeId($output, 0);
+		    	}
 		    	$this->potionContainerRecipes[] = new PotionContainerChangeRecipe($input, $ingredient, $output);
 	    	}
 		}
@@ -358,24 +368,43 @@ class CraftingDataPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	    	$this->putUnsignedVarInt(count($this->potionTypeRecipes));
 	    	foreach($this->potionTypeRecipes as $recipe){
-		    	$this->putVarInt($recipe->getInputItemId());
+	    	    $input = $recipe->getInputItemId();
+	    	    $inputMeta = $recipe->getInputItemMeta();
+	    	    $ingredient = $recipe->getIngredientItemId();
+	    	    $ingredientMeta = $recipe->getIngredientItemMeta();
+	    	    $output = $recipe->getOutputItemId();
+	    	    $outputMeta = $recipe->getOutputItemMeta();
+	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	    	        [$input, $inputMeta] = ItemPalette::getRuntimeFromLegacyId($input, $inputMeta);
+	    	        [$ingredient, $ingredientMeta] = ItemPalette::getRuntimeFromLegacyId($ingredient, $ingredientMeta);
+	    	        [$output, $outputMeta] = ItemPalette::getRuntimeFromLegacyId($output, $outputMeta);
+	    	    }
+		    	$this->putVarInt($input);
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-		        	$this->putVarInt($recipe->getInputItemMeta());
+		        	$this->putVarInt($inputMeta);
 		    	}
-		    	$this->putVarInt($recipe->getIngredientItemId());
+		    	$this->putVarInt($ingredient);
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-		        	$this->putVarInt($recipe->getIngredientItemMeta());
+		        	$this->putVarInt($ingredientMeta);
 		    	}
-		    	$this->putVarInt($recipe->getOutputItemId());
+		    	$this->putVarInt($output);
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-		        	$this->putVarInt($recipe->getOutputItemMeta());
+		        	$this->putVarInt($outputMeta);
 		    	}
 	    	}
 	    	$this->putUnsignedVarInt(count($this->potionContainerRecipes));
 	    	foreach($this->potionContainerRecipes as $recipe){
-		    	$this->putVarInt($recipe->getInputItemId());
-		    	$this->putVarInt($recipe->getIngredientItemId());
-		    	$this->putVarInt($recipe->getOutputItemId());
+	    	    $input = $recipe->getInputItemId();
+	    	    $ingredient = $recipe->getIngredientItemId();
+	    	    $output = $recipe->getOutputItemId();
+	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	    	        [$input, ] = ItemPalette::getRuntimeFromLegacyId($input, 0);
+	    	        [$ingredient, ] = ItemPalette::getRuntimeFromLegacyId($ingredient, 0);
+	    	        [$output, ] = ItemPalette::getRuntimeFromLegacyId($output, 0);
+	    	    }
+		    	$this->putVarInt($input);
+		    	$this->putVarInt($ingredient);
+		    	$this->putVarInt($output);
 		    }
 		}
 
