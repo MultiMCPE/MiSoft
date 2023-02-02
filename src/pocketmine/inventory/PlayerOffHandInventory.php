@@ -26,9 +26,7 @@ namespace pocketmine\inventory;
 use pocketmine\Player;
 use pocketmine\entity\Human;
 use pocketmine\item\Item;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
-use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 
 class PlayerOffHandInventory extends BaseInventory{

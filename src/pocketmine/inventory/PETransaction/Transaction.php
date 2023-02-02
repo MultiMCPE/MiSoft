@@ -114,7 +114,7 @@ class Transaction{
 			return;
 		}
 
-		$this->inventory->sendSlot($this->slot, [$source]);
+		$this->inventory->sendSlot($this->slot, $source);
 	}
 
 	/**
