@@ -100,7 +100,7 @@ class AddPlayerPacket extends DataPacket{
 		$this->yaw = ((\unpack("g", $this->get(4))[1]));
 		$this->headYaw = ((\unpack("g", $this->get(4))[1]));
 		$this->item = $this->getSlot($this->getProtocol());
-		$this->metadata = $this->getEntityMetadata();
+		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
 	    	$this->uvarint1 = $this->getUnsignedVarInt();

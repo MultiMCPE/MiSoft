@@ -29,6 +29,7 @@ namespace pocketmine\entity;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Water;
+use pocketmine\entity\object\EnderCrystal;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\FallingBlock;
 use pocketmine\entity\object\ItemEntity;
@@ -104,7 +105,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	public const DATA_TYPE_INT = 2;
 	public const DATA_TYPE_FLOAT = 3;
 	public const DATA_TYPE_STRING = 4;
-	public const DATA_TYPE_COMPOUND_TAG = 5;
+	public const DATA_TYPE_SLOT = 5;
 	public const DATA_TYPE_POS = 6;
 	public const DATA_TYPE_LONG = 7;
 	public const DATA_TYPE_VECTOR3F = 8;
@@ -127,6 +128,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 		Entity::registerEntity(Arrow::class, false, ['Arrow', 'minecraft:arrow']);
 		Entity::registerEntity(Egg::class, false, ['Egg', 'minecraft:egg']);
+		Entity::registerEntity(EnderCrystal::class, false, ['EnderCrystal', 'minecraft:ender_crystal']);
 		Entity::registerEntity(EnderPearl::class, false, ['ThrownEnderpearl', 'minecraft:ender_pearl']);
 		Entity::registerEntity(ExperienceBottle::class, false, ['ThrownExpBottle', 'minecraft:xp_bottle']);
 		Entity::registerEntity(ExperienceOrb::class, false, ['XPOrb', 'minecraft:xp_orb']);

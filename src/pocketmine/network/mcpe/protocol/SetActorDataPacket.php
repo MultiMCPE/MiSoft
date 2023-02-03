@@ -40,7 +40,7 @@ class SetActorDataPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->metadata = $this->getEntityMetadata();
+		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 		    $this->tick = $this->getUnsignedVarLong();
 		}

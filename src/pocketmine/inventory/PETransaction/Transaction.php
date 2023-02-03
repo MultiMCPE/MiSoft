@@ -32,9 +32,6 @@ use pocketmine\Player;
 use function abs;
 
 class Transaction{
-    public const PRIORITY_MIN = 1;
-    public const PRIORITY_MAX = 0;
-
     /** @var Inventory */
     protected $inventory;
     /** @var int */
@@ -55,13 +52,6 @@ class Transaction{
         $this->inventory = $inventory;
         $this->slot = $slot;
         $this->targetItem = $targetItem;
-    }
-
-    /**
-     * @return int
-     */
-    public function getPriority() : int{
-        return self::PRIORITY_MAX;
     }
 
     /**

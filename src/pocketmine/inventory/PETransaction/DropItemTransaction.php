@@ -36,13 +36,6 @@ class DropItemTransaction extends Transaction{
         $this->targetItem = $targetItem;
     }
 
-    /**
-     * @return int
-     */
-    public function getPriority() : int{
-        return self::PRIORITY_MIN;
-    }
-
 	/**
 	 * @param Player $source
 	 */

@@ -198,7 +198,7 @@ class AddActorPacket extends DataPacket{
 			}
 		}
 
-		$this->metadata = $this->getEntityMetadata();
+		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 		$linkCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $linkCount; ++$i){
 			$this->links[] = $this->getEntityLink($this->getProtocol());

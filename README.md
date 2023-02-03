@@ -4,8 +4,6 @@
 + 1.16.220 - 1.19.x
 + Шалкеры
 + Хопперы
-+ Фейерверки
-+ Эндер-кристалы
-+ InventoryTransactionEvent && InventoryClickEvent для 1.1
++ Пофиксить отображение левой руки другого игрока при заходе на сервер у первого
 
 https://www.youtube.com/watch?v=u8S0zdnks4M

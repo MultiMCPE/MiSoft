@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory\PETransaction;
 
+use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\Player;
 use function get_class;
@@ -32,8 +33,8 @@ class TransactionQueue{
 
     /** @var Player */
     protected $player;
-    /** @var \SplQueue[] */
-    protected $transactions;
+    /** @var \SplQueue */
+    protected $transactionQueue;
     /** @var CraftingGrid */
     protected $transactionInventory;
 
@@ -43,11 +44,7 @@ class TransactionQueue{
     public function __construct(Player $player){
         $this->player = $player;
         $this->transactionInventory = new class($player, 6) extends CraftingGrid{};
-        $this->transactions = new \SplFixedArray(Transaction::PRIORITY_MIN + 1);
-
-        for($i = 0; $i < $this->transactions->getSize(); $i++){
-            $this->transactions[$i] = new \SplQueue();
-        }
+        $this->transactionQueue = new \SplQueue();
     }
 
     /**
@@ -68,14 +65,12 @@ class TransactionQueue{
      * @param Transaction $transaction
      */
     public function addTransaction(Transaction $transaction) : void{
-        $this->transactions[$transaction->getPriority()]->enqueue($transaction);
+        $this->transactionQueue->enqueue($transaction);
     }
 
     public function onCloseWindow() : void{
-        foreach($this->transactions as $i => $transactionQueue){
-            while(!$transactionQueue->isEmpty()){
-                $transactionQueue->dequeue()->execute($this);
-            }
+        while(!$this->transactionQueue->isEmpty()){
+            $this->transactionQueue->dequeue()->execute($this);
         }
 
         foreach($this->transactionInventory->getContents() as $item){
@@ -88,24 +83,28 @@ class TransactionQueue{
 		/** @var Transaction[] */
 		$failed = [];
 
-        for($i = 0; $i < $this->transactions->getSize(); $i++){
-            $transactionQueue = $this->transactions[$i];
-            if($transactionQueue->isEmpty()){
-                continue;
-            }
+        if($this->transactionQueue->isEmpty()){
+            return;
+        }
 
-            while(!$transactionQueue->isEmpty()){
-                $transaction = $transactionQueue->dequeue();
-                if(!$transaction->execute($this)){
-                    $this->player->getServer()->getLogger()->debug("Can't execute " . get_class($transaction) . ": " . $transaction->getLastError());
-                    if($transaction->addFailure() >= self::DEFAULT_ALLOWED_RETRIES){
-                        /* Transaction failed completely after several retries, hold onto it to send a slot update */
-                        $failed[] = $transaction;
-                    }else{
-                        /* Add the transaction to the back of the queue to be retried on the next tick */
-                        $this->addTransaction($transaction);
-                    }
+        $this->player->getServer()->getPluginManager()->callEvent($ev = new InventoryTransactionEvent($this));
+
+        while(!$this->transactionQueue->isEmpty()){
+            $transaction = $this->transactionQueue->dequeue();
+
+			if($ev->isCancelled()){
+				$transaction->revert($this->player); //Send update back to client for cancelled transaction
+				continue;
+            }elseif(!$transaction->execute($this)){
+                $this->player->getServer()->getLogger()->debug("Can't execute " . get_class($transaction) . ": " . $transaction->getLastError());
+                if($transaction->addFailure() >= self::DEFAULT_ALLOWED_RETRIES){
+                    /* Transaction failed completely after several retries, hold onto it to send a slot update */
+                    $failed[] = $transaction;
+                }else{
+                    /* Add the transaction to the back of the queue to be retried on the next tick */
+                    $this->addTransaction($transaction);
                 }
+                continue;
             }
         }
 

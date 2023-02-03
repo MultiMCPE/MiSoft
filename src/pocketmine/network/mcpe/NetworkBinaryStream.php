@@ -399,7 +399,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @return array
 	 */
-	public function getEntityMetadata(bool $types = true) : array{
+	public function getEntityMetadata(int $playerProtocol, bool $types = true) : array{
 		$count = $this->getUnsignedVarInt();
 		$data = [];
 		for($i = 0; $i < $count; ++$i){
@@ -422,8 +422,12 @@ class NetworkBinaryStream extends BinaryStream{
 				case Entity::DATA_TYPE_STRING:
 					$value = $this->getString();
 					break;
-				case Entity::DATA_TYPE_COMPOUND_TAG:
-					$value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+				case Entity::DATA_TYPE_SLOT:
+				    if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
+				        $value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+				    }else{
+				        $value = $this->getSlot($playerProtocol);
+				    }
 					break;
 				case Entity::DATA_TYPE_POS:
 					$value = new Vector3();
@@ -476,8 +480,12 @@ class NetworkBinaryStream extends BinaryStream{
 				case Entity::DATA_TYPE_STRING:
 					$this->putString($d[1]);
 					break;
-				case Entity::DATA_TYPE_COMPOUND_TAG:
-					($this->buffer .= (new NetworkLittleEndianNBTStream())->write($d[1]));
+				case Entity::DATA_TYPE_SLOT:
+				    if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
+				        ($this->buffer .= (new NetworkLittleEndianNBTStream())->write($d[1]->getNamedTag()));
+				    }else{
+				        $this->putSlot($d[1], $playerProtocol);
+				    }
 					break;
 				case Entity::DATA_TYPE_POS:
 					$v = $d[1];
