@@ -24,9 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use pocketmine\inventory\HopperInventory;
-use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\level\Level;
 
 class Hopper extends Spawnable implements Container, Nameable{
 
@@ -41,12 +39,9 @@ class Hopper extends Spawnable implements Container, Nameable{
 	/** @var int */
 	private $transferCooldown = 0;
 
-	public function __construct(Level $level, CompoundTag $nbt){
-		parent::__construct($level, $nbt);
-		$this->inventory = new HopperInventory($this);
-	}
-
 	public function readSaveData(CompoundTag $nbt) : void{
+	    $this->inventory = new HopperInventory($this);
+
 		$this->loadItems($nbt);
 		$this->loadName($nbt);
 

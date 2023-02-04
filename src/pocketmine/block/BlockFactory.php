@@ -218,7 +218,7 @@ class BlockFactory{
 		self::registerBlock(new DaylightSensor());
 		self::registerBlock(new Redstone());
 		self::registerBlock(new NetherQuartzOre());
-		//TODO: HOPPER_BLOCK
+		self::registerBlock(new Hopper());
 		self::registerBlock(new Quartz());
 		self::registerBlock(new QuartzStairs());
 		self::registerBlock(new DoubleWoodenSlab());
