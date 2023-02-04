@@ -44,7 +44,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->mustAccept = (($this->get(1) !== "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 	    	$this->hasScripts = (($this->get(1) !== "\x00"));
 		}
 		$behaviorPackCount = ((\unpack("v", $this->get(2))[1]));
@@ -53,12 +53,14 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->getString();
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
-			$this->getString();
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->getString();
-			}
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
-		    	(($this->get(1) !== "\x00"));
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		        	$this->getString();
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		            	(($this->get(1) !== "\x00"));
+		        	}
+		    	}
 			}
 		}
 
@@ -68,19 +70,24 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->getString();
 			(Binary::readLLong($this->get(8)));
 			$this->getString();
-			$this->getString();
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->getString();
-			}
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
-		    	(($this->get(1) !== "\x00"));
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		    	    $this->getString();
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		            	(($this->get(1) !== "\x00"));
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
+		            	    (($this->get(1) !== "\x00"));
+		            	}
+		        	}
+		    	}
 			}
 		}
 	}
 
 	protected function encodePayload(){
 		($this->buffer .= ($this->mustAccept ? "\x01" : "\x00"));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 	    	($this->buffer .= ($this->hasScripts ? "\x01" : "\x00"));
 		}
 		($this->buffer .= (\pack("v", count($this->behaviorPackEntries))));
@@ -89,12 +96,14 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->putString($entry->getPackVersion());
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
-		    	$this->putString(""); //TODO: content identity
-			}
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
-		    	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: has scripts (?)
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->putString(""); //TODO: subpack name
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		        	$this->putString(""); //TODO: content identity
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		            	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: has scripts (?)
+		        	}
+		    	}
 			}
 		}
 		($this->buffer .= (\pack("v", count($this->resourcePackEntries))));
@@ -103,12 +112,17 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->putString($entry->getPackVersion());
 			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
-			$this->putString(""); //TODO: subpack name
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_280) {
-		    	$this->putString(""); //TODO: content identity
-			}
-			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_331) {
-		    	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: seems useless for resource packs
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$this->putString(""); //TODO: subpack name
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		        	$this->putString(""); //TODO: content identity
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		            	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: seems useless for resource packs
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
+		            	    ($this->buffer .= (false ? "\x01" : "\x00")); //TODO: supports RTX
+		            	}
+		        	}
+		    	}
 			}
 		}
 	}

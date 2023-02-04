@@ -71,13 +71,13 @@ use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\CompressBatchedTask;
-use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\RakLibInterface;
+use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\Network;
 use pocketmine\network\query\QueryHandler;
 use pocketmine\network\rcon\RCON;
@@ -379,7 +379,7 @@ class Server{
 	 * @return string
 	 */
 	public function getApiVersion() : string{
-		return \pocketmine\BASE_VERSION;
+		return \pocketmine\PMAPI_VERSION;
 	}
 
 	/**
@@ -1694,6 +1694,8 @@ class Server{
 			Timings::init();
 			TimingsHandler::setEnabled((bool) $this->getProperty("settings.enable-profiling", false));
 
+            EncryptionContext::$ENABLED = (bool) $this->getProperty("network.enable-encryption", true);
+
 			$this->commandMap = new SimpleCommandMap($this);
 
 			Entity::init();
@@ -2170,7 +2172,6 @@ class Server{
 	 * Starts the PocketMine-MP server and starts processing ticks and packets
 	 */
 	private function start(){
-	    MetadataConvertor::init();
 		$this->asyncPool->submitTask(new PaletteInitTask());
 
 		if($this->getConfigBool("enable-query", true)){

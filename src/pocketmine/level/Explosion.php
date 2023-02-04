@@ -38,6 +38,7 @@ use pocketmine\level\particle\HugeExplodeParticle;
 use pocketmine\level\utils\SubChunkIteratorManager;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ExplodePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\tile\Chest;
@@ -264,7 +265,15 @@ class Explosion{
 		$pk->position = $this->source->asVector3();
 		$pk->radius = $this->size;
 		$pk->records = $send;
-		$this->level->broadcastPacketToViewers($source, $pk);
+
+		$viewers = $this->level->getChunkPlayers($this->source->x >> 4, $this->source->z >> 4);
+		if(count($viewers) > 0){
+		    foreach($viewers as $player){
+		        if($player->getProtocol() < ProtocolInfo::PROTOCOL_387){
+		            $player->dataPacket($pk);
+		        }
+		    }
+		}
 
 		$this->level->addParticle(new HugeExplodeParticle($source));
 		$this->level->broadcastLevelSoundEvent($source, LevelSoundEventPacket::SOUND_EXPLODE);

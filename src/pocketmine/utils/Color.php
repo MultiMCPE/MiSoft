@@ -113,6 +113,22 @@ class Color{
 		$this->b = $b & 0xff;
 	}
 
+    /**
+     * @param string $colorString
+     * 
+     * @return Color
+     */
+    public static function fromHexString(string $colorString) : Color{
+        return Color::fromARGB(hexdec(substr($colorString, 1)));
+    }
+
+    /**
+     * @return string
+     */
+    public function toHexString() : string{
+        return "#" . dechex($this->toARGB());
+    }
+
 	/**
 	 * Mixes the supplied list of colours together to produce a result colour.
 	 *

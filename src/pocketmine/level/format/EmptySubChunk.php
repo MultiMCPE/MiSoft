@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function str_repeat;
 
 class EmptySubChunk implements SubChunkInterface{
@@ -126,6 +127,6 @@ class EmptySubChunk implements SubChunkInterface{
 	}
 
 	public function networkSerialize(int $playerProtocol) : string{
-		return "\x00" . str_repeat("\x00", 6144);
+		return "\x00" . str_repeat("\x00", ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? 6144 : 10240));
 	}
 }

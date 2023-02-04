@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
 use function count;
 
@@ -50,6 +51,8 @@ class InventoryTransactionPacket extends DataPacket{
 
 	/** @var int */
 	public $transactionType;
+	/** @var bool */
+	public $hasItemStackIds;
 
 	/**
 	 * @var bool
@@ -70,11 +73,83 @@ class InventoryTransactionPacket extends DataPacket{
 	/** @var \stdClass */
 	public $trData;
 
+    /** @var int[] */
+    public $knownInventories = [];
+
 	protected function decodePayload(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+            if($this->getUnsignedVarInt() !== 0){
+                $inventoriesCount = $this->getUnsignedVarInt();
+                while($inventoriesCount --> 0){
+                    $inventoryId = $this->getUnsignedVarInt();
+                    if(isset($this->knownInventories[$inventoryId])){
+                        throw new \InvalidArgumentException("Inventory $inventoryId already set");
+                    }
+
+                    $this->knownInventories[$inventoryId] = [];
+                    $slotsCount = $this->getUnsignedVarInt();
+                    while($slotsCount --> 0){
+                        $this->knownInventories[$inventoryId][] = $this->getUnsignedVarInt();
+                    }
+                }
+            }
+        }
+
 		$this->transactionType = $this->getUnsignedVarInt();
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393 && $this->getProtocol() < ProtocolInfo::PROTOCOL_429){
+            $this->hasItemStackIds = (($this->get(1) !== "\x00"));
+        }
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->actions[] = (new NetworkInventoryAction())->read($this);
+			$this->actions[] = $action = (new NetworkInventoryAction())->read($this, $this->hasItemStackIds ?? false);
+
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+                if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
+		        	if(
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_CONTAINER and
+			        	$action->windowId === ContainerIds::UI and
+			        	$action->inventorySlot === 50 and
+			        	!$action->oldItem->equalsExact($action->newItem)
+		        	){
+			        	$this->isCraftingPart = true;
+			        	if(!$action->oldItem->isNull() and $action->newItem->isNull()){
+				        	$this->isFinalCraftingPart = true;
+			        	}
+		        	}elseif(
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_TODO and (
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+			        	)
+		        	){
+			        	$this->isCraftingPart = true;
+		        	}
+                }else{
+                    if(
+			        	$action->sourceType === NetworkInventoryAction::SOURCE_TODO and (
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT or
+				        	$action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+			        	)
+		        	){
+			        	$this->isCraftingPart = true;
+			        	if($action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT){
+				        	$this->isFinalCraftingPart = true;
+			        	}
+			    	}
+                }
+	    	}else{
+                if((
+                    $action->sourceType === NetworkInventoryAction::SOURCE_TODO ||
+                    $action->sourceType === NetworkInventoryAction::SOURCE_UNTRACKED_INTERACTION_UI
+                ) && (
+                    $action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT ||
+                    $action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_USE_INGREDIENT
+                )){
+                    $this->isCraftingPart = true;
+                    if($action->windowId === NetworkInventoryAction::SOURCE_TYPE_CRAFTING_RESULT){
+                        $this->isFinalCraftingPart = true;
+                    }
+                }
+            }
 		}
 
 		$this->trData = new \stdClass();
@@ -117,10 +192,13 @@ class InventoryTransactionPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->transactionType);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393 && $this->getProtocol() < ProtocolInfo::PROTOCOL_429){
+            ($this->buffer .= ($this->hasItemStackIds ? "\x01" : "\x00"));
+		}
 
 		$this->putUnsignedVarInt(count($this->actions));
 		foreach($this->actions as $action){
-			$action->write($this);
+			$action->write($this, $this->hasItemStackIds ?? false);
 		}
 
 		switch($this->transactionType){

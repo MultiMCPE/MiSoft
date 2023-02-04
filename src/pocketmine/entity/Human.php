@@ -33,6 +33,9 @@ use pocketmine\inventory\EnderChestInventory;
 use pocketmine\inventory\EntityInventoryEventProcessor;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\OldPlayerInventory;
+use pocketmine\inventory\PlayerOffHandInventory;
+use pocketmine\inventory\PETransaction\TransactionQueue;
 use pocketmine\item\Consumable;
 use pocketmine\item\Durable;
 use pocketmine\item\enchantment\Enchantment;
@@ -75,8 +78,14 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	/** @var PlayerInventory */
 	protected $inventory;
 
+	/** @var PlayerOffHandInventory */
+	protected $offHandInventory;
+
 	/** @var EnderChestInventory */
 	protected $enderChestInventory;
+
+    /** @var TransactionQueue */
+    protected $transactionQueue = null;
 
 	/** @var UUID */
 	protected $uuid;
@@ -181,10 +190,18 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 * @param Player[]|null $targets
 	 */
 	public function sendSkin(?array $targets = null) : void{
-		$pk = new PlayerSkinPacket();
-		$pk->uuid = $this->getUniqueId();
-		$pk->skin = $this->skin;
-		$this->server->broadcastPacket($targets ?? $this->hasSpawned, $pk);
+	    $targets = $targets ?? $this->hasSpawned;
+	    foreach($targets as $target){
+	        if($target->getProtocol() < ProtocolInfo::PROTOCOL_130){
+	            $this->despawnFrom($target);
+	            $this->spawnTo($target);
+	        }else{
+	        	$pk = new PlayerSkinPacket();
+	        	$pk->uuid = $this->getUniqueId();
+	        	$pk->skin = $this->skin;
+	        	$target->dataPacket($pk);
+	        }
+	    }
 	}
 
 	public function jump() : void{
@@ -539,6 +556,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 	public function onPickupXp(int $xpValue) : void{
 		static $mainHandIndex = -1;
+		static $offHandIndex = -2;
 
 		//TODO: replace this with a more generic equipment getting/setting interface
 		/** @var Durable[] $equipment */
@@ -547,7 +565,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if(($item = $this->inventory->getItemInHand()) instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
 			$equipment[$mainHandIndex] = $item;
 		}
-		//TODO: check offhand
+		if(($item = $this->offHandInventory->getItem(0)) instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
+		    $equipment[$offHandIndex] = $item;
+		}
 		foreach($this->armorInventory->getContents() as $k => $item){
 			if($item instanceof Durable and $item->hasEnchantment(Enchantment::MENDING)){
 				$equipment[$k] = $item;
@@ -563,6 +583,8 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 				if($k === $mainHandIndex){
 					$this->inventory->setItemInHand($repairItem);
+				}elseif($k === $offHandIndex){
+				    $this->offHandInventory->setItem(0, $repairItem);
 				}else{
 					$this->armorInventory->setItem($k, $repairItem);
 				}
@@ -595,9 +617,17 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		return $this->inventory;
 	}
 
+	public function getOffHandInventory() : PlayerOffHandInventory{
+		return $this->offHandInventory;
+	}
+
 	public function getEnderChestInventory() : EnderChestInventory{
 		return $this->enderChestInventory;
 	}
+
+    public function getTransactionQueue() : ?TransactionQueue{
+        return $this->transactionQueue;
+    }
 
 	/**
 	 * For Human entities which are not players, sets their properties such as nametag, skin and UUID from NBT.
@@ -616,8 +646,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$this->setPlayerFlag(self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->propertyManager->setBlockPos(self::DATA_PLAYER_BED_POSITION, null);
 
-		$this->inventory = new PlayerInventory($this);
+		$this->inventory = ($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130) ? new OldPlayerInventory($this) : new PlayerInventory($this);
+		$this->offHandInventory = new PlayerOffHandInventory($this);
 		$this->enderChestInventory = new EnderChestInventory();
+		if($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+            $this->transactionQueue = new TransactionQueue($this);
+		}
 		$this->initHumanData();
 
 		$inventoryTag = $this->namedtag->getListTag("Inventory");
@@ -638,6 +672,11 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			}
 
 			$this->armorInventory->setEventProcessor($armorListener);
+		}
+
+		$offHand = $this->namedtag->getCompoundTag("OffHand");
+		if($offHand !== null){
+			$this->offHandInventory->setItemInHand(Item::nbtDeserialize($offHand));
 		}
 
 		$enderChestInventoryTag = $this->namedtag->getListTag("EnderChestInventory");
@@ -739,7 +778,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 
 		$type = $source->getCause();
 		if($type !== EntityDamageEvent::CAUSE_SUICIDE and $type !== EntityDamageEvent::CAUSE_VOID
-			and $this->inventory->getItemInHand() instanceof Totem){ //TODO: check offhand as well (when it's implemented)
+			and ($this->inventory->getItemInHand() instanceof Totem || $this->offHandInventory->getItem(0) instanceof Totem)){
 
 			$compensation = $this->getHealth() - $source->getFinalDamage() - 1;
 			if($compensation < 0){
@@ -765,6 +804,9 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			if($hand instanceof Totem){
 				$hand->pop(); //Plugins could alter max stack size
 				$this->inventory->setItemInHand($hand);
+			}elseif(($offHand = $this->offHandInventory->getItem(0)) instanceof Totem){
+				$offHand->pop();
+				$this->offHandInventory->setItem(0, $offHand);
 			}
 		}
 	}
@@ -772,6 +814,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	public function getDrops() : array{
 		return array_filter(array_merge(
 			$this->inventory !== null ? array_values($this->inventory->getContents()) : [],
+			$this->offHandInventory !== null ? array_values($this->offHandInventory->getContents()) : [],
 			$this->armorInventory !== null ? array_values($this->armorInventory->getContents()) : []
 		), function(Item $item) : bool{ return !$item->hasEnchantment(Enchantment::VANISHING); });
 	}
@@ -810,6 +853,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			}
 
 			$this->namedtag->setInt("SelectedInventorySlot", $this->inventory->getHeldItemIndex());
+		}
+
+		if($this->offHandInventory !== null){
+			$this->namedtag->setTag($this->offHandInventory->getItemInHand()->nbtSerialize(0, "OffHand"));
 		}
 
 		if($this->enderChestInventory !== null){
@@ -887,6 +934,10 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 			if($this->inventory !== null){
 				$this->inventory->removeAllViewers(true);
 				$this->inventory = null;
+			}
+			if($this->offHandInventory !== null){
+			    $this->offHandInventory->removeAllViewers(true);
+			    $this->offHandInventory = null;
 			}
 			if($this->enderChestInventory !== null){
 				$this->enderChestInventory->removeAllViewers(true);

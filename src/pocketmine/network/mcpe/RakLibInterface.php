@@ -28,6 +28,7 @@ use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\encryption\DecryptionException;
 use pocketmine\network\Network;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -53,7 +54,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 * Sometimes this gets changed when the MCPE-layer protocol gets broken to the point where old and new can't
 	 * communicate. It's important that we check this to avoid catastrophes.
 	 */
-	private const MCPE_RAKNET_PROTOCOL_VERSION = 9;
+	private const MCPE_RAKNET_PROTOCOL_VERSION = 10;
+	private const MCPE_RAKNET_PACKET_ID = "\xfe";
 
 	/** @var Server */
 	private $server;
@@ -165,8 +167,18 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$address = $player->getAddress();
 			try{
 				if($packet->buffer !== ""){
-					$pk = new BatchPacket($packet->buffer);
-					$pk->setProtocol($player->getProtocol());
+					$cipher = $player->getCipher();
+					$buffer = substr($packet->buffer, 1);
+					try {
+						if($cipher !== null) {
+							$buffer = $cipher->decrypt($buffer);
+						}
+					} catch (DecryptionException $e) {}
+
+				    $buffer = self::MCPE_RAKNET_PACKET_ID . $buffer;
+
+				    $pk = new BatchPacket($buffer);
+				    $pk->setProtocol($player->getProtocol());
 					$player->handleDataPacket($pk);
 				}
 			}catch(\Throwable $e){
@@ -237,22 +249,19 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			}
 
 			if($packet instanceof BatchPacket){
-				if($needACK){
-					$pk = new EncapsulatedPacket();
-					$pk->identifierACK = $this->identifiersACK[$identifier]++;
-					$pk->buffer = $packet->buffer;
-					$pk->reliability = PacketReliability::RELIABLE_ORDERED;
-					$pk->orderChannel = 0;
-				}else{
-					if(!isset($packet->__encapsulatedPacket)){
-						$packet->__encapsulatedPacket = new CachedEncapsulatedPacket;
-						$packet->__encapsulatedPacket->identifierACK = null;
-						$packet->__encapsulatedPacket->buffer = $packet->buffer;
-						$packet->__encapsulatedPacket->reliability = PacketReliability::RELIABLE_ORDERED;
-						$packet->__encapsulatedPacket->orderChannel = 0;
-					}
-					$pk = $packet->__encapsulatedPacket;
-				}
+			    $buffer = $packet->buffer;
+		    	$cipher = $player->getCipher();
+		    	$rawBuffer = substr($buffer, 1);
+		    	$buffer = self::MCPE_RAKNET_PACKET_ID . ($cipher !== null ? $cipher->encrypt($rawBuffer) : $rawBuffer);
+
+		    	$pk = new EncapsulatedPacket();
+		    	$pk->buffer = $buffer;
+		    	$pk->reliability = $immediate ? PacketReliability::RELIABLE : PacketReliability::RELIABLE_ORDERED;
+		    	$pk->orderChannel = 0;
+
+		    	if($needACK === true){
+			    	$pk->identifierACK = $this->identifiersACK[$identifier]++;
+		    	}
 
 				$this->interface->sendEncapsulated($identifier, $pk, ($needACK ? RakLib::FLAG_NEED_ACK : 0) | ($immediate ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 				return $pk->identifierACK;

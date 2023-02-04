@@ -33,6 +33,7 @@ use function get_class;
 use function strlen;
 use function zlib_decode;
 use function zlib_encode;
+use const ZLIB_ENCODING_RAW;
 
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;
@@ -57,11 +58,16 @@ class BatchPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$data = $this->getRemaining();
-		try{
-			$this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
-		}catch(\ErrorException $e){ //zlib decode error
-			$this->payload = "";
-		}
+		//var_dump($data[0]);
+		//if($data[0] === "\170"){
+	    	try{
+		    	$this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
+	    	}catch(\ErrorException $e){ //zlib decode error
+		    	$this->payload = "";
+	    	}
+		/*}else{
+		    $this->payload = Binary::writeUnsignedVarInt(strlen($data)) . $data;
+		}*/
 	}
 
 	protected function encodeHeader(){
@@ -69,7 +75,12 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel));
+		$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    ($this->buffer .= $payload);
+		}else{
+		    $this->putString($payload);
+		}
 	}
 
 	/**
@@ -115,10 +126,6 @@ class BatchPacket extends DataPacket{
 
 		foreach($this->getPackets() as $buf){
 			$pk = PacketPool::getPacket($buf, $session->getProtocol());
-			if($pk === null){
-			    continue;
-			}
-
             $pk->setProtocol($session->getProtocol());
 
 			if(!$pk->canBeBatched()){

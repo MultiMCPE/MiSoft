@@ -25,12 +25,13 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
 
-
 use pocketmine\network\mcpe\NetworkSession;
 
 class InteractPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::INTERACT_PACKET;
 
+	public const ACTION_RIGHT_CLICK = 1;
+	public const ACTION_LEFT_CLICK = 2;
 	public const ACTION_LEAVE_VEHICLE = 3;
 	public const ACTION_MOUSEOVER = 4;
 
@@ -52,11 +53,13 @@ class InteractPacket extends DataPacket{
 		$this->action = (\ord($this->get(1)));
 		$this->target = $this->getEntityRuntimeId();
 
-		if($this->action === self::ACTION_MOUSEOVER){
-			//TODO: should this be a vector3?
-			$this->x = ((\unpack("g", $this->get(4))[1]));
-			$this->y = ((\unpack("g", $this->get(4))[1]));
-			$this->z = ((\unpack("g", $this->get(4))[1]));
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	if($this->action === self::ACTION_MOUSEOVER){
+		    	//TODO: should this be a vector3?
+		    	$this->x = ((\unpack("g", $this->get(4))[1]));
+		    	$this->y = ((\unpack("g", $this->get(4))[1]));
+		    	$this->z = ((\unpack("g", $this->get(4))[1]));
+	    	}
 		}
 	}
 
@@ -64,11 +67,13 @@ class InteractPacket extends DataPacket{
 		($this->buffer .= \chr($this->action));
 		$this->putEntityRuntimeId($this->target);
 
-		if($this->action === self::ACTION_MOUSEOVER){
-			($this->buffer .= (\pack("g", $this->x)));
-			($this->buffer .= (\pack("g", $this->y)));
-			($this->buffer .= (\pack("g", $this->z)));
-		}
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	if($this->action === self::ACTION_MOUSEOVER){
+		    	($this->buffer .= (\pack("g", $this->x)));
+		    	($this->buffer .= (\pack("g", $this->y)));
+		    	($this->buffer .= (\pack("g", $this->z)));
+	    	}
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

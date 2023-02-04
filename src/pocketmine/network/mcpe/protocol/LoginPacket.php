@@ -43,6 +43,8 @@ class LoginPacket extends DataPacket{
 	public $username;
 	/** @var int */
 	public $protocol;
+	/** @var int */
+	public $gameEdition;
 	/** @var string */
 	public $clientUUID;
 	/** @var int */
@@ -96,6 +98,10 @@ class LoginPacket extends DataPacket{
             return;
         }
 
+        if ($this->protocol < ProtocolInfo::PROTOCOL_130) {
+            $this->gameEdition = (\ord($this->get(1)));
+        }
+
 		try{
 			$this->decodeConnectionRequest();
 		}catch(\Throwable $e){
@@ -112,7 +118,11 @@ class LoginPacket extends DataPacket{
 	}
 
 	protected function decodeConnectionRequest() : void{
-        $buffer = new BinaryStream($this->getString());
+        if ($this->protocol < ProtocolInfo::PROTOCOL_110) {
+            $buffer = new BinaryStream(\zlib_decode($this->getString(), 0x400 * 0x400 * 0x40));
+        } else {
+            $buffer = new BinaryStream($this->getString());
+        }
 
 		$this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
 

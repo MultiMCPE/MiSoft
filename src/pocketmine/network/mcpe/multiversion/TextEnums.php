@@ -28,6 +28,19 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 abstract class TextEnums {
 
     private static $textPacketType = [
+        ProtocolInfo::PROTOCOL_406 => [
+            "TYPE_RAW" => 0,
+            "TYPE_CHAT" => 1,
+            "TYPE_TRANSLATION" => 2,
+            "TYPE_POPUP" => 3,
+            "TYPE_JUKEBOX_POPUP" => 4,
+            "TYPE_TIP" => 5,
+            "TYPE_SYSTEM" => 6,
+            "TYPE_WHISPER" => 7,
+            "TYPE_ANNOUNCEMENT" => 8,
+            "TYPE_JSON_WHISPER" => 9,
+            "TYPE_JSON" => 10
+        ],
         ProtocolInfo::PROTOCOL_133 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
@@ -40,7 +53,7 @@ abstract class TextEnums {
             "TYPE_ANNOUNCEMENT" => 8,
             "TYPE_JSON" => 9
         ],
-        ProtocolInfo::PROTOCOL_130 => [ // 130 подойдет для 110
+        ProtocolInfo::PROTOCOL_110 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,

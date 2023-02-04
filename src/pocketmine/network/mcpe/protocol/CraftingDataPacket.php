@@ -33,6 +33,9 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
+use pocketmine\network\mcpe\protocol\types\PotionContainerChangeRecipe;
+use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
 use function count;
 use function str_repeat;
 
@@ -50,6 +53,10 @@ class CraftingDataPacket extends DataPacket{
 
 	/** @var object[] */
 	public $entries = [];
+	/** @var PotionTypeRecipe[] */
+	public $potionTypeRecipes = [];
+	/** @var PotionContainerChangeRecipe[] */
+	public $potionContainerRecipes = [];
 	/** @var bool */
 	public $cleanRecipes = false;
 
@@ -80,7 +87,7 @@ class CraftingDataPacket extends DataPacket{
 					$entry["input"] = [];
 					for($j = 0; $j < $ingredientCount; ++$j){
 					   	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system because it isn't always 1
 					   	} else {
 					   	    $entry["input"][] = $this->getSlot($this->getProtocol());
@@ -94,9 +101,12 @@ class CraftingDataPacket extends DataPacket{
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
 				    	$entry["block"] = $this->getString();
-					}
-					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-				    	$entry["priority"] = $this->getVarInt();
+				    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				        	$entry["priority"] = $this->getVarInt();
+				        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+				        	    $entry["net_id"] = $this->readGenericTypeNetworkId();
+				        	}
+				    	}
 					}
 
 					break;
@@ -111,7 +121,7 @@ class CraftingDataPacket extends DataPacket{
 					$entry["input"] = [];
 					for($j = 0; $j < $count; ++$j){
 					    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-					    	$entry["input"][] = $in = $this->getRecipeIngredient();
+					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system
 					    } else {
 					        $entry["input"][] = $this->getSlot($this->getProtocol());
@@ -125,21 +135,33 @@ class CraftingDataPacket extends DataPacket{
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
 				    	$entry["block"] = $this->getString();
-					}
-					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-				    	$entry["priority"] = $this->getVarInt();
+				    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+				        	$entry["priority"] = $this->getVarInt();
+				        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+				        	    $entry["net_id"] = $this->readGenericTypeNetworkId();
+				        	}
+				    	}
 					}
 
 					break;
 				case self::ENTRY_FURNACE:
 				case self::ENTRY_FURNACE_DATA:
 					$inputId = $this->getVarInt();
-					$inputData = -1;
-					if($recipeType === self::ENTRY_FURNACE_DATA){
-						$inputData = $this->getVarInt();
-						if($inputData === 0x7fff){
-							$inputData = -1;
-						}
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+				    	if($recipeType === self::ENTRY_FURNACE){
+					    	[$inputId, $inputData] = ItemPalette::getLegacyFromRuntimeIdWildcard($inputId, 0x7fff);
+				    	}else{
+					    	$inputData = $this->getVarInt();
+					    	[$inputId, $inputData] = ItemPalette::getLegacyFromRuntimeIdWildcard($inputId, $inputData);
+				    	}
+					}else{
+				    	$inputData = -1;
+				    	if($recipeType === self::ENTRY_FURNACE_DATA){
+					    	$inputData = $this->getVarInt();
+					    	if($inputData === 0x7fff){
+						    	$inputData = -1;
+					    	}
+				    	}
 					}
 					$entry["input"] = ItemFactory::get($inputId, $inputData);
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
@@ -157,11 +179,47 @@ class CraftingDataPacket extends DataPacket{
 					break;
 				case self::ENTRY_MULTI:
 					$entry["uuid"] = $this->getUUID()->toString();
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+					    $entry["net_id"] = $this->readGenericTypeNetworkId();
+					}
 					break;
 				default:
 					throw new \UnexpectedValueException("Unhandled recipe type $recipeType!"); //do not continue attempting to decode
 			}
 			$this->decodedEntries[] = $entry;
+		}
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$input = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$inputMeta = $this->getVarInt();
+		    	}
+		    	$ingredient = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$ingredientMeta = $this->getVarInt();
+		    	}
+		    	$output = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$outputMeta = $this->getVarInt();
+		    	}
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    	    [$input, $inputMeta] = ItemPalette::getLegacyFromRuntimeId($input, $inputMeta);
+		    	    [$ingredient, $ingredientMeta] = ItemPalette::getLegacyFromRuntimeId($ingredient, $ingredientMeta);
+		    	    [$output, $outputMeta] = ItemPalette::getLegacyFromRuntimeId($output, $outputMeta);
+		    	}
+		    	$this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta ?? 0, $ingredient, $ingredientMeta ?? 0, $output, $outputMeta ?? 0);
+	    	}
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		    	$input = $this->getVarInt();
+		    	$ingredient = $this->getVarInt();
+		    	$output = $this->getVarInt();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    	    [$input, ] = ItemPalette::getLegacyFromRuntimeId($input, 0);
+		    	    [$ingredient, ] = ItemPalette::getLegacyFromRuntimeId($ingredient, 0);
+		    	    [$output, ] = ItemPalette::getLegacyFromRuntimeId($output, 0);
+		    	}
+		    	$this->potionContainerRecipes[] = new PotionContainerChangeRecipe($input, $ingredient, $output);
+	    	}
 		}
 		$this->cleanRecipes = (($this->get(1) !== "\x00"));
 	}
@@ -186,7 +244,7 @@ class CraftingDataPacket extends DataPacket{
 		$stream->putUnsignedVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){
 		    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-		    	$stream->putRecipeIngredient($item);
+		    	$stream->putRecipeIngredient($item, $playerProtocol);
 		    } else {
 		        $stream->putSlot($item, $playerProtocol);
 		    }
@@ -201,9 +259,12 @@ class CraftingDataPacket extends DataPacket{
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		}
-		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
-	    	$stream->putVarInt(50); //TODO: priority
+	    	if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	        	$stream->putVarInt(50); //TODO: priority
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	}
+	    	}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPELESS;
@@ -220,7 +281,7 @@ class CraftingDataPacket extends DataPacket{
 			for($x = 0; $x < $recipe->getWidth(); ++$x){
 			    $ingredient = $recipe->getIngredient($x, $z);
 			    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-			    	$stream->putRecipeIngredient($ingredient);
+			    	$stream->putRecipeIngredient($ingredient, $playerProtocol);
 			    } else {
 			        $stream->putSlot($ingredient, $playerProtocol);
 			    }
@@ -236,20 +297,38 @@ class CraftingDataPacket extends DataPacket{
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
-		}
-		if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
-	    	$stream->putVarInt(50); //TODO: priority
+	    	if ($playerProtocol >= ProtocolInfo::PROTOCOL_361) {
+	        	$stream->putVarInt(50); //TODO: priority
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	}
+	    	}
 		}
 
 		return CraftingDataPacket::ENTRY_SHAPED;
 	}
 
 	private static function writeFurnaceRecipe(FurnaceRecipe $recipe, NetworkBinaryStream $stream, int $playerProtocol){
-		$stream->putVarInt($recipe->getInput()->getId());
-		$result = CraftingDataPacket::ENTRY_FURNACE;
-		if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
-			$stream->putVarInt($recipe->getInput()->getDamage());
-			$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+	    $id = $recipe->getInput()->getId();
+	    $damage = $recipe->getInput()->getDamage();
+	    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+	    	if($recipe->getInput()->hasAnyDamageValue()){
+		    	[$id, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		    	$damage = 0x7fff;
+	    	}else{
+		    	[$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+	    	}
+		}
+		$stream->putVarInt($id);
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		    $stream->putVarInt($damage);
+		    $result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+		}else{
+	    	$result = CraftingDataPacket::ENTRY_FURNACE;
+	    	if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
+		     	$stream->putVarInt($damage);
+		    	$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+	    	}
 		}
 		$stream->putSlot($recipe->getResult(), $playerProtocol);
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
@@ -285,6 +364,48 @@ class CraftingDataPacket extends DataPacket{
 			}
 
 			$writer->reset();
+		}
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+	    	$this->putUnsignedVarInt(count($this->potionTypeRecipes));
+	    	foreach($this->potionTypeRecipes as $recipe){
+	    	    $input = $recipe->getInputItemId();
+	    	    $inputMeta = $recipe->getInputItemMeta();
+	    	    $ingredient = $recipe->getIngredientItemId();
+	    	    $ingredientMeta = $recipe->getIngredientItemMeta();
+	    	    $output = $recipe->getOutputItemId();
+	    	    $outputMeta = $recipe->getOutputItemMeta();
+	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	    	        [$input, $inputMeta] = ItemPalette::getRuntimeFromLegacyId($input, $inputMeta);
+	    	        [$ingredient, $ingredientMeta] = ItemPalette::getRuntimeFromLegacyId($ingredient, $ingredientMeta);
+	    	        [$output, $outputMeta] = ItemPalette::getRuntimeFromLegacyId($output, $outputMeta);
+	    	    }
+		    	$this->putVarInt($input);
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($inputMeta);
+		    	}
+		    	$this->putVarInt($ingredient);
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($ingredientMeta);
+		    	}
+		    	$this->putVarInt($output);
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		        	$this->putVarInt($outputMeta);
+		    	}
+	    	}
+	    	$this->putUnsignedVarInt(count($this->potionContainerRecipes));
+	    	foreach($this->potionContainerRecipes as $recipe){
+	    	    $input = $recipe->getInputItemId();
+	    	    $ingredient = $recipe->getIngredientItemId();
+	    	    $output = $recipe->getOutputItemId();
+	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	    	        [$input, ] = ItemPalette::getRuntimeFromLegacyId($input, 0);
+	    	        [$ingredient, ] = ItemPalette::getRuntimeFromLegacyId($ingredient, 0);
+	    	        [$output, ] = ItemPalette::getRuntimeFromLegacyId($output, 0);
+	    	    }
+		    	$this->putVarInt($input);
+		    	$this->putVarInt($ingredient);
+		    	$this->putVarInt($output);
+		    }
 		}
 
 		($this->buffer .= ($this->cleanRecipes ? "\x01" : "\x00"));

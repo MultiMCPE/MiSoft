@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\entity\Attribute;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Skin;
 use pocketmine\item\Durable;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -38,12 +39,23 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\NamedTag;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\GameRuleType;
+use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
+use pocketmine\network\mcpe\protocol\types\PersonaSkinPiece;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
+use pocketmine\network\mcpe\protocol\types\SkinImage;
+use pocketmine\network\mcpe\protocol\types\SkinAnimation;
+use pocketmine\network\mcpe\protocol\types\StructureEditorData;
+use pocketmine\network\mcpe\protocol\types\StructureSettings;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
+use pocketmine\utils\Color;
 use function count;
 use function strlen;
 
@@ -78,6 +90,132 @@ class NetworkBinaryStream extends BinaryStream{
 		($this->buffer .= (\pack("V", $uuid->getPart(2))));
 	}
 
+	public function getSkin(int $playerProtocol) : Skin{
+		$skinId = $this->getString();
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_425){
+	    	$skinPlayFabId = $this->getString();
+		}
+		$skinResourcePatch = $this->getString();
+		$skinData = $this->getSkinImage();
+		$animationCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$animations = [];
+		for($i = 0; $i < $animationCount; ++$i){
+			$animations[] = new SkinAnimation(
+				$skinImage = $this->getSkinImage(),
+				$animationType = ((\unpack("V", $this->get(4))[1] << 32 >> 32)),
+				$animationFrames = ((\unpack("g", $this->get(4))[1])),
+				$expressionType = ($this->getProtocol() >= ProtocolInfo::PROTOCOL_419 ? ((\unpack("V", $this->get(4))[1] << 32 >> 32)) : 0)
+			);
+		}
+		$capeData = $this->getSkinImage();
+		$geometryData = $this->getString();
+		$animationData = $this->getString();
+		$premium = (($this->get(1) !== "\x00"));
+		$persona = (($this->get(1) !== "\x00"));
+		$capeOnClassic = (($this->get(1) !== "\x00"));
+		$capeId = $this->getString();
+		$fullSkinId = $this->getString();
+
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
+	    	$armSize = $this->getString();
+	    	$skinColor = Color::fromHexString($this->getString());
+	    	$personaPieceCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+    		$personaPieces = [];
+	    	for($i = 0; $i < $personaPieceCount; ++$i){
+		    	$personaPieces[] = new PersonaSkinPiece(
+			    	$pieceId = $this->getString(),
+			    	$pieceType = $this->getString(),
+			    	$packId = $this->getString(),
+			    	$isDefaultPiece = (($this->get(1) !== "\x00")),
+			    	$productId = $this->getString()
+		    	);
+	    	}
+	    	$pieceTintColorCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	    	$pieceTintColors = [];
+	    	for($i = 0; $i < $pieceTintColorCount; ++$i){
+		    	$pieceType = $this->getString();
+		    	$colorCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		    	$colors = [];
+		    	for($j = 0; $j < $colorCount; ++$j){
+			    	$colors[] = $this->getString();
+		    	}
+		    	$pieceTintColors[] = new PersonaPieceTintColor(
+			    	$pieceType,
+			    	$colors
+		    	);
+	    	}
+	    	$personaPieces = \SplFixedArray::fromArray($personaPieces);
+	    	$pieceTintColors = \SplFixedArray::fromArray($pieceTintColors);
+		}else{
+            $armSize = "wide";
+            $skinColor = new Color(0, 0, 0);
+            $personaPieces = \SplFixedArray::fromArray([]);
+            $pieceTintColors = \SplFixedArray::fromArray([]);
+		}
+
+        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
+	}
+
+	public function putSkin(Skin $skin, int $playerProtocol){
+	    $skin = SerializedSkin::fromSkin($skin);
+		$this->putString($skin->getSkinId());
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_425){
+		    $this->putString($skin->getPlayFabId());
+		}
+		$this->putString($skin->getResourcePatch());
+		$this->putSkinImage($skin->getSkinImage());
+		($this->buffer .= (\pack("V", count($skin->getAnimationFrames()))));
+		foreach($skin->getAnimationFrames() as $animation){
+			$this->putSkinImage($animation->getImage());
+			($this->buffer .= (\pack("V", $animation->getType())));
+			($this->buffer .= (\pack("g", $animation->getFrames())));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+			    ($this->buffer .= (\pack("V", $animation->getExpressionType())));
+			}
+		}
+		$this->putSkinImage($skin->getCapeImage());
+		$this->putString($skin->getGeometryData());
+		$this->putString($skin->getAnimationData());
+		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
+		($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
+		$this->putString($skin->getCapeId());
+		$this->putString($skin->getFullSkinId());
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
+	    	$this->putString($skin->getArmSize());
+	    	$this->putString($skin->getSkinColor()->toHexString());
+	    	($this->buffer .= (\pack("V", count($skin->getPersonaPieces()))));
+	    	foreach($skin->getPersonaPieces() as $piece){
+		    	$this->putString($piece->getPieceId());
+		    	$this->putString($piece->getPieceType());
+		    	$this->putString($piece->getPackId());
+		    	($this->buffer .= ($piece->isDefaultPiece() ? "\x01" : "\x00"));
+		    	$this->putString($piece->getProductId());
+	    	}
+	    	($this->buffer .= (\pack("V", count($skin->getPieceTintColors()))));
+	    	foreach($skin->getPieceTintColors() as $tint){
+		    	$this->putString($tint->getPieceType());
+		    	($this->buffer .= (\pack("V", count($tint->getColors()))));
+		    	foreach($tint->getColors() as $color){
+			    	$this->putString($color);
+		    	}
+	    	}
+		}
+	}
+
+	private function getSkinImage() : SkinImage{
+		$width = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$height = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$data = $this->getString();
+		return new SkinImage($height, $width, $data);
+	}
+
+	private function putSkinImage(SkinImage $image) : void{
+		($this->buffer .= (\pack("V", $image->getWidth())));
+		($this->buffer .= (\pack("V", $image->getHeight())));
+		$this->putString($image->getData());
+	}
+
 	public function getSlot(int $playerProtocol) : Item{
 		$id = $this->getVarInt();
 		if($id === 0){
@@ -87,6 +225,10 @@ class NetworkBinaryStream extends BinaryStream{
 		$auxValue = $this->getVarInt();
 		$data = $auxValue >> 8;
 		$cnt = $auxValue & 0xff;
+
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+            [$id, $data] = ItemPalette::getLegacyFromRuntimeId($id, $data);
+        }
 
 		$nbtLen = ((\unpack("v", $this->get(2))[1]));
 
@@ -158,8 +300,15 @@ class NetworkBinaryStream extends BinaryStream{
 			return;
 		}
 
-		$this->putVarInt($item->getId());
-		$auxValue = (($item->getDamage() & 0x7fff) << 8) | $item->getCount();
+        $id = $item->getId();
+        $damage = $item->getDamage();
+
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+        }
+
+		$this->putVarInt($id);
+		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
 		$this->putVarInt($auxValue);
 
 		$nbt = null;
@@ -201,30 +350,44 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 		$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-		if($item->getId() === ItemIds::SHIELD){
+		if($id === ItemIds::SHIELD){
 			$this->putVarLong(0); //"blocking tick" (ffs mojang)
 		}
 	}
 
-	public function getRecipeIngredient() : Item{
+	public function getRecipeIngredient(int $playerProtocol) : Item{
 		$id = $this->getVarInt();
 		if($id === 0){
 			return ItemFactory::get(ItemIds::AIR, 0, 0);
 		}
 		$meta = $this->getVarInt();
-		if($meta === 0x7fff){
-			$meta = -1;
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		    [$id, $meta] = ItemPalette::getLegacyFromRuntimeId($id, $meta);
+		}elseif($meta === 0x7fff){
+		    $meta = -1;
 		}
 		$count = $this->getVarInt();
 		return ItemFactory::get($id, $meta, $count);
 	}
 
-	public function putRecipeIngredient(Item $item) : void{
+	public function putRecipeIngredient(Item $item, int $playerProtocol) : void{
 		if($item->isNull()){
 			$this->putVarInt(0);
 		}else{
-			$this->putVarInt($item->getId());
-			$this->putVarInt($item->getDamage() & 0x7fff);
+		    $id = $item->getId();
+		    $damage = $item->getDamage();
+		    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		        if($item->hasAnyDamageValue()){
+		            [$id, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		            $damage = 0x7fff;
+		        }else{
+		            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+		        }
+		    }else{
+		        $damage = $damage & 0x7fff;
+		    }
+			$this->putVarInt($id);
+			$this->putVarInt($damage);
 			$this->putVarInt($item->getCount());
 		}
 	}
@@ -236,7 +399,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @return array
 	 */
-	public function getEntityMetadata(bool $types = true) : array{
+	public function getEntityMetadata(int $playerProtocol, bool $types = true) : array{
 		$count = $this->getUnsignedVarInt();
 		$data = [];
 		for($i = 0; $i < $count; ++$i){
@@ -259,8 +422,12 @@ class NetworkBinaryStream extends BinaryStream{
 				case Entity::DATA_TYPE_STRING:
 					$value = $this->getString();
 					break;
-				case Entity::DATA_TYPE_COMPOUND_TAG:
-					$value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+				case Entity::DATA_TYPE_SLOT:
+				    if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
+				        $value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+				    }else{
+				        $value = $this->getSlot($playerProtocol);
+				    }
 					break;
 				case Entity::DATA_TYPE_POS:
 					$value = new Vector3();
@@ -291,7 +458,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param array $metadata
 	 */
 	public function putEntityMetadata(array $metadata, int $playerProtocol) : void{
-	    $metadata = MetadataConvertor::updateMetadata($metadata, $playerProtocol);
+	    $metadata = MetadataConvertor::updateMeta($metadata, $playerProtocol);
 
 		$this->putUnsignedVarInt(count($metadata));
 		foreach($metadata as $key => $d){
@@ -313,8 +480,12 @@ class NetworkBinaryStream extends BinaryStream{
 				case Entity::DATA_TYPE_STRING:
 					$this->putString($d[1]);
 					break;
-				case Entity::DATA_TYPE_COMPOUND_TAG:
-					($this->buffer .= (new NetworkLittleEndianNBTStream())->write($d[1]));
+				case Entity::DATA_TYPE_SLOT:
+				    if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
+				        ($this->buffer .= (new NetworkLittleEndianNBTStream())->write($d[1]->getNamedTag()));
+				    }else{
+				        $this->putSlot($d[1], $playerProtocol);
+				    }
 					break;
 				case Entity::DATA_TYPE_POS:
 					$v = $d[1];
@@ -389,7 +560,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Reads and returns an EntityUniqueID
 	 * @return int
 	 */
-	public function getEntityUniqueId() : int{
+	final public function getEntityUniqueId() : int{
 		return $this->getVarLong();
 	}
 
@@ -406,7 +577,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * Reads and returns an EntityRuntimeID
 	 * @return int
 	 */
-	public function getEntityRuntimeId() : int{
+	final public function getEntityRuntimeId() : int{
 		return $this->getUnsignedVarLong();
 	}
 
@@ -537,13 +708,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$type = $this->getUnsignedVarInt();
 			$value = null;
 			switch($type){
-				case 1:
+				case GameRuleType::BOOL:
 					$value = (($this->get(1) !== "\x00"));
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$value = $this->getUnsignedVarInt();
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					$value = ((\unpack("g", $this->get(4))[1]));
 					break;
 			}
@@ -566,13 +737,13 @@ class NetworkBinaryStream extends BinaryStream{
 			$this->putString($name);
 			$this->putUnsignedVarInt($rule[0]);
 			switch($rule[0]){
-				case 1:
+				case GameRuleType::BOOL:
 					($this->buffer .= ($rule[1] ? "\x01" : "\x00"));
 					break;
-				case 2:
+				case GameRuleType::INT:
 					$this->putUnsignedVarInt($rule[1]);
 					break;
-				case 3:
+				case GameRuleType::FLOAT:
 					($this->buffer .= (\pack("g", $rule[1])));
 					break;
 			}
@@ -580,27 +751,40 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	/**
+	 * @param int $playerProtocol
+	 * 
 	 * @return EntityLink
 	 */
-	protected function getEntityLink() : EntityLink{
+	protected function getEntityLink(int $playerProtocol) : EntityLink{
 		$link = new EntityLink();
 
 		$link->fromEntityUniqueId = $this->getEntityUniqueId();
 		$link->toEntityUniqueId = $this->getEntityUniqueId();
 		$link->type = (\ord($this->get(1)));
-		$link->immediate = (($this->get(1) !== "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
+	    	$link->immediate = (($this->get(1) !== "\x00"));
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		        $link->causedByRider = (($this->get(1) !== "\x00"));
+	    	}
+		}
 
 		return $link;
 	}
 
 	/**
 	 * @param EntityLink $link
+	 * @param int $playerProtocol
 	 */
-	protected function putEntityLink(EntityLink $link) : void{
+	protected function putEntityLink(EntityLink $link, int $playerProtocol) : void{
 		$this->putEntityUniqueId($link->fromEntityUniqueId);
 		$this->putEntityUniqueId($link->toEntityUniqueId);
 		($this->buffer .= \chr($link->type));
-		($this->buffer .= ($link->immediate ? "\x01" : "\x00"));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
+	    	($this->buffer .= ($link->immediate ? "\x01" : "\x00"));
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		        ($this->buffer .= ($link->causedByRider ? "\x01" : "\x00"));
+	    	}
+		}
 	}
 
 	protected function getCommandOriginData() : CommandOriginData{
@@ -625,6 +809,97 @@ class NetworkBinaryStream extends BinaryStream{
 		if($data->type === CommandOriginData::ORIGIN_DEV_CONSOLE or $data->type === CommandOriginData::ORIGIN_TEST){
 			$this->putVarLong($data->varlong1);
 		}
+	}
+
+	protected function getStructureSettings() : StructureSettings{
+		$result = new StructureSettings();
+
+		$result->paletteName = $this->getString();
+
+		$result->ignoreEntities = (($this->get(1) !== "\x00"));
+		$result->ignoreBlocks = (($this->get(1) !== "\x00"));
+
+		$this->getBlockPosition($result->structureSizeX, $result->structureSizeY, $result->structureSizeZ);
+		$this->getBlockPosition($result->structureOffsetX, $result->structureOffsetY, $result->structureOffsetZ);
+
+		$result->lastTouchedByPlayerID = $this->getEntityUniqueId();
+		$result->rotation = (\ord($this->get(1)));
+		$result->mirror = (\ord($this->get(1)));
+		$result->integrityValue = ((\unpack("G", $this->get(4))[1]));
+		$result->integritySeed = ((\unpack("N", $this->get(4))[1] << 32 >> 32));
+
+		return $result;
+	}
+
+	protected function putStructureSettings(StructureSettings $structureSettings) : void{
+		$this->putString($structureSettings->paletteName);
+
+		($this->buffer .= ($structureSettings->ignoreEntities ? "\x01" : "\x00"));
+		($this->buffer .= ($structureSettings->ignoreBlocks ? "\x01" : "\x00"));
+
+		$this->putBlockPosition($structureSettings->structureSizeX, $structureSettings->structureSizeY, $structureSettings->structureSizeZ);
+		$this->putBlockPosition($structureSettings->structureOffsetX, $structureSettings->structureOffsetY, $structureSettings->structureOffsetZ);
+
+		$this->putEntityUniqueId($structureSettings->lastTouchedByPlayerID);
+		($this->buffer .= \chr($structureSettings->rotation));
+		($this->buffer .= \chr($structureSettings->mirror));
+		($this->buffer .= (\pack("G", $structureSettings->integrityValue)));
+		($this->buffer .= (\pack("N", $structureSettings->integritySeed)));
+	}
+
+	protected function getStructureEditorData() : StructureEditorData{
+		$result = new StructureEditorData();
+
+		$result->structureName = $this->getString();
+		$result->structureDataField = $this->getString();
+
+		$result->includePlayers = (($this->get(1) !== "\x00"));
+		$result->showBoundingBox = (($this->get(1) !== "\x00"));
+
+		$result->structureBlockType = $this->getVarInt();
+		$result->structureSettings = $this->getStructureSettings();
+		$result->structureRedstoneSaveMove = $this->getVarInt();
+
+		return $result;
+	}
+
+	protected function putStructureEditorData(StructureEditorData $structureEditorData) : void{
+		$this->putString($structureEditorData->structureName);
+		$this->putString($structureEditorData->structureDataField);
+
+		($this->buffer .= ($structureEditorData->includePlayers ? "\x01" : "\x00"));
+		($this->buffer .= ($structureEditorData->showBoundingBox ? "\x01" : "\x00"));
+
+		$this->putVarInt($structureEditorData->structureBlockType);
+		$this->putStructureSettings($structureEditorData->structureSettings);
+		$this->putVarInt($structureEditorData->structureRedstoneSaveMove);
+	}
+
+	public function getNbtRoot() : NamedTag{
+		$offset = $this->getOffset();
+		try{
+			$result = (new NetworkLittleEndianNBTStream())->read($this->getBuffer(), false, $offset, 512);
+			assert($result instanceof NamedTag, "doMultiple is false so we should definitely have a NamedTag here");
+			return $result;
+		}finally{
+			$this->setOffset($offset);
+		}
+	}
+
+	public function getNbtCompoundRoot() : CompoundTag{
+		$root = $this->getNbtRoot();
+		if(!($root instanceof CompoundTag)){
+			throw new \UnexpectedValueException("Expected TAG_Compound root");
+		}
+		return $root;
+	}
+
+	public function readGenericTypeNetworkId() : int{
+		return $this->getVarInt();
+	}
+
+	public function writeGenericTypeNetworkId(int $id) : void{
+		$this->putVarInt($id);
 	}
 
 	protected function duplicateArmAndLeg(string $skinData) : string{

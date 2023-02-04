@@ -111,26 +111,6 @@
     },
     {
         "type": "smelting",
-        "inputId": 87,
-        "output": {
-            "id": 405,
-            "damage": 0,
-            "count": 1,
-            "nbt": ""
-        }
-    },
-    {
-        "type": "smelting",
-        "inputId": 129,
-        "output": {
-            "id": 388,
-            "damage": 0,
-            "count": 1,
-            "nbt": ""
-        }
-    },
-    {
-        "type": "smelting",
         "inputId": 153,
         "output": {
             "id": 406,
@@ -267,6 +247,16 @@
         "output": {
             "id": 98,
             "damage": 2,
+            "count": 1,
+            "nbt": ""
+        }
+    },
+    {
+        "type": "smelting",
+        "inputId": 129,
+        "output": {
+            "id": 388,
+            "damage": 0,
             "count": 1,
             "nbt": ""
         }

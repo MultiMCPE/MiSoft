@@ -53,7 +53,7 @@ class AddItemActorPacket extends DataPacket{
 		$this->item = $this->getSlot($this->getProtocol());
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->metadata = $this->getEntityMetadata();
+		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 	    	$this->isFromFishing = (($this->get(1) !== "\x00"));
 		}

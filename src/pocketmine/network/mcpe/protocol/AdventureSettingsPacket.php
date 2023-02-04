@@ -55,13 +55,15 @@ class AdventureSettingsPacket extends DataPacket{
 	public const FLYING = 0x200;
 	public const MUTED = 0x400;
 
-	public const BUILD_AND_MINE = 0x01 | self::BITFLAG_SECOND_SET;
+	public const MINE = 0x01 | self::BITFLAG_SECOND_SET;
 	public const DOORS_AND_SWITCHES = 0x02 | self::BITFLAG_SECOND_SET;
 	public const OPEN_CONTAINERS = 0x04 | self::BITFLAG_SECOND_SET;
 	public const ATTACK_PLAYERS = 0x08 | self::BITFLAG_SECOND_SET;
 	public const ATTACK_MOBS = 0x10 | self::BITFLAG_SECOND_SET;
 	public const OPERATOR = 0x20 | self::BITFLAG_SECOND_SET;
 	public const TELEPORT = 0x80 | self::BITFLAG_SECOND_SET;
+	public const BUILD = 0x100 | self::BITFLAG_SECOND_SET;
+	public const DEFAULT = 0x200 | self::BITFLAG_SECOND_SET;
 
 	/** @var int */
 	public $flags = 0;
@@ -79,23 +81,27 @@ class AdventureSettingsPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->flags = $this->getUnsignedVarInt();
 		$this->commandPermission = $this->getUnsignedVarInt();
-		$this->flags2 = $this->getUnsignedVarInt();
-		$this->playerPermission = $this->getUnsignedVarInt();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->customFlags = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->flags2 = $this->getUnsignedVarInt();
+	    	$this->playerPermission = $this->getUnsignedVarInt();
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->customFlags = $this->getUnsignedVarInt();
+	    	}
+	    	$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 		}
-		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->flags);
 		$this->putUnsignedVarInt($this->commandPermission);
-		$this->putUnsignedVarInt($this->flags2);
-		$this->putUnsignedVarInt($this->playerPermission);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
-	    	$this->putUnsignedVarInt($this->customFlags);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->putUnsignedVarInt($this->flags2);
+	    	$this->putUnsignedVarInt($this->playerPermission);
+	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	        	$this->putUnsignedVarInt($this->customFlags);
+	    	}
+	    	($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 		}
-		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 	}
 
 	public function getFlag(int $flag) : bool{

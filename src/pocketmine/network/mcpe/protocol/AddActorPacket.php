@@ -36,10 +36,6 @@ use function count;
 class AddActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ACTOR_PACKET;
 
-	/*
-	* Thanks dktapps for this hack)
-	* By: sssss2281
-	*/
 	public const LEGACY_ID_MAP_BC = [
 		EntityIds::NPC => "minecraft:npc",
 		EntityIds::PLAYER => "minecraft:player",
@@ -202,10 +198,10 @@ class AddActorPacket extends DataPacket{
 			}
 		}
 
-		$this->metadata = $this->getEntityMetadata();
+		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 		$linkCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $linkCount; ++$i){
-			$this->links[] = $this->getEntityLink();
+			$this->links[] = $this->getEntityLink($this->getProtocol());
 		}
 	}
 
@@ -239,7 +235,7 @@ class AddActorPacket extends DataPacket{
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		$this->putUnsignedVarInt(count($this->links));
 		foreach($this->links as $link){
-			$this->putEntityLink($link);
+			$this->putEntityLink($link, $this->getProtocol());
 		}
 	}
 

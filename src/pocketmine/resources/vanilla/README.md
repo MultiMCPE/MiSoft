@@ -1,5 +1,5 @@
 # BedrockData
-Blobs of JSON data generated from Minecraft: Bedrock Edition used by PocketMine-MP
+Blobs of data generated from Minecraft: Bedrock Edition used by PocketMine-MP
 
 ### `required_block_states.json`
 This file contains data defining all the needed block states in MCPE's StartGamePacket. The format is as follows:
@@ -22,6 +22,9 @@ This file contains a mapping of all block stringy IDs to legacy numeric IDs (whi
 
 #### Note
 Where a block's legacy ID is > 255, its item ID is `255 - legacyBlockId`. This means prismarine stairs = -2 and so on.
+
+### `item_id_map.json`
+This file contains a mapping of all item stringy IDs to legacy numeric IDs.
 
 ### `banner_patterns.json`
 This file defines all the known banner pattern types and their crafting requirements.

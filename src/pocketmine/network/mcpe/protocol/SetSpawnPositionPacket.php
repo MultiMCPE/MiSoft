@@ -42,19 +42,37 @@ class SetSpawnPositionPacket extends DataPacket{
 	public $y;
 	/** @var int */
 	public $z;
+	/** @var int */
+	public $dimension;
+	/** @var int */
+	public $x2;
+	/** @var int */
+	public $y2;
+	/** @var int */
+	public $z2;
 	/** @var bool */
 	public $spawnForced;
 
 	protected function decodePayload(){
 		$this->spawnType = $this->getVarInt();
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->spawnForced = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	$this->dimension = $this->getVarInt();
+	    	$this->getBlockPosition($this->x2, $this->y2, $this->z2);
+		}else{
+	    	$this->spawnForced = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->spawnType);
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		($this->buffer .= ($this->spawnForced ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	$this->putVarInt($this->dimension);
+	    	$this->putBlockPosition($this->x2, $this->y2, $this->z2);
+		}else{
+	    	($this->buffer .= ($this->spawnForced ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

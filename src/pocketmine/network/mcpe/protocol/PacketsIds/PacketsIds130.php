@@ -1,12 +1,32 @@
 <?php
 
-declare(strict_types=0x1);
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
+declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\PacketsIds;
 
-final class PacketsIds130 {
+final class PacketsIds130{
 	public const LOGIN_PACKET = 0x01;
 	public const PLAY_STATUS_PACKET = 0x02;
+	public const SERVER_TO_CLIENT_HANDSHAKE_PACKET = 0x03;
 	public const CLIENT_TO_SERVER_HANDSHAKE_PACKET = 0x04;
 	public const DISCONNECT_PACKET = 0x05;
 	public const RESOURCE_PACKS_INFO_PACKET = 0x06;
@@ -33,12 +53,12 @@ final class PacketsIds130 {
 	public const ACTOR_EVENT_PACKET = 0x1b;
 	public const MOB_EFFECT_PACKET = 0x1c;
 	public const UPDATE_ATTRIBUTES_PACKET = 0x1d;
-	public const INVENTORY_TRANSACTION_PACKET = 0x1e;				// NEW
+	public const INVENTORY_TRANSACTION_PACKET = 0x1e;
 	public const MOB_EQUIPMENT_PACKET = 0x1f;
 	public const MOB_ARMOR_EQUIPMENT_PACKET = 0x20;
 	public const INTERACT_PACKET = 0x21;
-	public const BLOCK_PICK_REQUEST_PACKET = 0x22;					// NEW
-	public const ACTOR_PICK_REQUEST_PACKET = 0x23;				// NEW
+	public const BLOCK_PICK_REQUEST_PACKET = 0x22;
+	public const ACTOR_PICK_REQUEST_PACKET = 0x23;
 	public const PLAYER_ACTION_PACKET = 0x24;
 	public const ACTOR_FALL_PACKET = 0x25;
 	public const HURT_ARMOR_PACKET = 0x26;
@@ -51,13 +71,13 @@ final class PacketsIds130 {
 	public const RESPAWN_PACKET = 0x2d;
 	public const CONTAINER_OPEN_PACKET = 0x2e;
 	public const CONTAINER_CLOSE_PACKET = 0x2f;
-	public const PLAYER_HOTBAR_PACKET = 0x30;						// NEW
-	public const INVENTORY_CONTENT_PACKET = 0x31;					// NEW
-	public const INVENTORY_SLOT_PACKET = 0x32;						// NEW
+	public const PLAYER_HOTBAR_PACKET = 0x30;
+	public const INVENTORY_CONTENT_PACKET = 0x31;
+	public const INVENTORY_SLOT_PACKET = 0x32;
 	public const CONTAINER_SET_DATA_PACKET = 0x33;
 	public const CRAFTING_DATA_PACKET = 0x34;
 	public const CRAFTING_EVENT_PACKET = 0x35;
-	public const GUI_DATA_PICK_ITEM_PACKET = 0x36;					// NEW
+	public const GUI_DATA_PICK_ITEM_PACKET = 0x36;
 	public const ADVENTURE_SETTINGS_PACKET = 0x37;
 	public const BLOCK_ACTOR_DATA_PACKET = 0x38;
 	public const PLAYER_INPUT_PACKET = 0x39;
@@ -68,7 +88,7 @@ final class PacketsIds130 {
 	public const SET_PLAYER_GAME_TYPE_PACKET = 0x3e;
 	public const PLAYER_LIST_PACKET = 0x3f;
 	public const SIMPLE_EVENT_PACKET = 0x40;
-	public const TELEMETRY_EVENT_PACKET = 0x41;
+	public const EVENT_PACKET = 0x41;
 	public const SPAWN_EXPERIENCE_ORB_PACKET = 0x42;
 	public const CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x43;
 	public const MAP_INFO_REQUEST_PACKET = 0x44;
@@ -82,9 +102,9 @@ final class PacketsIds130 {
 	public const AVAILABLE_COMMANDS_PACKET = 0x4c;
 	public const COMMAND_REQUEST_PACKET = 0x4d;
 	public const COMMAND_BLOCK_UPDATE_PACKET = 0x4e;
-	public const COMMAND_OUTPUT_PACKET = 0x4f;						// NEW
+	public const COMMAND_OUTPUT_PACKET = 0x4f;
 	public const UPDATE_TRADE_PACKET = 0x50;
-	public const UPDATE_EQUIPMENT_PACKET = 0x51;
+	public const UPDATE_EQUIP_PACKET = 0x51;
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x52;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x53;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x54;
@@ -96,18 +116,25 @@ final class PacketsIds130 {
 	public const STRUCTURE_BLOCK_UPDATE_PACKET = 0x5a;
 	public const SHOW_STORE_OFFER_PACKET = 0x5b;
 	public const PURCHASE_RECEIPT_PACKET = 0x5c;
-	public const PLAYER_SKIN_PACKET = 0x5d;						// NEW
-	public const SUB_CLIENT_LOGIN_PACKET = 0x5e;					// NEW
-	public const INITIATE_WEB_SOCKET_CONNECTION_PACKET = 0x5f;		// NEW
-	public const SET_LAST_HURT_BY_PACKET = 0x60;					// NEW
-	public const BOOK_EDIT_PACKET = 0x61;							// NEW
-	public const NPC_REQUEST_PACKET = 0x62;						// NEW
-	public const PHOTO_TRANSFER_PACKET = 0x63;						// NEW
-	public const MODAL_FORM_REQUEST_PACKET = 0x64;					// NEW
-	public const MODAL_FORM_RESPONSE_PACKET = 0x65;				// NEW
-	public const SERVER_SETTINGS_REQUEST_PACKET = 0x66;			// NEW
-	public const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;			// NEW
-	public const SHOW_PROFILE_PACKET = 0x68;						// NEW
-	public const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;				// NEW
-	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x71;    // NEW
+	public const PLAYER_SKIN_PACKET = 0x5d;
+	public const SUB_CLIENT_LOGIN_PACKET = 0x5e;
+	public const AUTOMATION_CLIENT_CONNECT_PACKET = 0x5f;
+	public const SET_LAST_HURT_BY_PACKET = 0x60;
+	public const BOOK_EDIT_PACKET = 0x61;
+	public const NPC_REQUEST_PACKET = 0x62;
+	public const PHOTO_TRANSFER_PACKET = 0x63;
+	public const MODAL_FORM_REQUEST_PACKET = 0x64;
+	public const MODAL_FORM_RESPONSE_PACKET = 0x65;
+	public const SERVER_SETTINGS_REQUEST_PACKET = 0x66;
+	public const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;
+	public const SHOW_PROFILE_PACKET = 0x68;
+	public const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;
+	public const REMOVE_OBJECTIVE_PACKET = 0x6a;
+	public const SET_DISPLAY_OBJECTIVE_PACKET = 0x6b;
+	public const SET_SCORE_PACKET = 0x6c;
+	public const LAB_TABLE_PACKET = 0x6d;
+	public const UPDATE_BLOCK_SYNCED_PACKET = 0x6e;
+	public const MOVE_ACTOR_DELTA_PACKET = 0x6f;
+	public const SET_LOCAL_PLAYER_AS_INITIALIZED_PACKET = 0x70;
+
 }

@@ -80,6 +80,12 @@ class ActorEventPacket extends DataPacket{
 	public const ENTITY_SPAWN = 67; //used for MinecraftEventing stuff, not needed
 	public const DRAGON_PUKE = 68; //they call this puke particles
 	public const ITEM_ENTITY_MERGE = 69;
+	public const START_SWIM = 70;
+	public const BALLOON_POP = 71;
+	public const TREASURE_HUNT = 72;
+	public const AGENT_SUMMON = 73;
+	public const CHARGED_CROSSBOW = 74;
+	public const FALL = 75;
 
 	//TODO: add more events
 

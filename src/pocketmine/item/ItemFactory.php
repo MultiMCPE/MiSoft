@@ -146,7 +146,7 @@ class ItemFactory{
 		self::registerItem(new Dye());
 		self::registerItem(new Item(Item::BONE, 0, "Bone"));
 		self::registerItem(new Item(Item::SUGAR, 0, "Sugar"));
-		self::registerItem(new ItemBlock(Block::CAKE_BLOCK, 0, Item::CAKE));
+		self::registerItem(new Cake());
 		self::registerItem(new Bed());
 		self::registerItem(new ItemBlock(Block::REPEATER_BLOCK, 0, Item::REPEATER));
 		self::registerItem(new Cookie());
@@ -218,7 +218,7 @@ class ItemFactory{
 		self::registerItem(new RawMutton());
 		self::registerItem(new CookedMutton());
 		//TODO: ARMOR_STAND
-		//TODO: END_CRYSTAL
+		self::registerItem(new EndCrystal());
 		self::registerItem(new ItemBlock(Block::SPRUCE_DOOR_BLOCK, 0, Item::SPRUCE_DOOR));
 		self::registerItem(new ItemBlock(Block::BIRCH_DOOR_BLOCK, 0, Item::BIRCH_DOOR));
 		self::registerItem(new ItemBlock(Block::JUNGLE_DOOR_BLOCK, 0, Item::JUNGLE_DOOR));

@@ -25,7 +25,10 @@ namespace pocketmine\network\mcpe;
 
 
 use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\ActorFallPacket;
+use pocketmine\network\mcpe\protocol\ActorPickRequestPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
@@ -33,20 +36,29 @@ use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
 use pocketmine\network\mcpe\protocol\BossEventPacket;
 use pocketmine\network\mcpe\protocol\ClientToServerHandshakePacket;
+use pocketmine\network\mcpe\protocol\CommandBlockUpdatePacket;
 use pocketmine\network\mcpe\protocol\CommandRequestPacket;
+use pocketmine\network\mcpe\protocol\CommandStepPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
+use pocketmine\network\mcpe\protocol\DropItemPacket;
+use pocketmine\network\mcpe\protocol\UseItemPacket;
+use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
+use pocketmine\network\mcpe\protocol\ClientCacheStatusPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacketV1;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MapInfoRequestPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
@@ -54,14 +66,18 @@ use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
+use pocketmine\network\mcpe\protocol\RespawnPacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
 use pocketmine\network\mcpe\protocol\SetLocalPlayerAsInitializedPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
+use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
+use pocketmine\network\mcpe\protocol\TickSyncPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
+use pocketmine\math\Vector3;
 use function base64_encode;
 use function bin2hex;
 use function implode;
@@ -116,7 +132,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleClientToServerHandshake(ClientToServerHandshakePacket $packet) : bool{
-		return false; //TODO
+		return $this->player->onEncryptionHandshake();
 	}
 
 	public function handleResourcePackClientResponse(ResourcePackClientResponsePacket $packet) : bool{
@@ -135,6 +151,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return $this->player->handleMovePlayer($packet);
 	}
 
+	public function handleLevelSoundEventPacketV1(LevelSoundEventPacketV1 $packet) : bool{
+		return true; //useless leftover from 1.8
+	}
+
 	public function handleActorEvent(ActorEventPacket $packet) : bool{
 		return $this->player->handleEntityEvent($packet);
 	}
@@ -151,6 +171,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return true; //Not used
 	}
 
+	public function handleTickSync(TickSyncPacket $packet) : bool{
+		return true; //Not used
+	}
+
 	public function handleInteract(InteractPacket $packet) : bool{
 		return $this->player->handleInteract($packet);
 	}
@@ -159,12 +183,24 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return $this->player->handleBlockPickRequest($packet);
 	}
 
+	public function handleActorPickRequest(ActorPickRequestPacket $packet) : bool{
+		return false; //TODO
+	}
+
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
 		return $this->player->handlePlayerAction($packet);
 	}
 
+	public function handleActorFall(ActorFallPacket $packet) : bool{
+		return true; //Not used
+	}
+
 	public function handleAnimate(AnimatePacket $packet) : bool{
 		return $this->player->handleAnimate($packet);
+	}
+
+	public function handleRespawn(RespawnPacket $packet) : bool{
+		return $this->player->handleRespawn($packet);
 	}
 
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
@@ -176,7 +212,15 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
-		return true; //this is a broken useless packet, so we don't use it
+	    if($this->player->getProtocol() < ProtocolInfo::PROTOCOL_130){
+	    	return $this->player->handleCraftingEvent($packet); // only <= 1.1
+	    }
+
+	    return true;
+	}
+
+	public function handleClientCacheStatus(ClientCacheStatusPacket $packet) : bool{
+		return true; // Not used
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{
@@ -217,8 +261,36 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return false; //TODO
 	}
 
+	public function handleShowCredits(ShowCreditsPacket $packet) : bool{
+		return false; //TODO: handle resume
+	}
+
 	public function handleCommandRequest(CommandRequestPacket $packet) : bool{
 		return $this->player->chat($packet->command);
+	}
+
+	public function handleCommandBlockUpdate(CommandBlockUpdatePacket $packet) : bool{
+		return false; //TODO
+	}
+
+	public function handleCommandStep(CommandStepPacket $packet) : bool{
+		return $this->player->handleCommandStep($packet);
+	}
+
+	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
+		return $this->player->handleContainerSetSlot($packet);
+	}
+
+	public function handleDropItem(DropItemPacket $packet) : bool{
+		return $this->player->handleDropItem($packet);
+	}
+
+	public function handleRemoveBlock(RemoveBlockPacket $packet) : bool{
+		return $this->player->removeBlock(new Vector3($packet->x, $packet->y, $packet->z));
+	}
+
+	public function handleUseItem(UseItemPacket $packet) : bool{
+		return $this->player->handleUseItem($packet);
 	}
 
 	public function handleResourcePackChunkRequest(ResourcePackChunkRequestPacket $packet) : bool{
@@ -293,5 +365,9 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		return $this->player->handleLevelSoundEvent($packet);
+	}
+
+	public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet) : bool{
+		return true; //TODO: implement this properly - this is here to silence debug spam from MCPE dev builds
 	}
 }

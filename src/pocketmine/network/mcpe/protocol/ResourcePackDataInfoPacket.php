@@ -55,7 +55,7 @@ class ResourcePackDataInfoPacket extends DataPacket{
 	public $sha256;
 	/** @var bool */
 	public $isPremium = false;
-	/** @var int */
+	/** @var string|int */
 	public $packType = self::TYPE_RESOURCE; //TODO: check the values for this
 
 	protected function decodePayload(){

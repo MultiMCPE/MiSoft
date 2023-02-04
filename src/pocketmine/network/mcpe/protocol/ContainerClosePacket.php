@@ -33,13 +33,21 @@ class ContainerClosePacket extends DataPacket{
 
 	/** @var int */
 	public $windowId;
+	/** @var bool */
+	public $server = false;
 
 	protected function decodePayload(){
 		$this->windowId = (\ord($this->get(1)));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    $this->server = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload(){
 		($this->buffer .= \chr($this->windowId));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    ($this->buffer .= ($this->server ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

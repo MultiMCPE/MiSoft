@@ -57,6 +57,8 @@ class MovePlayerPacket extends DataPacket{
 	public $teleportCause = 0;
 	/** @var int */
 	public $teleportItem = 0;
+	/** @var int */
+	public $tick = 0;
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
@@ -70,6 +72,9 @@ class MovePlayerPacket extends DataPacket{
 		if($this->mode === MovePlayerPacket::MODE_TELEPORT){
 			$this->teleportCause = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
 			$this->teleportItem = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		}
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    $this->tick = $this->getUnsignedVarLong();
 		}
 	}
 
@@ -85,6 +90,9 @@ class MovePlayerPacket extends DataPacket{
 		if($this->mode === MovePlayerPacket::MODE_TELEPORT){
 			($this->buffer .= (\pack("V", $this->teleportCause)));
 			($this->buffer .= (\pack("V", $this->teleportItem)));
+		}
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    $this->putUnsignedVarLong($this->tick);
 		}
 	}
 

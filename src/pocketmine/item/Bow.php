@@ -48,7 +48,14 @@ class Bow extends Tool{
 	}
 
 	public function onReleaseUsing(Player $player) : bool{
-		if($player->isSurvival() and !$player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))){
+	    $inventory = null;
+        if($player->getOffHandInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))){
+            $inventory = $player->getOffHandInventory();
+	    }elseif($player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))){
+		    $inventory = $player->getInventory();
+		}
+
+		if($player->isSurvival() and $inventory === null){
 			$player->getInventory()->sendContents($player);
 			return false;
 		}
@@ -100,7 +107,9 @@ class Bow extends Tool{
 				$entity->setMotion($entity->getMotion()->multiply($ev->getForce()));
 				if($player->isSurvival()){
 					if(!$infinity){ //TODO: tipped arrows are still consumed when Infinity is applied
-						$player->getInventory()->removeItem(ItemFactory::get(Item::ARROW, 0, 1));
+					    if($inventory !== null){
+					    	$inventory->removeItem(ItemFactory::get(Item::ARROW, 0, 1));
+					    }
 					}
 					$this->applyDamage(1);
 				}

@@ -54,7 +54,7 @@ class ChunkRequestTask extends AsyncTask {
 
 	protected $compressionLevel;
 	
-	protected $protocols = [ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_360];
+	protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_406];
 
 	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk) {
 		$this->levelId = $level->getId();

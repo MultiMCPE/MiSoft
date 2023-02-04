@@ -41,6 +41,7 @@ class TextPacket extends DataPacket{
 	public const TYPE_SYSTEM = "TYPE_SYSTEM";
 	public const TYPE_WHISPER = "TYPE_WHISPER";
 	public const TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT";
+	public const TYPE_JSON_WHISPER = "TYPE_JSON_WHISPER";
 	public const TYPE_JSON = "TYPE_JSON";
 
 	/** @var int */
@@ -65,7 +66,9 @@ class TextPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->type = (\ord($this->get(1)));
 		$this->type = TextEnums::getMessageType($this->getProtocol(), $this->type);
-		$this->needsTranslation = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	$this->needsTranslation = (($this->get(1) !== "\x00"));
+		}
 		switch($this->type){
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:
@@ -79,6 +82,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
 				$this->message = $this->getString();
 				break;
@@ -110,7 +114,9 @@ class TextPacket extends DataPacket{
 	protected function encodePayload(){
 		$typeId = TextEnums::getMessageTypeId($this->getProtocol(), $this->type);
 		($this->buffer .= \chr($typeId));
-		($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+	    	($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
+		}
 		switch($this->type){
 			case self::TYPE_CHAT:
 			case self::TYPE_WHISPER:
@@ -124,6 +130,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_RAW:
 			case self::TYPE_TIP:
 			case self::TYPE_SYSTEM:
+			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
 				$this->putString($this->message);
 				break;

@@ -163,8 +163,10 @@ class FallingBlock extends Entity{
 	    	$pk->pitch = $this->pitch;
 	    	$pk->attributes = $this->attributeMap->getAll();
 			$pallet = DataPacket::getPallet($player->getProtocol());
-			if (!is_null($pallet)) { // for version higher than 1.1
+			if(!is_null($pallet)){ // for version higher than 1.1
 				$pk->metadata = [self::DATA_VARIANT => [self::DATA_TYPE_INT, $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage())]];
+			}else{
+			    $pk->metadata = $this->propertyManager->getAll();
 			}
 
 	    	$player->dataPacket($pk);

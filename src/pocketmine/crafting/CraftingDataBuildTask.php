@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
@@ -42,7 +43,7 @@ class CraftingDataBuildTask extends AsyncTask {
     /** @var int */
     protected $compressionLevel;
     /** @var array */
-    protected $protocols = [ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361];
+    protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361, ProtocolInfo::PROTOCOL_385, ProtocolInfo::PROTOCOL_392, ProtocolInfo::PROTOCOL_406, ProtocolInfo::PROTOCOL_419];
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel) {
 	    $this->shapelessRecipes = $shapelessRecipes;
@@ -52,6 +53,7 @@ class CraftingDataBuildTask extends AsyncTask {
 	}
 
 	public function onRun() {
+	    ItemPalette::init();
 	    PacketPool::init();
 
 	    $buffers = [];
