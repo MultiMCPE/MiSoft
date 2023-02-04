@@ -252,6 +252,18 @@ abstract class BaseInventory implements Inventory{
 		return -1;
 	}
 
+    /**
+     * @return int
+     */
+    public function firstOccupied(){
+        for($i = 0; $i < $this->size; $i++){
+            if(($item = $this->getItem($i))->getId() !== Item::AIR and $item->getCount() > 0){
+                return $i;
+            }
+        }
+        return -1;
+    }
+
 	public function isSlotEmpty(int $index) : bool{
 		return $this->slots[$index] === null or $this->slots[$index]->isNull();
 	}
