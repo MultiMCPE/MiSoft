@@ -31,68 +31,65 @@ use pocketmine\math\Vector3;
 
 class Hopper extends Spawnable implements Container, Nameable{
 
-	use ContainerTrait;
-	use NameableTrait;
+    use ContainerTrait;
+    use NameableTrait;
 
-	private const TAG_TRANSFER_COOLDOWN = "TransferCooldown";
+    private const TAG_TRANSFER_COOLDOWN = "TransferCooldown";
 
-	/** @var HopperInventory */
-	private $inventory;
+    /** @var HopperInventory */
+    private $inventory;
 
-	/** @var int */
-	private $transferCooldown = 0;
+    /** @var int */
+    private $transferCooldown = 0;
 
-	public function readSaveData(CompoundTag $nbt) : void{
-	    $this->inventory = new HopperInventory($this);
+    public function readSaveData(CompoundTag $nbt) : void{
+        $this->inventory = new HopperInventory($this);
 
-		$this->loadItems($nbt);
-		$this->loadName($nbt);
+        $this->loadItems($nbt);
+        $this->loadName($nbt);
 
-		$this->transferCooldown = $nbt->getInt(self::TAG_TRANSFER_COOLDOWN, 0);
+        $this->transferCooldown = $nbt->getInt(self::TAG_TRANSFER_COOLDOWN, 0);
 
-		$this->scheduleUpdate();
-	}
-
-	protected function writeSaveData(CompoundTag $nbt) : void{
-		$this->saveItems($nbt);
-		$this->saveName($nbt);
-
-		$nbt->setInt(self::TAG_TRANSFER_COOLDOWN, $this->transferCooldown);
-	}
-
-	public function close() : void{
-		if(!$this->closed){
-			$this->inventory->removeAllViewers(true);
-			$this->inventory = null;
-
-			parent::close();
-		}
-	}
-
-	public function getDefaultName() : string{
-		return "Hopper";
-	}
-
-	/**
-	 * @return HopperInventory
-	 */
-	public function getInventory(){
-		return $this->inventory;
-	}
-
-	/**
-	 * @return HopperInventory
-	 */
-	public function getRealInventory(){
-		return $this->inventory;
-	}
-
-    public function canUpdate(){
-        return $this->namedtag->TransferCooldown->getValue() === 0;
+        $this->scheduleUpdate();
     }
 
+    protected function writeSaveData(CompoundTag $nbt) : void{
+        $this->saveItems($nbt);
+        $this->saveName($nbt);
+
+        $nbt->setInt(self::TAG_TRANSFER_COOLDOWN, $this->transferCooldown);
+    }
+
+    public function close() : void{
+        if(!$this->closed){
+            $this->inventory->removeAllViewers(true);
+            $this->inventory = null;
+
+            parent::close();
+        }
+    }
+
+    public function getDefaultName() : string{
+        return "Hopper";
+    }
+
+    /**
+     * @return HopperInventory
+     */
+    public function getInventory(){
+        return $this->inventory;
+    }
+
+    /**
+     * @return HopperInventory
+     */
+    public function getRealInventory(){
+        return $this->inventory;
+    }
+
+
     public function resetCooldownTicks(){
-        $this->namedtag->TransferCooldown->setValue(8);
+        $this->transferCooldown = 8;
     }
 
     public function onUpdate(): bool{
@@ -123,11 +120,11 @@ class Hopper extends Spawnable implements Container, Nameable{
             }
         }
 
-        if(!$this->canUpdate()){ //Hoppers only update CONTENTS every 8th tick
-            $this->namedtag->TransferCooldown->setValue($this->namedtag->TransferCooldown->getValue() - 1);
+        if($this->transferCooldown > 0){ //Hoppers only update CONTENTS every 8th tick
+            $this->transferCooldown--;
             return true;
         }
- 
+
         //дюперы, я ебал вашу маму.
         $source = $this->getLevel()->getTile($this->getBlock()->getSide(Vector3::SIDE_UP));
         if($source instanceof ShulkerBox) {
