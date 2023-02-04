@@ -920,6 +920,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
         }
 
 		$this->armorInventory->sendContents($player);
+        $this->offHandInventory->sendOffhand($player);
 
 		if(!($this instanceof Player)){
 			$pk = new PlayerListPacket();

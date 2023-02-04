@@ -51,10 +51,11 @@ class PlayerOffHandInventory extends BaseInventory{
 	    	foreach($this->viewers as $viewer){
 		    	$this->sendContents($viewer); // Sync contents of this inventory instead of slot... #blamemojang?
 	    	}
-	    	foreach($this->holder->getViewers() as $viewer){
-		    	$this->sendOffhand($viewer);
-	    	}
 		}
+
+	    foreach($this->holder->getViewers() as $viewer){
+		    $this->sendOffhand($viewer);
+	    }
 	}
 
     public function sendOffhand(Player $target) : void{

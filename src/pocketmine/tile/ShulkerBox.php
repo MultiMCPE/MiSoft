@@ -1,124 +1,84 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
- *
-*/
-
 declare(strict_types=1);
 
 namespace pocketmine\tile;
 
 use pocketmine\inventory\ShulkerBoxInventory;
+use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
+use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\IntTag;
-use pocketmine\level\Level;
-use function abs;
+use pocketmine\Player;
+use pocketmine\tile\Container;
+use pocketmine\tile\ContainerTrait;
+use pocketmine\tile\Nameable;
+use pocketmine\tile\NameableTrait;
+use pocketmine\tile\Spawnable;
 
-class ShulkerBox extends Spawnable implements Container, Nameable{
-	use NameableTrait {
-		addAdditionalSpawnData as addNameSpawnData;
-	}
-	use ContainerTrait {
-		onBlockDestroyedHook as private;
-	}
+class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameable{
+    use NameableTrait, ContainerTrait;
 
-	public const TAG_FACING = "facing";
+    protected $facing = self::SIDE_UP;
+    protected $inventory;
 
-	/** @var ShulkerBoxInventory */
-	protected $inventory;
+    public function __construct(Level $level, CompoundTag $nbt){
+        parent::__construct($level, $nbt);
+    }
 
-	/** @var int */
-	private $facing;
+    protected static function createAdditionalNBT(CompoundTag $nbt, Vector3 $pos, ?int $face = null, ?Item $item = null, ?Player $player = null) : void{
+        if($face === null){
+            $face = 1;
+        }
+        $nbt->setByte("facing", $face);
+    }
 
-	public function __construct(Level $level, Vector3 $pos){
-		parent::__construct($level, $pos);
-		$this->inventory = new ShulkerBoxInventory($this->pos);
-	}
+    public function getDefaultName() : string{
+        return "Shulker Box";
+    }
 
-	public function readSaveData(CompoundTag $nbt) : void{
-		$this->facing = $nbt->getByte(self::TAG_FACING);
+    public function close() : void{
+        if ($this->isClosed()) {
+            $this->inventory->removeAllViewers(true);
+            $this->inventory = null;
+            parent::close();
+        }
+    }
 
-		$this->loadName($nbt);
-		$this->loadItems($nbt);
-	}
+    public function getRealInventory() : ?ShulkerBoxInventory{
+        return $this->inventory;
+    }
 
-	protected function writeSaveData(CompoundTag $nbt) : void{
-		$nbt->setByte(self::TAG_FACING, $this->facing);
+    public function getInventory() : ?ShulkerBoxInventory{
+        return $this->inventory;
+    }
 
-		$this->saveName($nbt);
-		$this->saveItems($nbt);
-	}
+    public function getFacing() : int{
+        return $this->facing;
+    }
 
-	public function close() : void{
-		if(!$this->closed){
-			$this->inventory->removeAllViewers();
-			$this->inventory = null;
+    public function setFacing(int $face) : void{
+        if($face < 0 or $face > 5){
+            throw new \InvalidArgumentException("Facing must be in range 0-5, not " . $face);
+        }
+        $this->facing = $face;
+    }
 
-			parent::close();
-		}
-	}
+    protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
+        $nbt->setByte("facing", $this->facing);
+    }
 
-	protected function onBlockDestroyedHook() : void{
-		$this->getRealInventory()->clearAll();
-	}
+    protected function readSaveData(CompoundTag $nbt) : void{
+        $this->loadName($nbt);
+        $this->inventory = new ShulkerBoxInventory($this);
+        $this->loadItems($nbt);
+        $this->facing = $nbt->getByte("facing", 1);
+    }
 
-	public function copyDataFromItem(Item $item) : void{
-		$this->loadItems($item->getNamedTag());
-	}
-
-	public function copyDataToItem(Item $item) : void{
-		$nbt = $item->getNamedTag();
-
-		$this->saveItems($nbt);
-		$item->setNamedTag($nbt);
-	}
-
-	/**
-	 * @return ShulkerBoxInventory
-	 */
-	public function getInventory(){
-		return $this->inventory;
-	}
-
-	/**
-	 * @return ShulkerBoxInventory
-	 */
-	public function getRealInventory(){
-		return $this->inventory;
-	}
-
-	public function getDefaultName() : string{
-		return "Shulker Box";
-	}
-
-	public function getFacing() : int{
-		return $this->facing;
-	}
-
-	public function setFacing(int $facing) : void{
-		$this->facing = $facing;
-	}
-
-	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
-		$nbt->setByte(self::TAG_FACING, $this->facing);
-
-		$this->addNameSpawnData($nbt);
-	}
+    protected function writeSaveData(CompoundTag $nbt) : void{
+        $this->saveName($nbt);
+        $this->saveItems($nbt);
+        $nbt->setByte("facing", $this->facing);
+    }
 }

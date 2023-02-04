@@ -64,6 +64,7 @@ abstract class Tile extends Position{
 	public const MOB_SPAWNER = "MobSpawner";
 	public const SIGN = "Sign";
 	public const SKULL = "Skull";
+    public const SHULKER_BOX = "ShulkerBox";
 
 	/** @var int */
 	public static $tileCount = 1;
@@ -95,6 +96,7 @@ abstract class Tile extends Position{
 		self::registerTile(ItemFrame::class, [self::ITEM_FRAME]); //this is an entity in PC
 		self::registerTile(Sign::class, [self::SIGN, "minecraft:sign"]);
 		self::registerTile(Skull::class, [self::SKULL, "minecraft:skull"]);
+		self::registerTile(ShulkerBox::class, [self::SHULKER_BOX, "minecraft:shulker_box"]);
 	}
 
 	/**

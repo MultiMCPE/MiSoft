@@ -33,11 +33,8 @@ use function array_search;
 class LevelSoundEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_SOUND_EVENT_PACKET;
 
-	public const SOUND_LARGE_BLAST = 'SOUND_LARGE_BLAST'; //for firework
-	public const SOUND_TWINKLE = 'SOUND_TWINKLE'; //for firework
-	public const SOUND_BLAST = 'SOUND_BLAST'; //for firework
-	public const SOUND_LAUNCH = 'SOUND_LAUNCH'; //for firework
-
+    public const SOUND_SHULKERBOX_OPEN = 'SOUND_SHULKERBOX_OPEN';
+    public const SOUND_SHULKERBOX_CLOSED = 'SOUND_SHULKERBOX_CLOSED';
     public const SOUND_ENDERCHEST_OPEN = 'SOUND_ENDER_CHEST_OPEN';
     public const SOUND_ENDERCHEST_CLOSED = 'SOUND_ENDER_CHEST_CLOSED';
     public const SOUND_BUCKET_FILL_WATER = 'SOUND_BUCKET_FILL_WATER';

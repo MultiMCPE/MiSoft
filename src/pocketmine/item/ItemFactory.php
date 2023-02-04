@@ -234,6 +234,7 @@ class ItemFactory{
 		//TODO: SPARKLER
 		//TODO: COMMAND_BLOCK_MINECART
 		//TODO: ELYTRA
+		self::registerItem(new ShulkerBox());
 		self::registerItem(new Item(Item::SHULKER_SHELL, 0, "Shulker Shell"));
 		self::registerItem(new Banner());
 		//TODO: MEDICINE
