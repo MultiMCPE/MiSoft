@@ -23,10 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use pocketmine\network\mcpe\protocol\BlockEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\types\WindowTypes;
+use pocketmine\Player;
 use pocketmine\tile\ShulkerBox;
+use function count;
 
-class ShulkerBoxInventory extends ChestInventory{
+class ShulkerBoxInventory extends ContainerInventory{
 	/** @var ShulkerBox */
 	protected $holder;
 
@@ -39,6 +43,14 @@ class ShulkerBoxInventory extends ChestInventory{
 
 	public function getName() : string{
 		return "Shulker Box";
+	}
+
+	public function getDefaultSize() : int{
+		return 27;
+	}
+
+	public function getNetworkType() : int{
+		return WindowTypes::CONTAINER;
 	}
 
 	/**
@@ -55,5 +67,36 @@ class ShulkerBoxInventory extends ChestInventory{
 
 	protected function getCloseSound() : string{
 		return LevelSoundEventPacket::SOUND_SHULKERBOX_CLOSED;
+	}
+
+	public function onOpen(Player $who) : void{
+		parent::onOpen($who);
+
+		if(count($this->getViewers()) === 1 and $this->getHolder()->isValid()){
+			//TODO: this crap really shouldn't be managed by the inventory
+			$this->broadcastBlockEventPacket(true);
+			$this->getHolder()->getLevel()->broadcastLevelSoundEvent($this->getHolder()->add(0.5, 0.5, 0.5), $this->getOpenSound());
+		}
+	}
+
+	public function onClose(Player $who) : void{
+		if(count($this->getViewers()) === 1 and $this->getHolder()->isValid()){
+			//TODO: this crap really shouldn't be managed by the inventory
+			$this->broadcastBlockEventPacket(false);
+			$this->getHolder()->getLevel()->broadcastLevelSoundEvent($this->getHolder()->add(0.5, 0.5, 0.5), $this->getCloseSound());
+		}
+		parent::onClose($who);
+	}
+
+	protected function broadcastBlockEventPacket(bool $isOpen) : void{
+		$holder = $this->getHolder();
+
+		$pk = new BlockEventPacket();
+		$pk->x = (int) $holder->x;
+		$pk->y = (int) $holder->y;
+		$pk->z = (int) $holder->z;
+		$pk->eventType = 1; //it's always 1 for a chest
+		$pk->eventData = $isOpen ? 1 : 0;
+		$holder->getLevel()->broadcastPacketToViewers($holder, $pk);
 	}
 }

@@ -60,39 +60,39 @@ class ShulkerBox extends Transparent{
     }
 
     public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-        $this->getLevelNonNull()->setBlock($this, $this, true, true);
+        $this->getLevel()->setBlock($this, $this, true, true);
         $nbt = TileShulkerBox::createNBT($this, $face, $item, $player);
         $items = $item->getNamedTag()->getTag(Container::TAG_ITEMS);
         if ($items != null) {
             $nbt->setTag($items);
         }
-        Tile::createTile(TileShulkerBox::SHULKER_BOX, $this->getLevelNonNull(), $nbt);
+        Tile::createTile(TileShulkerBox::SHULKER_BOX, $this->getLevel(), $nbt);
         return true;
     }
 
     public function onBreak(Item $item, Player $player = null) : bool{
-        $t = $this->getLevelNonNull()->getTile($this);
+        $t = $this->getLevel()->getTile($this);
         if($t instanceof TileShulkerBox){
             $item = ItemFactory::get($this->id, $this instanceof UndyedShulkerBox ? 0 : $this->meta);
             $nbt = clone $item->getNamedTag();
             $nbt->setTag($t->getCleanedNBT()->getTag(Container::TAG_ITEMS));
             $item->setNamedTag($nbt);
-            $this->getLevelNonNull()->dropItem($this->add(0.5, 0.5, 0.5), $item);
+            $this->getLevel()->dropItem($this->add(0.5, 0.5, 0.5), $item);
             $t->getInventory()->clearAll();
             $t->close();
         }
-        $this->getLevelNonNull()->setBlock($this, new Air(), true, true);
+        $this->getLevel()->setBlock($this, new Air(), true, true);
         return true;
     }
 
     public function onActivate(Item $item, Player $player = null) : bool{
         if($player instanceof Player){
-            $t = $this->getLevelNonNull()->getTile($this);
+            $t = $this->getLevel()->getTile($this);
             $shulker = null;
             if($t instanceof TileShulkerBox){
                 $shulker = $t;
             }else{
-                $shulker = Tile::createTile(TileShulkerBox::SHULKER_BOX, $this->getLevelNonNull(), TileShulkerBox::createNBT($this));
+                $shulker = Tile::createTile(TileShulkerBox::SHULKER_BOX, $this->getLevel(), TileShulkerBox::createNBT($this));
                 if(!($shulker instanceof TileShulkerBox)){
                     return true;
                 }
