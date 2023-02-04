@@ -730,7 +730,7 @@ class Item implements ItemIds, \JsonSerializable{
 	 * @return int
 	 */
 	public function getMaxStackSize() : int{
-		return 64;
+		return ($this->getBlock()->getId() === BlockIds::SHULKER_BOX ? 1 : 64);
 	}
 
 	/**
