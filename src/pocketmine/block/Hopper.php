@@ -67,7 +67,7 @@ class Hopper extends Transparent{
 		$this->meta = $faces[$player instanceof Player ? $player->getDirection() : 0];
 		$this->getLevel()->setBlock($blockReplace, $this, true, true);
 
-		Tile::createTile(Tile::HOPPER, $this->getLevel(), TileHopper::createNBT($this));
+		Tile::createTile(Tile::HOPPER, $this->getLevel(), TileHopper::createNBT($this, $face, $item, $player));
 
 		return true;
 	}

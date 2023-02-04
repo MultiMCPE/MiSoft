@@ -42,8 +42,6 @@ class Hopper extends Spawnable implements Container, Nameable{
 	/** @var int */
 	private $transferCooldown = 0;
 
-    protected $isPowered = false;
-
 	public function readSaveData(CompoundTag $nbt) : void{
 	    $this->inventory = new HopperInventory($this);
 
@@ -51,6 +49,8 @@ class Hopper extends Spawnable implements Container, Nameable{
 		$this->loadName($nbt);
 
 		$this->transferCooldown = $nbt->getInt(self::TAG_TRANSFER_COOLDOWN, 0);
+
+		$this->scheduleUpdate();
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{
@@ -88,7 +88,7 @@ class Hopper extends Spawnable implements Container, Nameable{
 	}
 
     public function canUpdate(){
-        return $this->namedtag->TransferCooldown->getValue() === 0 and !$this->isPowered;
+        return $this->namedtag->TransferCooldown->getValue() === 0;
     }
 
     public function resetCooldownTicks(){
