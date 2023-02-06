@@ -54,6 +54,7 @@ class ChunkRequestTask extends AsyncTask {
 	protected $protocols = [
 	    ProtocolInfo::PROTOCOL_110,
 	    ProtocolInfo::PROTOCOL_130,
+	    ProtocolInfo::PROTOCOL_270,
 	    ProtocolInfo::PROTOCOL_280,
 	    ProtocolInfo::PROTOCOL_310,
 	    ProtocolInfo::PROTOCOL_331,

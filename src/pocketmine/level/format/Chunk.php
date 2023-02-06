@@ -34,6 +34,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\tile\Tile;
 use pocketmine\utils\BinaryStream;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function array_fill;
 use function array_filter;
@@ -881,6 +882,12 @@ class Chunk{
 	    	$result .= pack("v*", ...$this->heightMap)
 		    	. $this->biomeIds
 		    	. chr(0); //border block array count
+		    if($playerProtocol < ProtocolInfo::PROTOCOL_270){
+		        $extraData = new NetworkBinaryStream();
+		        $extraData->putVarInt(0);
+
+		        $result .= $extraData->getBuffer(); // extraData (WTF)
+	    	}
 		}
 		//Border block entry format: 1 byte (4 bits X, 4 bits Z). These are however useless since they crash the regular client.
 
