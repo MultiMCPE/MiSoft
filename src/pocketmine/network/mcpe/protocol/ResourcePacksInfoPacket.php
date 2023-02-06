@@ -37,6 +37,8 @@ class ResourcePacksInfoPacket extends DataPacket{
 	public $mustAccept = false; //if true, forces client to use selected resource packs
 	/** @var bool */
 	public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
+	/** @var bool */
+	public $forceServerPacks = false;
 	/** @var ResourcePack[] */
 	public $behaviorPackEntries = [];
 	/** @var ResourcePack[] */
@@ -46,6 +48,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		$this->mustAccept = (($this->get(1) !== "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 	    	$this->hasScripts = (($this->get(1) !== "\x00"));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
+	    	    $this->forceServerPacks = $this->getBool();
+	    	}
 		}
 		$behaviorPackCount = ((\unpack("v", $this->get(2))[1]));
 		while($behaviorPackCount-- > 0){
@@ -89,6 +94,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		($this->buffer .= ($this->mustAccept ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 	    	($this->buffer .= ($this->hasScripts ? "\x01" : "\x00"));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
+	    	    $this->putBool($this->forceServerPacks);
+	    	}
 		}
 		($this->buffer .= (\pack("v", count($this->behaviorPackEntries))));
 		foreach($this->behaviorPackEntries as $entry){

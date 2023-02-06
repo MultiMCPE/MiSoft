@@ -13,7 +13,6 @@ use function file_get_contents;
 use function json_decode;
 
 final class ItemPalette{
-
 	/** @var int[] */
 	private static $stringToRuntimeIdMap = [];
 	/** @var string[] */

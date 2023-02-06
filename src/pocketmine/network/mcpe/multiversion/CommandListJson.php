@@ -30,14 +30,12 @@ use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use function count;
 use function sprintf;
 
-final class CommandListJson implements \JsonSerializable {
-
+final class CommandListJson implements \JsonSerializable{
     public const PERMISSION_NORMAL = 0;
     public const PERMISSION_OPERATOR = 1;
     public const PERMISSION_HOST = 2;
     public const PERMISSION_AUTOMATION = 3;
     public const PERMISSION_ADMIN = 4;
-
     public const MAGIC = "overload%d";
 
     /**
@@ -46,7 +44,7 @@ final class CommandListJson implements \JsonSerializable {
      * @return string
      */
     public static function permName(int $permission) : string{
-        switch ($permission) {
+        switch($permission){
             case self::PERMISSION_NORMAL:
                 return "any";
             case self::PERMISSION_OPERATOR:
@@ -63,7 +61,7 @@ final class CommandListJson implements \JsonSerializable {
     /** @var array */
     protected $commandData;
 
-    public function __construct(array $commandData) {
+    public function __construct(array $commandData){
         $this->commandData = $commandData;
     }
 
@@ -72,8 +70,7 @@ final class CommandListJson implements \JsonSerializable {
      */
     public function jsonSerialize() : array{
         $json = [];
-
-        foreach ($this->commandData as $data) {
+        foreach($this->commandData as $data){
             $json[$data->commandName] = self::dataJson($data);
         }
 
@@ -91,19 +88,19 @@ final class CommandListJson implements \JsonSerializable {
             "permission" => self::permName($commandData->permission)
         ];
 
-        if ($commandData->aliases instanceof CommandEnum) {
+        if($commandData->aliases instanceof CommandEnum){
             $data["aliases"] = $commandData->aliases->enumValues;
         }
 
         $data["overloads"] = [];
-        if (count($commandData->overloads) === 0) {
+        if(count($commandData->overloads) === 0){
             $data["overloads"]["default"] = [
                 "input" => [
                     "parameters" => []
                 ]
             ];
-        } else {
-            foreach ($commandData->overloads as $i => $overloads) {
+        }else{
+            foreach($commandData->overloads as $i => $overloads){
                 $overloadData = [
                     "input" => [
                         "parameters" => self::overloadJson($overloads)
@@ -114,10 +111,10 @@ final class CommandListJson implements \JsonSerializable {
                 ];
 
                 $newData = null;
-                foreach ($overloads as $overload) {
-                    if ($overload->postfix !== null) {
+                foreach($overloads as $overload){
+                    if($overload->postfix !== null){
                         $newData = [];
-                        foreach ($overloads as $key => $value) {
+                        foreach($overloads as $key => $value){
                             $newData[] = "\{$key\}" . ($value->postfix === null ? "" : $value->postfix);
                         }
 
@@ -125,7 +122,7 @@ final class CommandListJson implements \JsonSerializable {
                     }
                 }
 
-                if ($newData !== null) {
+                if($newData !== null){
                     $overloadData["parser"] = implode(" ", $newData);
                 }
 
@@ -145,8 +142,7 @@ final class CommandListJson implements \JsonSerializable {
      */
     public static function overloadJson(array $overload) : array{
         $jsonOverload = [];
-
-        foreach ($overload as $param) {
+        foreach($overload as $param){
             $jsonOverload[] = self::parameterJson($param);
         }
 
@@ -161,7 +157,7 @@ final class CommandListJson implements \JsonSerializable {
     public static function parameterJson(CommandParameter $parameter) : array{
         $data = ["name" => $parameter->paramName];
         $data["type"] = self::getParameterType($parameter, $data);
-        if ($parameter->enum !== null && $data["type"] === "stringenum") {
+        if($parameter->enum !== null && $data["type"] === "stringenum"){
             static $paramTypes = [
                 "EntityType" => "entityType",
                 "Effect" => "effectType",
@@ -176,12 +172,12 @@ final class CommandListJson implements \JsonSerializable {
             $data["type"] = "stringenum";
             $data["enum_type"] = $paramTypes[$parameter->enum->enumName] ?? $parameter->enum->enumName;
 
-            if (count($parameter->enum->getValues()) > 0) {
+            if(count($parameter->enum->getValues()) > 0){
                 $data["enum_values"] = $parameter->enum->enumValues;
             }
         }
 
-        if ($parameter->isOptional) {
+        if($parameter->isOptional){
             $data["optional"] = true;
         }
 
@@ -195,15 +191,15 @@ final class CommandListJson implements \JsonSerializable {
      * @return string
      */
     public static function getParameterType(CommandParameter $parameter, ?array &$data = []) : string{
-        if ($parameter->enum !== null) {
-            if ($parameter->enum->enumName === "Boolean") {
+        if($parameter->enum !== null){
+            if($parameter->enum->enumName === "Boolean"){
                 return "bool";
             }
 
             return "stringenum";
         }
 
-        switch ($parameter->paramType & 0xffff) {
+        switch($parameter->paramType & 0xffff){
             case AvailableCommandsPacket::ARG_TYPE_INT:
                 return "int";
             case AvailableCommandsPacket::ARG_TYPE_FLOAT:
@@ -229,5 +225,4 @@ final class CommandListJson implements \JsonSerializable {
                 return "unknown";
         }
     }
-
 }

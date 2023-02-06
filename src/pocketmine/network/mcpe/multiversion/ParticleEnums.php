@@ -25,8 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class ParticleEnums {
-
+abstract class ParticleEnums{
 	private static $particleIds = [
 		ProtocolInfo::PROTOCOL_429 => [
 			"TYPE_BUBBLE" => 1,
@@ -184,13 +183,12 @@ abstract class ParticleEnums {
      * @return array
      */
     public static function getParticleArrayByProtocol(int $playerProtocol) : array{
-		foreach (self::$particleIds as $protocol => $types) {
-			if ($playerProtocol >= $protocol) {
+		foreach(self::$particleIds as $protocol => $types){
+			if($playerProtocol >= $protocol){
 			    return $types;
 			}
 		}
 
 		return [];
     }
-
 }

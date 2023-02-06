@@ -33,7 +33,6 @@ use function strlen;
 use function strrev;
 
 final class MetadataConvertor{
-
 	public const METADATA = [
 		ProtocolInfo::PROTOCOL_110 => [
 			"DATA_NPC_SKIN_INDEX" => 41,
@@ -640,5 +639,4 @@ final class MetadataConvertor{
 		$flags = $newFlags;
 		$flags2 = $newFlags2;
 	}
-
 }

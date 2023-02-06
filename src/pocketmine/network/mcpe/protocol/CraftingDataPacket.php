@@ -90,13 +90,13 @@ class CraftingDataPacket extends DataPacket{
 					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system because it isn't always 1
 					   	} else {
-					   	    $entry["input"][] = $this->getSlot($this->getProtocol());
+					   	    $entry["input"][] = $this->getSlot($this->getProtocol(), false);
 					   	}
 					}
 					$resultCount = $this->getUnsignedVarInt();
 					$entry["output"] = [];
 					for($k = 0; $k < $resultCount; ++$k){
-						$entry["output"][] = $this->getSlot($this->getProtocol());
+						$entry["output"][] = $this->getSlot($this->getProtocol(), false);
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
@@ -124,13 +124,13 @@ class CraftingDataPacket extends DataPacket{
 					    	$entry["input"][] = $in = $this->getRecipeIngredient($this->getProtocol());
 					    	$in->setCount(1); //TODO HACK: they send a useless count field which breaks the PM crafting system
 					    } else {
-					        $entry["input"][] = $this->getSlot($this->getProtocol());
+					        $entry["input"][] = $this->getSlot($this->getProtocol(), false);
 					    }
 					}
 					$resultCount = $this->getUnsignedVarInt();
 					$entry["output"] = [];
 					for($k = 0; $k < $resultCount; ++$k){
-						$entry["output"][] = $this->getSlot($this->getProtocol());
+						$entry["output"][] = $this->getSlot($this->getProtocol(), false);
 					}
 					$entry["uuid"] = $this->getUUID()->toString();
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
@@ -165,12 +165,12 @@ class CraftingDataPacket extends DataPacket{
 					}
 					$entry["input"] = ItemFactory::get($inputId, $inputData);
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
-				    	$entry["output"] = $out = $this->getSlot($this->getProtocol());
+				    	$entry["output"] = $out = $this->getSlot($this->getProtocol(), false);
 				    	if($out->getDamage() === 0x7fff){
 					    	$out->setDamage(0); //TODO HACK: some 1.12 furnace recipe outputs have wildcard damage values
 				    	}
 					} else {
-					    $entry["output"] = $this->getSlot($this->getProtocol());
+					    $entry["output"] = $this->getSlot($this->getProtocol(), false);
 					}
 					if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_350) {
 				    	$entry["block"] = $this->getString();
@@ -246,14 +246,14 @@ class CraftingDataPacket extends DataPacket{
 		    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
 		    	$stream->putRecipeIngredient($item, $playerProtocol);
 		    } else {
-		        $stream->putSlot($item, $playerProtocol);
+		        $stream->putSlot($item, $playerProtocol, false);
 		    }
 		}
 
 		$results = $recipe->getResults();
 		$stream->putUnsignedVarInt(count($results));
 		foreach($results as $item){
-			$stream->putSlot($item, $playerProtocol);
+			$stream->putSlot($item, $playerProtocol, false);
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
@@ -283,7 +283,7 @@ class CraftingDataPacket extends DataPacket{
 			    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
 			    	$stream->putRecipeIngredient($ingredient, $playerProtocol);
 			    } else {
-			        $stream->putSlot($ingredient, $playerProtocol);
+			        $stream->putSlot($ingredient, $playerProtocol, false);
 			    }
 			}
 		}
@@ -291,7 +291,7 @@ class CraftingDataPacket extends DataPacket{
 		$results = $recipe->getResults();
 		$stream->putUnsignedVarInt(count($results));
 		foreach($results as $item){
-			$stream->putSlot($item, $playerProtocol);
+			$stream->putSlot($item, $playerProtocol, false);
 		}
 
 		$stream->put(str_repeat("\x00", 16)); //Null UUID
@@ -330,7 +330,7 @@ class CraftingDataPacket extends DataPacket{
 		    	$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
 	    	}
 		}
-		$stream->putSlot($recipe->getResult(), $playerProtocol);
+		$stream->putSlot($recipe->getResult(), $playerProtocol, false);
 		if ($playerProtocol >= ProtocolInfo::PROTOCOL_350) {
 	    	$stream->putString("furnace"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 		}

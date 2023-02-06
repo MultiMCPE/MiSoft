@@ -25,8 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class SoundEnums {
-
+abstract class SoundEnums{
     private static $levelSoundEvent = [
 		ProtocolInfo::PROTOCOL_260 => [
 			"SOUND_ITEM_USE_ON" => 0,
@@ -947,8 +946,8 @@ abstract class SoundEnums {
      */
 	public static function getLevelSoundEventName(int $playerProtocol, int $eventId) : string{
 		$group = self::getSoundTypesByProtocol($playerProtocol);
-		foreach ($group as $key => $value) {
-		    if ($value === $eventId) {
+		foreach($group as $key => $value){
+		    if($value === $eventId){
 		        return $key;
 		    }
 		}
@@ -964,7 +963,7 @@ abstract class SoundEnums {
      */
 	public static function getLevelSoundEventId(int $playerProtocol, $eventName) : int{
 		$group = self::getSoundTypesByProtocol($playerProtocol);
-		if (isset($group[$eventName])) {
+		if(isset($group[$eventName])){
 		    return $group[$eventName];
 		}
 
@@ -977,13 +976,12 @@ abstract class SoundEnums {
      * @return array
      */
 	private static function getSoundTypesByProtocol(int $playerProtocol) : array{
-		foreach (self::$levelSoundEvent as $protocol => $types) {
-			if ($playerProtocol >= $protocol) {
+		foreach(self::$levelSoundEvent as $protocol => $types){
+			if($playerProtocol >= $protocol){
 			    return $types;
 			}
 		}
 
 		return [];
 	}
-
 }

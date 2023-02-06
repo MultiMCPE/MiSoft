@@ -23,17 +23,18 @@ declare(strict_types=1);
 
 namespace pocketmine\crafting;
 
-use pocketmine\scheduler\AsyncTask;
 use pocketmine\network\mcpe\multiversion\ItemPalette;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\inventory\CraftingManager;
+use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use function assert;
+use function strlen;
 
-class CraftingDataBuildTask extends AsyncTask {
-
+class CraftingDataBuildTask extends AsyncTask{
     /** @var array */
     protected $shapelessRecipes;
     /** @var array */
@@ -43,16 +44,31 @@ class CraftingDataBuildTask extends AsyncTask {
     /** @var int */
     protected $compressionLevel;
     /** @var array */
-    protected $protocols = [ProtocolInfo::PROTOCOL_110, ProtocolInfo::PROTOCOL_130, ProtocolInfo::PROTOCOL_280, ProtocolInfo::PROTOCOL_310, ProtocolInfo::PROTOCOL_330, ProtocolInfo::PROTOCOL_331, ProtocolInfo::PROTOCOL_350, ProtocolInfo::PROTOCOL_360, ProtocolInfo::PROTOCOL_361, ProtocolInfo::PROTOCOL_385, ProtocolInfo::PROTOCOL_392, ProtocolInfo::PROTOCOL_406, ProtocolInfo::PROTOCOL_419];
+    protected $protocols = [
+        ProtocolInfo::PROTOCOL_110,
+        ProtocolInfo::PROTOCOL_130,
+        ProtocolInfo::PROTOCOL_280,
+        ProtocolInfo::PROTOCOL_310,
+        ProtocolInfo::PROTOCOL_330,
+        ProtocolInfo::PROTOCOL_331,
+        ProtocolInfo::PROTOCOL_350,
+        ProtocolInfo::PROTOCOL_360,
+        ProtocolInfo::PROTOCOL_361,
+        ProtocolInfo::PROTOCOL_385,
+        ProtocolInfo::PROTOCOL_392,
+        ProtocolInfo::PROTOCOL_406,
+        ProtocolInfo::PROTOCOL_419,
+        ProtocolInfo::PROTOCOL_429
+    ];
 
-	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel) {
+	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel){
 	    $this->shapelessRecipes = $shapelessRecipes;
 	    $this->shapedRecipes = $shapedRecipes;
 	    $this->furnaceRecipes = $furnaceRecipes;
 		$this->compressionLevel = $networkCompressionLevel;
 	}
 
-	public function onRun() {
+	public function onRun(){
 	    ItemPalette::init();
 	    PacketPool::init();
 
@@ -60,23 +76,19 @@ class CraftingDataBuildTask extends AsyncTask {
 	    foreach ($this->protocols as $protocol) {
 	    	$pk = new CraftingDataPacket();
 	    	$pk->cleanRecipes = true;
-
 	    	foreach ($this->shapelessRecipes as $list) {
 		    	foreach ($list as $recipe) {
 			    	$pk->addShapelessRecipe($recipe);
 		    	}
 	    	}
-
 	    	foreach ($this->shapedRecipes as $list) {
 		    	foreach ($list as $recipe) {
 			    	$pk->addShapedRecipe($recipe);
 		    	}
 	    	}
-
 	    	foreach ($this->furnaceRecipes as $recipe) {
 		    	$pk->addFurnaceRecipe($recipe);
 	    	}
-
             $pk->setProtocol($protocol);
 	    	$pk->encode();
 
@@ -92,12 +104,11 @@ class CraftingDataBuildTask extends AsyncTask {
 		$this->setResult($buffers);
 	}
 
-	public function onCompletion(Server $server) {
-	    if ($this->hasResult()) {
-	        if ($server->getCraftingManager() instanceof CraftingManager) {
+	public function onCompletion(Server $server){
+	    if($this->hasResult()){
+	        if($server->getCraftingManager() instanceof CraftingManager){
 			    $buffers = [];
-
-			    foreach ($this->getResult() as $protocol => $buffer) {
+			    foreach($this->getResult() as $protocol => $buffer){
 			    	$batch = new BatchPacket($buffer);
 			    	assert(strlen($batch->buffer) > 0);
 			    	$batch->setProtocol($protocol);
@@ -109,9 +120,8 @@ class CraftingDataBuildTask extends AsyncTask {
 	            $server->getCraftingManager()->setCraftingData($buffers);
 	            $server->getCraftingManager()->sendCraftingDataToQueue($buffers);
 	        }
-	    } else {
+	    }else{
 	        $server->getLogger()->error("CraftingDataCacheBuild request doesn't have any result data");
 	    }
 	}
-
 }

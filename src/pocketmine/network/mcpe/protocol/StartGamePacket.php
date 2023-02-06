@@ -118,7 +118,7 @@ class StartGamePacket extends DataPacket{
 	public $isTexturePacksRequired = true;
 	/** @var array */
 	public $gameRules = [ //TODO: implement this
-		"naturalregeneration" => [GameRuleType::BOOL, false] //Hack for client side regeneration
+		"naturalregeneration" => [GameRuleType::BOOL, false, false] //Hack for client side regeneration
 	];
 	/** @var Experiments */
 	public $experiments;
@@ -183,6 +183,8 @@ class StartGamePacket extends DataPacket{
 	public $multiplayerCorrelationId = ""; //TODO: this should be filled with a UUID of some sort
 	/** @var bool */
 	public $enableNewInventorySystem = false; //TODO
+	/** @var string */
+	public $serverSoftwareVersion;
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
@@ -247,7 +249,7 @@ class StartGamePacket extends DataPacket{
 		}
 		$this->commandsEnabled = (($this->get(1) !== "\x00"));
 		$this->isTexturePacksRequired = (($this->get(1) !== "\x00"));
-		$this->gameRules = $this->getGameRules();
+		$this->gameRules = $this->getGameRules($this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
                 $this->experiments = Experiments::read($this);
@@ -361,6 +363,9 @@ class StartGamePacket extends DataPacket{
 	            	$this->multiplayerCorrelationId = $this->getString();
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 	        	        $this->enableNewInventorySystem = (($this->get(1) !== "\x00"));
+	        	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
+	        	            $this->serverSoftwareVersion = $this->getString();
+	        	        }
 	            	}
 	        	}
             }
@@ -425,7 +430,7 @@ class StartGamePacket extends DataPacket{
 		}
 		($this->buffer .= ($this->commandsEnabled ? "\x01" : "\x00"));
 		($this->buffer .= ($this->isTexturePacksRequired ? "\x01" : "\x00"));
-		$this->putGameRules($this->gameRules);
+		$this->putGameRules($this->gameRules, $this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 		        $this->experiments->write($this);
@@ -525,6 +530,9 @@ class StartGamePacket extends DataPacket{
 	    	        $this->putString($this->multiplayerCorrelationId);
 	    	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 	    	            ($this->buffer .= ($this->enableNewInventorySystem ? "\x01" : "\x00"));
+	    	            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
+	    	                $this->putString($this->serverSoftwareVersion);
+	    	            }
 	    	        }
 	    	    }
             }

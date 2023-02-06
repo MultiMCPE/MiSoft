@@ -202,7 +202,7 @@ class CreativeContentPacket extends DataPacket{
                     $this->putUnsignedVarInt($knownGroups[$item->getId()] ?? 0xffffffff);
                 }
             }
-            $this->putSlot($item, $this->getProtocol());
+            $this->putSlot($item, $this->getProtocol(), false);
         }
     }
 

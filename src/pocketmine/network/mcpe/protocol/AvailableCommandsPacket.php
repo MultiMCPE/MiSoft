@@ -305,7 +305,11 @@ class AvailableCommandsPacket extends DataPacket{
 		$retval = new CommandData();
 		$retval->commandName = $this->getString();
 		$retval->commandDescription = $this->getString();
-		$retval->flags = (\ord($this->get(1)));
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
+	    	$retval->flags = (\ord($this->get(1)));
+		}else{
+		    $retval->flags = $this->getLShort();
+		}
 		$retval->permission = (\ord($this->get(1)));
 		$retval->aliases = $enums[((\unpack("V", $this->get(4))[1] << 32 >> 32))] ?? null;
 
@@ -351,7 +355,11 @@ class AvailableCommandsPacket extends DataPacket{
 	protected function putCommandData(CommandData $data, array $enumIndexes, array $postfixIndexes) : void{
 		$this->putString($data->commandName);
 		$this->putString($data->commandDescription);
-		($this->buffer .= \chr($data->flags));
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
+	    	($this->buffer .= \chr($data->flags));
+		}else{
+		    $this->putLShort($data->flags);
+		}
 		($this->buffer .= \chr($data->permission));
 
 		if($data->aliases !== null){

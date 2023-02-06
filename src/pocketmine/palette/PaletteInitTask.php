@@ -28,24 +28,20 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\multiversion\BlockPallet;
 use pocketmine\Server;
 
-class PaletteInitTask extends AsyncTask {
+class PaletteInitTask extends AsyncTask{
 
-	public function __construct() {
-
+	public function __construct(){
 	}
 
-	public function onRun() {
-        $palettes = BlockPallet::initAll();
-
-		$this->setResult($palettes);
+	public function onRun(){
+		$this->setResult(BlockPallet::initAll());
 	}
 
-	public function onCompletion(Server $server) {
-	    if ($this->hasResult()) {
+	public function onCompletion(Server $server){
+	    if($this->hasResult()) {
 	        DataPacket::initPalletes($this->getResult());
-	    } else {
+	    }else{
 	        $server->getLogger()->error("PaletteInit request doesn't have any result data");
 	    }
 	}
-
 }

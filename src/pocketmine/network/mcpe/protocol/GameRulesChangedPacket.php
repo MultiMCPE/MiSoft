@@ -34,11 +34,11 @@ class GameRulesChangedPacket extends DataPacket{
 	public $gameRules = [];
 
 	protected function decodePayload(){
-		$this->gameRules = $this->getGameRules();
+		$this->gameRules = $this->getGameRules($this->getProtocol());
 	}
 
 	protected function encodePayload(){
-		$this->putGameRules($this->gameRules);
+		$this->putGameRules($this->gameRules, $this->getProtocol());
 	}
 
 	public function handle(NetworkSession $session) : bool{

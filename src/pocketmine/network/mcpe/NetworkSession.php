@@ -33,6 +33,7 @@ use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\AddItemActorPacket;
 use pocketmine\network\mcpe\protocol\AddPaintingPacket;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
+use pocketmine\network\mcpe\protocol\AddVolumeEntityPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\AnimateEntityPacket;
@@ -110,6 +111,7 @@ use pocketmine\network\mcpe\protocol\MultiplayerSettingsPacket;
 use pocketmine\network\mcpe\protocol\NetworkChunkPublisherUpdatePacket;
 use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
+use pocketmine\network\mcpe\protocol\NpcDialoguePacket;
 use pocketmine\network\mcpe\protocol\NpcRequestPacket;
 use pocketmine\network\mcpe\protocol\OnScreenTextureAnimationPacket;
 use pocketmine\network\mcpe\protocol\PhotoTransferPacket;
@@ -129,6 +131,7 @@ use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\PurchaseReceiptPacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\network\mcpe\protocol\RemoveObjectivePacket;
+use pocketmine\network\mcpe\protocol\RemoveVolumeEntityPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkDataPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
@@ -167,6 +170,8 @@ use pocketmine\network\mcpe\protocol\SetHealthPacket;
 use pocketmine\network\mcpe\protocol\SetLastHurtByPacket;
 use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SimpleEventPacket;
+use pocketmine\network\mcpe\protocol\SimulationTypePacket;
+use pocketmine\network\mcpe\protocol\SyncActorPropertyPacket;
 use pocketmine\network\mcpe\protocol\EventPacket;
 use pocketmine\network\mcpe\protocol\FilterTextPacket;
 use pocketmine\network\mcpe\protocol\TakeItemActorPacket;
@@ -867,5 +872,25 @@ abstract class NetworkSession{
 
 	public function handleClientboundDebugRenderer(ClientboundDebugRendererPacket $packet) : bool{
 		return false;
+	}
+
+	public function handleSyncActorProperty(SyncActorPropertyPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleAddVolumeEntity(AddVolumeEntityPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleRemoveVolumeEntity(RemoveVolumeEntityPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSimulationType(SimulationTypePacket $packet) : bool{
+	    return false;
+	}
+
+	public function handleNpcDialogue(NpcDialoguePacket $packet) : bool{
+	    return false;
 	}
 }

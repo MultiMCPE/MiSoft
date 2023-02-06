@@ -25,8 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class TextEnums {
-
+abstract class TextEnums{
     private static $textPacketType = [
         ProtocolInfo::PROTOCOL_406 => [
             "TYPE_RAW" => 0,
@@ -73,8 +72,8 @@ abstract class TextEnums {
      */
 	public static function getMessageType(int $playerProtocol, int $typeId) : string{
 		$group = self::getTextTypesByProtocol($playerProtocol);
-		foreach ($group as $key => $value) {
-		    if ($value === $typeId) {
+		foreach($group as $key => $value){
+		    if($value === $typeId){
 		        return $key;
 		    }
 		}
@@ -90,7 +89,7 @@ abstract class TextEnums {
      */
 	public static function getMessageTypeId(int $playerProtocol, string $typeName) : int{
 		$group = self::getTextTypesByProtocol($playerProtocol);
-		if (isset($group[$typeName])) {
+		if(isset($group[$typeName])){
 		    return $group[$typeName];
 		}
 
@@ -103,13 +102,12 @@ abstract class TextEnums {
      * @return array
      */
     private static function getTextTypesByProtocol(int $playerProtocol) : array{
-		foreach (self::$textPacketType as $protocol => $types) {
-			if ($playerProtocol >= $protocol) {
+		foreach(self::$textPacketType as $protocol => $types){
+			if($playerProtocol >= $protocol){
 			    return $types;
 			}
 		}
 
 		return [];
 	}
-
 }

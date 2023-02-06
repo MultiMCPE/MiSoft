@@ -33,6 +33,16 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use function array_diff;
+use function scandir;
+use function strpos;
+use function explode;
+use function substr;
+use function krsort;
+use function json_decode;
+use function file_get_contents;
+use function count;
+use function var_dump;
 
 class BlockPallet {
 
@@ -52,18 +62,15 @@ class BlockPallet {
 		$result = [];
 		$folderPath = \pocketmine\RESOURCE_PATH . "/vanilla/palette/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
-
 		foreach($palletFiles as $fileName){
 			if(strpos($fileName, "BlockPallet") !== 0){
 				continue;
 			}
-
 			$parts = explode(".", $fileName);
 			$protocolNumber = (int) substr($parts[0], 11);
 			$pallet = new BlockPallet($folderPath . $fileName, $protocolNumber);
 			$result[$protocolNumber] = $pallet;
 		}
-
 		krsort($result);
 
 		return $result;
@@ -142,7 +149,7 @@ class BlockPallet {
             $palletTag = new ListTag("", $data);
 
 			$this->dataForPackets = (new NetworkLittleEndianNBTStream())->write($palletTag);
-		} else {
+		}else{
 	    	$bs = new NetworkBinaryStream();
 	    	$bs->putUnsignedVarInt(count($palletData));
 
@@ -199,5 +206,4 @@ class BlockPallet {
 	public function getDataForPackets() : string{
 		return $this->dataForPackets;
 	}
-
 }

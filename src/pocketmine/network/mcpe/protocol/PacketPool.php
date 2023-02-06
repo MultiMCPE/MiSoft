@@ -36,10 +36,14 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds406;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds419;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds422;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds428;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds440;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds448;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_448 => PacketsIds448::class,
+        ProtocolInfo::PROTOCOL_440 => PacketsIds440::class,
         ProtocolInfo::PROTOCOL_428 => PacketsIds428::class,
         ProtocolInfo::PROTOCOL_422 => PacketsIds422::class,
         ProtocolInfo::PROTOCOL_419 => PacketsIds419::class,
@@ -244,6 +248,11 @@ class PacketPool {
 		self::registerPacket(new ItemComponentPacket());
 		self::registerPacket(new FilterTextPacket());
 		self::registerPacket(new ClientboundDebugRendererPacket());
+		self::registerPacket(new SyncActorPropertyPacket());
+		self::registerPacket(new AddVolumeEntityPacket());
+		self::registerPacket(new RemoveVolumeEntityPacket());
+		self::registerPacket(new SimulationTypePacket());
+		self::registerPacket(new NpcDialoguePacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

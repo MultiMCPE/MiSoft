@@ -187,18 +187,23 @@ interface PacketMagicNumbers{
 	public const ITEM_COMPONENT_PACKET = 0xa2;
 	public const FILTER_TEXT_PACKET = 0xa3;
 	public const CLIENTBOUND_DEBUG_RENDERER_PACKET = 0xa4;
+	public const SYNC_ACTOR_PROPERTY_PACKET = 0xa5;
+	public const ADD_VOLUME_ENTITY_PACKET = 0xa6;
+	public const REMOVE_VOLUME_ENTITY_PACKET = 0xa7;
+	public const SIMULATION_TYPE_PACKET = 0xa8;
+	public const NPC_DIALOGUE_PACKET = 0xa9;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xa5;
+	public const EXPLODE_PACKET = 0xaa;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xa6;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xa7;
-	public const DROP_ITEM_PACKET = 0xa8;
-	public const USE_ITEM_PACKET = 0xa9;
-	public const REMOVE_BLOCK_PACKET = 0xaa;
-	public const COMMAND_STEP_PACKET = 0xab;
-	public const ADD_HANGING_ACTOR_PACKET = 0xac;
-	public const INVENTORY_ACTION_PACKET = 0xad;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xae;
-	public const ADD_ITEM_PACKET = 0xaf;
+	public const CONTAINER_SET_SLOT_PACKET = 0xab;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xac;
+	public const DROP_ITEM_PACKET = 0xad;
+	public const USE_ITEM_PACKET = 0xae;
+	public const REMOVE_BLOCK_PACKET = 0xaf;
+	public const COMMAND_STEP_PACKET = 0xb0;
+	public const ADD_HANGING_ACTOR_PACKET = 0xb1;
+	public const INVENTORY_ACTION_PACKET = 0xb2;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xb3;
+	public const ADD_ITEM_PACKET = 0xb4;
 
 }

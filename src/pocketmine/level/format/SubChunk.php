@@ -212,7 +212,7 @@ class SubChunk implements SubChunkInterface{
 	}
 
 	public function networkSerialize(int $playerProtocol) : string{
-		return "\x00" . ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? $this->ids . $this->data : $this->ids . $this->data . $this->skyLight . $this->blockLight);
+		return "\x00" . ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? $this->ids . $this->data : $this->ids . $this->data . str_repeat("\xff", 2048) . str_repeat("\x00", 2048));
 	}
 
 	public function __debugInfo(){

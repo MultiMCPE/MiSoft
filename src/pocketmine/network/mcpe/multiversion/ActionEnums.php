@@ -25,8 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class ActionEnums {
-
+abstract class ActionEnums{
     private static $playerActionType = [
         ProtocolInfo::PROTOCOL_428 => [
             'UNKNOWN' => -1,
@@ -209,5 +208,4 @@ abstract class ActionEnums {
 
 		return [];
 	}
-
 }

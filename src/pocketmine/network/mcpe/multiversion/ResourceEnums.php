@@ -25,8 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class ResourceEnums {
-
+abstract class ResourceEnums{
 	private static $packTypes = [
 		ProtocolInfo::PROTOCOL_370 => [
 			"TYPE_INVALID" => 0,
@@ -60,13 +59,12 @@ abstract class ResourceEnums {
      * @return int
      */
 	public static function getPackTypeId(int $playerProtocol, string $typeName) : int{
-		foreach (self::$packTypes as $protocol => $types) {
-			if ($playerProtocol >= $protocol) {
+		foreach(self::$packTypes as $protocol => $types){
+			if($playerProtocol >= $protocol){
 			    return $types[$typeName] ?? 0;
 			}
 		}
 
 		return 0;
 	}
-
 }
