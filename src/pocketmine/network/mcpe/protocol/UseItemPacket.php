@@ -24,9 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\item\Item;
+use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 
 class UseItemPacket extends DataPacket{
+
 	const NETWORK_ID = ProtocolInfo::USE_ITEM_PACKET;
 
 	public $x;
@@ -34,12 +36,12 @@ class UseItemPacket extends DataPacket{
 	public $z;
 	public $blockId;
 	public $face;
-	public $fx;
-	public $fy;
-	public $fz;
-	public $posX;
-	public $posY;
-	public $posZ;
+
+	/** @var Vector3 */
+	public $playerPos;
+	/** @var Vector3 */
+	public $clickPos;
+
 	public $slot;
 	/** @var Item */
 	public $item;
@@ -48,8 +50,8 @@ class UseItemPacket extends DataPacket{
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		$this->blockId = $this->getUnsignedVarInt();
 		$this->face = $this->getVarInt();
-		$this->getVector3($this->fx, $this->fy, $this->fz);
-		$this->getVector3($this->posX, $this->posY, $this->posZ);
+		$this->clickPos = $this->getVector3();
+		$this->playerPos = $this->getVector3();
 		$this->slot = $this->getVarInt();
 		$this->item = $this->getSlot($this->getProtocol());
 	}
@@ -57,8 +59,8 @@ class UseItemPacket extends DataPacket{
 	public function encodePayload(){
 		$this->putUnsignedVarInt($this->blockId);
 		$this->putUnsignedVarInt($this->face);
-		$this->putVector3Nullable($this->fx, $this->fy, $this->fz);
-		$this->putVector3Nullable($this->posX, $this->posY, $this->posZ);
+		$this->putVector3($this->clickPos);
+		$this->putVector3($this->playerPos);
 		$this->putVarInt($this->slot);
 		$this->putSlot($this->item, $this->getProtocol());
 	}
@@ -66,5 +68,4 @@ class UseItemPacket extends DataPacket{
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleUseItem($this);
 	}
-
 }
