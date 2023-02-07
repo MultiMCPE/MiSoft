@@ -26,8 +26,10 @@ namespace pocketmine\tile;
 use pocketmine\inventory\HopperInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\item\Item;
+use pocketmine\entity\object\ItemEntity as DroppedItem;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\math\Vector3;
+use pocketmine\math\AxisAlignedBB;
 
 class Hopper extends Spawnable implements Container, Nameable{
 
@@ -95,29 +97,29 @@ class Hopper extends Spawnable implements Container, Nameable{
     public function onUpdate(): bool{
         //Pickup dropped items
         //This can happen at any time regardless of cooldown
-        $area = clone $this->getBlock()->getBoundingBox(); //Area above hopper to draw items from
-        $area->maxY = ceil($area->maxY) + 1; //Account for full block above, not just 1 + 5/8
-        foreach($this->getLevel()->getChunkEntities($this->getBlock()->x >> 4, $this->getBlock()->z >> 4) as $entity){
-            if(!($entity instanceof Item) or !$entity->isAlive()){
-                continue;
-            }
-            if(!$entity->boundingBox->intersectsWith($area)){
-                continue;
-            }
+		$pickupCollisionBox = new AxisAlignedBB(
+		    $this->getBlock()->getX(),
+		    $this->getBlock()->getY() + 1,
+		    $this->getBlock()->getZ(),
+		    $this->getBlock()->getX() + 1,
+		    $this->getBlock()->getY() + 1.75,
+		    $this->getBlock()->getZ() + 1
+		);
+		foreach($this->getBlock()->getLevel()->getNearbyEntities($pickupCollisionBox) as $entity){
+			if($entity->isClosed() || $entity->isFlaggedForDespawn() || !$entity instanceof DroppedItem){
+				continue;
+			}
+			// Unlike Java Edition, Bedrock Edition's hoppers don't save in which order item entities landed on top of them to collect them in that order.
+			// In Bedrock Edition hoppers collect item entities in the order in which they entered the chunk.
+			// Because of how entities are saved by PocketMine-MP the first entities of this loop are also the first ones who were saved.
+			// That's why we don't need to implement any sorting mechanism.
+			$item = $entity->getItem();
+			if(!$this->inventory->canAddItem($item)){
+				continue;
+			}
 
-            $item = $entity->getItem();
-            if(!$item instanceof Item){
-                continue;
-            }
-            if($item->getCount() < 1){
-                $entity->kill();
-                continue;
-            }
-
-            if($this->inventory->canAddItem($item)){
-                $this->inventory->addItem($item);
-                $entity->kill();
-            }
+			$this->inventory->addItem($item);
+			$entity->flagForDespawn();
         }
 
         if($this->transferCooldown > 0){ //Hoppers only update CONTENTS every 8th tick

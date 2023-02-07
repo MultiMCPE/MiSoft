@@ -516,15 +516,18 @@ class StartGamePacket extends DataPacket{
                     $this->putUnsignedVarInt(0);
                 }
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
-	        	    $this->put(ItemPalette::getEncodedPalette());
-	            	/*if($this->itemTable === null){
-		            	if(self::$itemTableCache === null){
-			            	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true), $this->getProtocol());
-		              	}
-		            	($this->buffer .= self::$itemTableCache);
-	            	}else{
-		            	($this->buffer .= self::serializeItemTable($this->itemTable, $this->getProtocol()));
-	            	}*/
+	        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	        	        $this->put(ItemPalette::getEncodedPalette());
+	        	    }else{
+	            	    if($this->itemTable === null){
+		                	if(self::$itemTableCache === null){
+			                	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));
+		                  	}
+		                	($this->buffer .= self::$itemTableCache);
+	                	}else{
+		                	($this->buffer .= self::serializeItemTable($this->itemTable));
+	                	}
+	        	    }
 		        }
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
 	    	        $this->putString($this->multiplayerCorrelationId);
@@ -539,18 +542,15 @@ class StartGamePacket extends DataPacket{
         }
 	}
 
-	/*private static function serializeItemTable(array $table, int $playerProtocol) : string{
+	private static function serializeItemTable(array $table) : string{
 		$stream = new NetworkBinaryStream();
 		$stream->putUnsignedVarInt(count($table));
 		foreach($table as $name => $legacyId){
 			$stream->putString($name);
 			$stream->putLShort($legacyId);
-			if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-		    	$stream->buffer .= "\x00"; // bool
-			}
 		}
 		return $stream->getBuffer();
-	}*/
+	}
 
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleStartGame($this);
