@@ -284,27 +284,34 @@ final class MetadataConvertor{
         	"DATA_AREA_EFFECT_CLOUD_RADIUS" => 61,
 	        "DATA_AREA_EFFECT_CLOUD_WAITING" => 62,
 	        "DATA_AREA_EFFECT_CLOUD_PARTICLE_ID" => 63,
+
 	        "DATA_SHULKER_ATTACH_FACE" => 65,
+
 	        "DATA_SHULKER_ATTACH_POS" => 67,
 	        "DATA_TRADING_PLAYER_EID" => 68,
+
 	        "DATA_COMMAND_BLOCK_COMMAND" => 71,
 	        "DATA_COMMAND_BLOCK_LAST_OUTPUT" => 72,
 	        "DATA_COMMAND_BLOCK_TRACK_OUTPUT" => 73,
 	        "DATA_CONTROLLING_RIDER_SEAT_NUMBER" => 74,
 	        "DATA_STRENGTH" => 75,
 	        "DATA_MAX_STRENGTH" => 76,
+
 	        "DATA_LIMITED_LIFE" => 78,
 	        "DATA_ARMOR_STAND_POSE_INDEX" => 79,
 	        "DATA_ENDER_CRYSTAL_TIME_OFFSET" => 80,
 	        "DATA_ALWAYS_SHOW_NAMETAG" => 81,
 	        "DATA_COLOR_2" => 82,
+
 	        "DATA_SCORE_TAG" => 84,
 	        "DATA_BALLOON_ATTACHED_ENTITY" => 85,
 	        "DATA_PUFFERFISH_SIZE" => 86,
 	        "DATA_BOAT_BUBBLE_TIME" => 87,
 	        "DATA_PLAYER_AGENT_EID" => 88,
+
 	        "DATA_EAT_COUNTER" => 91,
 	        "DATA_FLAGS2" => 92,
+
 	        "DATA_AREA_EFFECT_CLOUD_DURATION" => 95,
 	        "DATA_AREA_EFFECT_CLOUD_SPAWN_TIME" => 96,
 	        "DATA_AREA_EFFECT_CLOUD_RADIUS_PER_TICK" => 97,
@@ -315,6 +322,7 @@ final class MetadataConvertor{
 	        "DATA_MAX_TRADE_TIER" => 102,
 	        "DATA_TRADE_XP" => 103,
 	        "DATA_SKIN_ID" => 104,
+
 	        "DATA_COMMAND_BLOCK_TICK_DELAY" => 106,
 	        "DATA_COMMAND_BLOCK_EXECUTE_ON_FIRST_TICK" => 107,
 	        "DATA_AMBIENT_SOUND_INTERVAL_MIN" => 108,

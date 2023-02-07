@@ -36,6 +36,7 @@ use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
+use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use function abs;
 use function floor;
 use function get_class;
@@ -162,14 +163,40 @@ class FallingBlock extends Entity{
 	    	$pk->headYaw = $this->yaw; //TODO
 	    	$pk->pitch = $this->pitch;
 	    	$pk->attributes = $this->attributeMap->getAll();
-			$pallet = DataPacket::getPallet($player->getProtocol());
-			if(!is_null($pallet)){ // for version higher than 1.1
-				$pk->metadata = [self::DATA_VARIANT => [self::DATA_TYPE_INT, $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage())]];
-			}else{
-			    $pk->metadata = $this->propertyManager->getAll();
+	    	$pk->metadata = $this->propertyManager->getAll();
+	    	if(isset($pk->metadata[self::DATA_VARIANT])){
+		    	$pallet = DataPacket::getPallet($player->getProtocol());
+		    	if(!is_null($pallet)){ // for version higher than 1.1
+			    	$pk->metadata[self::DATA_VARIANT][1] = $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage());
+		    	}
 			}
 
 	    	$player->dataPacket($pk);
+		}
+	}
+
+	/**
+	 * @param Player[]|Player $player
+	 * @param array           $data Properly formatted entity data, defaults to everything
+	 */
+	public function sendData($player, ?array $data = null) : void{
+		if(!is_array($player)){
+			$player = [$player];
+		}
+
+		$pk = new SetActorDataPacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->metadata = $data ?? $this->propertyManager->getAll();
+
+		foreach($player as $p){
+		    if(isset($pk->metadata[self::DATA_VARIANT])){
+		    	$pallet = DataPacket::getPallet($p->getProtocol());
+		    	if(!is_null($pallet)){ // for version higher than 1.1
+			    	$pk->metadata[self::DATA_VARIANT][1] = $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage());
+		    	}
+			}
+
+			$p->dataPacket(clone $pk);
 		}
 	}
 }

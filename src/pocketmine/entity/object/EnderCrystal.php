@@ -41,14 +41,12 @@ class EnderCrystal extends Entity implements Explosive{
 	public $height = 0.7;
 	public $width = 1.6;
 
-	protected $showBase = false;
-
 	public function showBase() : bool{
-		return $this->showBase;
+		return $this->getGenericFlag(self::DATA_FLAG_SHOWBASE);
 	}
 
 	public function setShowBase(bool $showBase) : void{
-		$this->showBase = $showBase;
+		$this->setGenericFlag(self::DATA_FLAG_SHOWBASE, $showBase);
 	}
 
 	public function attack(EntityDamageEvent $source) : void{
@@ -69,19 +67,58 @@ class EnderCrystal extends Entity implements Explosive{
 		return true;
 	}
 
+	public function hasMovementUpdate() : bool{
+		return false;
+	}
+
+	protected function updateMovement(bool $teleport = false) : void{
+
+	}
+
+	public function canBeMovedByCurrents() : bool{
+		return false;
+	}
+
+	public function canBeCollidedWith() : bool{
+		return false;
+	}
+
+	/**
+	 * @param int  $propertyId
+	 * @param int  $flagId
+	 * @param bool $value
+	 * @param int  $propertyType
+	 */
+	public function setDataFlag(int $propertyId, int $flagId, bool $value = true, int $propertyType = self::DATA_TYPE_LONG) : void{
+	    if($flagId === self::DATA_FLAG_ONFIRE){
+	        return; //TODO: Hack to prevent fire animation
+	    }
+	    parent::setDataFlag($propertyId, $flagId, $value, $propertyType);
+	}
+
+	/**
+	 * Wrapper around {@link Entity#setDataFlag} for generic data flag setting.
+	 *
+	 * @param int  $flagId
+	 * @param bool $value
+	 */
+	public function setGenericFlag(int $flagId, bool $value = true) : void{
+	    if($flagId === self::DATA_FLAG_ONFIRE){
+	        return; //TODO: Hack to prevent fire animation
+	    }
+	    parent::setGenericFlag($flagId, $value);
+	}
+
 	protected function initEntity() : void{
 		parent::initEntity();
 
 		$this->setShowBase($this->namedtag->getByte(self::TAG_SHOWBASE, 0) === 1);
-
-		$this->setGenericFlag(self::DATA_FLAG_SHOWBASE, $this->showBase);
-		$this->setGenericFlag(self::DATA_FLAG_ONFIRE, false); //TODO: Hack to prevent fire animation
 	}
 
 	public function saveNBT() : void{
 		parent::saveNBT();
 
-		$this->namedtag->setByte(self::TAG_SHOWBASE, $this->showBase ? 1 : 0);
+		$this->namedtag->setByte(self::TAG_SHOWBASE, $this->showBase() ? 1 : 0);
 	}
 
 	public function explode() : void{
