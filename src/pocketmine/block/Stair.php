@@ -1,5 +1,24 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
 declare(strict_types=1);
 
 namespace pocketmine\block;
@@ -70,13 +89,12 @@ abstract class Stair extends Transparent{
 			2 => 1,
 			3 => 3
 		];
-
-		$this->meta = $faces[$player->getDirection()] & 0x03;
-		if(($clickVector->y > 0.5 and $face !== 1) or $face === 0){
+		$this->meta = $player !== null ? $faces[$player->getDirection()] & 0x03 : 0;
+		if(($clickVector->y > 0.5 and $face !== Vector3::SIDE_UP) or $face === Vector3::SIDE_DOWN){
 			$this->meta |= 0x04; //Upside-down stairs
 		}
-
 		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+
 		return true;
 	}
 

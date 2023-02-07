@@ -31,17 +31,21 @@ class UseItemPacket extends DataPacket{
 
 	const NETWORK_ID = ProtocolInfo::USE_ITEM_PACKET;
 
+    /** @var int */
 	public $x;
+    /** @var int */
 	public $y;
+    /** @var int */
 	public $z;
+    /** @var int */
 	public $blockId;
+    /** @var int */
 	public $face;
-
 	/** @var Vector3 */
 	public $playerPos;
 	/** @var Vector3 */
 	public $clickPos;
-
+    /** @var int */
 	public $slot;
 	/** @var Item */
 	public $item;
@@ -57,8 +61,9 @@ class UseItemPacket extends DataPacket{
 	}
 
 	public function encodePayload(){
+	    $this->putBlockPosition($this->x, $this->y, $this->z);
 		$this->putUnsignedVarInt($this->blockId);
-		$this->putUnsignedVarInt($this->face);
+		$this->putVarInt($this->face);
 		$this->putVector3($this->clickPos);
 		$this->putVector3($this->playerPos);
 		$this->putVarInt($this->slot);
