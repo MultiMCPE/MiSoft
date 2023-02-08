@@ -950,6 +950,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette448' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette448.php',
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\Palette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/Palette.php',
         'pocketmine\\network\\mcpe\\multiversion\\biomes\\BiomeDefinitionPalette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/biomes/BiomeDefinitionPalette.php',
+        'pocketmine\\network\\mcpe\\multiversion\\actor\\AvailableActorIdentifiersPalette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/actor/AvailableActorIdentifiersPalette.php',
         'pocketmine\\network\\mcpe\\protocol\\ActorEventPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/ActorEventPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\ActorFallPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/ActorFallPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\ActorPickRequestPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/ActorPickRequestPacket.php',

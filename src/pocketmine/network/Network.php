@@ -31,6 +31,7 @@ use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
+use pocketmine\network\mcpe\multiversion\actor\AvailableActorIdentifiersPalette;
 use pocketmine\Server;
 use function spl_object_hash;
 
@@ -57,6 +58,7 @@ class Network{
 		PacketPool::init();
         ItemPalette::init();
         BiomeDefinitionPalette::init();
+        AvailableActorIdentifiersPalette::init();
 
 		$this->server = $server;
 

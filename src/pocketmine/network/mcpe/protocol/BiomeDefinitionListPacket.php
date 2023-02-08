@@ -25,8 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\NetworkSession;
-use function file_get_contents;
-use const pocketmine\RESOURCE_PATH;
 
 class BiomeDefinitionListPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BIOME_DEFINITION_LIST_PACKET;
