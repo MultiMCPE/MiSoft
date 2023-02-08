@@ -3064,20 +3064,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 
 			$ev = new PlayerInteractEvent($this, $item, null, $directionVector, $packet->face, PlayerInteractEvent::RIGHT_CLICK_AIR);
+			if($this->hasItemCooldown($item)){
+				$ev->setCancelled();
+			}
 
 			$this->server->getPluginManager()->callEvent($ev);
-
 			if($ev->isCancelled()){
 				$this->inventory->sendHeldItem($this);
 				return true;
 			}
 
-			if($item->onClickAir($this, $directionVector) and $this->isSurvival()){
-				$this->inventory->setItemInHand($item);
+			if($item->onClickAir($this, $directionVector)){
+			    $this->resetItemCooldown($item);
+			    if($this->isSurvival()){
+			    	$this->inventory->setItemInHand($item);
+			    }
 			}
 
-			$this->setGenericFlag(self::DATA_FLAG_ACTION, true);
-			$this->startAction = $this->server->getTick();
+			$this->setUsingItem(true);
 		}
 
 		return true;
