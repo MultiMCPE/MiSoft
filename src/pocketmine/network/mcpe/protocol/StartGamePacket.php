@@ -31,7 +31,7 @@ use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\multiversion\ItemPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
@@ -517,7 +517,8 @@ class StartGamePacket extends DataPacket{
                 }
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	        	        $this->put(ItemPalette::getEncodedPalette());
+	        	        $palette = ItemPalette::getPalette($this->getProtocol());
+	        	        $this->put($palette::getEncodedPalette());
 	        	    }else{
 	            	    if($this->itemTable === null){
 		                	if(self::$itemTableCache === null){

@@ -29,7 +29,7 @@ namespace pocketmine\network;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
 use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\multiversion\ItemPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\Server;
 use function spl_object_hash;
 

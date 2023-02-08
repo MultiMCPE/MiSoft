@@ -1,8 +1,27 @@
 <?php
 
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\inventory\palettes;
 
 use InvalidArgumentException;
 use InvalidStateException;
@@ -12,7 +31,8 @@ use function count;
 use function file_get_contents;
 use function json_decode;
 
-final class ItemPalette{
+final class ItemPalette431 extends Palette{
+
 	/** @var int[] */
 	private static $stringToRuntimeIdMap = [];
 	/** @var string[] */
@@ -33,7 +53,7 @@ final class ItemPalette{
 
 	public static function init() : void{
 		/** @var int[] $itemPalette */
-		$itemMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/r16_to_current_item_map.json"), true);
+		$itemMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/items/431/r16_to_current_item_map.json"), true);
 
 		/** @var int[] $itemPalette */
 		$stringToIntMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/item_id_map.json"), true);
@@ -56,13 +76,11 @@ final class ItemPalette{
 		$complexMappings = [];
 		foreach($itemMap["complex"] as $oldId => $map){
 			foreach($map as $meta => $newId){
-				if(isset($stringToIntMap[$oldId])){
-					$complexMappings[$newId] = [$stringToIntMap[$oldId], (int) $meta];
-				}
+				$complexMappings[$newId] = [$stringToIntMap[$oldId], (int) $meta];
 			}
 		}
 
-		$itemList = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/required_item_list.json"), true);
+		$itemList = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/items/431/required_item_list.json"), true);
 		foreach($itemList as $stringId => $entry){
 			$runtimeId = $entry["runtime_id"];
 
@@ -76,10 +94,9 @@ final class ItemPalette{
 			}elseif(isset($simpleMappings[$stringId])){
 				self::$simpleLegacyToRuntimeIdMap[$simpleMappings[$stringId]] = $runtimeId;
 				self::$simpleRuntimeToLegacyIdMap[$runtimeId] = $simpleMappings[$stringId];
-			}else{
-                //not all items have a legacy mapping - for now, we only support the ones that do
-                continue;
-            }
+			}elseif($stringId !== "minecraft:unknown"){
+				throw new InvalidArgumentException("Unmapped entry " . $stringId);
+			}
 		}
 
 		$stream = new NetworkBinaryStream();
@@ -91,6 +108,12 @@ final class ItemPalette{
 		}
 		self::$encodedPalette = $stream->buffer;
 	}
+
+    public static function lazyInit() : void{
+        if(self::$encodedPalette === null){
+            self::init();
+        }
+    }
 
 	/**
 	 * @param int $runtimeId
@@ -135,9 +158,6 @@ final class ItemPalette{
 	 * @return int[]
 	 */
 	public static function getLegacyFromRuntimeId(int $runtimeId, int $runtimeMeta, &$isComplex = false) : array{
-		if($runtimeMeta === -1){
-			$runtimeMeta = 0x7fff;
-		}
 		if(isset(self::$complexRuntimeToLegacyIdMap[$runtimeId])){
 			if($runtimeMeta !== 0){
 				throw new UnexpectedValueException("Unexpected non-zero network meta on complex item mapping");

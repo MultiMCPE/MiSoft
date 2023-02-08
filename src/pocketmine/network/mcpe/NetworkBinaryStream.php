@@ -41,7 +41,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\NamedTag;
-use pocketmine\network\mcpe\multiversion\ItemPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -234,7 +234,8 @@ class NetworkBinaryStream extends BinaryStream{
 		$cnt = $auxValue & 0xff;
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-            [$id, $data] = ItemPalette::getLegacyFromRuntimeId($id, $data);
+            $palette = ItemPalette::getPalette($playerProtocol);
+            [$id, $data] = $palette::getLegacyFromRuntimeId($id, $data);
         }
 
 		$nbtLen = ((\unpack("v", $this->get(2))[1]));
@@ -317,7 +318,8 @@ class NetworkBinaryStream extends BinaryStream{
         $damage = $item->getDamage();
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+            $palette = ItemPalette::getPalette($playerProtocol);
+            [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
         }
 
 		$this->putVarInt($id);
@@ -377,7 +379,8 @@ class NetworkBinaryStream extends BinaryStream{
 		$cnt = ((\unpack("v", $this->get(2))[1]));
 		$netData = $this->getUnsignedVarInt();
 
-		[$id, $meta] = ItemPalette::getLegacyFromRuntimeId($netId, $netData);
+        $palette = ItemPalette::getPalette($playerProtocol);
+		[$id, $meta] = $palette::getLegacyFromRuntimeId($netId, $netData);
 
 		if($withStackId === true){
 			$includeNetId = $this->getBool();
@@ -460,7 +463,9 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
 		$coreData = $item->getDamage();
-		[$netId, $netData] = ItemPalette::getRuntimeFromLegacyId($item->getId(), $coreData);
+
+        $palette = ItemPalette::getPalette($playerProtocol);
+		[$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $coreData);
 
 		$this->putVarInt($netId);
 		($this->buffer .= (\pack("v", $item->getCount())));
@@ -539,7 +544,8 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$meta = $this->getVarInt();
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-		    [$id, $meta] = ItemPalette::getLegacyFromRuntimeId($id, $meta);
+            $palette = ItemPalette::getPalette($playerProtocol);
+		    [$id, $meta] = $palette::getLegacyFromRuntimeId($id, $meta);
 		}elseif($meta === 0x7fff){
 		    $meta = -1;
 		}
@@ -554,11 +560,12 @@ class NetworkBinaryStream extends BinaryStream{
 		    $id = $item->getId();
 		    $damage = $item->getDamage();
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		        $palette = ItemPalette::getPalette($playerProtocol);
 		        if($item->hasAnyDamageValue()){
-		            [$id, ] = ItemPalette::getRuntimeFromLegacyId($id, 0);
+		            [$id, ] = $palette::getRuntimeFromLegacyId($id, 0);
 		            $damage = 0x7fff;
 		        }else{
-		            [$id, $damage] = ItemPalette::getRuntimeFromLegacyId($id, $damage);
+		            [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
 		        }
 		    }else{
 		        $damage = $damage & 0x7fff;

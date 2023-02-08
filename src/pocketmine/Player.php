@@ -3358,18 +3358,22 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		switch($action){
 		    case 'ACTION_RELEASE_ITEM':
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
-					if($this->isUsingItem()){
-						$item = $this->inventory->getItemInHand();
-						if($this->hasItemCooldown($item)){
-							$this->inventory->sendContents($this);
-							return false;
-						}
-						if($item->onReleaseUsing($this)){
-							$this->resetItemCooldown($item);
-							$this->inventory->setItemInHand($item);
-						}
-					}else{
-						break;
+		            try{
+				    	if($this->isUsingItem()){
+					    	$item = $this->inventory->getItemInHand();
+					    	if($this->hasItemCooldown($item)){
+						    	$this->inventory->sendContents($this);
+						    	return false;
+					    	}
+					    	if($item->onReleaseUsing($this)){
+						    	$this->resetItemCooldown($item);
+						    	$this->inventory->setItemInHand($item);
+					    	}
+				    	}else{
+					    	break;
+				    	}
+					}finally{
+					    $this->setUsingItem(false);
 					}
 		        }
 

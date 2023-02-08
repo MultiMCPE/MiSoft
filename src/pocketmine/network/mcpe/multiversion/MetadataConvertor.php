@@ -517,7 +517,7 @@ final class MetadataConvertor{
     }
 
     protected static function lazyInit() : void{
-        if(!isset(self::$protocolMetadata) || !isset(self::$protocolFlags)){
+        if(self::$protocolMetadata === null || self::$protocolFlags === null){
             self::init();
         }
     }

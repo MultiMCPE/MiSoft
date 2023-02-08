@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\crafting;
 
-use pocketmine\network\mcpe\multiversion\ItemPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
@@ -58,7 +58,9 @@ class CraftingDataBuildTask extends AsyncTask{
         ProtocolInfo::PROTOCOL_392,
         ProtocolInfo::PROTOCOL_406,
         ProtocolInfo::PROTOCOL_419,
-        ProtocolInfo::PROTOCOL_429
+        ProtocolInfo::PROTOCOL_429,
+        ProtocolInfo::PROTOCOL_440,
+        ProtocolInfo::PROTOCOL_448
     ];
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel){
