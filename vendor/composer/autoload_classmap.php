@@ -877,6 +877,7 @@ return array(
     'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette440' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette440.php',
     'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette448' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette448.php',
     'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\Palette' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/Palette.php',
+    'pocketmine\\network\\mcpe\\multiversion\\biomes\\BiomeDefinitionPalette' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/biomes/BiomeDefinitionPalette.php',
     'pocketmine\\network\\mcpe\\multiversion\\CommandListJson' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/CommandListJson.php',
     'pocketmine\\network\\mcpe\\protocol\\ActorEventPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ActorEventPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\ActorFallPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/ActorFallPacket.php',

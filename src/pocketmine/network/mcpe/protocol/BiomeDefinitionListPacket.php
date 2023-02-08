@@ -23,15 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\NetworkSession;
 use function file_get_contents;
 use const pocketmine\RESOURCE_PATH;
 
 class BiomeDefinitionListPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BIOME_DEFINITION_LIST_PACKET;
-
-	/** @var string|null */
-	private static $DEFAULT_NBT_CACHE = null;
 
 	/** @var string */
 	public $namedtag;
@@ -41,7 +39,7 @@ class BiomeDefinitionListPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= $this->namedtag ?? self::$DEFAULT_NBT_CACHE ?? (self::$DEFAULT_NBT_CACHE = file_get_contents(\pocketmine\RESOURCE_PATH . '/vanilla/biome_definitions.nbt')));
+		($this->buffer .= $this->namedtag ?? BiomeDefinitionPalette::getBiomesCache($this->getProtocol()));
 	}
 
 	public function handle(NetworkSession $session) : bool{

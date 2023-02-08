@@ -421,7 +421,7 @@ class NetworkBinaryStream extends BinaryStream{
 				$extraData->get($extraData->getLShort());
 			}
 
-			if($netId === ItemIds::SHIELD){
+			if($id === ItemIds::SHIELD){
 				$extraData->getLLong(); //"blocking tick" (ffs mojang)
 			}
 

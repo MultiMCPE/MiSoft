@@ -59,7 +59,9 @@ class BlockPallet {
      * @return array
      */
 	public static function initAll() : array{
-		$result = [];
+	    self::$blockNamesIds = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . '/vanilla/block_id_map.json'), true);
+
+	 	$result = [];
 		$folderPath = \pocketmine\RESOURCE_PATH . "/vanilla/palette/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
 		foreach($palletFiles as $fileName){
@@ -82,12 +84,6 @@ class BlockPallet {
      */
 	public function __construct(string $path, int $protocolNumber){
 		$palletData = json_decode(file_get_contents($path), true);
-
-		if($protocolNumber === ProtocolInfo::PROTOCOL_370 && empty(self::$blockNamesIds)){
-			foreach($palletData as $blockInfo){
-				self::$blockNamesIds[$blockInfo['name']] = $blockInfo['id'];
-			}
-		}
 
 		if($protocolNumber >= ProtocolInfo::PROTOCOL_419){
 			$palletData = $palletData['blocks'];
