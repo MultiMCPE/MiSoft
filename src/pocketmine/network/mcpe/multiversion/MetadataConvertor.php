@@ -35,6 +35,7 @@ use function strrev;
 final class MetadataConvertor{
 	public const METADATA = [
 		ProtocolInfo::PROTOCOL_110 => [
+			"DATA_SCALE" => 39,
 			"DATA_NPC_SKIN_INDEX" => 41,
 			"DATA_NPC_ACTIONS" => 42,
 			"DATA_MAX_AIR" => 43,
