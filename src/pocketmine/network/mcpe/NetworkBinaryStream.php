@@ -112,6 +112,9 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$capeData = $this->getSkinImage();
 		$geometryData = $this->getString();
+        if ($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+            $geometryDataVersion = $this->getString();
+        }
 		$animationData = $this->getString();
 		$premium = (($this->get(1) !== "\x00"));
 		$persona = (($this->get(1) !== "\x00"));
@@ -156,7 +159,7 @@ class NetworkBinaryStream extends BinaryStream{
             $pieceTintColors = \SplFixedArray::fromArray([]);
 		}
 
-        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
+        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $geometryDataVersion, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
 	}
 
 	public function putSkin(Skin $skin, int $playerProtocol){
@@ -178,6 +181,9 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$this->putSkinImage($skin->getCapeImage());
 		$this->putString($skin->getGeometryData());
+        if ($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+            $this->putString($skin->getGeometryDataEngineVersion());
+        }
 		$this->putString($skin->getAnimationData());
 		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
 		($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));

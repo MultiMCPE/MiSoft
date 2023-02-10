@@ -34,6 +34,8 @@ class ActorPickRequestPacket extends DataPacket{
 	public $entityUniqueId;
 	/** @var int */
 	public $hotbarSlot;
+    /** @var bool */
+    public $addUserData;
 
 	protected function decodePayload(){
 		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
@@ -43,6 +45,7 @@ class ActorPickRequestPacket extends DataPacket{
 	protected function encodePayload(){
 		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 		($this->buffer .= \chr($this->hotbarSlot));
+        ($this->buffer .= $this->addUserData);
 	}
 
 	public function handle(NetworkSession $session) : bool{
