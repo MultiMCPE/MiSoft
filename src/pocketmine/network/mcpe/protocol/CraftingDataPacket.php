@@ -229,16 +229,18 @@ class CraftingDataPacket extends DataPacket{
 		    	}
 		    	$this->potionContainerRecipes[] = new PotionContainerChangeRecipe($input, $ingredient, $output);
 	    	}
-			for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-				$inputIdAndData = $this->getVarInt();
-				[$inputId, $inputMeta] = [$inputIdAndData >> 16, $inputIdAndData & 0x7fff];
-				$outputs = [];
-				for($j = 0, $outputCount = $this->getUnsignedVarInt(); $j < $outputCount; ++$j){
-					$outputItemId = $this->getVarInt();
-					$outputItemCount = $this->getVarInt();
-					$outputs[] = new MaterialReducerRecipeOutput($outputItemId, $outputItemCount);
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+				for ($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i) {
+					$inputIdAndData = $this->getVarInt();
+					[$inputId, $inputMeta] = [$inputIdAndData >> 16, $inputIdAndData & 0x7fff];
+					$outputs = [];
+					for ($j = 0, $outputCount = $this->getUnsignedVarInt(); $j < $outputCount; ++$j) {
+						$outputItemId = $this->getVarInt();
+						$outputItemCount = $this->getVarInt();
+						$outputs[] = new MaterialReducerRecipeOutput($outputItemId, $outputItemCount);
+					}
+					$this->materialReducerRecipes[] = new MaterialReducerRecipe($inputId, $inputMeta, $outputs);
 				}
-				$this->materialReducerRecipes[] = new MaterialReducerRecipe($inputId, $inputMeta, $outputs);
 			}
 		}
 		$this->cleanRecipes = (($this->get(1) !== "\x00"));
@@ -429,13 +431,15 @@ class CraftingDataPacket extends DataPacket{
 		    	$this->putVarInt($ingredient);
 		    	$this->putVarInt($output);
 		    }
-			$this->putUnsignedVarInt(count($this->materialReducerRecipes));
-			foreach($this->materialReducerRecipes as $recipe){
-				$this->putVarInt(($recipe->getInputItemId() << 16) | $recipe->getInputItemMeta());
-				$this->putUnsignedVarInt(count($recipe->getOutputs()));
-				foreach($recipe->getOutputs() as $output){
-					$this->putVarInt($output->getItemId());
-					$this->putVarInt($output->getCount());
+			if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+				$this->putUnsignedVarInt(count($this->materialReducerRecipes));
+				foreach ($this->materialReducerRecipes as $recipe) {
+					$this->putVarInt(($recipe->getInputItemId() << 16) | $recipe->getInputItemMeta());
+					$this->putUnsignedVarInt(count($recipe->getOutputs()));
+					foreach ($recipe->getOutputs() as $output) {
+						$this->putVarInt($output->getItemId());
+						$this->putVarInt($output->getCount());
+					}
 				}
 			}
 		}
