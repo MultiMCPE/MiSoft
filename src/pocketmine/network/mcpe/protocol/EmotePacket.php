@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class EmotePacket extends DataPacket/* implements ClientboundPacket, ServerboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::EMOTE_PACKET;
@@ -66,13 +68,13 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 	protected function decodePayload() : void{
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->emoteId = $this->getString();
-		$this->flags = (\ord($this->get(1)));
+		$this->flags = (ord($this->get(1)));
 	}
 
 	protected function encodePayload() : void{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putString($this->emoteId);
-		($this->buffer .= \chr($this->flags));
+		($this->buffer .= chr($this->flags));
 	}
 
 	public function handle(NetworkSession $handler) : bool{

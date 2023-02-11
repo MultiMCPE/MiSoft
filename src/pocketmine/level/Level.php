@@ -26,6 +26,8 @@ declare(strict_types=1);
  */
 namespace pocketmine\level;
 
+use InvalidArgumentException;
+use InvalidStateException;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
@@ -86,6 +88,10 @@ use pocketmine\tile\Container;
 use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
 use pocketmine\utils\ReversePriorityQueue;
+use SplFixedArray;
+use SplPriorityQueue;
+use SplQueue;
+use TypeError;
 use function abs;
 use function array_fill_keys;
 use function array_map;
@@ -213,7 +219,7 @@ class Level implements ChunkManager, Metadatable{
 	/** @var int[] */
 	private $scheduledBlockUpdateQueueIndex = [];
 
-	/** @var \SplQueue */
+	/** @var SplQueue */
 	private $neighbourBlockUpdateQueue;
 
 	/** @var Player[][] */
@@ -241,7 +247,7 @@ class Level implements ChunkManager, Metadatable{
 	/** @var Vector3 */
 	private $temporalVector;
 
-	/** @var \SplFixedArray */
+	/** @var SplFixedArray */
 	private $blockStates;
 
 	/** @var int */
@@ -255,7 +261,7 @@ class Level implements ChunkManager, Metadatable{
 	private $chunksPerTick;
 	/** @var bool */
 	private $clearChunksOnTick;
-	/** @var \SplFixedArray<Block> */
+	/** @var SplFixedArray<Block> */
 	private $randomTickBlocks = null;
 
 	/** @var LevelTimings */
@@ -289,7 +295,7 @@ class Level implements ChunkManager, Metadatable{
 
 	public static function blockHash(int $x, int $y, int $z) : int{
 		if($y < 0 or $y >= Level::Y_MAX){
-			throw new \InvalidArgumentException("Y coordinate $y is out of range!");
+			throw new InvalidArgumentException("Y coordinate $y is out of range!");
 		}
 		return (($x & 0xFFFFFFF) << 36) | (($y & Level::Y_MASK) << 28) | ($z & 0xFFFFFFF);
 	}
@@ -327,7 +333,7 @@ class Level implements ChunkManager, Metadatable{
 		if($loader->getLoaderId() === 0){
 			return self::$chunkLoaderCounter++;
 		}else{
-			throw new \InvalidStateException("ChunkLoader has a loader id already assigned: " . $loader->getLoaderId());
+			throw new InvalidStateException("ChunkLoader has a loader id already assigned: " . $loader->getLoaderId());
 		}
 	}
 
@@ -388,9 +394,9 @@ class Level implements ChunkManager, Metadatable{
 		$this->folderName = $name;
 
 		$this->scheduledBlockUpdateQueue = new ReversePriorityQueue();
-		$this->scheduledBlockUpdateQueue->setExtractFlags(\SplPriorityQueue::EXTR_BOTH);
+		$this->scheduledBlockUpdateQueue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
 
-		$this->neighbourBlockUpdateQueue = new \SplQueue();
+		$this->neighbourBlockUpdateQueue = new SplQueue();
 
 		$this->time = $this->provider->getTime();
 
@@ -401,7 +407,7 @@ class Level implements ChunkManager, Metadatable{
 
 		$dontTickBlocks = array_fill_keys($this->server->getProperty("chunk-ticking.disable-block-ticking", []), true);
 
-		$this->randomTickBlocks = new \SplFixedArray(256);
+		$this->randomTickBlocks = new SplFixedArray(256);
 		foreach($this->randomTickBlocks as $id => $null){
 			$block = BlockFactory::get($id); //Make sure it's a copy
 			if(!isset($dontTickBlocks[$id]) and $block->ticksRandomly()){
@@ -474,7 +480,7 @@ class Level implements ChunkManager, Metadatable{
 
 	public function close(){
 		if($this->closed){
-			throw new \InvalidStateException("Tried to close a world which is already closed");
+			throw new InvalidStateException("Tried to close a world which is already closed");
 		}
 
 		foreach($this->chunks as $chunk){
@@ -578,11 +584,11 @@ class Level implements ChunkManager, Metadatable{
 	 * @param bool $force default false, force unload of default level
 	 *
 	 * @return bool
-	 * @throws \InvalidStateException if trying to unload a level during level tick
+	 * @throws InvalidStateException if trying to unload a level during level tick
 	 */
 	public function unload(bool $force = false) : bool{
 		if($this->doingTick and !$force){
-			throw new \InvalidStateException("Cannot unload a world during world tick");
+			throw new InvalidStateException("Cannot unload a world during world tick");
 		}
 
 		$ev = new LevelUnloadEvent($this);
@@ -773,7 +779,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function doTick(int $currentTick){
 		if($this->closed){
-			throw new \InvalidStateException("Attempted to tick a world which has been closed");
+			throw new InvalidStateException("Attempted to tick a world which has been closed");
 		}
 
 		$this->timings->doTick->startTiming();
@@ -964,7 +970,7 @@ class Level implements ChunkManager, Metadatable{
 			$chunks = [];
 			foreach($blocks as $b){
 				if(!($b instanceof Vector3)){
-					throw new \TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+					throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 				}
 				$pk = new UpdateBlockPacket();
 
@@ -994,7 +1000,7 @@ class Level implements ChunkManager, Metadatable{
 		}else{
 			foreach($blocks as $b){
 				if(!($b instanceof Vector3)){
-					throw new \TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+					throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 				}
 				$pk = new UpdateBlockPacket();
 
@@ -1040,7 +1046,7 @@ class Level implements ChunkManager, Metadatable{
 		unset($this->chunkCache[((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF)]);
 	}
 
-	public function getRandomTickedBlocks() : \SplFixedArray{
+	public function getRandomTickedBlocks() : SplFixedArray{
 		return $this->randomTickBlocks;
 	}
 
@@ -2708,7 +2714,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function addEntity(Entity $entity){
 		if($entity->isClosed()){
-			throw new \InvalidArgumentException("Attempted to add a garbage closed Entity to world");
+			throw new InvalidArgumentException("Attempted to add a garbage closed Entity to world");
 		}
 		if($entity->getLevel() !== $this){
 			throw new LevelException("Invalid Entity world");
@@ -2748,7 +2754,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function addTile(Tile $tile){
 		if($tile->isClosed()){
-			throw new \InvalidArgumentException("Attempted to add a garbage closed Tile to world");
+			throw new InvalidArgumentException("Attempted to add a garbage closed Tile to world");
 		}
 		if($tile->getLevel() !== $this){
 			throw new LevelException("Invalid Tile world");
@@ -2760,7 +2766,7 @@ class Level implements ChunkManager, Metadatable{
 		if(isset($this->chunks[$hash = ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF)])){
 			$this->chunks[$hash]->addTile($tile);
 		}else{
-			throw new \InvalidStateException("Attempted to create tile " . get_class($tile) . " in unloaded chunk $chunkX $chunkZ");
+			throw new InvalidStateException("Attempted to create tile " . get_class($tile) . " in unloaded chunk $chunkX $chunkZ");
 		}
 
 		$this->tiles[$tile->getId()] = $tile;
@@ -2807,7 +2813,7 @@ class Level implements ChunkManager, Metadatable{
 	 *
 	 * @return bool if loading the chunk was successful
 	 *
-	 * @throws \InvalidStateException
+	 * @throws InvalidStateException
 	 */
 	public function loadChunk(int $x, int $z, bool $create = true) : bool{
 		if(isset($this->chunks[$chunkHash = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)])){
@@ -3087,7 +3093,7 @@ class Level implements ChunkManager, Metadatable{
 	 */
 	public function setDifficulty(int $difficulty){
 		if($difficulty < 0 or $difficulty > 3){
-			throw new \InvalidArgumentException("Invalid difficulty level $difficulty");
+			throw new InvalidArgumentException("Invalid difficulty level $difficulty");
 		}
 		$this->provider->setDifficulty($difficulty);
 

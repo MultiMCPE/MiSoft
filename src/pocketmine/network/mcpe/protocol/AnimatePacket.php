@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class AnimatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ANIMATE_PACKET;
@@ -49,7 +51,7 @@ class AnimatePacket extends DataPacket{
 		$this->action = $this->getVarInt();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->action & 0x80){
-			$this->float = ((\unpack("g", $this->get(4))[1]));
+			$this->float = ((unpack("g", $this->get(4))[1]));
 		}
 	}
 
@@ -57,7 +59,7 @@ class AnimatePacket extends DataPacket{
 		$this->putVarInt($this->action);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->action & 0x80){
-			($this->buffer .= (\pack("g", $this->float)));
+			($this->buffer .= (pack("g", $this->float)));
 		}
 	}
 

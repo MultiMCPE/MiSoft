@@ -20,6 +20,8 @@ namespace raklib\protocol;
 use pocketmine\utils\Binary;
 
 use raklib\utils\InternetAddress;
+use function pack;
+use function unpack;
 
 class OpenConnectionRequest2 extends OfflineMessage{
 	public static $ID = MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_2;
@@ -34,14 +36,14 @@ class OpenConnectionRequest2 extends OfflineMessage{
 	protected function encodePayload() : void{
 		$this->writeMagic();
 		$this->putAddress($this->serverAddress);
-		($this->buffer .= (\pack("n", $this->mtuSize)));
-		($this->buffer .= (\pack("NN", $this->clientID >> 32, $this->clientID & 0xFFFFFFFF)));
+		($this->buffer .= (pack("n", $this->mtuSize)));
+		($this->buffer .= (pack("NN", $this->clientID >> 32, $this->clientID & 0xFFFFFFFF)));
 	}
 
 	protected function decodePayload() : void{
 		$this->readMagic();
 		$this->serverAddress = $this->getAddress();
-		$this->mtuSize = ((\unpack("n", $this->get(2))[1]));
+		$this->mtuSize = ((unpack("n", $this->get(2))[1]));
 		$this->clientID = (Binary::readLong($this->get(8)));
 	}
 }

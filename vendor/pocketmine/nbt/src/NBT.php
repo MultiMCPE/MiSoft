@@ -26,6 +26,7 @@ declare(strict_types=1);
  */
 namespace pocketmine\nbt;
 
+use InvalidArgumentException;
 use pocketmine\nbt\tag\ByteArrayTag;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -84,7 +85,7 @@ abstract class NBT{
 			case self::TAG_IntArray:
 				return new IntArrayTag();
 			default:
-				throw new \InvalidArgumentException("Unknown NBT tag type $type");
+				throw new InvalidArgumentException("Unknown NBT tag type $type");
 		}
 	}
 }

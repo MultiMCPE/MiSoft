@@ -23,9 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use UnexpectedValueException;
+use function chr;
+use function ord;
 
 class BookEditPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BOOK_EDIT_PACKET;
@@ -58,22 +62,22 @@ class BookEditPacket extends DataPacket{
 	public $xuid;
 
 	protected function decodePayload(){
-		$this->type = (\ord($this->get(1)));
-		$this->inventorySlot = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
+		$this->inventorySlot = (ord($this->get(1)));
 
 		switch($this->type){
 			case self::TYPE_REPLACE_PAGE:
 			case self::TYPE_ADD_PAGE:
-				$this->pageNumber = (\ord($this->get(1)));
+				$this->pageNumber = (ord($this->get(1)));
 				$this->text = $this->getString();
 				$this->photoName = $this->getString();
 				break;
 			case self::TYPE_DELETE_PAGE:
-				$this->pageNumber = (\ord($this->get(1)));
+				$this->pageNumber = (ord($this->get(1)));
 				break;
 			case self::TYPE_SWAP_PAGES:
-				$this->pageNumber = (\ord($this->get(1)));
-				$this->secondaryPageNumber = (\ord($this->get(1)));
+				$this->pageNumber = (ord($this->get(1)));
+				$this->secondaryPageNumber = (ord($this->get(1)));
 				break;
 			case self::TYPE_SIGN_BOOK:
 				$this->title = $this->getString();
@@ -83,27 +87,27 @@ class BookEditPacket extends DataPacket{
 				}
 				break;
 			default:
-				throw new \UnexpectedValueException("Unknown book edit type $this->type!");
+				throw new UnexpectedValueException("Unknown book edit type $this->type!");
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->type));
-		($this->buffer .= \chr($this->inventorySlot));
+		($this->buffer .= chr($this->type));
+		($this->buffer .= chr($this->inventorySlot));
 
 		switch($this->type){
 			case self::TYPE_REPLACE_PAGE:
 			case self::TYPE_ADD_PAGE:
-				($this->buffer .= \chr($this->pageNumber));
+				($this->buffer .= chr($this->pageNumber));
 				$this->putString($this->text);
 				$this->putString($this->photoName);
 				break;
 			case self::TYPE_DELETE_PAGE:
-				($this->buffer .= \chr($this->pageNumber));
+				($this->buffer .= chr($this->pageNumber));
 				break;
 			case self::TYPE_SWAP_PAGES:
-				($this->buffer .= \chr($this->pageNumber));
-				($this->buffer .= \chr($this->secondaryPageNumber));
+				($this->buffer .= chr($this->pageNumber));
+				($this->buffer .= chr($this->secondaryPageNumber));
 				break;
 			case self::TYPE_SIGN_BOOK:
 				$this->putString($this->title);
@@ -113,7 +117,7 @@ class BookEditPacket extends DataPacket{
 				}
 				break;
 			default:
-				throw new \InvalidArgumentException("Unknown book edit type $this->type!");
+				throw new InvalidArgumentException("Unknown book edit type $this->type!");
 		}
 	}
 

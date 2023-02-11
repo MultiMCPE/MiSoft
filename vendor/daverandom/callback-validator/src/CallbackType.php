@@ -2,6 +2,15 @@
 
 namespace DaveRandom\CallbackValidator;
 
+use Closure;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionMethod;
+use function is_array;
+use function is_object;
+use function method_exists;
+use function strpos;
+
 final class CallbackType
 {
     /**
@@ -21,28 +30,28 @@ final class CallbackType
      * a callable type-hint or this behaviour will break!
      *
      * @param callable $target
-     * @return \ReflectionFunction|\ReflectionMethod
-     * @throws \ReflectionException
+     * @return ReflectionFunction|ReflectionMethod
+     * @throws ReflectionException
      */
     private static function reflectCallable($target)
     {
-        if ($target instanceof \Closure) {
-            return new \ReflectionFunction($target);
+        if ($target instanceof Closure) {
+            return new ReflectionFunction($target);
         }
 
-        if (\is_array($target) && isset($target[0], $target[1])) {
-            return new \ReflectionMethod($target[0], $target[1]);
+        if (is_array($target) && isset($target[0], $target[1])) {
+            return new ReflectionMethod($target[0], $target[1]);
         }
 
-        if (\is_object($target) && \method_exists($target, '__invoke')) {
-            return new \ReflectionMethod($target, '__invoke');
+        if (is_object($target) && method_exists($target, '__invoke')) {
+            return new ReflectionMethod($target, '__invoke');
         }
 
         $target = (string)$target;
 
-        return \strpos($target, '::') !== false
-            ? new \ReflectionMethod($target)
-            : new \ReflectionFunction($target);
+        return strpos($target, '::') !== false
+            ? new ReflectionMethod($target)
+            : new ReflectionFunction($target);
     }
 
     /**
@@ -55,7 +64,7 @@ final class CallbackType
     {
         try {
             $reflection = self::reflectCallable($callable);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             throw new InvalidCallbackException('Failed to reflect the supplied callable', 0, $e);
         }
 
@@ -84,7 +93,7 @@ final class CallbackType
     {
         try {
             $candidate = self::reflectCallable($callable);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             throw new InvalidCallbackException('Failed to reflect the supplied callable', 0, $e);
         }
 

@@ -12,13 +12,14 @@ namespace FG\ASN1\Composite;
 
 use FG\ASN1\Exception\NotImplementedException;
 use FG\ASN1\ASNObject;
+use FG\ASN1\Universal\ObjectIdentifier;
 use FG\ASN1\Universal\Set;
 
 class RelativeDistinguishedName extends Set
 {
     /**
-     * @param string|\FG\ASN1\Universal\ObjectIdentifier $objIdentifierString
-     * @param \FG\ASN1\ASNObject $value
+     * @param string|ObjectIdentifier $objIdentifierString
+     * @param ASNObject $value
      */
     public function __construct($objIdentifierString, ASNObject $value)
     {
@@ -29,7 +30,7 @@ class RelativeDistinguishedName extends Set
 
     public function getContent()
     {
-        /** @var \FG\ASN1\ASNObject $firstObject */
+        /** @var ASNObject $firstObject */
         $firstObject = $this->children[0];
         return $firstObject->__toString();
     }

@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
+use function pack;
+use function unpack;
 
 class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::ANIMATE_ENTITY_PACKET;
@@ -93,7 +95,7 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 			$this->stopExpressionVersion = $this->getLInt();
 		}
 		$this->controller = $this->getString();
-		$this->blendOutTime = ((\unpack("g", $this->get(4))[1]));
+		$this->blendOutTime = ((unpack("g", $this->get(4))[1]));
 		$this->actorRuntimeIds = [];
 		for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
 			$this->actorRuntimeIds[] = $this->getEntityRuntimeId();
@@ -108,7 +110,7 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 			$this->putLInt($this->stopExpressionVersion);
 		}
 		$this->putString($this->controller);
-		($this->buffer .= (\pack("g", $this->blendOutTime)));
+		($this->buffer .= (pack("g", $this->blendOutTime)));
 		$this->putUnsignedVarInt(count($this->actorRuntimeIds));
 		foreach($this->actorRuntimeIds as $id){
 			$this->putEntityRuntimeId($id);

@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class ActorEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ACTOR_EVENT_PACKET;
@@ -98,13 +100,13 @@ class ActorEventPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->event = (\ord($this->get(1)));
+		$this->event = (ord($this->get(1)));
 		$this->data = $this->getVarInt();
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= \chr($this->event));
+		($this->buffer .= chr($this->event));
 		$this->putVarInt($this->data);
 	}
 

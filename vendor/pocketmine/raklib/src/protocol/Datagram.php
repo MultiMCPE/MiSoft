@@ -19,8 +19,12 @@ namespace raklib\protocol;
 
 use pocketmine\utils\Binary;
 
+use function chr;
+use function ord;
+use function pack;
 use function strlen;
 use function substr;
+use function unpack;
 
 class Datagram extends Packet{
 	public const BITFLAG_VALID = 0x80;
@@ -45,11 +49,11 @@ class Datagram extends Packet{
 	public $seqNumber;
 
 	protected function encodeHeader() : void{
-		($this->buffer .= \chr(self::BITFLAG_VALID | $this->headerFlags));
+		($this->buffer .= chr(self::BITFLAG_VALID | $this->headerFlags));
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\substr(\pack("V", $this->seqNumber), 0, -1)));
+		($this->buffer .= (substr(pack("V", $this->seqNumber), 0, -1)));
 		foreach($this->packets as $packet){
 			($this->buffer .= $packet instanceof EncapsulatedPacket ? $packet->toBinary() : (string) $packet);
 		}
@@ -65,11 +69,11 @@ class Datagram extends Packet{
 	}
 
 	protected function decodeHeader() : void{
-		$this->headerFlags = (\ord($this->get(1)));
+		$this->headerFlags = (ord($this->get(1)));
 	}
 
 	protected function decodePayload() : void{
-		$this->seqNumber = ((\unpack("V", $this->get(3) . "\x00")[1]));
+		$this->seqNumber = ((unpack("V", $this->get(3) . "\x00")[1]));
 
 		while(!$this->feof()){
 			$offset = 0;

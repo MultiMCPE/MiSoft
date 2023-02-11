@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class RespawnPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESPAWN_PACKET;
@@ -46,7 +48,7 @@ class RespawnPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->position = $this->getVector3();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	    	$this->respawnState = (\ord($this->get(1)));
+	    	$this->respawnState = (ord($this->get(1)));
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
 		}
 	}
@@ -54,7 +56,7 @@ class RespawnPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVector3($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	    	($this->buffer .= \chr($this->respawnState));
+	    	($this->buffer .= chr($this->respawnState));
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
 		}
 	}

@@ -27,6 +27,7 @@ use pocketmine\block\BlockFactory;
 use pocketmine\level\ChunkManager;
 use pocketmine\level\Level;
 use pocketmine\level\utils\SubChunkIteratorManager;
+use SplQueue;
 
 //TODO: make light updates asynchronous
 abstract class LightUpdate{
@@ -37,12 +38,12 @@ abstract class LightUpdate{
 	/** @var int[][] blockhash => [x, y, z, new light level] */
 	protected $updateNodes = [];
 
-	/** @var \SplQueue */
+	/** @var SplQueue */
 	protected $spreadQueue;
 	/** @var bool[] */
 	protected $spreadVisited = [];
 
-	/** @var \SplQueue */
+	/** @var SplQueue */
 	protected $removalQueue;
 	/** @var bool[] */
 	protected $removalVisited = [];
@@ -51,8 +52,8 @@ abstract class LightUpdate{
 
 	public function __construct(ChunkManager $level){
 		$this->level = $level;
-		$this->removalQueue = new \SplQueue();
-		$this->spreadQueue = new \SplQueue();
+		$this->removalQueue = new SplQueue();
+		$this->spreadQueue = new SplQueue();
 
 		$this->subChunkHandler = new SubChunkIteratorManager($this->level);
 	}

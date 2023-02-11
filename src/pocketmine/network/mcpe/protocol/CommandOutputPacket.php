@@ -28,7 +28,9 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\CommandOutputMessage;
+use function chr;
 use function count;
+use function ord;
 
 class CommandOutputPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::COMMAND_OUTPUT_PACKET;
@@ -46,7 +48,7 @@ class CommandOutputPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->originData = $this->getCommandOriginData();
-		$this->outputType = (\ord($this->get(1)));
+		$this->outputType = (ord($this->get(1)));
 		$this->successCount = $this->getUnsignedVarInt();
 
 		for($i = 0, $size = $this->getUnsignedVarInt(); $i < $size; ++$i){
@@ -73,7 +75,7 @@ class CommandOutputPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putCommandOriginData($this->originData);
-		($this->buffer .= \chr($this->outputType));
+		($this->buffer .= chr($this->outputType));
 		$this->putUnsignedVarInt($this->successCount);
 
 		$this->putUnsignedVarInt(count($this->messages));

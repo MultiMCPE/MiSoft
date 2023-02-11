@@ -18,6 +18,10 @@ declare(strict_types=1);
 namespace raklib\protocol;
 
 use pocketmine\utils\Binary;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class OpenConnectionReply1 extends OfflineMessage{
 	public static $ID = MessageIdentifiers::ID_OPEN_CONNECTION_REPLY_1;
@@ -31,15 +35,15 @@ class OpenConnectionReply1 extends OfflineMessage{
 
 	protected function encodePayload() : void{
 		$this->writeMagic();
-		($this->buffer .= (\pack("NN", $this->serverID >> 32, $this->serverID & 0xFFFFFFFF)));
-		($this->buffer .= \chr($this->serverSecurity ? 1 : 0));
-		($this->buffer .= (\pack("n", $this->mtuSize)));
+		($this->buffer .= (pack("NN", $this->serverID >> 32, $this->serverID & 0xFFFFFFFF)));
+		($this->buffer .= chr($this->serverSecurity ? 1 : 0));
+		($this->buffer .= (pack("n", $this->mtuSize)));
 	}
 
 	protected function decodePayload() : void{
 		$this->readMagic();
 		$this->serverID = (Binary::readLong($this->get(8)));
-		$this->serverSecurity = (\ord($this->get(1))) !== 0;
-		$this->mtuSize = ((\unpack("n", $this->get(2))[1]));
+		$this->serverSecurity = (ord($this->get(1))) !== 0;
+		$this->mtuSize = ((unpack("n", $this->get(2))[1]));
 	}
 }

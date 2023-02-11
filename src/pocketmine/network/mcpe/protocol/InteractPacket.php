@@ -26,6 +26,10 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class InteractPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::INTERACT_PACKET;
@@ -50,28 +54,28 @@ class InteractPacket extends DataPacket{
 	public $z;
 
 	protected function decodePayload(){
-		$this->action = (\ord($this->get(1)));
+		$this->action = (ord($this->get(1)));
 		$this->target = $this->getEntityRuntimeId();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	if($this->action === self::ACTION_MOUSEOVER){
 		    	//TODO: should this be a vector3?
-		    	$this->x = ((\unpack("g", $this->get(4))[1]));
-		    	$this->y = ((\unpack("g", $this->get(4))[1]));
-		    	$this->z = ((\unpack("g", $this->get(4))[1]));
+		    	$this->x = ((unpack("g", $this->get(4))[1]));
+		    	$this->y = ((unpack("g", $this->get(4))[1]));
+		    	$this->z = ((unpack("g", $this->get(4))[1]));
 	    	}
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->action));
+		($this->buffer .= chr($this->action));
 		$this->putEntityRuntimeId($this->target);
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	if($this->action === self::ACTION_MOUSEOVER){
-		    	($this->buffer .= (\pack("g", $this->x)));
-		    	($this->buffer .= (\pack("g", $this->y)));
-		    	($this->buffer .= (\pack("g", $this->z)));
+		    	($this->buffer .= (pack("g", $this->x)));
+		    	($this->buffer .= (pack("g", $this->y)));
+		    	($this->buffer .= (pack("g", $this->z)));
 	    	}
         }
 	}

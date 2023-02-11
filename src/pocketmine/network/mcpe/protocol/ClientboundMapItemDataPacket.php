@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 
@@ -32,8 +33,13 @@ use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\MapDecoration;
 use pocketmine\network\mcpe\protocol\types\MapTrackedObject;
 use pocketmine\utils\Color;
+use UnexpectedValueException;
 use function assert;
+use function chr;
 use function count;
+use function ord;
+use function pack;
+use function unpack;
 
 class ClientboundMapItemDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENTBOUND_MAP_ITEM_DATA_PACKET;
@@ -75,7 +81,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		$this->mapId = $this->getEntityUniqueId();
 		$this->type = $this->getUnsignedVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-	    	$this->dimensionId = (\ord($this->get(1)));
+	    	$this->dimensionId = (ord($this->get(1)));
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
 	    	$this->isLocked = (($this->get(1) !== "\x00"));
@@ -94,20 +100,20 @@ class ClientboundMapItemDataPacket extends DataPacket{
             $flags = (self::BITFLAG_DECORATION_UPDATE | self::BITFLAG_TEXTURE_UPDATE);
         }
 		if(($this->type & ($flags)) !== 0){ //Decoration bitflag or colour bitflag
-			$this->scale = (\ord($this->get(1)));
+			$this->scale = (ord($this->get(1)));
 		}
 
 		if(($this->type & self::BITFLAG_DECORATION_UPDATE) !== 0){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			    	$object = new MapTrackedObject();
-			    	$object->type = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+			    	$object->type = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 			    	if($object->type === MapTrackedObject::TYPE_BLOCK){
 				    	$this->getBlockPosition($object->x, $object->y, $object->z);
 			    	}elseif($object->type === MapTrackedObject::TYPE_ENTITY){
 				    	$object->entityUniqueId = $this->getEntityUniqueId();
 			    	}else{
-				    	throw new \UnexpectedValueException("Unknown map object type $object->type");
+				    	throw new UnexpectedValueException("Unknown map object type $object->type");
 			    	}
 			    	$this->trackedEntities[] = $object;
 		    	}
@@ -115,15 +121,15 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 			for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-			    	$icon = (\ord($this->get(1)));
-			    	$rotation = (\ord($this->get(1)));
+			    	$icon = (ord($this->get(1)));
+			    	$rotation = (ord($this->get(1)));
 			    }else{
 			    	$weird = $this->getVarInt();
 			    	$rotation = $weird & 0x0f;
 			    	$icon = $weird >> 4;
 			    }
-				$xOffset = (\ord($this->get(1)));
-				$yOffset = (\ord($this->get(1)));
+				$xOffset = (ord($this->get(1)));
+				$yOffset = (ord($this->get(1)));
 				$label = $this->getString();
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$color = Color::fromABGR($this->getUnsignedVarInt());
@@ -143,7 +149,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	$count = $this->getUnsignedVarInt();
 		    	if($count !== $this->width * $this->height){
-			    	throw new \UnexpectedValueException("Expected colour count of " . ($this->height * $this->width) . " (height $this->height * width $this->width), got $count");
+			    	throw new UnexpectedValueException("Expected colour count of " . ($this->height * $this->width) . " (height $this->height * width $this->width), got $count");
 		    	}
 			}
 
@@ -171,7 +177,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 		$this->putUnsignedVarInt($type);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-	    	($this->buffer .= \chr($this->dimensionId));
+	    	($this->buffer .= chr($this->dimensionId));
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
 	    	($this->buffer .= ($this->isLocked ? "\x01" : "\x00"));
@@ -190,20 +196,20 @@ class ClientboundMapItemDataPacket extends DataPacket{
             $flags = (self::BITFLAG_TEXTURE_UPDATE | self::BITFLAG_DECORATION_UPDATE);
         }
 		if(($type & ($flags)) !== 0){
-			($this->buffer .= \chr($this->scale));
+			($this->buffer .= chr($this->scale));
 		}
 
 		if(($type & self::BITFLAG_DECORATION_UPDATE) !== 0){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	$this->putUnsignedVarInt(count($this->trackedEntities));
 		    	foreach($this->trackedEntities as $object){
-			    	($this->buffer .= (\pack("V", $object->type)));
+			    	($this->buffer .= (pack("V", $object->type)));
 			    	if($object->type === MapTrackedObject::TYPE_BLOCK){
 				    	$this->putBlockPosition($object->x, $object->y, $object->z);
 			    	}elseif($object->type === MapTrackedObject::TYPE_ENTITY){
 				    	$this->putEntityUniqueId($object->entityUniqueId);
 			    	}else{
-				    	throw new \InvalidArgumentException("Unknown map object type $object->type");
+				    	throw new InvalidArgumentException("Unknown map object type $object->type");
 			    	}
 				}
 			}
@@ -211,13 +217,13 @@ class ClientboundMapItemDataPacket extends DataPacket{
 			$this->putUnsignedVarInt($decorationCount);
 			foreach($this->decorations as $decoration){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-			    	($this->buffer .= \chr($decoration->getIcon()));
-			    	($this->buffer .= \chr($decoration->getRotation()));
+			    	($this->buffer .= chr($decoration->getIcon()));
+			    	($this->buffer .= chr($decoration->getRotation()));
 			    }else{
 			        $this->putVarInt(($decoration->getRotation() & 0x0f) | ($decoration->getIcon() << 4));
 			    }
-				($this->buffer .= \chr($decoration->getXOffset()));
-				($this->buffer .= \chr($decoration->getYOffset()));
+				($this->buffer .= chr($decoration->getXOffset()));
+				($this->buffer .= chr($decoration->getYOffset()));
 				$this->putString($decoration->getLabel());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$this->putUnsignedVarInt($decoration->getColor()->toABGR());

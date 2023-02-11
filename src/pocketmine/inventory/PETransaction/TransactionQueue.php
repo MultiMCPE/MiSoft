@@ -26,6 +26,7 @@ namespace pocketmine\inventory\PETransaction;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\Player;
+use SplQueue;
 use function get_class;
 
 class TransactionQueue{
@@ -33,7 +34,7 @@ class TransactionQueue{
 
     /** @var Player */
     protected $player;
-    /** @var \SplQueue */
+    /** @var SplQueue */
     protected $transactionQueue;
     /** @var CraftingGrid */
     protected $transactionInventory;
@@ -44,7 +45,7 @@ class TransactionQueue{
     public function __construct(Player $player){
         $this->player = $player;
         $this->transactionInventory = new class($player, 6) extends CraftingGrid{};
-        $this->transactionQueue = new \SplQueue();
+        $this->transactionQueue = new SplQueue();
     }
 
     /**

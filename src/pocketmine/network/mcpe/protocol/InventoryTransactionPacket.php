@@ -23,11 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
+use stdClass;
+use UnexpectedValueException;
 use function count;
 
 class InventoryTransactionPacket extends DataPacket{
@@ -70,7 +73,7 @@ class InventoryTransactionPacket extends DataPacket{
 	/** @var NetworkInventoryAction[] */
 	public $actions = [];
 
-	/** @var \stdClass */
+	/** @var stdClass */
 	public $trData;
 
     /** @var int[] */
@@ -83,7 +86,7 @@ class InventoryTransactionPacket extends DataPacket{
                 while($inventoriesCount --> 0){
                     $inventoryId = $this->getUnsignedVarInt();
                     if(isset($this->knownInventories[$inventoryId])){
-                        throw new \InvalidArgumentException("Inventory $inventoryId already set");
+                        throw new InvalidArgumentException("Inventory $inventoryId already set");
                     }
 
                     $this->knownInventories[$inventoryId] = [];
@@ -152,7 +155,7 @@ class InventoryTransactionPacket extends DataPacket{
             }
 		}
 
-		$this->trData = new \stdClass();
+		$this->trData = new stdClass();
 
 		switch($this->transactionType){
 			case self::TYPE_NORMAL:
@@ -186,7 +189,7 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->trData->headPos = $this->getVector3();
 				break;
 			default:
-				throw new \UnexpectedValueException("Unknown transaction type $this->transactionType");
+				throw new UnexpectedValueException("Unknown transaction type $this->transactionType");
 		}
 	}
 
@@ -232,7 +235,7 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->putVector3($this->trData->headPos);
 				break;
 			default:
-				throw new \InvalidArgumentException("Unknown transaction type $this->transactionType");
+				throw new InvalidArgumentException("Unknown transaction type $this->transactionType");
 		}
 	}
 

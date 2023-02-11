@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ChunkCacheBlob;
 use function count;
+use function pack;
 
 class ClientCacheMissResponsePacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_CACHE_MISS_RESPONSE_PACKET;
@@ -67,7 +68,7 @@ class ClientCacheMissResponsePacket extends DataPacket/* implements ClientboundP
 	protected function encodePayload() : void{
 		$this->putUnsignedVarInt(count($this->blobs));
 		foreach($this->blobs as $blob){
-			($this->buffer .= (\pack("VV", $blob->getHash() & 0xFFFFFFFF, $blob->getHash() >> 32)));
+			($this->buffer .= (pack("VV", $blob->getHash() & 0xFFFFFFFF, $blob->getHash() >> 32)));
 			$this->putString($blob->getPayload());
 		}
 	}

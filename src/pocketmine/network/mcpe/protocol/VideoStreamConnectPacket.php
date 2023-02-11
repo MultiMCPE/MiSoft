@@ -26,6 +26,10 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class VideoStreamConnectPacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::VIDEO_STREAM_CONNECT_PACKET;
@@ -46,18 +50,18 @@ class VideoStreamConnectPacket extends DataPacket/* implements ClientboundPacket
 
 	protected function decodePayload() : void{
 		$this->serverUri = $this->getString();
-		$this->frameSendFrequency = ((\unpack("g", $this->get(4))[1]));
-		$this->action = (\ord($this->get(1)));
-		$this->resolutionX = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
-		$this->resolutionY = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->frameSendFrequency = ((unpack("g", $this->get(4))[1]));
+		$this->action = (ord($this->get(1)));
+		$this->resolutionX = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->resolutionY = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->serverUri);
-		($this->buffer .= (\pack("g", $this->frameSendFrequency)));
-		($this->buffer .= \chr($this->action));
-		($this->buffer .= (\pack("V", $this->resolutionX)));
-		($this->buffer .= (\pack("V", $this->resolutionY)));
+		($this->buffer .= (pack("g", $this->frameSendFrequency)));
+		($this->buffer .= chr($this->action));
+		($this->buffer .= (pack("V", $this->resolutionX)));
+		($this->buffer .= (pack("V", $this->resolutionY)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

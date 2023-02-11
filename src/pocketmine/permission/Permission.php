@@ -27,6 +27,9 @@ declare(strict_types=1);
 
 namespace pocketmine\permission;
 
+use Exception;
+use InvalidArgumentException;
+use InvalidStateException;
 use function is_array;
 use function is_bool;
 use function strtolower;
@@ -47,7 +50,7 @@ class Permission{
 	 *
 	 * @return string
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public static function getByName($value) : string{
 		if(is_bool($value)){
@@ -80,7 +83,7 @@ class Permission{
 				return self::DEFAULT_FALSE;
 		}
 
-		throw new \InvalidArgumentException("Unknown permission default name \"$value\"");
+		throw new InvalidArgumentException("Unknown permission default name \"$value\"");
 	}
 
 	/**
@@ -106,7 +109,7 @@ class Permission{
 	 *
 	 * @return Permission
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public static function loadPermission(string $name, array $data, string $default = self::DEFAULT_OP, array &$output = []) : Permission{
 		$desc = null;
@@ -126,7 +129,7 @@ class Permission{
 					$children[$k] = true;
 				}
 			}else{
-				throw new \InvalidStateException("'children' key is of wrong type");
+				throw new InvalidStateException("'children' key is of wrong type");
 			}
 		}
 

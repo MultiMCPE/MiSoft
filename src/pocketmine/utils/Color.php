@@ -25,6 +25,7 @@ declare(strict_types=1);
 namespace pocketmine\utils;
 
 
+use ArgumentCountError;
 use function count;
 
 class Color{
@@ -139,7 +140,7 @@ class Color{
 	public static function mix(Color ...$colors) : Color{
 		$count = count($colors);
 		if($count < 1){
-			throw new \ArgumentCountError("No colors given");
+			throw new ArgumentCountError("No colors given");
 		}
 
 		$a = $r = $g = $b = 0;

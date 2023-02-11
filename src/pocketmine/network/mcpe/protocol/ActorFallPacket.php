@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class ActorFallPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ACTOR_FALL_PACKET;
@@ -40,13 +42,13 @@ class ActorFallPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->fallDistance = ((\unpack("g", $this->get(4))[1]));
+		$this->fallDistance = ((unpack("g", $this->get(4))[1]));
 		$this->isInVoid = (($this->get(1) !== "\x00"));
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= (\pack("g", $this->fallDistance)));
+		($this->buffer .= (pack("g", $this->fallDistance)));
 		($this->buffer .= ($this->isInVoid ? "\x01" : "\x00"));
 	}
 

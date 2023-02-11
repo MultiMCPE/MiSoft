@@ -23,12 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\snooze;
 
+use Threaded;
 use function assert;
 
 /**
  * Notifiable Threaded class which tracks counts of notifications it receives.
  */
-class ThreadedSleeper extends \Threaded{
+class ThreadedSleeper extends Threaded{
 	/**
 	 * @var int
 	 */

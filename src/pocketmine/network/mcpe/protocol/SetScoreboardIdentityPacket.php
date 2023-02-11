@@ -27,7 +27,9 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ScoreboardIdentityPacketEntry;
+use function chr;
 use function count;
+use function ord;
 
 class SetScoreboardIdentityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_SCOREBOARD_IDENTITY_PACKET;
@@ -41,7 +43,7 @@ class SetScoreboardIdentityPacket extends DataPacket{
 	public $entries = [];
 
 	protected function decodePayload(){
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$entry = new ScoreboardIdentityPacketEntry();
 			$entry->scoreboardId = $this->getVarLong();
@@ -54,7 +56,7 @@ class SetScoreboardIdentityPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->type));
 		$this->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			$this->putVarLong($entry->scoreboardId);

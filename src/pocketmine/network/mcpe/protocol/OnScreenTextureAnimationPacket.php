@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class OnScreenTextureAnimationPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ON_SCREEN_TEXTURE_ANIMATION_PACKET;
@@ -34,11 +36,11 @@ class OnScreenTextureAnimationPacket extends DataPacket{
 	public $effectId;
 
 	protected function decodePayload() : void{
-		$this->effectId = ((\unpack("V", $this->get(4))[1] << 32 >> 32)); //unsigned
+		$this->effectId = ((unpack("V", $this->get(4))[1] << 32 >> 32)); //unsigned
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("V", $this->effectId)));
+		($this->buffer .= (pack("V", $this->effectId)));
 	}
 
 	public function handle(NetworkSession $handler) : bool{

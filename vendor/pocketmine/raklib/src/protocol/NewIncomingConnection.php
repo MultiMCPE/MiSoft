@@ -21,6 +21,7 @@ use pocketmine\utils\Binary;
 
 use raklib\RakLib;
 use raklib\utils\InternetAddress;
+use function pack;
 use function strlen;
 
 class NewIncomingConnection extends Packet{
@@ -42,8 +43,8 @@ class NewIncomingConnection extends Packet{
 		foreach($this->systemAddresses as $address){
 			$this->putAddress($address);
 		}
-		($this->buffer .= (\pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
-		($this->buffer .= (\pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
 	}
 
 	protected function decodePayload() : void{

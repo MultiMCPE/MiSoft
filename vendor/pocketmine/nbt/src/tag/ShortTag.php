@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt\tag;
 
+use InvalidArgumentException;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
@@ -40,7 +41,7 @@ class ShortTag extends NamedTag{
 	public function __construct(string $name = "", int $value = 0){
 		parent::__construct($name);
 		if($value < -0x8000 or $value > 0x7fff){
-			throw new \InvalidArgumentException("Value $value is too large!");
+			throw new InvalidArgumentException("Value $value is too large!");
 		}
 		$this->value = $value;
 	}

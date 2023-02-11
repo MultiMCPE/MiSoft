@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion;
 
+use InvalidArgumentException;
+use JsonSerializable;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
@@ -30,7 +32,7 @@ use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use function count;
 use function sprintf;
 
-final class CommandListJson implements \JsonSerializable{
+final class CommandListJson implements JsonSerializable{
     public const PERMISSION_NORMAL = 0;
     public const PERMISSION_OPERATOR = 1;
     public const PERMISSION_HOST = 2;
@@ -55,7 +57,7 @@ final class CommandListJson implements \JsonSerializable{
                 return "admin";
         }
 
-        throw new \InvalidArgumentException("Permission $permission not exists");
+        throw new InvalidArgumentException("Permission $permission not exists");
     }
 
     /** @var array */

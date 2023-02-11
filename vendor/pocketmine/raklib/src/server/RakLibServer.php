@@ -17,6 +17,12 @@ declare(strict_types=1);
 
 namespace raklib\server;
 
+use Exception;
+use Phar;
+use Thread;
+use Threaded;
+use ThreadedLogger;
+use Throwable;
 use function error_get_last;
 use pocketmine\snooze\SleeperNotifier;
 use raklib\RakLib;
@@ -60,11 +66,11 @@ use const E_USER_WARNING;
 use const E_WARNING;
 use const PHP_INT_MAX;
 
-class RakLibServer extends \Thread{
+class RakLibServer extends Thread{
 	/** @var InternetAddress */
 	private $address;
 
-	/** @var \ThreadedLogger */
+	/** @var ThreadedLogger */
 	protected $logger;
 
 	/** @var string */
@@ -73,9 +79,9 @@ class RakLibServer extends \Thread{
 	/** @var bool */
 	protected $shutdown = false;
 
-	/** @var \Threaded */
+	/** @var Threaded */
 	protected $externalQueue;
-	/** @var \Threaded */
+	/** @var Threaded */
 	protected $internalQueue;
 
 	/** @var string */
@@ -92,14 +98,14 @@ class RakLibServer extends \Thread{
 	protected $mainThreadNotifier;
 
 	/**
-	 * @param \ThreadedLogger      $logger
+	 * @param ThreadedLogger      $logger
 	 * @param string               $autoloaderPath Path to Composer autoloader
 	 * @param InternetAddress      $address
 	 * @param int                  $maxMtuSize
 	 * @param int|null             $overrideProtocolVersion Optional custom protocol version to use, defaults to current RakLib's protocol
 	 * @param SleeperNotifier|null $sleeper
 	 */
-	public function __construct(\ThreadedLogger $logger, string $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, ?int $overrideProtocolVersion = null, ?SleeperNotifier $sleeper = null){
+	public function __construct(ThreadedLogger $logger, string $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, ?int $overrideProtocolVersion = null, ?SleeperNotifier $sleeper = null){
 		$this->address = $address;
 
 		$this->serverId = mt_rand(0, PHP_INT_MAX);
@@ -108,11 +114,11 @@ class RakLibServer extends \Thread{
 		$this->logger = $logger;
 		$this->loaderPath = $autoloaderPath;
 
-		$this->externalQueue = new \Threaded;
-		$this->internalQueue = new \Threaded;
+		$this->externalQueue = new Threaded;
+		$this->internalQueue = new Threaded;
 
-		if(\Phar::running(true) !== ""){
-			$this->mainPath = \Phar::running(true);
+		if(Phar::running(true) !== ""){
+			$this->mainPath = Phar::running(true);
 		}else{
 			$this->mainPath = realpath(getcwd()) . DIRECTORY_SEPARATOR;
 		}
@@ -143,23 +149,23 @@ class RakLibServer extends \Thread{
 	}
 
 	/**
-	 * @return \ThreadedLogger
+	 * @return ThreadedLogger
 	 */
-	public function getLogger() : \ThreadedLogger{
+	public function getLogger() : ThreadedLogger{
 		return $this->logger;
 	}
 
 	/**
-	 * @return \Threaded
+	 * @return Threaded
 	 */
-	public function getExternalQueue() : \Threaded{
+	public function getExternalQueue() : Threaded{
 		return $this->externalQueue;
 	}
 
 	/**
-	 * @return \Threaded
+	 * @return Threaded
 	 */
-	public function getInternalQueue() : \Threaded{
+	public function getInternalQueue() : Threaded{
 		return $this->internalQueue;
 	}
 
@@ -235,7 +241,7 @@ class RakLibServer extends \Thread{
 			if(function_exists("xdebug_get_function_stack")){
 				$trace = array_reverse(xdebug_get_function_stack());
 			}else{
-				$e = new \Exception();
+				$e = new Exception();
 				$trace = $e->getTrace();
 			}
 		}
@@ -279,7 +285,7 @@ class RakLibServer extends \Thread{
 
 			$socket = new UDPServerSocket($this->address);
 			new SessionManager($this, $socket, $this->maxMtuSize);
-		}catch(\Throwable $e){
+		}catch(Throwable $e){
 			$this->logger->logException($e);
 		}
 	}

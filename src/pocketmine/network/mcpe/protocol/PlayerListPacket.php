@@ -26,7 +26,11 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use function chr;
 use function count;
+use function ord;
+use function pack;
+use function unpack;
 
 class PlayerListPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_LIST_PACKET;
@@ -80,7 +84,7 @@ class PlayerListPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
 			$entry = new PlayerListEntry();
@@ -118,7 +122,7 @@ class PlayerListPacket extends DataPacket{
 			        	$entry->platformChatId = $this->getString();
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	$entry->buildPlatform = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+			                	$entry->buildPlatform = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 			        	    }
 			            	$entry->skin = $this->getSkin($this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
@@ -152,7 +156,7 @@ class PlayerListPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->type));
 		$this->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			if($this->type === self::TYPE_ADD){
@@ -217,7 +221,7 @@ class PlayerListPacket extends DataPacket{
 			        	$this->putString($entry->platformChatId);
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	($this->buffer .= (\pack("V", $entry->buildPlatform)));
+			                	($this->buffer .= (pack("V", $entry->buildPlatform)));
 			        	    }
 			            	$this->putSkin($entry->skin, $this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){

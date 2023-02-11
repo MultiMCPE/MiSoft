@@ -30,6 +30,7 @@ use UnexpectedValueException;
 use function count;
 use function file_get_contents;
 use function json_decode;
+use const pocketmine\RESOURCE_PATH;
 
 final class ItemPalette431 extends Palette{
 
@@ -53,10 +54,10 @@ final class ItemPalette431 extends Palette{
 
 	public static function init() : void{
 		/** @var int[] $itemPalette */
-		$itemMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/items/431/r16_to_current_item_map.json"), true);
+		$itemMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/items/431/r16_to_current_item_map.json"), true);
 
 		/** @var int[] $itemPalette */
-		$stringToIntMap = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/item_id_map.json"), true);
+		$stringToIntMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/item_id_map.json"), true);
 
 		$simpleMappings = [];
 		foreach($itemMap["simple"] as $oldId => $newId){
@@ -80,7 +81,7 @@ final class ItemPalette431 extends Palette{
 			}
 		}
 
-		$itemList = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "/vanilla/items/431/required_item_list.json"), true);
+		$itemList = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/items/431/required_item_list.json"), true);
 		foreach($itemList as $stringId => $entry){
 			$runtimeId = $entry["runtime_id"];
 

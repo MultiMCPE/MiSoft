@@ -24,7 +24,11 @@ declare(strict_types=1);
 
 namespace pocketmine\resourcepacks;
 
+use ErrorException;
+use InvalidArgumentException;
+use Logger;
 use pocketmine\utils\Config;
+use SplFileInfo;
 use function array_keys;
 use function copy;
 use function count;
@@ -35,6 +39,7 @@ use function is_dir;
 use function mkdir;
 use function strtolower;
 use const DIRECTORY_SEPARATOR;
+use const pocketmine\RESOURCE_PATH;
 
 class ResourcePackManager{
 
@@ -52,20 +57,20 @@ class ResourcePackManager{
 
 	/**
 	 * @param string  $path Path to resource-packs directory.
-	 * @param \Logger $logger
+	 * @param Logger $logger
 	 */
-	public function __construct(string $path, \Logger $logger){
+	public function __construct(string $path, Logger $logger){
 		$this->path = $path;
 
 		if(!file_exists($this->path)){
 			$logger->debug("Resource packs path $path does not exist, creating directory");
 			mkdir($this->path);
 		}elseif(!is_dir($this->path)){
-			throw new \InvalidArgumentException("Resource packs path $path exists and is not a directory");
+			throw new InvalidArgumentException("Resource packs path $path exists and is not a directory");
 		}
 
 		if(!file_exists($this->path . "resource_packs.yml")){
-			copy(\pocketmine\RESOURCE_PATH . "resource_packs.yml", $this->path . "resource_packs.yml");
+			copy(RESOURCE_PATH . "resource_packs.yml", $this->path . "resource_packs.yml");
 		}
 
 		$resourcePacksConfig = new Config($this->path . "resource_packs.yml", Config::YAML, []);
@@ -76,13 +81,13 @@ class ResourcePackManager{
 
 		$resourceStack = $resourcePacksConfig->get("resource_stack", []);
 		if(!is_array($resourceStack)){
-			throw new \InvalidArgumentException("\"resource_stack\" key should contain a list of pack names");
+			throw new InvalidArgumentException("\"resource_stack\" key should contain a list of pack names");
 		}
 
 		foreach($resourceStack as $pos => $pack){
 			try{
 				$pack = (string) $pack;
-			}catch(\ErrorException $e){
+			}catch(ErrorException $e){
 				$logger->critical("Found invalid entry in resource pack list at offset $pos of type " . gettype($pack));
 				continue;
 			}
@@ -98,7 +103,7 @@ class ResourcePackManager{
 
 				$newPack = null;
 				//Detect the type of resource pack.
-				$info = new \SplFileInfo($packPath);
+				$info = new SplFileInfo($packPath);
 				switch($info->getExtension()){
 					case "zip":
 					case "mcpack":

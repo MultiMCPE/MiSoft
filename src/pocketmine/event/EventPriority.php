@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\event;
 
+use InvalidArgumentException;
 use function constant;
 use function defined;
 use function strtoupper;
@@ -80,7 +81,7 @@ abstract class EventPriority{
 	 *
 	 * @return int
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public static function fromString(string $name) : int{
 		$name = strtoupper($name);
@@ -89,6 +90,6 @@ abstract class EventPriority{
 			return constant($const);
 		}
 
-		throw new \InvalidArgumentException("Unable to resolve priority \"$name\"");
+		throw new InvalidArgumentException("Unable to resolve priority \"$name\"");
 	}
 }

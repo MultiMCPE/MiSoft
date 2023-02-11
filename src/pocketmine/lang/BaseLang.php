@@ -37,6 +37,7 @@ use function strpos;
 use function strtolower;
 use function substr;
 use const INI_SCANNER_RAW;
+use const pocketmine\PATH;
 use const SCANDIR_SORT_NONE;
 
 class BaseLang{
@@ -45,7 +46,7 @@ class BaseLang{
 
 	public static function getLanguageList(string $path = "") : array{
 		if($path === ""){
-			$path = \pocketmine\PATH . "src/pocketmine/lang/locale/";
+			$path = PATH . "src/pocketmine/lang/locale/";
 		}
 
 		if(is_dir($path)){
@@ -86,7 +87,7 @@ class BaseLang{
 		$this->langName = strtolower($lang);
 
 		if($path === null){
-			$path = \pocketmine\PATH . "src/pocketmine/lang/locale/";
+			$path = PATH . "src/pocketmine/lang/locale/";
 		}
 
 		if(!self::loadLang($file = $path . $this->langName . ".ini", $this->lang)){

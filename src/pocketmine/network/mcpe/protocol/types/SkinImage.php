@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
+use InvalidArgumentException;
+
 class SkinImage{
 
 	/** @var int */
@@ -54,7 +56,7 @@ class SkinImage{
 			    return new self(256, 256, $data);
 		}
 
-		throw new \InvalidArgumentException("Unknown size");
+		throw new InvalidArgumentException("Unknown size");
 	}
 
 	public function getHeight() : int{

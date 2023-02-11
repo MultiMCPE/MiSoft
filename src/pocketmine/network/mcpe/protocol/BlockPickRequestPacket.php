@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class BlockPickRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BLOCK_PICK_REQUEST_PACKET;
@@ -48,7 +50,7 @@ class BlockPickRequestPacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
 	        $this->addUserData = (($this->get(1) !== "\x00"));
 		}
-		$this->hotbarSlot = (\ord($this->get(1)));
+		$this->hotbarSlot = (ord($this->get(1)));
 	}
 
 	protected function encodePayload(){
@@ -56,7 +58,7 @@ class BlockPickRequestPacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
 	        ($this->buffer .= ($this->addUserData ? "\x01" : "\x00"));
 		}
-		($this->buffer .= \chr($this->hotbarSlot));
+		($this->buffer .= chr($this->hotbarSlot));
 	}
 
 	public function handle(NetworkSession $session) : bool{

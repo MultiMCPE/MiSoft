@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\StructureSettings;
+use function chr;
+use function ord;
 
 class StructureTemplateDataRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::STRUCTURE_TEMPLATE_DATA_REQUEST_PACKET;
@@ -51,14 +53,14 @@ class StructureTemplateDataRequestPacket extends DataPacket{
 		$this->structureTemplateName = $this->getString();
 		$this->getBlockPosition($this->structureBlockX, $this->structureBlockY, $this->structureBlockZ);
 		$this->structureSettings = $this->getStructureSettings();
-		$this->structureTemplateResponseType = (\ord($this->get(1)));
+		$this->structureTemplateResponseType = (ord($this->get(1)));
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->structureTemplateName);
 		$this->putBlockPosition($this->structureBlockX, $this->structureBlockY, $this->structureBlockZ);
 		$this->putStructureSettings($this->structureSettings);
-		($this->buffer .= \chr($this->structureTemplateResponseType));
+		($this->buffer .= chr($this->structureTemplateResponseType));
 	}
 
 	public function handle(NetworkSession $handler) : bool{

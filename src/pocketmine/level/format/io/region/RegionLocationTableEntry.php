@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io\region;
 
+use InvalidArgumentException;
 use function range;
 
 class RegionLocationTableEntry{
@@ -39,15 +40,15 @@ class RegionLocationTableEntry{
 	 * @param int $sectorCount
 	 * @param int $timestamp
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function __construct(int $firstSector, int $sectorCount, int $timestamp){
 		if($firstSector < 0){
-			throw new \InvalidArgumentException("Start sector must be positive, got $firstSector");
+			throw new InvalidArgumentException("Start sector must be positive, got $firstSector");
 		}
 		$this->firstSector = $firstSector;
 		if($sectorCount < 0 or $sectorCount > 255){
-			throw new \InvalidArgumentException("Sector count must be in range 0...255, got $sectorCount");
+			throw new InvalidArgumentException("Sector count must be in range 0...255, got $sectorCount");
 		}
 		$this->sectorCount = $sectorCount;
 		$this->timestamp = $timestamp;

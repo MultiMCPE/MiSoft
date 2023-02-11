@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
+use function pack;
 
 class ClientCacheBlobStatusPacket extends DataPacket/* implements ServerboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_CACHE_BLOB_STATUS_PACKET;
@@ -82,10 +83,10 @@ class ClientCacheBlobStatusPacket extends DataPacket/* implements ServerboundPac
 		$this->putUnsignedVarInt(count($this->hitHashes));
 		$this->putUnsignedVarInt(count($this->missHashes));
 		foreach($this->hitHashes as $hash){
-			($this->buffer .= (\pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+			($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
 		}
 		foreach($this->missHashes as $hash){
-			($this->buffer .= (\pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+			($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
 		}
 	}
 

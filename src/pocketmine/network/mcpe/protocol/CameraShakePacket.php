@@ -26,6 +26,10 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::CAMERA_SHAKE_PACKET;
@@ -63,20 +67,20 @@ class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
 	public function getShakeAction() : int{ return $this->shakeAction; }
 
 	protected function decodePayload() : void{
-		$this->intensity = ((\unpack("g", $this->get(4))[1]));
-		$this->duration = ((\unpack("g", $this->get(4))[1]));
-		$this->shakeType = (\ord($this->get(1)));
+		$this->intensity = ((unpack("g", $this->get(4))[1]));
+		$this->duration = ((unpack("g", $this->get(4))[1]));
+		$this->shakeType = (ord($this->get(1)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
-		    $this->shakeAction = (\ord($this->get(1)));
+		    $this->shakeAction = (ord($this->get(1)));
 		}
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("g", $this->intensity)));
-		($this->buffer .= (\pack("g", $this->duration)));
-		($this->buffer .= \chr($this->shakeType));
+		($this->buffer .= (pack("g", $this->intensity)));
+		($this->buffer .= (pack("g", $this->duration)));
+		($this->buffer .= chr($this->shakeType));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
-		    ($this->buffer .= \chr($this->shakeAction));
+		    ($this->buffer .= chr($this->shakeAction));
 		}
 	}
 

@@ -18,6 +18,7 @@ declare(strict_types=1);
 namespace raklib\protocol;
 
 use pocketmine\utils\Binary;
+use function pack;
 
 class ConnectedPong extends Packet{
 	public static $ID = MessageIdentifiers::ID_CONNECTED_PONG;
@@ -28,8 +29,8 @@ class ConnectedPong extends Packet{
 	public $sendPongTime;
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
-		($this->buffer .= (\pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
 	}
 
 	protected function decodePayload() : void{

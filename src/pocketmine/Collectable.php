@@ -23,7 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine;
 
-abstract class Collectable extends \Threaded{
+use Threaded;
+
+abstract class Collectable extends Threaded{
 
 	private $isGarbage = false;
 

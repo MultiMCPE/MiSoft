@@ -29,6 +29,8 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\resourcepacks\ResourcePack;
 use function count;
+use function pack;
+use function unpack;
 
 class ResourcePacksInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACKS_INFO_PACKET;
@@ -52,7 +54,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 	    	    $this->forceServerPacks = $this->getBool();
 	    	}
 		}
-		$behaviorPackCount = ((\unpack("v", $this->get(2))[1]));
+		$behaviorPackCount = ((unpack("v", $this->get(2))[1]));
 		while($behaviorPackCount-- > 0){
 			$this->getString();
 			$this->getString();
@@ -69,7 +71,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 			}
 		}
 
-		$resourcePackCount = ((\unpack("v", $this->get(2))[1]));
+		$resourcePackCount = ((unpack("v", $this->get(2))[1]));
 		while($resourcePackCount-- > 0){
 			$this->getString();
 			$this->getString();
@@ -98,11 +100,11 @@ class ResourcePacksInfoPacket extends DataPacket{
 	    	    $this->putBool($this->forceServerPacks);
 	    	}
 		}
-		($this->buffer .= (\pack("v", count($this->behaviorPackEntries))));
+		($this->buffer .= (pack("v", count($this->behaviorPackEntries))));
 		foreach($this->behaviorPackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
+			($this->buffer .= (pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
@@ -114,11 +116,11 @@ class ResourcePacksInfoPacket extends DataPacket{
 		    	}
 			}
 		}
-		($this->buffer .= (\pack("v", count($this->resourcePackEntries))));
+		($this->buffer .= (pack("v", count($this->resourcePackEntries))));
 		foreach($this->resourcePackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			($this->buffer .= (\pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
+			($this->buffer .= (pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
 			$this->putString(""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name

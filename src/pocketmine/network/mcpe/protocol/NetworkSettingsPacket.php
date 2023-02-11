@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::NETWORK_SETTINGS_PACKET;
@@ -47,11 +49,11 @@ class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 	}
 
 	protected function decodePayload() : void{
-		$this->compressionThreshold = ((\unpack("v", $this->get(2))[1]));
+		$this->compressionThreshold = ((unpack("v", $this->get(2))[1]));
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("v", $this->compressionThreshold)));
+		($this->buffer .= (pack("v", $this->compressionThreshold)));
 	}
 
 	public function handle(NetworkSession $handler) : bool{

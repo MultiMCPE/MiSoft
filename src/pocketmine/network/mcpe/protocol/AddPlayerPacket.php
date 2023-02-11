@@ -32,6 +32,8 @@ use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\utils\UUID;
 use function count;
+use function pack;
+use function unpack;
 
 class AddPlayerPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_PLAYER_PACKET;
@@ -96,9 +98,9 @@ class AddPlayerPacket extends DataPacket{
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->pitch = ((\unpack("g", $this->get(4))[1]));
-		$this->yaw = ((\unpack("g", $this->get(4))[1]));
-		$this->headYaw = ((\unpack("g", $this->get(4))[1]));
+		$this->pitch = ((unpack("g", $this->get(4))[1]));
+		$this->yaw = ((unpack("g", $this->get(4))[1]));
+		$this->headYaw = ((unpack("g", $this->get(4))[1]));
 		$this->item = $this->getSlot($this->getProtocol());
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 
@@ -122,7 +124,7 @@ class AddPlayerPacket extends DataPacket{
                 if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
 	            	$this->deviceId = $this->getString();
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	            	    $this->buildPlatform = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	            	    $this->buildPlatform = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	            	}
                 }
             }
@@ -143,9 +145,9 @@ class AddPlayerPacket extends DataPacket{
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-		($this->buffer .= (\pack("g", $this->pitch)));
-		($this->buffer .= (\pack("g", $this->yaw)));
-		($this->buffer .= (\pack("g", $this->headYaw ?? $this->yaw)));
+		($this->buffer .= (pack("g", $this->pitch)));
+		($this->buffer .= (pack("g", $this->yaw)));
+		($this->buffer .= (pack("g", $this->headYaw ?? $this->yaw)));
 		$this->putSlot($this->item, $this->getProtocol());
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 
@@ -158,7 +160,7 @@ class AddPlayerPacket extends DataPacket{
 	        	$this->putUnsignedVarInt($this->uvarint5);
 	    	}
 
-	    	($this->buffer .= (\pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
+	    	($this->buffer .= (pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
 	        	$this->putUnsignedVarInt(count($this->links));
@@ -169,7 +171,7 @@ class AddPlayerPacket extends DataPacket{
                 if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
 	            	$this->putString($this->deviceId);
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	            	    ($this->buffer .= (\pack("V", $this->buildPlatform)));
+	            	    ($this->buffer .= (pack("V", $this->buildPlatform)));
 	            	}
                 }
             }

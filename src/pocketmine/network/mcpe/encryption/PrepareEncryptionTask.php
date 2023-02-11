@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\encryption;
 
+use Closure;
+use InvalidArgumentException;
+use JsonException;
 use pocketmine\network\mcpe\JwtUtils;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use RuntimeException;
 use function igbinary_serialize;
 use function igbinary_unserialize;
 use function openssl_error_string;
@@ -33,14 +37,14 @@ class PrepareEncryptionTask extends AsyncTask{
 	private $serverTokenRandom;
 
 	/**
-	 * @phpstan-param \Closure(string $encryptionKey, string $handshakeJwt) : void $onCompletion
+	 * @phpstan-param Closure(string $encryptionKey, string $handshakeJwt) : void $onCompletion
 	 */
-	public function __construct(string $clientPub, \Closure $onCompletion){
+	public function __construct(string $clientPub, Closure $onCompletion){
 		if(self::$SERVER_PRIVATE_KEY === null){
 			$serverPrivateKey = openssl_pkey_new(["ec" => ["curve_name" => "secp384r1"]]);
 
 			if($serverPrivateKey === false){
-				throw new \RuntimeException("openssl_pkey_new() failed: " . openssl_error_string());
+				throw new RuntimeException("openssl_pkey_new() failed: " . openssl_error_string());
 			}
 			self::$SERVER_PRIVATE_KEY = $serverPrivateKey;
 		}
@@ -52,14 +56,14 @@ class PrepareEncryptionTask extends AsyncTask{
 	}
 
 	/**
-	 * @throws \JsonException
+	 * @throws JsonException
 	 */
 	public function onRun() : void{
 		/** @var mixed[] $serverPrivDetails */
 		$serverPrivDetails = igbinary_unserialize($this->serverPrivateKey);
 		$serverPriv = openssl_pkey_new($serverPrivDetails);
 
-		if($serverPriv === false) throw new  \InvalidArgumentException("Failed to restore server signing key from details");
+		if($serverPriv === false) throw new  InvalidArgumentException("Failed to restore server signing key from details");
 
 		$clientPub = JwtUtils::parseDerPublicKey($this->clientPub);
 		$sharedSecret = EncryptionUtils::generateSharedSecret($serverPriv, $clientPub);
@@ -80,12 +84,12 @@ class PrepareEncryptionTask extends AsyncTask{
 
 	public function onCompletion(Server $server) : void{
 		/**
-		 * @var \Closure $callback
-		 * @phpstan-var \Closure(string $encryptionKey, string $handshakeJwt) : void $callback
+		 * @var Closure $callback
+		 * @phpstan-var Closure(string $encryptionKey, string $handshakeJwt) : void $callback
 		 */
 		$callback = $this->fetchLocal();
 		if($this->aesKey === null || $this->handshakeJwt === null){
-			throw new  \InvalidArgumentException("Something strange happened here ...");
+			throw new  InvalidArgumentException("Something strange happened here ...");
 		}
 		$callback($this->aesKey, $this->handshakeJwt, $this->serverPublickey, $this->serverTokenRandom);
 	}

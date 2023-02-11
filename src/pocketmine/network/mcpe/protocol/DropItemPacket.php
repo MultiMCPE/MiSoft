@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class DropItemPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::DROP_ITEM_PACKET;
@@ -34,12 +36,12 @@ class DropItemPacket extends DataPacket{
 	public $item;
 
 	public function decodePayload(){
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		$this->item = $this->getSlot($this->getProtocol());
 	}
 
 	public function encodePayload(){
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->type));
 		$this->putSlot($this->item, $this->getProtocol());
 	}
 

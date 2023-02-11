@@ -23,11 +23,15 @@ declare(strict_types=1);
 
 namespace pocketmine;
 
+use Logger;
 use pocketmine\event\server\LowMemoryEvent;
 use pocketmine\scheduler\DumpWorkerMemoryTask;
 use pocketmine\scheduler\GarbageCollectionTask;
 use pocketmine\timings\Timings;
 use pocketmine\utils\Utils;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionObject;
 use function arsort;
 use function count;
 use function fclose;
@@ -317,11 +321,11 @@ class MemoryManager{
 	 * @param string  $outputFolder
 	 * @param int     $maxNesting
 	 * @param int     $maxStringSize
-	 * @param \Logger $logger
+	 * @param Logger $logger
 	 *
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
-	public static function dumpMemory($startingObject, string $outputFolder, int $maxNesting, int $maxStringSize, \Logger $logger){
+	public static function dumpMemory($startingObject, string $outputFolder, int $maxNesting, int $maxStringSize, Logger $logger){
 		$hardLimit = ini_get('memory_limit');
 		ini_set('memory_limit', '-1');
 		gc_disable();
@@ -344,7 +348,7 @@ class MemoryManager{
 		$staticCount = 0;
 
 		foreach(get_declared_classes() as $className){
-			$reflection = new \ReflectionClass($className);
+			$reflection = new ReflectionClass($className);
 			$staticProperties[$className] = [];
 			foreach($reflection->getProperties() as $property){
 				if(!$property->isStatic() or $property->getDeclaringClass()->getName() !== $className){
@@ -415,7 +419,7 @@ class MemoryManager{
 
 				$objects[$hash] = true;
 
-				$reflection = new \ReflectionObject($object);
+				$reflection = new ReflectionObject($object);
 
 				$info = [
 					"information" => "$hash@$className",

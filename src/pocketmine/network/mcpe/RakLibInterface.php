@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
+use Exception;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\network\mcpe\protocol\BatchPacket;
@@ -40,6 +41,7 @@ use raklib\server\RakLibServer;
 use raklib\server\ServerHandler;
 use raklib\server\ServerInstance;
 use raklib\utils\InternetAddress;
+use Throwable;
 use function addcslashes;
 use function base64_encode;
 use function get_class;
@@ -47,6 +49,7 @@ use function implode;
 use function rtrim;
 use function spl_object_hash;
 use function unserialize;
+use const pocketmine\COMPOSER_AUTOLOADER_PATH;
 use const PTHREADS_INHERIT_CONSTANTS;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
@@ -87,7 +90,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->sleeper = new SleeperNotifier();
 		$this->rakLib = new RakLibServer(
 			$this->server->getLogger(),
-			\pocketmine\COMPOSER_AUTOLOADER_PATH,
+			COMPOSER_AUTOLOADER_PATH,
 			new InternetAddress($this->server->getIp(), $this->server->getPort(), 4),
 			(int) $this->server->getProperty("network.max-mtu-size", 1492),
 			self::MCPE_RAKNET_PROTOCOL_VERSION,
@@ -111,7 +114,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		while($this->interface->handlePacket()){}
 
 		if(!$this->rakLib->isRunning() and !$this->rakLib->isShutdown()){
-			throw new \Exception("RakLib Thread crashed");
+			throw new Exception("RakLib Thread crashed");
 		}
 	}
 
@@ -181,7 +184,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				    $pk->setProtocol($player->getProtocol());
 					$player->handleDataPacket($pk);
 				}
-			}catch(\Throwable $e){
+			}catch(Throwable $e){
 				$logger = $this->server->getLogger();
 				$logger->debug("Packet " . (isset($pk) ? get_class($pk) : "unknown") . ": " . base64_encode($packet->buffer));
 				$logger->logException($e);

@@ -27,11 +27,13 @@ declare(strict_types=1);
  */
 namespace pocketmine\network\rcon;
 
+use InvalidArgumentException;
 use pocketmine\command\RemoteConsoleCommandSender;
 use pocketmine\event\server\RemoteServerCommandEvent;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\utils\TextFormat;
+use RuntimeException;
 use function max;
 use function socket_bind;
 use function socket_close;
@@ -69,13 +71,13 @@ class RCON{
 		$this->server = $server;
 		$this->server->getLogger()->info("Starting remote control listener");
 		if($password === ""){
-			throw new \InvalidArgumentException("Empty password");
+			throw new InvalidArgumentException("Empty password");
 		}
 
 		$this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
 		if($this->socket === false or !@socket_bind($this->socket, $interface, $port) or !@socket_listen($this->socket, 5)){
-			throw new \RuntimeException(trim(socket_strerror(socket_last_error())));
+			throw new RuntimeException(trim(socket_strerror(socket_last_error())));
 		}
 
 		socket_set_block($this->socket);
@@ -84,7 +86,7 @@ class RCON{
 		if(!$ret){
 			$err = socket_last_error();
 			if(($err !== SOCKET_EPROTONOSUPPORT and $err !== SOCKET_ENOPROTOOPT) or !@socket_create_pair(AF_INET, SOCK_STREAM, 0, $ipc)){
-				throw new \RuntimeException(trim(socket_strerror(socket_last_error())));
+				throw new RuntimeException(trim(socket_strerror(socket_last_error())));
 			}
 		}
 

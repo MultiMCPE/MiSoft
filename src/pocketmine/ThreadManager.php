@@ -24,29 +24,35 @@ declare(strict_types=1);
 namespace pocketmine;
 
 use pocketmine\utils\MainLogger;
+use ThreadException;
+use Volatile;
 use function spl_object_hash;
 
-class ThreadManager extends \Volatile{
+class ThreadManager extends Volatile
+{
 
 	/** @var ThreadManager */
 	private static $instance = null;
 
-	public static function init(){
+	public static function init()
+	{
 		self::$instance = new ThreadManager();
 	}
 
 	/**
 	 * @return ThreadManager
 	 */
-	public static function getInstance(){
+	public static function getInstance()
+	{
 		return self::$instance;
 	}
 
 	/**
 	 * @param Worker|Thread $thread
 	 */
-	public function add($thread){
-		if($thread instanceof Thread or $thread instanceof Worker){
+	public function add($thread)
+	{
+		if ($thread instanceof Thread or $thread instanceof Worker) {
 			$this->{spl_object_hash($thread)} = $thread;
 		}
 	}
@@ -54,8 +60,9 @@ class ThreadManager extends \Volatile{
 	/**
 	 * @param Worker|Thread $thread
 	 */
-	public function remove($thread){
-		if($thread instanceof Thread or $thread instanceof Worker){
+	public function remove($thread)
+	{
+		if ($thread instanceof Thread or $thread instanceof Worker) {
 			unset($this->{spl_object_hash($thread)});
 		}
 	}
@@ -63,26 +70,28 @@ class ThreadManager extends \Volatile{
 	/**
 	 * @return Worker[]|Thread[]
 	 */
-	public function getAll() : array{
+	public function getAll(): array
+	{
 		$array = [];
-		foreach($this as $key => $thread){
+		foreach ($this as $key => $thread) {
 			$array[$key] = $thread;
 		}
 
 		return $array;
 	}
 
-	public function stopAll() : int{
+	public function stopAll(): int
+	{
 		$logger = MainLogger::getLogger();
 
 		$erroredThreads = 0;
 
-		foreach($this->getAll() as $thread){
+		foreach ($this->getAll() as $thread) {
 			$logger->debug("Stopping " . $thread->getThreadName() . " thread");
-			try{
+			try {
 				$thread->quit();
 				$logger->debug($thread->getThreadName() . " thread stopped successfully.");
-			}catch(\ThreadException $e){
+			} catch (ThreadException $e) {
 				++$erroredThreads;
 				$logger->debug("Could not stop " . $thread->getThreadName() . " thread: " . $e->getMessage());
 			}

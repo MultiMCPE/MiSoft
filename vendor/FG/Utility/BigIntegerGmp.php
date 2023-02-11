@@ -8,6 +8,10 @@
 
 namespace FG\Utility;
 
+use GMP;
+use OverflowException;
+use UnexpectedValueException;
+
 /**
  * Class BigIntegerGmp
  * Integer representation of big numbers using the GMP extension to perform operations.
@@ -18,7 +22,7 @@ class BigIntegerGmp extends BigInteger
 {
     /**
      * Resource handle.
-     * @var \GMP
+     * @var GMP
      */
     protected $_rh;
 
@@ -45,7 +49,7 @@ class BigIntegerGmp extends BigInteger
     public function toInteger()
     {
         if ($this->compare(PHP_INT_MAX) > 0 || $this->compare(PHP_INT_MIN) < 0) {
-            throw new \OverflowException(sprintf('Can not represent %s as integer.', $this));
+            throw new OverflowException(sprintf('Can not represent %s as integer.', $this));
         }
         return gmp_intval($this->_rh);
     }
@@ -101,7 +105,7 @@ class BigIntegerGmp extends BigInteger
         if ($b instanceof self) {
             // gmp_pow accepts just an integer
             if ($b->compare(PHP_INT_MAX) > 0) {
-                throw new \UnexpectedValueException('Unable to raise to power greater than PHP_INT_MAX.');
+                throw new UnexpectedValueException('Unable to raise to power greater than PHP_INT_MAX.');
             }
             $b = gmp_intval($b->_rh);
         }

@@ -8,6 +8,11 @@
 
 namespace FG\Utility;
 
+use InvalidArgumentException;
+use OverflowException;
+use RuntimeException;
+use UnexpectedValueException;
+
 /**
  * Class BigInteger
  * Utility class to remove dependence on a single large number library. Not intended for external use, this class only
@@ -35,7 +40,7 @@ abstract class BigInteger
      * Create a BigInteger instance based off the base 10 string or an integer.
      * @param string|int $val
      * @return BigInteger
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function create($val)
     {
@@ -48,7 +53,7 @@ abstract class BigInteger
                     $ret = new BigIntegerBcmath();
                     break;
                 default:
-                    throw new \UnexpectedValueException('Unknown number implementation: ' . self::$_prefer);
+                    throw new UnexpectedValueException('Unknown number implementation: ' . self::$_prefer);
             }
         }
         else {
@@ -59,7 +64,7 @@ abstract class BigInteger
             elseif (function_exists('bcadd')) {
                 $ret = new BigIntegerBcmath();
             } else {
-                throw new \RuntimeException('Requires GMP or bcmath extension.');
+                throw new RuntimeException('Requires GMP or bcmath extension.');
             }
         }
 
@@ -72,7 +77,7 @@ abstract class BigInteger
 
             // validate string
             if (!preg_match('/^-?[0-9]+$/', $val)) {
-                throw new \InvalidArgumentException('Expects a string representation of an integer.');
+                throw new InvalidArgumentException('Expects a string representation of an integer.');
             }
             $ret->_fromString($val);
         }
@@ -118,7 +123,7 @@ abstract class BigInteger
     /**
      * Return integer, if possible. Throws an exception if the number can not be represented as a native integer.
      * @return int
-     * @throws \OverflowException
+     * @throws OverflowException
      */
     abstract public function toInteger();
 

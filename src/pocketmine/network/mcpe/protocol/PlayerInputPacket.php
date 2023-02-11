@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class PlayerInputPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_INPUT_PACKET;
@@ -41,15 +43,15 @@ class PlayerInputPacket extends DataPacket{
 	public $sneaking;
 
 	protected function decodePayload(){
-		$this->motionX = ((\unpack("g", $this->get(4))[1]));
-		$this->motionY = ((\unpack("g", $this->get(4))[1]));
+		$this->motionX = ((unpack("g", $this->get(4))[1]));
+		$this->motionY = ((unpack("g", $this->get(4))[1]));
 		$this->jumping = (($this->get(1) !== "\x00"));
 		$this->sneaking = (($this->get(1) !== "\x00"));
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (\pack("g", $this->motionX)));
-		($this->buffer .= (\pack("g", $this->motionY)));
+		($this->buffer .= (pack("g", $this->motionX)));
+		($this->buffer .= (pack("g", $this->motionY)));
 		($this->buffer .= ($this->jumping ? "\x01" : "\x00"));
 		($this->buffer .= ($this->sneaking ? "\x01" : "\x00"));
 	}

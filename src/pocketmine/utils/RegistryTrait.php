@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use ArgumentCountError;
+use Error;
+use InvalidArgumentException;
 use function array_map;
 use function count;
 use function mb_strtoupper;
@@ -44,20 +47,20 @@ trait RegistryTrait{
 
 	private static function verifyName(string $name) : void{
 		if(preg_match('/^(?!\d)[A-Za-z\d_]+$/u', $name) === 0){
-			throw new \InvalidArgumentException("Invalid member name \"$name\", should only contain letters, numbers and underscores, and must not start with a number");
+			throw new InvalidArgumentException("Invalid member name \"$name\", should only contain letters, numbers and underscores, and must not start with a number");
 		}
 	}
 
 	/**
 	 * Adds the given object to the registry.
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	private static function _registryRegister(string $name, object $member) : void{
 		self::verifyName($name);
 		$upperName = mb_strtoupper($name);
 		if(isset(self::$members[$upperName])){
-			throw new \InvalidArgumentException("\"$upperName\" is already reserved");
+			throw new InvalidArgumentException("\"$upperName\" is already reserved");
 		}
 		self::$members[$upperName] = $member;
 	}
@@ -72,7 +75,7 @@ trait RegistryTrait{
 	/**
 	 * @internal Lazy-inits the enum if necessary.
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	protected static function checkInit() : void{
 		if(self::$members === null){
@@ -82,13 +85,13 @@ trait RegistryTrait{
 	}
 
 	/**
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	private static function _registryFromString(string $name) : object{
 		self::checkInit();
 		$upperName = mb_strtoupper($name);
 		if(!isset(self::$members[$upperName])){
-			throw new \InvalidArgumentException("No such registry member: " . self::class . "::" . $upperName);
+			throw new InvalidArgumentException("No such registry member: " . self::class . "::" . $upperName);
 		}
 		return self::preprocessMember(self::$members[$upperName]);
 	}
@@ -106,12 +109,12 @@ trait RegistryTrait{
 	 */
 	public static function __callStatic($name, $arguments){
 		if(count($arguments) > 0){
-			throw new \ArgumentCountError("Expected exactly 0 arguments, " . count($arguments) . " passed");
+			throw new ArgumentCountError("Expected exactly 0 arguments, " . count($arguments) . " passed");
 		}
 		try{
 			return self::_registryFromString($name);
-		}catch(\InvalidArgumentException $e){
-			throw new \Error($e->getMessage(), 0, $e);
+		}catch(InvalidArgumentException $e){
+			throw new Error($e->getMessage(), 0, $e);
 		}
 	}
 

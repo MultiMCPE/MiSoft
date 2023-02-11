@@ -36,7 +36,9 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\PotionContainerChangeRecipe;
 use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
+use UnexpectedValueException;
 use function count;
+use function pack;
 use function str_repeat;
 
 class CraftingDataPacket extends DataPacket{
@@ -185,7 +187,7 @@ class CraftingDataPacket extends DataPacket{
 					}
 					break;
 				default:
-					throw new \UnexpectedValueException("Unhandled recipe type $recipeType!"); //do not continue attempting to decode
+					throw new UnexpectedValueException("Unhandled recipe type $recipeType!"); //do not continue attempting to decode
 			}
 			$this->decodedEntries[] = $entry;
 		}
@@ -242,7 +244,7 @@ class CraftingDataPacket extends DataPacket{
 
 	private static function writeShapelessRecipe(ShapelessRecipe $recipe, NetworkBinaryStream $stream, int $pos, int $playerProtocol){
 	    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-	    	$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	    	$stream->putString((pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
 	    }
 		$stream->putUnsignedVarInt($recipe->getIngredientCount());
 		foreach($recipe->getIngredientList() as $item){
@@ -275,7 +277,7 @@ class CraftingDataPacket extends DataPacket{
 
 	private static function writeShapedRecipe(ShapedRecipe $recipe, NetworkBinaryStream $stream, int $pos, int $playerProtocol){
 	    if ($playerProtocol >= ProtocolInfo::PROTOCOL_360) {
-	    	$stream->putString((\pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
+	    	$stream->putString((pack("N", $pos))); //some kind of recipe ID, doesn't matter what it is as long as it's unique
 	    }
 		$stream->putVarInt($recipe->getWidth());
 		$stream->putVarInt($recipe->getHeight());

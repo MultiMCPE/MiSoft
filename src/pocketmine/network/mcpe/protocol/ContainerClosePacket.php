@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class ContainerClosePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_CLOSE_PACKET;
@@ -37,14 +39,14 @@ class ContainerClosePacket extends DataPacket{
 	public $server = false;
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 		    $this->server = (($this->get(1) !== "\x00"));
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
+		($this->buffer .= chr($this->windowId));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 		    ($this->buffer .= ($this->server ? "\x01" : "\x00"));
 		}

@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
 
 class TickSyncPacket extends DataPacket/* implements ClientboundPacket, ServerboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::TICK_SYNC_PACKET;
@@ -63,8 +64,8 @@ class TickSyncPacket extends DataPacket/* implements ClientboundPacket, Serverbo
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("VV", $this->clientSendTime & 0xFFFFFFFF, $this->clientSendTime >> 32)));
-		($this->buffer .= (\pack("VV", $this->serverReceiveTime & 0xFFFFFFFF, $this->serverReceiveTime >> 32)));
+		($this->buffer .= (pack("VV", $this->clientSendTime & 0xFFFFFFFF, $this->clientSendTime >> 32)));
+		($this->buffer .= (pack("VV", $this->serverReceiveTime & 0xFFFFFFFF, $this->serverReceiveTime >> 32)));
 	}
 
 	public function handle(NetworkSession $handler) : bool{

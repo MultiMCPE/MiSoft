@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use ReflectionClass;
 
 abstract class CommandEnums{
     private static $commandArgTypes = [
@@ -138,7 +139,7 @@ abstract class CommandEnums{
      * @return int
      */
 	public static function getCommandArgType(int $argTypeInt, int $playerProtocol) : int{
-	    $commandsArgs = (new \ReflectionClass('pocketmine\network\mcpe\protocol\AvailableCommandsPacket'))->getConstants();
+	    $commandsArgs = (new ReflectionClass('pocketmine\network\mcpe\protocol\AvailableCommandsPacket'))->getConstants();
 	    foreach(self::$commandArgTypes as $protocol => $types){
 	        if($playerProtocol >= $protocol){
 	            foreach($commandsArgs as $stringArg => $intArg){

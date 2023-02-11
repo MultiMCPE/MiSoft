@@ -29,6 +29,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
+use function chr;
+use function ord;
 
 class UpdateTradePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_TRADE_PACKET;
@@ -59,8 +61,8 @@ class UpdateTradePacket extends DataPacket{
 	public $offers;
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
-		$this->windowType = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
+		$this->windowType = (ord($this->get(1)));
 		$this->thisIsAlwaysZero = $this->getVarInt();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
 		    $this->uvarint = $this->getVarInt();
@@ -82,8 +84,8 @@ class UpdateTradePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
-		($this->buffer .= \chr($this->windowType));
+		($this->buffer .= chr($this->windowId));
+		($this->buffer .= chr($this->windowType));
 		$this->putVarInt($this->thisIsAlwaysZero);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
 		    $this->putVarInt($this->uvarint);

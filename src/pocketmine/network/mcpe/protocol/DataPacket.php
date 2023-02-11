@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use Error;
+use InvalidArgumentException;
+use OutOfBoundsException;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\CachedEncapsulatedPacket;
@@ -32,11 +35,15 @@ use pocketmine\network\mcpe\multiversion\BlockPallet;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\utils\Utils;
 use pocketmine\block\BlockIds;
+use ReflectionClass;
+use UnexpectedValueException;
 use function bin2hex;
+use function chr;
 use function get_class;
 use function is_object;
 use function is_string;
 use function method_exists;
+use function ord;
 
 abstract class DataPacket extends NetworkBinaryStream{
 
@@ -67,7 +74,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	public function getName() : string{
-		return (new \ReflectionClass($this))->getShortName();
+		return (new ReflectionClass($this))->getShortName();
 	}
 
 	public function setProtocol(int $protocol) : void{
@@ -80,7 +87,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 
     public function checkProtocol() : void{
         if ($this->packetProtocol === null) {
-            throw new \InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
+            throw new InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
         }
     }
 
@@ -101,8 +108,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	/**
-	 * @throws \OutOfBoundsException
-	 * @throws \UnexpectedValueException
+	 * @throws OutOfBoundsException
+	 * @throws UnexpectedValueException
 	 */
 	public function decode(){
 		$this->rewind();
@@ -112,15 +119,15 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	/**
-	 * @throws \OutOfBoundsException
-	 * @throws \UnexpectedValueException
+	 * @throws OutOfBoundsException
+	 * @throws UnexpectedValueException
 	 */
 	protected function decodeHeader(){
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
-            (\ord($this->get(1)));
+            (ord($this->get(1)));
             if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
-                $this->senderSubId = (\ord($this->get(1)));
-                $this->recipientSubId = (\ord($this->get(1)));
+                $this->senderSubId = (ord($this->get(1)));
+                $this->recipientSubId = (ord($this->get(1)));
                 if ($this->senderSubId > 0x4 || $this->recipientSubId > 0x4) {
                     throw new BinaryDataException(($this) . ": Packet decode headers error");
                 }
@@ -135,8 +142,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	/**
 	 * Note for plugin developers: If you're adding your own packets, you should perform decoding in here.
 	 *
-	 * @throws \OutOfBoundsException
-	 * @throws \UnexpectedValueException
+	 * @throws OutOfBoundsException
+	 * @throws UnexpectedValueException
 	 */
 	protected function decodePayload(){
 
@@ -153,10 +160,10 @@ abstract class DataPacket extends NetworkBinaryStream{
 	protected function encodeHeader(){
 	    $pid = PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
         if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
-            ($this->buffer .= \chr($pid));
+            ($this->buffer .= chr($pid));
             if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
-                ($this->buffer .= \chr($this->senderSubId));
-                ($this->buffer .= \chr($this->recipientSubId));
+                ($this->buffer .= chr($this->senderSubId));
+                ($this->buffer .= chr($this->recipientSubId));
             }
         } else {
             $this->putUnsignedVarInt($pid | ($this->senderSubId << self::SENDER_SUBCLIENT_ID_SHIFT) | ($this->recipientSubId << self::RECIPIENT_SUBCLIENT_ID_SHIFT));
@@ -205,11 +212,11 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	public function __get($name){
-		throw new \Error("Undefined property: " . get_class($this) . "::\$" . $name);
+		throw new Error("Undefined property: " . get_class($this) . "::\$" . $name);
 	}
 
 	public function __set($name, $value){
-		throw new \Error("Undefined property: " . get_class($this) . "::\$" . $name);
+		throw new Error("Undefined property: " . get_class($this) . "::\$" . $name);
 	}
 
     /**

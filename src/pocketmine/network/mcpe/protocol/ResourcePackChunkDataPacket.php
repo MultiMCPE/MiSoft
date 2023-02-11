@@ -28,7 +28,9 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
 use function strlen;
+use function unpack;
 
 class ResourcePackChunkDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CHUNK_DATA_PACKET;
@@ -44,23 +46,23 @@ class ResourcePackChunkDataPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->packId = $this->getString();
-		$this->chunkIndex = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->chunkIndex = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		$this->progress = (Binary::readLLong($this->get(8)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    $this->data = $this->getString();
 		}else{
-	    	$this->data = $this->get(((\unpack("V", $this->get(4))[1] << 32 >> 32)));
+	    	$this->data = $this->get(((unpack("V", $this->get(4))[1] << 32 >> 32)));
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->packId);
-		($this->buffer .= (\pack("V", $this->chunkIndex)));
-		($this->buffer .= (\pack("VV", $this->progress & 0xFFFFFFFF, $this->progress >> 32)));
+		($this->buffer .= (pack("V", $this->chunkIndex)));
+		($this->buffer .= (pack("VV", $this->progress & 0xFFFFFFFF, $this->progress >> 32)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    $this->putString($this->data);
 		}else{
-	    	($this->buffer .= (\pack("V", strlen($this->data))));
+	    	($this->buffer .= (pack("V", strlen($this->data))));
 	    	($this->buffer .= $this->data);
 		}
 	}

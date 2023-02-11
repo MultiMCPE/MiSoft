@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class ContainerSetSlotPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::CONTAINER_SET_SLOT_PACKET;
@@ -37,19 +39,19 @@ class ContainerSetSlotPacket extends DataPacket{
 	public $selectSlot = 0;
 
 	public function decodePayload(){
-		$this->windowid = (\ord($this->get(1)));
+		$this->windowid = (ord($this->get(1)));
 		$this->slot = $this->getVarInt();
 		$this->hotbarSlot = $this->getVarInt();
 		$this->item = $this->getSlot($this->getProtocol());
-		$this->selectSlot = (\ord($this->get(1)));
+		$this->selectSlot = (ord($this->get(1)));
 	}
 
 	public function encodePayload(){
-		($this->buffer .= \chr($this->windowid));
+		($this->buffer .= chr($this->windowid));
 		$this->putVarInt($this->slot);
 		$this->putVarInt($this->hotbarSlot);
 		$this->putSlot($this->item, $this->getProtocol());
-		($this->buffer .= \chr($this->selectSlot));
+		($this->buffer .= chr($this->selectSlot));
 	}
 
 	public function handle(NetworkSession $session) : bool{

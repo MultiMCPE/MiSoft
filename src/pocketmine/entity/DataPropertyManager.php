@@ -25,6 +25,7 @@ namespace pocketmine\entity;
 
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use RuntimeException;
 use function assert;
 use function is_float;
 use function is_int;
@@ -252,7 +253,7 @@ class DataPropertyManager{
 
 	private function checkType(int $key, int $type) : void{
 		if(isset($this->properties[$key]) and $this->properties[$key][0] !== $type){
-			throw new \RuntimeException("Expected type $type, but have " . $this->properties[$key][0]);
+			throw new RuntimeException("Expected type $type, but have " . $this->properties[$key][0]);
 		}
 	}
 

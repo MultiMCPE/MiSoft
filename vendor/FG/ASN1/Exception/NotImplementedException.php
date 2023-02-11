@@ -10,6 +10,8 @@
 
 namespace FG\ASN1\Exception;
 
-class NotImplementedException extends \Exception
+use Exception;
+
+class NotImplementedException extends Exception
 {
 }

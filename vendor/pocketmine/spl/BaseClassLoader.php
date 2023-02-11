@@ -15,9 +15,9 @@
  * GNU General Public License for more details.
 */
 
-class BaseClassLoader extends \Threaded implements ClassLoader{
+class BaseClassLoader extends Threaded implements ClassLoader{
 
-	/** @var \ClassLoader */
+	/** @var ClassLoader */
 	private $parent;
 	/** @var string[] */
 	private $lookup;
@@ -30,8 +30,8 @@ class BaseClassLoader extends \Threaded implements ClassLoader{
 	 */
 	public function __construct(ClassLoader $parent = null){
 		$this->parent = $parent;
-		$this->lookup = new \Threaded;
-		$this->classes = new \Threaded;
+		$this->lookup = new Threaded;
+		$this->classes = new Threaded;
 	}
 
 	/**

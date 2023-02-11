@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use BadMethodCallException;
+use InvalidStateException;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use function max;
@@ -62,7 +64,7 @@ class CraftingGrid extends BaseInventory{
 	}
 
 	public function setSize(int $size){
-		throw new \BadMethodCallException("Cannot change the size of a crafting grid");
+		throw new BadMethodCallException("Cannot change the size of a crafting grid");
 	}
 
 	public function getName() : string{
@@ -140,7 +142,7 @@ class CraftingGrid extends BaseInventory{
 			return $this->getItem(($y + $this->startY) * $this->gridWidth + ($x + $this->startX));
 		}
 
-		throw new \InvalidStateException("No ingredients found in grid");
+		throw new InvalidStateException("No ingredients found in grid");
 	}
 
 	/**

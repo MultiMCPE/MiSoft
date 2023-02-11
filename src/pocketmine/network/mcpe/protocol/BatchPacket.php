@@ -23,13 +23,19 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use ErrorException;
+use Generator;
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use UnexpectedValueException;
 use function assert;
+use function chr;
 use function get_class;
+use function ord;
 use function strlen;
 use function zlib_decode;
 use function zlib_encode;
@@ -52,7 +58,7 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function decodeHeader(){
-		$pid = (\ord($this->get(1)));
+		$pid = (ord($this->get(1)));
 		assert($pid === static::NETWORK_ID);
 	}
 
@@ -62,7 +68,7 @@ class BatchPacket extends DataPacket{
 		//if($data[0] === "\170"){
 	    	try{
 		    	$this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
-	    	}catch(\ErrorException $e){ //zlib decode error
+	    	}catch(ErrorException $e){ //zlib decode error
 		    	$this->payload = "";
 	    	}
 		/*}else{
@@ -71,7 +77,7 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function encodeHeader(){
-		($this->buffer .= \chr(static::NETWORK_ID));
+		($this->buffer .= chr(static::NETWORK_ID));
 	}
 
 	protected function encodePayload(){
@@ -88,7 +94,7 @@ class BatchPacket extends DataPacket{
 	 */
 	public function addPacket(DataPacket $packet){
 		if(!$packet->canBeBatched()){
-			throw new \InvalidArgumentException(get_class($packet) . " cannot be put inside a BatchPacket");
+			throw new InvalidArgumentException(get_class($packet) . " cannot be put inside a BatchPacket");
 		}
 		if(!$packet->isEncoded){
 			$packet->encode();
@@ -98,14 +104,14 @@ class BatchPacket extends DataPacket{
 	}
 
 	/**
-	 * @return \Generator
+	 * @return Generator
 	 */
 	public function getPackets(){
 		$stream = new NetworkBinaryStream($this->payload);
 		$count = 0;
 		while(!$stream->feof()){
 			if($count++ >= 500){
-				throw new \UnexpectedValueException("Too many packets in a single batch");
+				throw new UnexpectedValueException("Too many packets in a single batch");
 			}
 			yield $stream->getString();
 		}
@@ -129,7 +135,7 @@ class BatchPacket extends DataPacket{
             $pk->setProtocol($session->getProtocol());
 
 			if(!$pk->canBeBatched()){
-				throw new \UnexpectedValueException("Received invalid " . get_class($pk) . " inside BatchPacket");
+				throw new UnexpectedValueException("Received invalid " . get_class($pk) . " inside BatchPacket");
 			}
 
 			$session->handleDataPacket($pk);

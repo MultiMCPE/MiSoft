@@ -26,6 +26,9 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
 
 class ActorPickRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ACTOR_PICK_REQUEST_PACKET;
@@ -39,15 +42,15 @@ class ActorPickRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
-		$this->hotbarSlot = (\ord($this->get(1)));
+		$this->hotbarSlot = (ord($this->get(1)));
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
             $this->addUserData = $this->getBool();
         }
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
-		($this->buffer .= \chr($this->hotbarSlot));
+		($this->buffer .= (pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
+		($this->buffer .= chr($this->hotbarSlot));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
 			($this->buffer .= $this->addUserData);
 		}

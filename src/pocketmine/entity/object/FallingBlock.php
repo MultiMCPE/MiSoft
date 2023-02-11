@@ -37,6 +37,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
+use UnexpectedValueException;
 use function abs;
 use function floor;
 use function get_class;
@@ -71,7 +72,7 @@ class FallingBlock extends Entity{
 		}
 
 		if($blockId === 0){
-			throw new \UnexpectedValueException("Invalid " . get_class($this) . " entity: block ID is 0 or missing");
+			throw new UnexpectedValueException("Invalid " . get_class($this) . " entity: block ID is 0 or missing");
 		}
 
 		$damage = $this->namedtag->getByte("Data", 0);

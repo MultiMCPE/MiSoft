@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class PlayStatusPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAY_STATUS_PACKET;
@@ -44,7 +46,7 @@ class PlayStatusPacket extends DataPacket{
 	public $status;
 
 	protected function decodePayload(){
-		$this->status = ((\unpack("N", $this->get(4))[1] << 32 >> 32));
+		$this->status = ((unpack("N", $this->get(4))[1] << 32 >> 32));
 	}
 
 	public function canBeSentBeforeLogin() : bool{
@@ -52,7 +54,7 @@ class PlayStatusPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (\pack("N", $this->status)));
+		($this->buffer .= (pack("N", $this->status)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

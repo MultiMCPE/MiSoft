@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class UpdateEquipPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_EQUIP_PACKET;
@@ -42,16 +44,16 @@ class UpdateEquipPacket extends DataPacket{
 	public $namedtag;
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
-		$this->windowType = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
+		$this->windowType = (ord($this->get(1)));
 		$this->unknownVarint = $this->getVarInt();
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->namedtag = $this->getRemaining();
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
-		($this->buffer .= \chr($this->windowType));
+		($this->buffer .= chr($this->windowId));
+		($this->buffer .= chr($this->windowType));
 		$this->putVarInt($this->unknownVarint);
 		$this->putEntityUniqueId($this->entityUniqueId);
 		($this->buffer .= $this->namedtag);

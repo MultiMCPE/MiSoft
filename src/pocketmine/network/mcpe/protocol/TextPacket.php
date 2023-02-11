@@ -27,7 +27,9 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\multiversion\TextEnums;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
 use function count;
+use function ord;
 
 class TextPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TEXT_PACKET;
@@ -64,7 +66,7 @@ class TextPacket extends DataPacket{
 	public $platformChatId = "";
 
 	protected function decodePayload(){
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		$this->type = TextEnums::getMessageType($this->getProtocol(), $this->type);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->needsTranslation = (($this->get(1) !== "\x00"));
@@ -113,7 +115,7 @@ class TextPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$typeId = TextEnums::getMessageTypeId($this->getProtocol(), $this->type);
-		($this->buffer .= \chr($typeId));
+		($this->buffer .= chr($typeId));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
 		}

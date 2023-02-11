@@ -23,9 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\nbt\tag\CompoundTag;
+use RuntimeException;
+use SplFixedArray;
+use TypeError;
 use function constant;
 use function defined;
 use function explode;
@@ -43,11 +47,11 @@ use function trim;
  */
 class ItemFactory{
 
-	/** @var \SplFixedArray */
+	/** @var SplFixedArray */
 	private static $list = null;
 
 	public static function init(){
-		self::$list = new \SplFixedArray(65536);
+		self::$list = new SplFixedArray(65536);
 
 		self::registerItem(new Shovel(Item::IRON_SHOVEL, 0, "Iron Shovel", TieredTool::TIER_IRON));
 		self::registerItem(new Pickaxe(Item::IRON_PICKAXE, 0, "Iron Pickaxe", TieredTool::TIER_IRON));
@@ -285,13 +289,13 @@ class ItemFactory{
 	 * @param Item $item
 	 * @param bool $override
 	 *
-	 * @throws \RuntimeException if something attempted to override an already-registered item without specifying the
+	 * @throws RuntimeException if something attempted to override an already-registered item without specifying the
 	 * $override parameter.
 	 */
 	public static function registerItem(Item $item, bool $override = false){
 		$id = $item->getId();
 		if(!$override and self::isRegistered($id)){
-			throw new \RuntimeException("Trying to overwrite an already registered item");
+			throw new RuntimeException("Trying to overwrite an already registered item");
 		}
 
 		self::$list[self::getListOffset($id)] = clone $item;
@@ -306,11 +310,11 @@ class ItemFactory{
 	 * @param CompoundTag|string|null $tags
 	 *
 	 * @return Item
-	 * @throws \TypeError
+	 * @throws TypeError
 	 */
 	public static function get(int $id, int $meta = 0, int $count = 1, $tags = null) : Item{
 		if(!is_string($tags) and !($tags instanceof CompoundTag) and $tags !== null){
-			throw new \TypeError("`tags` argument must be a string or CompoundTag instance, " . (is_object($tags) ? "instance of " . get_class($tags) : gettype($tags)) . " given");
+			throw new TypeError("`tags` argument must be a string or CompoundTag instance, " . (is_object($tags) ? "instance of " . get_class($tags) : gettype($tags)) . " given");
 		}
 
 		try{
@@ -325,8 +329,8 @@ class ItemFactory{
 			}else{
 				$item = new Item($id, $meta);
 			}
-		}catch(\RuntimeException $e){
-			throw new \InvalidArgumentException("Item ID $id is invalid or out of bounds");
+		}catch(RuntimeException $e){
+			throw new InvalidArgumentException("Item ID $id is invalid or out of bounds");
 		}
 
 		$item->setDamage($meta);
@@ -351,7 +355,7 @@ class ItemFactory{
 	 *
 	 * @return Item[]|Item
 	 *
-	 * @throws \InvalidArgumentException if the given string cannot be parsed as an item identifier
+	 * @throws InvalidArgumentException if the given string cannot be parsed as an item identifier
 	 */
 	public static function fromString(string $str, bool $multiple = false){
 		if($multiple){
@@ -368,7 +372,7 @@ class ItemFactory{
 			}elseif(is_numeric($b[1])){
 				$meta = (int) $b[1];
 			}else{
-				throw new \InvalidArgumentException("Unable to parse \"" . $b[1] . "\" from \"" . $str . "\" as a valid meta value");
+				throw new InvalidArgumentException("Unable to parse \"" . $b[1] . "\" from \"" . $str . "\" as a valid meta value");
 			}
 
 			if(is_numeric($b[0])){
@@ -376,7 +380,7 @@ class ItemFactory{
 			}elseif(defined(ItemIds::class . "::" . strtoupper($b[0]))){
 				$item = self::get(constant(ItemIds::class . "::" . strtoupper($b[0])), $meta);
 			}else{
-				throw new \InvalidArgumentException("Unable to resolve \"" . $str . "\" to a valid item");
+				throw new InvalidArgumentException("Unable to resolve \"" . $str . "\" to a valid item");
 			}
 
 			return $item;
@@ -398,7 +402,7 @@ class ItemFactory{
 
 	private static function getListOffset(int $id) : int{
 		if($id < -0x8000 or $id > 0x7fff){
-			throw new \InvalidArgumentException("ID must be in range " . -0x8000 . " - " . 0x7fff);
+			throw new InvalidArgumentException("ID must be in range " . -0x8000 . " - " . 0x7fff);
 		}
 		return $id & 0xffff;
 	}

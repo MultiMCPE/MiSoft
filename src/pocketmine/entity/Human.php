@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\entity;
 
+use InvalidArgumentException;
+use InvalidStateException;
 use pocketmine\entity\projectile\ProjectileSource;
 use pocketmine\entity\utils\ExperienceUtils;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -59,6 +61,7 @@ use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
+use ReflectionClass;
 use function array_filter;
 use function array_merge;
 use function array_rand;
@@ -110,7 +113,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		if($this->skin === null){
 			$skinTag = $nbt->getCompoundTag("Skin");
 			if($skinTag === null){
-				throw new \InvalidStateException((new \ReflectionClass($this))->getShortName() . " must have a valid skin set");
+				throw new InvalidStateException((new ReflectionClass($this))->getShortName() . " must have a valid skin set");
 			}
 			$this->skin = self::deserializeSkinNBT($skinTag); //this throws if the skin is invalid
 		}
@@ -122,7 +125,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 * @param CompoundTag $skinTag
 	 *
 	 * @return Skin
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	protected static function deserializeSkinNBT(CompoundTag $skinTag) : Skin{
 		$skin = new Skin(
@@ -223,7 +226,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 *
 	 * @param float $new
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function setFood(float $new) : void{
 		$attr = $this->attributeMap->getAttribute(Attribute::HUNGER);
@@ -269,7 +272,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 *
 	 * @param float $saturation
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function setSaturation(float $saturation) : void{
 		$this->attributeMap->getAttribute(Attribute::SATURATION)->setValue($saturation);
@@ -540,7 +543,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	 */
 	public function setLifetimeTotalXp(int $amount) : void{
 		if($amount < 0){
-			throw new \InvalidArgumentException("XP must be greater than 0");
+			throw new InvalidArgumentException("XP must be greater than 0");
 		}
 
 		$this->totalXp = $amount;

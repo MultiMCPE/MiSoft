@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::LECTERN_UPDATE_PACKET;
@@ -44,18 +46,18 @@ class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
 	public $dropBook;
 
 	protected function decodePayload() : void{
-		$this->page = (\ord($this->get(1)));
+		$this->page = (ord($this->get(1)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	$this->totalPages = (\ord($this->get(1)));
+	    	$this->totalPages = (ord($this->get(1)));
     	}
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		$this->dropBook = (($this->get(1) !== "\x00"));
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= \chr($this->page));
+		($this->buffer .= chr($this->page));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	($this->buffer .= \chr($this->totalPages));
+	    	($this->buffer .= chr($this->totalPages));
 		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		($this->buffer .= ($this->dropBook ? "\x01" : "\x00"));

@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
+use InvalidArgumentException;
 use pocketmine\block\BlockFactory;
 use pocketmine\entity\Entity;
 use pocketmine\level\Level;
@@ -36,6 +37,8 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\BinaryStream;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use SplFixedArray;
+use Throwable;
 use function array_fill;
 use function array_filter;
 use function array_values;
@@ -73,7 +76,7 @@ class Chunk{
 	/** @var int */
 	protected $height = Chunk::MAX_SUBCHUNKS;
 
-	/** @var \SplFixedArray|SubChunkInterface[] */
+	/** @var SplFixedArray|SubChunkInterface[] */
 	protected $subChunks;
 
 	/** @var EmptySubChunk */
@@ -87,7 +90,7 @@ class Chunk{
 	/** @var Entity[] */
 	protected $entities = [];
 
-	/** @var \SplFixedArray|int[] */
+	/** @var SplFixedArray|int[] */
 	protected $heightMap;
 
 	/** @var string */
@@ -114,7 +117,7 @@ class Chunk{
 
 		$this->height = Chunk::MAX_SUBCHUNKS; //TODO: add a way of changing this
 
-		$this->subChunks = new \SplFixedArray($this->height);
+		$this->subChunks = new SplFixedArray($this->height);
 		$this->emptySubChunk = EmptySubChunk::getInstance();
 
 		foreach($this->subChunks as $y => $null){
@@ -122,11 +125,11 @@ class Chunk{
 		}
 
 		if(count($heightMap) === 256){
-			$this->heightMap = \SplFixedArray::fromArray($heightMap);
+			$this->heightMap = SplFixedArray::fromArray($heightMap);
 		}else{
 			assert(count($heightMap) === 0, "Wrong HeightMap value count, expected 256, got " . count($heightMap));
 			$val = ($this->height * 16);
-			$this->heightMap = \SplFixedArray::fromArray(array_fill(0, 256, $val));
+			$this->heightMap = SplFixedArray::fromArray(array_fill(0, 256, $val));
 		}
 
 		if(strlen($biomeIds) === 256){
@@ -588,7 +591,7 @@ class Chunk{
 	 */
 	public function addEntity(Entity $entity){
 		if($entity->isClosed()){
-			throw new \InvalidArgumentException("Attempted to add a garbage closed Entity to a chunk");
+			throw new InvalidArgumentException("Attempted to add a garbage closed Entity to a chunk");
 		}
 		$this->entities[$entity->getId()] = $entity;
 		if(!($entity instanceof Player) and $this->isInit){
@@ -611,7 +614,7 @@ class Chunk{
 	 */
 	public function addTile(Tile $tile){
 		if($tile->isClosed()){
-			throw new \InvalidArgumentException("Attempted to add a garbage closed Tile to a chunk");
+			throw new InvalidArgumentException("Attempted to add a garbage closed Tile to a chunk");
 		}
 		$this->tiles[$tile->getId()] = $tile;
 		if(isset($this->tileList[$index = (($tile->x & 0x0f) << 12) | (($tile->z & 0x0f) << 8) | ($tile->y & 0xff)]) and $this->tileList[$index] !== $tile){
@@ -710,7 +713,7 @@ class Chunk{
 							$changed = true;
 							continue;
 						}
-					}catch(\Throwable $t){
+					}catch(Throwable $t){
 						$level->getServer()->getLogger()->logException($t);
 						$changed = true;
 						continue;
@@ -813,9 +816,9 @@ class Chunk{
 	}
 
 	/**
-	 * @return \SplFixedArray|SubChunkInterface[]
+	 * @return SplFixedArray|SubChunkInterface[]
 	 */
-	public function getSubChunks() : \SplFixedArray{
+	public function getSubChunks() : SplFixedArray{
 		return $this->subChunks;
 	}
 

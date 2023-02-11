@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator;
 
+use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\item\ItemFactory;
@@ -114,7 +115,7 @@ class Flat extends Generator{
 			$cnt = $matches[1] !== "" ? (int) $matches[1] : 1;
 			try{
 				$b = ItemFactory::fromString($matches[2])->getBlock();
-			}catch(\InvalidArgumentException $e){
+			}catch(InvalidArgumentException $e){
 				throw new InvalidGeneratorOptionsException("Invalid preset layer \"$line\": " . $e->getMessage(), 0, $e);
 			}
 			for($cY = $y, $y += $cnt; $cY < $y; ++$cY){

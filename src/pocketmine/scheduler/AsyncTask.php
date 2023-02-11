@@ -23,8 +23,15 @@ declare(strict_types=1);
 
 namespace pocketmine\scheduler;
 
+use BadMethodCallException;
+use InvalidStateException;
 use pocketmine\Collectable;
 use pocketmine\Server;
+use RuntimeException;
+use SplObjectStorage;
+use Thread;
+use Threaded;
+use Throwable;
 use function is_scalar;
 use function serialize;
 use function unserialize;
@@ -48,7 +55,7 @@ use function unserialize;
  */
 abstract class AsyncTask extends Collectable{
 	/**
-	 * @var \SplObjectStorage|null
+	 * @var SplObjectStorage|null
 	 * Used to store objects on the main thread which should not be serialized.
 	 */
 	private static $localObjectStorage;
@@ -56,7 +63,7 @@ abstract class AsyncTask extends Collectable{
 	/** @var AsyncWorker $worker */
 	public $worker = null;
 
-	/** @var \Threaded */
+	/** @var Threaded */
 	public $progressUpdates;
 
 	private $result = null;
@@ -73,7 +80,7 @@ abstract class AsyncTask extends Collectable{
 		if(!$this->cancelRun){
 			try{
 				$this->onRun();
-			}catch(\Throwable $e){
+			}catch(Throwable $e){
 				$this->crashed = true;
 				$this->worker->handleException($e);
 			}
@@ -135,7 +142,7 @@ abstract class AsyncTask extends Collectable{
 	 */
 	public function getFromThreadStore(string $identifier){
 		if($this->worker === null or $this->isGarbage()){
-			throw new \BadMethodCallException("Objects stored in AsyncWorker thread-local storage can only be retrieved during task execution");
+			throw new BadMethodCallException("Objects stored in AsyncWorker thread-local storage can only be retrieved during task execution");
 		}
 		return $this->worker->getFromThreadStore($identifier);
 	}
@@ -148,7 +155,7 @@ abstract class AsyncTask extends Collectable{
 	 */
 	public function saveToThreadStore(string $identifier, $value){
 		if($this->worker === null or $this->isGarbage()){
-			throw new \BadMethodCallException("Objects can only be added to AsyncWorker thread-local storage during task execution");
+			throw new BadMethodCallException("Objects can only be added to AsyncWorker thread-local storage during task execution");
 		}
 		$this->worker->saveToThreadStore($identifier, $value);
 	}
@@ -160,7 +167,7 @@ abstract class AsyncTask extends Collectable{
 	 */
 	public function removeFromThreadStore(string $identifier) : void{
 		if($this->worker === null or $this->isGarbage()){
-			throw new \BadMethodCallException("Objects can only be removed from AsyncWorker thread-local storage during task execution");
+			throw new BadMethodCallException("Objects can only be removed from AsyncWorker thread-local storage during task execution");
 		}
 		$this->worker->removeFromThreadStore($identifier);
 	}
@@ -233,19 +240,19 @@ abstract class AsyncTask extends Collectable{
 	 *
 	 * @param mixed $complexData the data to store
 	 *
-	 * @throws \BadMethodCallException if called from any thread except the main thread
+	 * @throws BadMethodCallException if called from any thread except the main thread
 	 */
 	protected function storeLocal($complexData){
-		if($this->worker !== null and $this->worker === \Thread::getCurrentThread()){
-			throw new \BadMethodCallException("Objects can only be stored from the parent thread");
+		if($this->worker !== null and $this->worker === Thread::getCurrentThread()){
+			throw new BadMethodCallException("Objects can only be stored from the parent thread");
 		}
 
 		if(self::$localObjectStorage === null){
-			self::$localObjectStorage = new \SplObjectStorage(); //lazy init
+			self::$localObjectStorage = new SplObjectStorage(); //lazy init
 		}
 
 		if(isset(self::$localObjectStorage[$this])){
-			throw new \InvalidStateException("Already storing complex data for this async task");
+			throw new InvalidStateException("Already storing complex data for this async task");
 		}
 		self::$localObjectStorage[$this] = $complexData;
 	}
@@ -265,8 +272,8 @@ abstract class AsyncTask extends Collectable{
 	 *
 	 * @return mixed
 	 *
-	 * @throws \RuntimeException if no data were stored by this AsyncTask instance.
-	 * @throws \BadMethodCallException if called from any thread except the main thread
+	 * @throws RuntimeException if no data were stored by this AsyncTask instance.
+	 * @throws BadMethodCallException if called from any thread except the main thread
 	 */
 	protected function fetchLocal(){
 		try{
@@ -291,16 +298,16 @@ abstract class AsyncTask extends Collectable{
 	 *
 	 * @return mixed
 	 *
-	 * @throws \RuntimeException if no data were stored by this AsyncTask instance
-	 * @throws \BadMethodCallException if called from any thread except the main thread
+	 * @throws RuntimeException if no data were stored by this AsyncTask instance
+	 * @throws BadMethodCallException if called from any thread except the main thread
 	 */
 	protected function peekLocal(){
-		if($this->worker !== null and $this->worker === \Thread::getCurrentThread()){
-			throw new \BadMethodCallException("Objects can only be retrieved from the parent thread");
+		if($this->worker !== null and $this->worker === Thread::getCurrentThread()){
+			throw new BadMethodCallException("Objects can only be retrieved from the parent thread");
 		}
 
 		if(self::$localObjectStorage === null or !isset(self::$localObjectStorage[$this])){
-			throw new \InvalidStateException("No complex data stored for this async task");
+			throw new InvalidStateException("No complex data stored for this async task");
 		}
 
 		return self::$localObjectStorage[$this];

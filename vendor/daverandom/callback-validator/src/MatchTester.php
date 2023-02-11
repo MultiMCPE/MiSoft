@@ -2,6 +2,11 @@
 
 namespace DaveRandom\CallbackValidator;
 
+use Closure;
+use Traversable;
+use function is_subclass_of;
+use function method_exists;
+
 final class MatchTester
 {
     /**
@@ -51,7 +56,7 @@ final class MatchTester
         }
 
         // Classes with __toString() satisfy string
-        if ($superTypeName === BuiltInTypes::STRING && \method_exists($subTypeName, '__toString')) {
+        if ($superTypeName === BuiltInTypes::STRING && method_exists($subTypeName, '__toString')) {
             return true;
         }
 
@@ -95,15 +100,15 @@ final class MatchTester
         // Check iterable
         if ($superTypeName === BuiltInTypes::ITERABLE) {
             return $subTypeName === BuiltInTypes::ARRAY
-                || $subTypeName === \Traversable::class
-                || \is_subclass_of($subTypeName, \Traversable::class);
+                || $subTypeName === Traversable::class
+                || is_subclass_of($subTypeName, Traversable::class);
         }
 
         // Check callable
         if ($superTypeName === BuiltInTypes::CALLABLE) {
-            return $subTypeName === \Closure::class
-                || \method_exists($subTypeName, '__invoke')
-                || \is_subclass_of($subTypeName, \Closure::class);
+            return $subTypeName === Closure::class
+                || method_exists($subTypeName, '__invoke')
+                || is_subclass_of($subTypeName, Closure::class);
         }
 
         // If the super type is built-in, check whether casting rules can succeed
@@ -117,6 +122,6 @@ final class MatchTester
             return false;
         }
 
-        return \is_subclass_of($subTypeName, $superTypeName);
+        return is_subclass_of($subTypeName, $superTypeName);
     }
 }

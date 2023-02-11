@@ -2,6 +2,15 @@
 
 namespace Ahc\Json;
 
+use RuntimeException;
+use function function_exists;
+use function json_decode;
+use function json_last_error;
+use function json_last_error_msg;
+use function preg_match;
+use function rtrim;
+use const JSON_ERROR_NONE;
+
 /**
  * JSON comment stripper.
  *
@@ -27,7 +36,7 @@ class Comment
      */
     public function strip($json)
     {
-        if (!\preg_match('%\/(\/|\*)%', $json)) {
+        if (!preg_match('%\/(\/|\*)%', $json)) {
             return $json;
         }
 
@@ -58,7 +67,7 @@ class Comment
 
             $wasSingle = 1 === $this->comment;
             if ($this->hasCommentEnded($char, $char . $next) && $wasSingle) {
-                $return = \rtrim($return) . $char;
+                $return = rtrim($return) . $char;
             }
 
             $this->index += $char . $next === '*/' ? 1 : 0;
@@ -123,22 +132,22 @@ class Comment
      *
      * @see http://php.net/json_decode [JSON decode native function]
      *
-     * @throws \RuntimeException When decode fails.
+     * @throws RuntimeException When decode fails.
      *
      * @return mixed
      */
     public function decode($json, $assoc = false, $depth = 512, $options = 0)
     {
-        $decoded = \json_decode($this->strip($json), $assoc, $depth, $options);
+        $decoded = json_decode($this->strip($json), $assoc, $depth, $options);
 
-        if (\JSON_ERROR_NONE !== $err = \json_last_error()) {
+        if (JSON_ERROR_NONE !== $err = json_last_error()) {
             $msg = 'JSON decode failed';
 
-            if (\function_exists('json_last_error_msg')) {
-                $msg .= ': ' . \json_last_error_msg();
+            if (function_exists('json_last_error_msg')) {
+                $msg .= ': ' . json_last_error_msg();
             }
 
-            throw new \RuntimeException($msg, $err);
+            throw new RuntimeException($msg, $err);
         }
 
         return $decoded;

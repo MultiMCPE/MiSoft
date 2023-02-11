@@ -26,6 +26,8 @@ namespace pocketmine\scheduler;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\Utils;
 use pocketmine\Worker;
+use ThreadedLogger;
+use Throwable;
 use function error_reporting;
 use function gc_enable;
 use function ini_set;
@@ -41,7 +43,7 @@ class AsyncWorker extends Worker{
 	/** @var int */
 	private $memoryLimit;
 
-	public function __construct(\ThreadedLogger $logger, int $id, int $memoryLimit){
+	public function __construct(ThreadedLogger $logger, int $id, int $memoryLimit){
 		$this->logger = $logger;
 		$this->id = $id;
 		$this->memoryLimit = $memoryLimit;
@@ -70,11 +72,11 @@ class AsyncWorker extends Worker{
 		}
 	}
 
-	public function getLogger() : \ThreadedLogger{
+	public function getLogger() : ThreadedLogger{
 		return $this->logger;
 	}
 
-	public function handleException(\Throwable $e){
+	public function handleException(Throwable $e){
 		$this->logger->logException($e);
 	}
 

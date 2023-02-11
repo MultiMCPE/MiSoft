@@ -18,7 +18,7 @@ class AttributeTypeAndValue extends Sequence
 {
     /**
      * @param ObjectIdentifier|string $objIdentifier
-     * @param \FG\ASN1\ASNObject $value
+     * @param ASNObject $value
      */
     public function __construct($objIdentifier, ASNObject $value)
     {

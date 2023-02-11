@@ -15,15 +15,16 @@ use ArrayIterator;
 use Countable;
 use FG\ASN1\Exception\ParserException;
 use Iterator;
+use ReturnTypeWillChange;
 
 abstract class Construct extends ASNObject implements Countable, ArrayAccess, Iterator, Parsable
 {
-    /** @var \FG\ASN1\ASNObject[] */
+    /** @var ASNObject[] */
     protected $children;
     private $iteratorPosition;
 
     /**
-     * @param \FG\ASN1\ASNObject[] $children the variadic type hint is commented due to https://github.com/facebook/hhvm/issues/4858
+     * @param ASNObject[] $children the variadic type hint is commented due to https://github.com/facebook/hhvm/issues/4858
      */
     public function __construct(/* HH_FIXME[4858]: variadic + strict */ ...$children)
     {
@@ -36,49 +37,49 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
         return $this->children;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function rewind()
     {
         $this->iteratorPosition = 0;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function current()
     {
         return $this->children[$this->iteratorPosition];
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function key()
     {
         return $this->iteratorPosition;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function next()
     {
         $this->iteratorPosition++;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function valid()
     {
         return isset($this->children[$this->iteratorPosition]);
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return array_key_exists($offset, $this->children);
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->children[$offset];
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ($offset === null) {
@@ -88,7 +89,7 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
         $this->children[$offset] = $value;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         unset($this->children[$offset]);
@@ -140,7 +141,7 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
     }
 
     /**
-     * @return \FG\ASN1\ASNObject[]
+     * @return ASNObject[]
      */
     public function getChildren()
     {
@@ -148,7 +149,7 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
     }
 
     /**
-     * @return \FG\ASN1\ASNObject
+     * @return ASNObject
      */
     public function getFirstChild()
     {
@@ -163,7 +164,7 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
      *
      * @return Construct|static
      */
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public static function fromBinary(&$binaryData, &$offsetIndex = 0)
     {
         $parsedObject = new static();
@@ -189,7 +190,7 @@ abstract class Construct extends ASNObject implements Countable, ArrayAccess, It
         return $parsedObject;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function count($mode = COUNT_NORMAL)
     {
         return count($this->children, $mode);

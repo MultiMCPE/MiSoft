@@ -17,14 +17,20 @@ declare(strict_types=1);
 
 namespace raklib\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\BinaryStream;
 use raklib\utils\InternetAddress;
+use UnexpectedValueException;
 use function assert;
+use function chr;
 use function count;
 use function explode;
 use function inet_ntop;
 use function inet_pton;
+use function ord;
+use function pack;
 use function strlen;
+use function unpack;
 use const AF_INET6;
 
 use pocketmine\utils\Binary;
@@ -36,50 +42,50 @@ abstract class Packet extends BinaryStream{
 	public $sendTime;
 
 	protected function getString() : string{
-		return $this->get(((\unpack("n", $this->get(2))[1])));
+		return $this->get(((unpack("n", $this->get(2))[1])));
 	}
 
 	protected function getAddress() : InternetAddress{
-		$version = (\ord($this->get(1)));
+		$version = (ord($this->get(1)));
 		if($version === 4){
-			$addr = ((~(\ord($this->get(1)))) & 0xff) . "." . ((~(\ord($this->get(1)))) & 0xff) . "." . ((~(\ord($this->get(1)))) & 0xff) . "." . ((~(\ord($this->get(1)))) & 0xff);
-			$port = ((\unpack("n", $this->get(2))[1]));
+			$addr = ((~(ord($this->get(1)))) & 0xff) . "." . ((~(ord($this->get(1)))) & 0xff) . "." . ((~(ord($this->get(1)))) & 0xff) . "." . ((~(ord($this->get(1)))) & 0xff);
+			$port = ((unpack("n", $this->get(2))[1]));
 			return new InternetAddress($addr, $port, $version);
 		}elseif($version === 6){
 			//http://man7.org/1/man-pages/man7/ipv6.7.html
-			(\unpack("v", $this->get(2))[1]); //Family, AF_INET6
-			$port = ((\unpack("n", $this->get(2))[1]));
-			((\unpack("N", $this->get(4))[1] << 32 >> 32)); //flow info
+			(unpack("v", $this->get(2))[1]); //Family, AF_INET6
+			$port = ((unpack("n", $this->get(2))[1]));
+			((unpack("N", $this->get(4))[1] << 32 >> 32)); //flow info
 			$addr = inet_ntop($this->get(16));
-			((\unpack("N", $this->get(4))[1] << 32 >> 32)); //scope ID
+			((unpack("N", $this->get(4))[1] << 32 >> 32)); //scope ID
 			return new InternetAddress($addr, $port, $version);
 		}else{
-			throw new \UnexpectedValueException("Unknown IP address version $version");
+			throw new UnexpectedValueException("Unknown IP address version $version");
 		}
 	}
 
 	protected function putString(string $v) : void{
-		($this->buffer .= (\pack("n", strlen($v))));
+		($this->buffer .= (pack("n", strlen($v))));
 		($this->buffer .= $v);
 	}
 
 	protected function putAddress(InternetAddress $address) : void{
-		($this->buffer .= \chr($address->version));
+		($this->buffer .= chr($address->version));
 		if($address->version === 4){
 			$parts = explode(".", $address->ip);
 			assert(count($parts) === 4, "Wrong number of parts in IPv4 IP, expected 4, got " . count($parts));
 			foreach($parts as $b){
-				($this->buffer .= \chr((~((int) $b)) & 0xff));
+				($this->buffer .= chr((~((int) $b)) & 0xff));
 			}
-			($this->buffer .= (\pack("n", $address->port)));
+			($this->buffer .= (pack("n", $address->port)));
 		}elseif($address->version === 6){
-			($this->buffer .= (\pack("v", AF_INET6)));
-			($this->buffer .= (\pack("n", $address->port)));
-			($this->buffer .= (\pack("N", 0)));
+			($this->buffer .= (pack("v", AF_INET6)));
+			($this->buffer .= (pack("n", $address->port)));
+			($this->buffer .= (pack("N", 0)));
 			($this->buffer .= inet_pton($address->ip));
-			($this->buffer .= (\pack("N", 0)));
+			($this->buffer .= (pack("N", 0)));
 		}else{
-			throw new \InvalidArgumentException("IP version $address->version is not supported");
+			throw new InvalidArgumentException("IP version $address->version is not supported");
 		}
 	}
 
@@ -90,7 +96,7 @@ abstract class Packet extends BinaryStream{
 	}
 
 	protected function encodeHeader() : void{
-		($this->buffer .= \chr(static::$ID));
+		($this->buffer .= chr(static::$ID));
 	}
 
 	abstract protected function encodePayload() : void;
@@ -102,7 +108,7 @@ abstract class Packet extends BinaryStream{
 	}
 
 	protected function decodeHeader() : void{
-		(\ord($this->get(1))); //PID
+		(ord($this->get(1))); //PID
 	}
 
 	abstract protected function decodePayload() : void;

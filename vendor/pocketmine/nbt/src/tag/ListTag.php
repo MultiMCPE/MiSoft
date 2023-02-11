@@ -23,22 +23,32 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt\tag;
 
+use ArrayAccess;
+use Countable;
+use Iterator;
+use LogicException;
+use OutOfRangeException;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
+use SplDoublyLinkedList;
+use TypeError;
+use UnexpectedValueException;
+use function chr;
 use function get_class;
 use function gettype;
 use function is_object;
+use function ord;
 use function str_repeat;
 
 use pocketmine\utils\Binary;
 
-class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
+class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	use NoDynamicFieldsTrait;
 
 	/** @var int */
 	private $tagType;
-	/** @var \SplDoublyLinkedList|NamedTag[] */
+	/** @var SplDoublyLinkedList|NamedTag[] */
 	private $value;
 
 	/**
@@ -50,7 +60,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 		parent::__construct($name);
 
 		$this->tagType = $tagType;
-		$this->value = new \SplDoublyLinkedList();
+		$this->value = new SplDoublyLinkedList();
 		foreach($value as $tag){
 			$this->push($tag);
 		}
@@ -77,7 +87,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	public function getAllValues() : array{
 		$result = [];
 		foreach($this->value as $tag){
-			if($tag instanceof \ArrayAccess){
+			if($tag instanceof ArrayAccess){
 				$result[] = $tag;
 			}else{
 				$result[] = $tag->getValue();
@@ -105,7 +115,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 		/** @var NamedTag|null $value */
 		$value = $this->value[$offset] ?? null;
 
-		if($value instanceof \ArrayAccess){
+		if($value instanceof ArrayAccess){
 			return $value;
 		}elseif($value !== null){
 			return $value->getValue();
@@ -118,15 +128,15 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * @param int|null $offset
 	 * @param NamedTag $value
 	 *
-	 * @throws \TypeError if an incompatible tag type is given
-	 * @throws \TypeError if $value is not a NamedTag object
+	 * @throws TypeError if an incompatible tag type is given
+	 * @throws TypeError if $value is not a NamedTag object
 	 */
 	public function offsetSet($offset, $value) : void{
 		if($value instanceof NamedTag){
 			$this->checkTagType($value);
 			$this->value[$offset] = $value;
 		}else{
-			throw new \TypeError("Value set by ArrayAccess must be an instance of " . NamedTag::class . ", got " . (is_object($value) ? " instance of " . get_class($value) : gettype($value)));
+			throw new TypeError("Value set by ArrayAccess must be an instance of " . NamedTag::class . ", got " . (is_object($value) ? " instance of " . get_class($value) : gettype($value)));
 		}
 	}
 
@@ -196,7 +206,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * @param int      $offset
 	 * @param NamedTag $tag
 	 *
-	 * @throws \OutOfRangeException if the offset is not within the bounds of the list
+	 * @throws OutOfRangeException if the offset is not within the bounds of the list
 	 */
 	public function insert(int $offset, NamedTag $tag){
 		$this->checkTagType($tag);
@@ -218,7 +228,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * @param int $offset
 	 *
 	 * @return NamedTag
-	 * @throws \OutOfRangeException if the offset is not within the bounds of the list
+	 * @throws OutOfRangeException if the offset is not within the bounds of the list
 	 */
 	public function get(int $offset) : NamedTag{
 		return $this->value[$offset];
@@ -248,7 +258,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * @param int      $offset
 	 * @param NamedTag $tag
 	 *
-	 * @throws \OutOfRangeException if the offset is not within the bounds of the list
+	 * @throws OutOfRangeException if the offset is not within the bounds of the list
 	 */
 	public function set(int $offset, NamedTag $tag) : void{
 		$this->checkTagType($tag);
@@ -293,11 +303,11 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * first tag added to the list.
 	 *
 	 * @param int $type
-	 * @throws \LogicException if the list is not empty
+	 * @throws LogicException if the list is not empty
 	 */
 	public function setTagType(int $type){
 		if(!$this->value->isEmpty()){
-			throw new \LogicException("Cannot change tag type of non-empty ListTag");
+			throw new LogicException("Cannot change tag type of non-empty ListTag");
 		}
 		$this->tagType = $type;
 	}
@@ -306,7 +316,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	 * Type-checks the given NamedTag for addition to the list, updating the list tag type as appropriate.
 	 * @param NamedTag $tag
 	 *
-	 * @throws \TypeError if the tag type is not compatible.
+	 * @throws TypeError if the tag type is not compatible.
 	 */
 	private function checkTagType(NamedTag $tag) : void{
 		$type = $tag->getType();
@@ -314,19 +324,19 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 			if($this->tagType === NBT::TAG_End){
 				$this->tagType = $type;
 			}else{
-				throw new \TypeError("Invalid tag of type " . get_class($tag) . " assigned to ListTag, expected " . get_class(NBT::createTag($this->tagType)));
+				throw new TypeError("Invalid tag of type " . get_class($tag) . " assigned to ListTag, expected " . get_class(NBT::createTag($this->tagType)));
 			}
 		}
 	}
 
 	public function read(NBTStream $nbt, ReaderTracker $tracker) : void{
-		$this->value = new \SplDoublyLinkedList();
-		$this->tagType = (\ord($nbt->get(1)));
+		$this->value = new SplDoublyLinkedList();
+		$this->tagType = (ord($nbt->get(1)));
 		$size = $nbt->getInt();
 
 		if($size > 0){
 			if($this->tagType === NBT::TAG_End){
-				throw new \UnexpectedValueException("Unexpected non-empty list of TAG_End");
+				throw new UnexpectedValueException("Unexpected non-empty list of TAG_End");
 			}
 
 			$tracker->protectDepth(function() use($nbt, $tracker, $size){
@@ -343,7 +353,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	}
 
 	public function write(NBTStream $nbt) : void{
-		($nbt->buffer .= \chr($this->tagType));
+		($nbt->buffer .= chr($this->tagType));
 		$nbt->putInt($this->value->count());
 		/** @var NamedTag $tag */
 		foreach($this->value as $tag){
@@ -361,7 +371,7 @@ class ListTag extends NamedTag implements \ArrayAccess, \Countable, \Iterator{
 	}
 
 	public function __clone(){
-		$new = new \SplDoublyLinkedList();
+		$new = new SplDoublyLinkedList();
 
 		foreach($this->value as $tag){
 			$new->push($tag->safeClone());

@@ -15,22 +15,23 @@
  * GNU General Public License for more details.
 */
 
-interface AttachableLogger extends \Logger{
+interface AttachableLogger extends Logger
+{
 
 	/**
 	 * @param LoggerAttachment $attachment
 	 */
-	public function addAttachment(\LoggerAttachment $attachment);
+	public function addAttachment(LoggerAttachment $attachment);
 
 	/**
 	 * @param LoggerAttachment $attachment
 	 */
-	public function removeAttachment(\LoggerAttachment $attachment);
+	public function removeAttachment(LoggerAttachment $attachment);
 
 	public function removeAttachments();
 
 	/**
-	 * @return \LoggerAttachment[]
+	 * @return LoggerAttachment[]
 	 */
 	public function getAttachments();
 }

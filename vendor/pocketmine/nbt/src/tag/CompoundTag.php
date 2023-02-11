@@ -23,9 +23,16 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt\tag;
 
+use ArrayAccess;
+use Countable;
+use InvalidArgumentException;
+use Iterator;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
+use RuntimeException;
+use TypeError;
+use UnexpectedValueException;
 use function assert;
 use function count;
 use function current;
@@ -41,7 +48,7 @@ use function str_repeat;
 
 use pocketmine\utils\Binary;
 
-class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countable{
+class CompoundTag extends NamedTag implements ArrayAccess, Iterator, Countable{
 	use NoDynamicFieldsTrait;
 
 	/** @var NamedTag[] */
@@ -91,13 +98,13 @@ class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countabl
 	 * @param string $expectedClass Class that extends NamedTag
 	 *
 	 * @return NamedTag|null
-	 * @throws \RuntimeException if the tag exists and is not of the expected type (if specified)
+	 * @throws RuntimeException if the tag exists and is not of the expected type (if specified)
 	 */
 	public function getTag(string $name, string $expectedClass = NamedTag::class) : ?NamedTag{
 		assert(is_a($expectedClass, NamedTag::class, true));
 		$tag = $this->value[$name] ?? null;
 		if($tag !== null and !($tag instanceof $expectedClass)){
-			throw new \RuntimeException("Expected a tag of type $expectedClass, got " . get_class($tag));
+			throw new RuntimeException("Expected a tag of type $expectedClass, got " . get_class($tag));
 		}
 
 		return $tag;
@@ -136,7 +143,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countabl
 		if(!$force){
 			$existing = $this->value[$tag->__name] ?? null;
 			if($existing !== null and !($tag instanceof $existing)){
-				throw new \RuntimeException("Cannot set tag at \"$tag->__name\": tried to overwrite " . get_class($existing) . " with " . get_class($tag));
+				throw new RuntimeException("Cannot set tag at \"$tag->__name\": tried to overwrite " . get_class($existing) . " with " . get_class($tag));
 			}
 		}
 		$this->value[$tag->__name] = $tag;
@@ -186,7 +193,7 @@ class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countabl
 		}
 
 		if($default === null){
-			throw new \RuntimeException("Tag with name \"$name\" " . ($tag !== null ? "not of expected type" : "not found") . " and no valid default value given");
+			throw new RuntimeException("Tag with name \"$name\" " . ($tag !== null ? "not of expected type" : "not found") . " and no valid default value given");
 		}
 
 		return $default;
@@ -393,11 +400,11 @@ class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countabl
 	/**
 	 * @param string $offset
 	 *
-	 * @return mixed|null|\ArrayAccess
+	 * @return mixed|null|ArrayAccess
 	 */
 	public function offsetGet($offset){
 		if(isset($this->value[$offset])){
-			if($this->value[$offset] instanceof \ArrayAccess){
+			if($this->value[$offset] instanceof ArrayAccess){
 				return $this->value[$offset];
 			}else{
 				return $this->value[$offset]->getValue();
@@ -413,20 +420,20 @@ class CompoundTag extends NamedTag implements \ArrayAccess, \Iterator, \Countabl
 	 * @param string   $offset
 	 * @param NamedTag $value
 	 *
-	 * @throws \InvalidArgumentException if offset is null
-	 * @throws \TypeError if $value is not a NamedTag object
+	 * @throws InvalidArgumentException if offset is null
+	 * @throws TypeError if $value is not a NamedTag object
 	 */
 	public function offsetSet($offset, $value){
 		if($offset === null){
-			throw new \InvalidArgumentException("Array access push syntax is not supported");
+			throw new InvalidArgumentException("Array access push syntax is not supported");
 		}
 		if($value instanceof NamedTag){
 			if($offset !== $value->getName()){
-				throw new \UnexpectedValueException("Given tag has a name which does not match the offset given (offset: \"$offset\", tag name: \"" . $value->getName() . "\")");
+				throw new UnexpectedValueException("Given tag has a name which does not match the offset given (offset: \"$offset\", tag name: \"" . $value->getName() . "\")");
 			}
 			$this->value[$offset] = $value;
 		}else{
-			throw new \TypeError("Value set by ArrayAccess must be an instance of " . NamedTag::class . ", got " . (is_object($value) ? " instance of " . get_class($value) : gettype($value)));
+			throw new TypeError("Value set by ArrayAccess must be an instance of " . NamedTag::class . ", got " . (is_object($value) ? " instance of " . get_class($value) : gettype($value)));
 		}
 	}
 

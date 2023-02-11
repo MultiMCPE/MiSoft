@@ -24,13 +24,15 @@ declare(strict_types=1);
 namespace pocketmine\item\enchantment;
 
 
+use SplFixedArray;
+
 class EnchantmentList{
 
-	/** @var \SplFixedArray|EnchantmentEntry[] */
+	/** @var SplFixedArray|EnchantmentEntry[] */
 	private $enchantments;
 
 	public function __construct(int $size){
-		$this->enchantments = new \SplFixedArray($size);
+		$this->enchantments = new SplFixedArray($size);
 	}
 
 	/**

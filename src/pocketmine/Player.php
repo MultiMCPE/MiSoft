@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine;
 
+use BadMethodCallException;
+use InvalidArgumentException;
+use InvalidStateException;
 use pocketmine\block\Bed;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
@@ -193,6 +196,8 @@ use pocketmine\timings\Timings;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\UUID;
 use pocketmine\utils\Color;
+use SplFixedArray;
+use UnexpectedValueException;
 use function abs;
 use function array_merge;
 use function assert;
@@ -596,7 +601,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function setScreenLineHeight(int $height = null){
 		if($height !== null and $height < 1){
-			throw new \InvalidArgumentException("Line height must be at least 1");
+			throw new InvalidArgumentException("Line height must be at least 1");
 		}
 		$this->lineHeight = $height;
 	}
@@ -710,11 +715,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return bool
 	 *
-	 * @throws \InvalidStateException if the player is closed
+	 * @throws InvalidStateException if the player is closed
 	 */
 	public function hasPermission($name) : bool{
 		if($this->closed){
-			throw new \InvalidStateException("Trying to get permissions of closed player");
+			throw new InvalidStateException("Trying to get permissions of closed player");
 		}
 		return $this->perm->hasPermission($name);
 	}
@@ -2011,13 +2016,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		    	$armSize = $packet->clientData["ArmSize"] ?? "wide";
 		    	$skinColor = isset($packet->clientData["SkinColor"]) ? Color::fromHexString($packet->clientData["SkinColor"]) : new Color(0, 0, 0);
-		    	$personaPieces = \SplFixedArray::fromArray($personaPieces);
-		    	$pieceTintColors = \SplFixedArray::fromArray($pieceTintColors);
+		    	$personaPieces = SplFixedArray::fromArray($personaPieces);
+		    	$pieceTintColors = SplFixedArray::fromArray($pieceTintColors);
 	    	}else{
 	    	    $armSize = "wide";
 	    	    $skinColor = new Color(0, 0, 0);
-		    	$personaPieces = \SplFixedArray::fromArray([]);
-		    	$pieceTintColors = \SplFixedArray::fromArray([]);
+		    	$personaPieces = SplFixedArray::fromArray([]);
+		    	$pieceTintColors = SplFixedArray::fromArray([]);
 	    	}
 
 	    	$serializedSkin = new SerializedSkin(
@@ -2155,7 +2160,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($identityPublicKey === false){
 			//if this is invalid it should have borked VerifyLoginTask
-			throw new \InvalidArgumentException("We should never have reached here if the key is invalid");
+			throw new InvalidArgumentException("We should never have reached here if the key is invalid");
 		}
 
 		if(EncryptionContext::$ENABLED){
@@ -2379,7 +2384,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->worldName = $this->server->getMotd();
 		$pk->experiments = new Experiments([], false);
 		$pk->playerMovementSettings = new PlayerMovementSettings(PlayerMovementType::LEGACY, 0, false);
-		$pk->serverSoftwareVersion = sprintf("%s %s", \pocketmine\NAME, \pocketmine\VERSION);
+		$pk->serverSoftwareVersion = sprintf("%s %s", NAME, VERSION);
 		$pk->vanillaVersion = $this->vanillaVersion;
 		$this->dataPacket($pk);
 
@@ -2733,7 +2738,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		if(count($packet->actions) > 100){
-		    throw new \UnexpectedValueException("Too many actions in inventory transaction");
+		    throw new UnexpectedValueException("Too many actions in inventory transaction");
 		}
 
 		/** @var InventoryAction[] $actions */
@@ -2744,7 +2749,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				if($action !== null){
 					$actions[] = $action;
 				}
-			}catch(\UnexpectedValueException $e){
+			}catch(UnexpectedValueException $e){
 				$this->server->getLogger()->debug("Unhandled inventory action from " . $this->getName() . ": " . $e->getMessage());
 				$this->sendAllInventories();
 				return false;
@@ -3108,7 +3113,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                     $inventory->addItem($item);
                     $this->getInventory()->removeItem($item);
                 }else{
-                    throw new \InvalidArgumentException("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
+                    throw new InvalidArgumentException("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
                 }
             }
         }
@@ -3140,7 +3145,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                         if($count === 0){
                             break;
                         }elseif($count < 0){
-                            throw new \InvalidArgumentException("Wait... this is illegally $count $reduce");
+                            throw new InvalidArgumentException("Wait... this is illegally $count $reduce");
                         }
                     }
                 }
@@ -3158,7 +3163,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         }
 
         if($currentRecipe === null){
-            throw new \InvalidArgumentException("Recipe not founded");
+            throw new InvalidArgumentException("Recipe not founded");
         }
 
         $baseInventory = new class([], 36) extends BaseInventory{
@@ -3602,20 +3607,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
         if($packet->slot < 0){
-            throw new \InvalidArgumentException("Slot " . $packet->slot . " is invalid");
+            throw new InvalidArgumentException("Slot " . $packet->slot . " is invalid");
         }
 
         switch($packet->windowid){
             case ContainerIds::INVENTORY:
                 if($packet->slot >= $this->inventory->getSize()){
-                    throw new \InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                    throw new InvalidArgumentException("Slot " . $packet->slot . " out of range");
                 }
 
                 $transaction = new Transaction($this->inventory, $packet->slot, $packet->item);
                 break;
             case ContainerIds::ARMOR:
                 if($packet->slot >= 4){
-                    throw new \InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                    throw new InvalidArgumentException("Slot " . $packet->slot . " out of range");
                 }
 
                 $transaction = new Transaction($this->armorInventory, $packet->slot, $packet->item);
@@ -3626,7 +3631,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             default:
                 $inventory = $this->getWindow($packet->windowid);
                 if(!($inventory instanceof Inventory)){
-                    throw new \InvalidArgumentException("Inventory " . $packet->windowid . " not founded");
+                    throw new InvalidArgumentException("Inventory " . $packet->windowid . " not founded");
                 }
 
                 $transaction = new Transaction($inventory, $packet->slot, $packet->item);
@@ -3691,7 +3696,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$compound = $nbt->read($packet->namedtag, false, $_, 512);
 
 			if(!($compound instanceof CompoundTag)){
-				throw new \InvalidArgumentException("Expected " . CompoundTag::class . " in block entity NBT, got " . (is_object($compound) ? get_class($compound) : gettype($compound)));
+				throw new InvalidArgumentException("Expected " . CompoundTag::class . " in block entity NBT, got " . (is_object($compound) ? get_class($compound) : gettype($compound)));
 			}
 			if(!$t->updateCompoundTag($compound, $this)){
 				$t->spawnTo($this);
@@ -3864,7 +3869,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		//Basic safety restriction. TODO: improve this
 		if(!$this->loggedIn and !$packet->canBeSentBeforeLogin()){
-			throw new \InvalidArgumentException("Attempted to send " . get_class($packet) . " to " . $this->getName() . " too early");
+			throw new InvalidArgumentException("Attempted to send " . get_class($packet) . " to " . $this->getName() . " too early");
 		}
 
 		$timings = Timings::getSendDataPacketTimings($packet);
@@ -4138,7 +4143,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->formId = $id;
 		$pk->formData = json_encode($form);
 		if($pk->formData === false){
-			throw new \InvalidArgumentException("Failed to encode form JSON: " . json_last_error_msg());
+			throw new InvalidArgumentException("Failed to encode form JSON: " . json_last_error_msg());
 		}
 		if($this->dataPacket($pk)){
 			$this->forms[$id] = $form;
@@ -4268,17 +4273,17 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function setCanSaveWithChunk(bool $value) : void{
-		throw new \BadMethodCallException("Players can't be saved with chunks");
+		throw new BadMethodCallException("Players can't be saved with chunks");
 	}
 
 	/**
 	 * Handles player data saving
 	 *
-	 * @throws \InvalidStateException if the player is closed
+	 * @throws InvalidStateException if the player is closed
 	 */
 	public function save(){
 		if($this->closed){
-			throw new \InvalidStateException("Tried to save closed player");
+			throw new InvalidStateException("Tried to save closed player");
 		}
 
 		parent::saveNBT();
@@ -4574,8 +4579,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return int
 	 *
-	 * @throws \InvalidArgumentException if a forceID which is already in use is specified
-	 * @throws \InvalidStateException if trying to add a window without forceID when no slots are free
+	 * @throws InvalidArgumentException if a forceID which is already in use is specified
+	 * @throws InvalidStateException if trying to add a window without forceID when no slots are free
 	 */
 	public function addWindow(Inventory $inventory, int $forceId = null, bool $isPermanent = false) : int{
 		if(($id = $this->getWindowId($inventory)) !== ContainerIds::NONE){
@@ -4587,14 +4592,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			do{
 				$cnt = max(ContainerIds::FIRST, ($cnt + 1) % ContainerIds::LAST);
 				if($cnt === $this->windowCnt){ //wraparound, no free slots
-					throw new \InvalidStateException("No free window IDs found");
+					throw new InvalidStateException("No free window IDs found");
 				}
 			}while(isset($this->windowIndex[$cnt]));
 			$this->windowCnt = $cnt;
 		}else{
 			$cnt = $forceId;
 			if(isset($this->windowIndex[$cnt])){
-				throw new \InvalidArgumentException("Requested force ID $forceId already in use");
+				throw new InvalidArgumentException("Requested force ID $forceId already in use");
 			}
 		}
 
@@ -4618,13 +4623,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * @param Inventory $inventory
 	 * @param bool      $force Forces removal of permanent windows such as normal inventory, cursor
 	 *
-	 * @throws \InvalidArgumentException if trying to remove a fixed inventory window without the `force` parameter as true
+	 * @throws InvalidArgumentException if trying to remove a fixed inventory window without the `force` parameter as true
 	 */
 	public function removeWindow(Inventory $inventory, bool $force = false){
 		$id = $this->windows[$hash = spl_object_hash($inventory)] ?? null;
 
 		if($id !== null and !$force and isset($this->permanentWindows[$id])){
-			throw new \InvalidArgumentException("Cannot remove fixed window $id (" . get_class($inventory) . ") from " . $this->getName());
+			throw new InvalidArgumentException("Cannot remove fixed window $id (" . get_class($inventory) . ") from " . $this->getName());
 		}
 
 		if($id !== null){

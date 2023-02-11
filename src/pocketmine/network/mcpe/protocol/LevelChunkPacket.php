@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
+use function pack;
 
 class LevelChunkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_CHUNK_PACKET;
@@ -136,7 +137,7 @@ class LevelChunkPacket extends DataPacket{
 	    	if($this->cacheEnabled){
 		    	$this->putUnsignedVarInt(count($this->usedBlobHashes));
 		    	foreach($this->usedBlobHashes as $hash){
-			    	($this->buffer .= (\pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+			    	($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
 		    	}
 			}
 		}

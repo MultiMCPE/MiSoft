@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\math;
 
+use Generator;
+use InvalidArgumentException;
 use function floor;
 use const INF;
 
@@ -36,9 +38,9 @@ abstract class VoxelRayTrace{
 	 * @param Vector3 $directionVector
 	 * @param float   $maxDistance
 	 *
-	 * @return \Generator|Vector3[]
+	 * @return Generator|Vector3[]
 	 */
-	public static function inDirection(Vector3 $start, Vector3 $directionVector, float $maxDistance) : \Generator{
+	public static function inDirection(Vector3 $start, Vector3 $directionVector, float $maxDistance) : Generator{
 		return self::betweenPoints($start, $start->add($directionVector->multiply($maxDistance)));
 	}
 
@@ -52,14 +54,14 @@ abstract class VoxelRayTrace{
 	 * @param Vector3 $start
 	 * @param Vector3 $end
 	 *
-	 * @return \Generator|Vector3[]
+	 * @return Generator|Vector3[]
 	 */
-	public static function betweenPoints(Vector3 $start, Vector3 $end) : \Generator{
+	public static function betweenPoints(Vector3 $start, Vector3 $end) : Generator{
 		$currentBlock = $start->floor();
 
 		$directionVector = $end->subtract($start)->normalize();
 		if($directionVector->lengthSquared() <= 0){
-			throw new \InvalidArgumentException("Start and end points are the same, giving a zero direction vector");
+			throw new InvalidArgumentException("Start and end points are the same, giving a zero direction vector");
 		}
 
 		$radius = $start->distance($end);

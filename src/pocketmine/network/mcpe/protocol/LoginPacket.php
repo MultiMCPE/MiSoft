@@ -30,9 +30,14 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\Utils;
+use RuntimeException;
+use Throwable;
 use function in_array;
 use function get_class;
 use function json_decode;
+use function ord;
+use function unpack;
+use function zlib_decode;
 
 class LoginPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
@@ -85,12 +90,12 @@ class LoginPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-        if (((\unpack("N", $this->get(4))[1] << 32 >> 32)) === 0x0) {
+        if (((unpack("N", $this->get(4))[1] << 32 >> 32)) === 0x0) {
             $this->setOffset($this->getOffset() - 0x2);
         } else {
             $this->setOffset($this->getOffset() - 0x4);
         }
-		$this->protocol = ((\unpack("N", $this->get(4))[1] << 32 >> 32));
+		$this->protocol = ((unpack("N", $this->get(4))[1] << 32 >> 32));
 
         if (!in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)) {
             $this->isValidProtocol = false;
@@ -99,12 +104,12 @@ class LoginPacket extends DataPacket{
         }
 
         if ($this->protocol < ProtocolInfo::PROTOCOL_130) {
-            $this->gameEdition = (\ord($this->get(1)));
+            $this->gameEdition = (ord($this->get(1)));
         }
 
 		try{
 			$this->decodeConnectionRequest();
-		}catch(\Throwable $e){
+		}catch(Throwable $e){
 			if($this->isValidProtocol){
 				throw $e;
 			}
@@ -119,7 +124,7 @@ class LoginPacket extends DataPacket{
 
 	protected function decodeConnectionRequest() : void{
         if ($this->protocol < ProtocolInfo::PROTOCOL_110) {
-            $buffer = new BinaryStream(\zlib_decode($this->getString(), 0x400 * 0x400 * 0x40));
+            $buffer = new BinaryStream(zlib_decode($this->getString(), 0x400 * 0x400 * 0x40));
         } else {
             $buffer = new BinaryStream($this->getString());
         }
@@ -131,7 +136,7 @@ class LoginPacket extends DataPacket{
 			$webtoken = Utils::decodeJWT($chain);
 			if(isset($webtoken["extraData"])){
 				if($hasExtraData){
-					throw new \RuntimeException("Found 'extraData' multiple times in key chain");
+					throw new RuntimeException("Found 'extraData' multiple times in key chain");
 				}
 				$hasExtraData = true;
 				if(isset($webtoken["extraData"]["displayName"])){

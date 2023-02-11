@@ -43,6 +43,7 @@ use function json_decode;
 use function file_get_contents;
 use function count;
 use function var_dump;
+use const pocketmine\RESOURCE_PATH;
 
 class BlockPallet {
 
@@ -59,10 +60,10 @@ class BlockPallet {
      * @return array
      */
 	public static function initAll() : array{
-	    self::$blockNamesIds = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . '/vanilla/block_id_map.json'), true);
+	    self::$blockNamesIds = json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/block_id_map.json'), true);
 
 	 	$result = [];
-		$folderPath = \pocketmine\RESOURCE_PATH . "/vanilla/palette/";
+		$folderPath = RESOURCE_PATH . "/vanilla/palette/";
 		$palletFiles = array_diff(scandir($folderPath), ['..', '.']);
 		foreach($palletFiles as $fileName){
 			if(strpos($fileName, "BlockPallet") !== 0){

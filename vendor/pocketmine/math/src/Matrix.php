@@ -23,11 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\math;
 
+use ArrayAccess;
 use function implode;
 use function max;
 use function substr;
 
-class Matrix implements \ArrayAccess{
+class Matrix implements ArrayAccess{
 	private $matrix = [];
 	private $rows = 0;
 	private $columns = 0;

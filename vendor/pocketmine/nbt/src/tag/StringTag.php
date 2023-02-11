@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt\tag;
 
+use InvalidArgumentException;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
@@ -41,7 +42,7 @@ class StringTag extends NamedTag{
 	public function __construct(string $name = "", string $value = ""){
 		parent::__construct($name);
 		if(strlen($value) > 32767){
-			throw new \InvalidArgumentException("StringTag cannot hold more than 32767 bytes, got string of length " . strlen($value));
+			throw new InvalidArgumentException("StringTag cannot hold more than 32767 bytes, got string of length " . strlen($value));
 		}
 		$this->value = $value;
 	}

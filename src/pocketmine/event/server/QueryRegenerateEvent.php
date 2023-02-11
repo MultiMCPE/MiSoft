@@ -29,6 +29,7 @@ use pocketmine\Server;
 use pocketmine\utils\Binary;
 use function chr;
 use function count;
+use function pack;
 use function str_replace;
 use function substr;
 
@@ -298,6 +299,6 @@ class QueryRegenerateEvent extends ServerEvent{
 	 * @return string
 	 */
 	public function getShortQuery() : string{
-		return $this->shortQueryCache ?? ($this->shortQueryCache = $this->serverName . "\x00" . $this->gametype . "\x00" . $this->map . "\x00" . $this->numPlayers . "\x00" . $this->maxPlayers . "\x00" . (\pack("v", $this->port)) . $this->ip . "\x00");
+		return $this->shortQueryCache ?? ($this->shortQueryCache = $this->serverName . "\x00" . $this->gametype . "\x00" . $this->map . "\x00" . $this->numPlayers . "\x00" . $this->maxPlayers . "\x00" . (pack("v", $this->port)) . $this->ip . "\x00");
 	}
 }

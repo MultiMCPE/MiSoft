@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\multiversion;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
+use ReflectionClass;
+use SplFixedArray;
 use function array_keys;
 use function decbin;
 use function max;
@@ -480,19 +482,19 @@ final class MetadataConvertor{
 		]
 	];
 
-    /** @var \SplFixedArray<int>[] */
+    /** @var SplFixedArray<int>[] */
     protected static $protocolMetadata;
-    /** @var \SplFixedArray<int>[] */
+    /** @var SplFixedArray<int>[] */
     protected static $protocolFlags;
 
     protected static function init() : void{
-        $magicNetworkMetadataProperties = (new \ReflectionClass(EntityMetadataProperties::class))->getConstants();
-        $magicNetworkFlags = (new \ReflectionClass(EntityMetadataFlags::class))->getConstants();
+        $magicNetworkMetadataProperties = (new ReflectionClass(EntityMetadataProperties::class))->getConstants();
+        $magicNetworkFlags = (new ReflectionClass(EntityMetadataFlags::class))->getConstants();
 
         self::$protocolMetadata = [];
         foreach(array_keys(self::METADATA) as $protocol){
             $protocolMagicMetadataProperties = self::METADATA[$protocol];
-            self::$protocolMetadata[$protocol] = new \SplFixedArray(max($magicNetworkMetadataProperties) + 1);
+            self::$protocolMetadata[$protocol] = new SplFixedArray(max($magicNetworkMetadataProperties) + 1);
 
             foreach($protocolMagicMetadataProperties as $magicName => $magicId){
                 if(isset($magicNetworkMetadataProperties[$magicName])){
@@ -504,7 +506,7 @@ final class MetadataConvertor{
         self::$protocolFlags = [];
         foreach(array_keys(self::FLAGS) as $protocol){
             $protocolMagicFlags = self::FLAGS[$protocol];
-            self::$protocolFlags[$protocol] = new \SplFixedArray(max($magicNetworkFlags) + 1);
+            self::$protocolFlags[$protocol] = new SplFixedArray(max($magicNetworkFlags) + 1);
 
             foreach($protocolMagicFlags as $magicName => $magicId){
                 if(isset($magicNetworkFlags[$magicName])){

@@ -23,10 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
+use UnexpectedValueException;
+use function pack;
+use function unpack;
 
 class ClientboundDebugRendererPacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::CLIENTBOUND_DEBUG_RENDERER_PACKET;
@@ -90,7 +94,7 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 	public function getDurationMillis() : int{ return $this->durationMillis; }
 
 	protected function decodePayload() : void{
-		$this->type = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->type = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 
 		switch($this->type){
 			case self::TYPE_CLEAR:
@@ -99,19 +103,19 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 			case self::TYPE_ADD_CUBE:
 				$this->text = $this->getString();
 				$this->position = $this->getVector3();
-				$this->red = ((\unpack("g", $this->get(4))[1]));
-				$this->green = ((\unpack("g", $this->get(4))[1]));
-				$this->blue = ((\unpack("g", $this->get(4))[1]));
-				$this->alpha = ((\unpack("g", $this->get(4))[1]));
+				$this->red = ((unpack("g", $this->get(4))[1]));
+				$this->green = ((unpack("g", $this->get(4))[1]));
+				$this->blue = ((unpack("g", $this->get(4))[1]));
+				$this->alpha = ((unpack("g", $this->get(4))[1]));
 				$this->durationMillis = (Binary::readLLong($this->get(8)));
 				break;
 			default:
-				throw new \UnexpectedValueException("Unknown type " . $this->type);
+				throw new UnexpectedValueException("Unknown type " . $this->type);
 		}
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (\pack("V", $this->type)));
+		($this->buffer .= (pack("V", $this->type)));
 
 		switch($this->type){
 			case self::TYPE_CLEAR:
@@ -120,14 +124,14 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 			case self::TYPE_ADD_CUBE:
 				$this->putString($this->text);
 				$this->putVector3($this->position);
-				($this->buffer .= (\pack("g", $this->red)));
-				($this->buffer .= (\pack("g", $this->green)));
-				($this->buffer .= (\pack("g", $this->blue)));
-				($this->buffer .= (\pack("g", $this->alpha)));
-				($this->buffer .= (\pack("VV", $this->durationMillis & 0xFFFFFFFF, $this->durationMillis >> 32)));
+				($this->buffer .= (pack("g", $this->red)));
+				($this->buffer .= (pack("g", $this->green)));
+				($this->buffer .= (pack("g", $this->blue)));
+				($this->buffer .= (pack("g", $this->alpha)));
+				($this->buffer .= (pack("VV", $this->durationMillis & 0xFFFFFFFF, $this->durationMillis >> 32)));
 				break;
 			default:
-				throw new \InvalidArgumentException("Unknown type " . $this->type);
+				throw new InvalidArgumentException("Unknown type " . $this->type);
 		}
 	}
 

@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class SimpleEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SIMPLE_EVENT_PACKET;
@@ -37,11 +39,11 @@ class SimpleEventPacket extends DataPacket{
 	public $eventType;
 
 	protected function decodePayload(){
-		$this->eventType = ((\unpack("v", $this->get(2))[1]));
+		$this->eventType = ((unpack("v", $this->get(2))[1]));
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (\pack("v", $this->eventType)));
+		($this->buffer .= (pack("v", $this->eventType)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

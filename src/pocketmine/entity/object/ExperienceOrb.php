@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\object;
 
+use InvalidArgumentException;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
 use pocketmine\nbt\tag\IntTag;
@@ -134,7 +135,7 @@ class ExperienceOrb extends Entity{
 
 	public function setXpValue(int $amount) : void{
 		if($amount <= 0){
-			throw new \InvalidArgumentException("XP amount must be greater than 0, got $amount");
+			throw new InvalidArgumentException("XP amount must be greater than 0, got $amount");
 		}
 		$this->propertyManager->setInt(self::DATA_EXPERIENCE_VALUE, $amount);
 	}

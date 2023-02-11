@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use InvalidArgumentException;
 use function getmypid;
 
 /**
@@ -40,7 +41,7 @@ trait EnumTrait{
 	/**
 	 * Registers the given object as an enum member.
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	protected static function register(self $member) : void{
 		self::_registryRegister($member->name(), $member);
@@ -84,7 +85,7 @@ trait EnumTrait{
 	private $runtimeId;
 
 	/**
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	private function __construct(string $enumName){
 		self::verifyName($enumName);

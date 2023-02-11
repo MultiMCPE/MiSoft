@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\encryption;
 
-final class DecryptionException extends \RuntimeException{
+use RuntimeException;
+
+final class DecryptionException extends RuntimeException{
 
 }

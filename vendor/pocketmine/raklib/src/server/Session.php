@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace raklib\server;
 
+use InvalidArgumentException;
 use raklib\protocol\ACK;
 use raklib\protocol\ConnectedPing;
 use raklib\protocol\ConnectedPong;
@@ -139,7 +140,7 @@ class Session{
 
 	public function __construct(SessionManager $sessionManager, InternetAddress $address, int $clientId, int $mtuSize){
 		if($mtuSize < self::MIN_MTU_SIZE){
-			throw new \InvalidArgumentException("MTU size must be at least " . self::MIN_MTU_SIZE . ", got $mtuSize");
+			throw new InvalidArgumentException("MTU size must be at least " . self::MIN_MTU_SIZE . ", got $mtuSize");
 		}
 		$this->sessionManager = $sessionManager;
 		$this->address = $address;

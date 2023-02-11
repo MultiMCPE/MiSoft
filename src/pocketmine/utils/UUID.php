@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use InvalidArgumentException;
 use function bin2hex;
 use function getmypid;
 use function getmyuid;
@@ -30,11 +31,13 @@ use function hash;
 use function hex2bin;
 use function implode;
 use function mt_rand;
+use function pack;
 use function str_replace;
 use function strlen;
 use function substr;
 use function time;
 use function trim;
+use function unpack;
 
 class UUID{
 
@@ -77,14 +80,14 @@ class UUID{
 	 *
 	 * @return UUID
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public static function fromBinary(string $uuid, int $version = null) : UUID{
 		if(strlen($uuid) !== 16){
-			throw new \InvalidArgumentException("Must have exactly 16 bytes");
+			throw new InvalidArgumentException("Must have exactly 16 bytes");
 		}
 
-		return new UUID((\unpack("N", substr($uuid, 0, 4))[1] << 32 >> 32), (\unpack("N", substr($uuid, 4, 4))[1] << 32 >> 32), (\unpack("N", substr($uuid, 8, 4))[1] << 32 >> 32), (\unpack("N", substr($uuid, 12, 4))[1] << 32 >> 32), $version);
+		return new UUID((unpack("N", substr($uuid, 0, 4))[1] << 32 >> 32), (unpack("N", substr($uuid, 4, 4))[1] << 32 >> 32), (unpack("N", substr($uuid, 8, 4))[1] << 32 >> 32), (unpack("N", substr($uuid, 12, 4))[1] << 32 >> 32), $version);
 	}
 
 	/**
@@ -101,11 +104,11 @@ class UUID{
 	}
 
 	public static function fromRandom() : UUID{
-		return self::fromData((\pack("N", time())), (\pack("n", getmypid())), (\pack("n", getmyuid())), (\pack("N", mt_rand(-0x7fffffff, 0x7fffffff))), (\pack("N", mt_rand(-0x7fffffff, 0x7fffffff))));
+		return self::fromData((pack("N", time())), (pack("n", getmypid())), (pack("n", getmyuid())), (pack("N", mt_rand(-0x7fffffff, 0x7fffffff))), (pack("N", mt_rand(-0x7fffffff, 0x7fffffff))));
 	}
 
 	public function toBinary() : string{
-		return (\pack("N", $this->parts[0])) . (\pack("N", $this->parts[1])) . (\pack("N", $this->parts[2])) . (\pack("N", $this->parts[3]));
+		return (pack("N", $this->parts[0])) . (pack("N", $this->parts[1])) . (pack("N", $this->parts[2])) . (pack("N", $this->parts[3]));
 	}
 
 	public function toString() : string{
@@ -121,7 +124,7 @@ class UUID{
 
 	public function getPart(int $partNumber){
 		if($partNumber < 0 or $partNumber > 3){
-			throw new \InvalidArgumentException("Invalid UUID part index $partNumber");
+			throw new InvalidArgumentException("Invalid UUID part index $partNumber");
 		}
 		return $this->parts[$partNumber];
 	}

@@ -20,10 +20,12 @@ namespace raklib\protocol;
 use function ceil;
 use function chr;
 use function ord;
+use function pack;
 use function strlen;
 use function substr;
 
 use pocketmine\utils\Binary;
+use function unpack;
 
 class EncapsulatedPacket{
 	private const RELIABILITY_SHIFT = 5;
@@ -72,9 +74,9 @@ class EncapsulatedPacket{
 		$offset = 0;
 		$packet->reliability = ord($bytes[$offset++]);
 
-		$length = (\unpack("N", substr($bytes, $offset, 4))[1] << 32 >> 32);
+		$length = (unpack("N", substr($bytes, $offset, 4))[1] << 32 >> 32);
 		$offset += 4;
-		$packet->identifierACK = (\unpack("N", substr($bytes, $offset, 4))[1] << 32 >> 32); //TODO: don't read this for non-ack-receipt reliabilities
+		$packet->identifierACK = (unpack("N", substr($bytes, $offset, 4))[1] << 32 >> 32); //TODO: don't read this for non-ack-receipt reliabilities
 		$offset += 4;
 
 		if(PacketReliability::isSequencedOrOrdered($packet->reliability)){
@@ -93,8 +95,8 @@ class EncapsulatedPacket{
 	public function toInternalBinary() : string{
 		return
 			chr($this->reliability) .
-			(\pack("N", strlen($this->buffer))) .
-			(\pack("N", $this->identifierACK ?? -1)) . //TODO: don't write this for non-ack-receipt reliabilities
+			(pack("N", strlen($this->buffer))) .
+			(pack("N", $this->identifierACK ?? -1)) . //TODO: don't write this for non-ack-receipt reliabilities
 			(PacketReliability::isSequencedOrOrdered($this->reliability) ? chr($this->orderChannel) : "") .
 			$this->buffer;
 	}
@@ -113,33 +115,33 @@ class EncapsulatedPacket{
 		$packet->reliability = $reliability = ($flags & self::RELIABILITY_FLAGS) >> self::RELIABILITY_SHIFT;
 		$packet->hasSplit = $hasSplit = ($flags & self::SPLIT_FLAG) > 0;
 
-		$length = (int) ceil((\unpack("n", substr($binary, 1, 2))[1]) / 8);
+		$length = (int) ceil((unpack("n", substr($binary, 1, 2))[1]) / 8);
 		$offset = 3;
 
 		if($reliability > PacketReliability::UNRELIABLE){
 			if(PacketReliability::isReliable($reliability)){
-				$packet->messageIndex = (\unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
+				$packet->messageIndex = (unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
 				$offset += 3;
 			}
 
 			if(PacketReliability::isSequenced($reliability)){
-				$packet->sequenceIndex = (\unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
+				$packet->sequenceIndex = (unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
 				$offset += 3;
 			}
 
 			if(PacketReliability::isSequencedOrOrdered($reliability)){
-				$packet->orderIndex = (\unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
+				$packet->orderIndex = (unpack("V", substr($binary, $offset, 3) . "\x00")[1]);
 				$offset += 3;
 				$packet->orderChannel = ord($binary[$offset++]);
 			}
 		}
 
 		if($hasSplit){
-			$packet->splitCount = (\unpack("N", substr($binary, $offset, 4))[1] << 32 >> 32);
+			$packet->splitCount = (unpack("N", substr($binary, $offset, 4))[1] << 32 >> 32);
 			$offset += 4;
-			$packet->splitID = (\unpack("n", substr($binary, $offset, 2))[1]);
+			$packet->splitID = (unpack("n", substr($binary, $offset, 2))[1]);
 			$offset += 2;
-			$packet->splitIndex = (\unpack("N", substr($binary, $offset, 4))[1] << 32 >> 32);
+			$packet->splitIndex = (unpack("N", substr($binary, $offset, 4))[1] << 32 >> 32);
 			$offset += 4;
 		}
 
@@ -155,14 +157,14 @@ class EncapsulatedPacket{
 	public function toBinary() : string{
 		return
 			chr(($this->reliability << self::RELIABILITY_SHIFT) | ($this->hasSplit ? self::SPLIT_FLAG : 0)) .
-			(\pack("n", strlen($this->buffer) << 3)) .
+			(pack("n", strlen($this->buffer) << 3)) .
 			($this->reliability > PacketReliability::UNRELIABLE ?
-				(PacketReliability::isReliable($this->reliability) ? (\substr(\pack("V", $this->messageIndex), 0, -1)) : "") .
-				(PacketReliability::isSequenced($this->reliability) ? (\substr(\pack("V", $this->sequenceIndex), 0, -1)) : "") .
-				(PacketReliability::isSequencedOrOrdered($this->reliability) ? (\substr(\pack("V", $this->orderIndex), 0, -1)) . chr($this->orderChannel) : "")
+				(PacketReliability::isReliable($this->reliability) ? (substr(pack("V", $this->messageIndex), 0, -1)) : "") .
+				(PacketReliability::isSequenced($this->reliability) ? (substr(pack("V", $this->sequenceIndex), 0, -1)) : "") .
+				(PacketReliability::isSequencedOrOrdered($this->reliability) ? (substr(pack("V", $this->orderIndex), 0, -1)) . chr($this->orderChannel) : "")
 				: ""
 			) .
-			($this->hasSplit ? (\pack("N", $this->splitCount)) . (\pack("n", $this->splitID)) . (\pack("N", $this->splitIndex)) : "")
+			($this->hasSplit ? (pack("N", $this->splitCount)) . (pack("n", $this->splitID)) . (pack("N", $this->splitIndex)) : "")
 			. $this->buffer;
 	}
 

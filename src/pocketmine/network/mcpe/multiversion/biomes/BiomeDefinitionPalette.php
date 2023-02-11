@@ -29,9 +29,9 @@ use const pocketmine\RESOURCE_PATH;
 
 class BiomeDefinitionPalette{
     protected const BIOMES_CACHE = [
-        ProtocolInfo::PROTOCOL_428 => \pocketmine\RESOURCE_PATH . '/vanilla/biomes/428/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_400 => \pocketmine\RESOURCE_PATH . '/vanilla/biomes/400/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_331 => \pocketmine\RESOURCE_PATH . '/vanilla/biomes/331/biome_definitions.nbt'
+        ProtocolInfo::PROTOCOL_428 => RESOURCE_PATH . '/vanilla/biomes/428/biome_definitions.nbt',
+        ProtocolInfo::PROTOCOL_400 => RESOURCE_PATH . '/vanilla/biomes/400/biome_definitions.nbt',
+        ProtocolInfo::PROTOCOL_331 => RESOURCE_PATH . '/vanilla/biomes/331/biome_definitions.nbt'
     ];
 
     /** @var string[] */

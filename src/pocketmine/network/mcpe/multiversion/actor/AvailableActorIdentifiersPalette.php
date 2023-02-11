@@ -29,12 +29,12 @@ use const pocketmine\RESOURCE_PATH;
 
 class AvailableActorIdentifiersPalette{
     protected const ACTOR_IDS_CACHE = [
-        ProtocolInfo::PROTOCOL_440 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/440/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_419 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/419/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_408 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/408/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_400 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/400/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_390 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/390/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_331 => \pocketmine\RESOURCE_PATH . '/vanilla/actor/331/entity_identifiers.nbt'
+        ProtocolInfo::PROTOCOL_440 => RESOURCE_PATH . '/vanilla/actor/440/entity_identifiers.nbt',
+        ProtocolInfo::PROTOCOL_419 => RESOURCE_PATH . '/vanilla/actor/419/entity_identifiers.nbt',
+        ProtocolInfo::PROTOCOL_408 => RESOURCE_PATH . '/vanilla/actor/408/entity_identifiers.nbt',
+        ProtocolInfo::PROTOCOL_400 => RESOURCE_PATH . '/vanilla/actor/400/entity_identifiers.nbt',
+        ProtocolInfo::PROTOCOL_390 => RESOURCE_PATH . '/vanilla/actor/390/entity_identifiers.nbt',
+        ProtocolInfo::PROTOCOL_331 => RESOURCE_PATH . '/vanilla/actor/331/entity_identifiers.nbt'
     ];
 
     /** @var string[] */

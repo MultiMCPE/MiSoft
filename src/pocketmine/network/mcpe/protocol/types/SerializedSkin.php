@@ -22,15 +22,18 @@
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
+use InvalidArgumentException;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 use Ahc\Json\Comment;
 use pocketmine\entity\Skin;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Color;
+use SplFixedArray;
 use function json_decode;
 use function json_encode;
 use function json_last_error_msg;
+use function microtime;
 use function random_int;
 
 class SerializedSkin{
@@ -60,8 +63,8 @@ class SerializedSkin{
             null,
             "",
             new Color(0, 0, 0),
-            \SplFixedArray::fromArray([]),
-            \SplFixedArray::fromArray([])
+            SplFixedArray::fromArray([]),
+            SplFixedArray::fromArray([])
         );
     }
 
@@ -111,9 +114,9 @@ class SerializedSkin{
     protected $armSize;
     /** @var Color */
     protected $skinColor;
-    /** @var \SplFixedArray */
+    /** @var SplFixedArray */
     protected $personaPieces;
-    /** @var \SplFixedArray */
+    /** @var SplFixedArray */
     protected $pieceTintColors;
     /** @var bool */
     protected $isTrusted = false;
@@ -134,21 +137,21 @@ class SerializedSkin{
 	 * @param string|null     $fullSkinId
 	 * @param string          $armSize
 	 * @param Color           $skinColor
-	 * @param \SplFixedArray  $personaPieces
-	 * @param \SplFixedArray  $pieceTintColors
+	 * @param SplFixedArray  $personaPieces
+	 * @param SplFixedArray  $pieceTintColors
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, \SplFixedArray $personaPieces, \SplFixedArray $pieceTintColors){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
-            if($decodedData === \false){
-                throw new \InvalidArgumentException("Invalid geometry data (" . json_last_error_msg() . ")");
+            if($decodedData === false){
+                throw new InvalidArgumentException("Invalid geometry data (" . json_last_error_msg() . ")");
             }
             $geometryData = json_encode($decodedData);
         }
 
         $decodedPatch = json_decode($resourcePatch);
         if(!isset($decodedPatch->geometry->default)){
-            throw new \InvalidArgumentException("Invalid resource patch: $resourcePatch");
+            throw new InvalidArgumentException("Invalid resource patch: $resourcePatch");
         }
 
         $resourcePatch = json_encode($decodedPatch);
@@ -165,7 +168,7 @@ class SerializedSkin{
         $this->premiumSkin = $premiumSkin;
         $this->personaSkin = $personaSkin;
         $this->capeOnClassicSkin = $capeOnClassicSkin;
-        $this->fullSkinId = $fullSkinId ?? (Binary::writeDouble(\microtime(\true)) . Binary::writeLInt(random_int(-0xffffffff, 0xffffffff)));
+        $this->fullSkinId = $fullSkinId ?? (Binary::writeDouble(microtime(true)) . Binary::writeLInt(random_int(-0xffffffff, 0xffffffff)));
         $this->armSize = $armSize;
         $this->skinColor = $skinColor;
         $this->personaPieces = $personaPieces;
@@ -280,16 +283,16 @@ class SerializedSkin{
     }
 
     /**
-     * @return \SplFixedArray
+     * @return SplFixedArray
      */
-    public function getPersonaPieces() : \SplFixedArray{
+    public function getPersonaPieces() : SplFixedArray{
         return $this->personaPieces;
     }
 
     /**
-     * @return \SplFixedArray
+     * @return SplFixedArray
      */
-    public function getPieceTintColors() : \SplFixedArray{
+    public function getPieceTintColors() : SplFixedArray{
         return $this->pieceTintColors;
     }
 

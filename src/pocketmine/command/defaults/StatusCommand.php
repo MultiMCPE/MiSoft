@@ -31,6 +31,7 @@ use function floor;
 use function microtime;
 use function number_format;
 use function round;
+use const pocketmine\START_TIME;
 
 class StatusCommand extends VanillaCommand{
 
@@ -54,7 +55,7 @@ class StatusCommand extends VanillaCommand{
 		$server = $sender->getServer();
 		$sender->sendMessage(TextFormat::GREEN . "---- " . TextFormat::WHITE . "Server status" . TextFormat::GREEN . " ----");
 
-		$time = microtime(true) - \pocketmine\START_TIME;
+		$time = microtime(true) - START_TIME;
 
 		$seconds = floor($time % 60);
 		$minutes = null;

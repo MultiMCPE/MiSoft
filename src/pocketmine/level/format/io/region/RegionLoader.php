@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io\region;
 
+use InvalidArgumentException;
 use pocketmine\level\format\ChunkException;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
 use pocketmine\utils\Binary;
@@ -124,7 +125,7 @@ class RegionLoader{
 	 * @param int $z
 	 *
 	 * @return null|string
-	 * @throws \InvalidArgumentException if invalid coordinates are given
+	 * @throws InvalidArgumentException if invalid coordinates are given
 	 * @throws CorruptedChunkException if chunk corruption is detected
 	 */
 	public function readChunk(int $x, int $z) : ?string{
@@ -142,7 +143,7 @@ class RegionLoader{
 		if($prefix === false or strlen($prefix) !== 4){
 			throw new CorruptedChunkException("Corrupted chunk header detected (unexpected end of file reading length prefix)");
 		}
-		$length = (\unpack("N", $prefix)[1] << 32 >> 32);
+		$length = (unpack("N", $prefix)[1] << 32 >> 32);
 
 		if($length <= 0){ //TODO: if we reached here, the locationTable probably needs updating
 			return null;
@@ -176,7 +177,7 @@ class RegionLoader{
 	 * @param int $z
 	 *
 	 * @return bool
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function chunkExists(int $x, int $z) : bool{
 		return $this->isChunkGenerated(self::getChunkOffset($x, $z));
@@ -188,7 +189,7 @@ class RegionLoader{
 	 * @param string $chunkData
 	 *
 	 * @throws ChunkException
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function writeChunk(int $x, int $z, string $chunkData){
 		$this->lastUsed = time();
@@ -210,7 +211,7 @@ class RegionLoader{
 		$this->bumpNextFreeSector($this->locationTable[$index]);
 
 		fseek($this->filePointer, $offset << 12);
-		fwrite($this->filePointer, str_pad((\pack("N", $length)) . chr(self::COMPRESSION_ZLIB) . $chunkData, $newSize << 12, "\x00", STR_PAD_RIGHT));
+		fwrite($this->filePointer, str_pad((pack("N", $length)) . chr(self::COMPRESSION_ZLIB) . $chunkData, $newSize << 12, "\x00", STR_PAD_RIGHT));
 
 		$this->writeLocationIndex($index);
 	}
@@ -219,7 +220,7 @@ class RegionLoader{
 	 * @param int $x
 	 * @param int $z
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function removeChunk(int $x, int $z){
 		$index = self::getChunkOffset($x, $z);
@@ -232,11 +233,11 @@ class RegionLoader{
 	 * @param int $z
 	 *
 	 * @return int
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	protected static function getChunkOffset(int $x, int $z) : int{
 		if($x < 0 or $x > 31 or $z < 0 or $z > 31){
-			throw new \InvalidArgumentException("Invalid chunk position in region, expected x/z in range 0-31, got x=$x, z=$z");
+			throw new InvalidArgumentException("Invalid chunk position in region, expected x/z in range 0-31, got x=$x, z=$z");
 		}
 		return $x | ($z << 5);
 	}
@@ -343,9 +344,9 @@ class RegionLoader{
 
 	protected function writeLocationIndex($index){
 		fseek($this->filePointer, $index << 2);
-		fwrite($this->filePointer, (\pack("N", ($this->locationTable[$index]->getFirstSector() << 8) | $this->locationTable[$index]->getSectorCount())), 4);
+		fwrite($this->filePointer, (pack("N", ($this->locationTable[$index]->getFirstSector() << 8) | $this->locationTable[$index]->getSectorCount())), 4);
 		fseek($this->filePointer, 4096 + ($index << 2));
-		fwrite($this->filePointer, (\pack("N", $this->locationTable[$index]->getTimestamp())), 4);
+		fwrite($this->filePointer, (pack("N", $this->locationTable[$index]->getTimestamp())), 4);
 	}
 
 	protected function createBlank(){

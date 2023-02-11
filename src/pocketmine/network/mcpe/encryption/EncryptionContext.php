@@ -6,6 +6,7 @@ namespace pocketmine\network\mcpe\encryption;
 
 use Crypto\Cipher;
 use pocketmine\utils\Binary;
+use RuntimeException;
 use function openssl_digest;
 use function openssl_error_string;
 use function strlen;
@@ -93,7 +94,7 @@ class EncryptionContext{
 	private function calculateChecksum(int $counter, string $payload) : string{
 		$hash = openssl_digest(Binary::writeLLong($counter) . $payload . $this->key, self::CHECKSUM_ALGO, true);
 		if($hash === false){
-			throw new \RuntimeException("openssl_digest() error: " . openssl_error_string());
+			throw new RuntimeException("openssl_digest() error: " . openssl_error_string());
 		}
 		return substr($hash, 0, 8);
 	}

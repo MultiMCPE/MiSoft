@@ -31,13 +31,13 @@ use FG\ASN1\Exception\ParserException;
  */
 class ExplicitlyTaggedObject extends ASNObject
 {
-    /** @var \FG\ASN1\ASNObject[] */
+    /** @var ASNObject[] */
     private $decoratedObjects;
     private $tag;
 
     /**
      * @param int $tag
-     * @param \FG\ASN1\ASNObject $objects,...
+     * @param ASNObject $objects,...
      */
     public function __construct($tag, /* HH_FIXME[4858]: variadic + strict */ ...$objects)
     {

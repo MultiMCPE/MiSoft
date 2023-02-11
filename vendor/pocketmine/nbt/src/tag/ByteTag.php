@@ -23,11 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt\tag;
 
+use InvalidArgumentException;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
 
 use pocketmine\utils\Binary;
+use function chr;
 
 class ByteTag extends NamedTag{
 	/** @var int */
@@ -40,7 +42,7 @@ class ByteTag extends NamedTag{
 	public function __construct(string $name = "", int $value = 0){
 		parent::__construct($name);
 		if($value < -128 or $value > 127){
-			throw new \InvalidArgumentException("Value $value is too large!");
+			throw new InvalidArgumentException("Value $value is too large!");
 		}
 		$this->value = $value;
 	}
@@ -54,7 +56,7 @@ class ByteTag extends NamedTag{
 	}
 
 	public function write(NBTStream $nbt) : void{
-		($nbt->buffer .= \chr($this->value));
+		($nbt->buffer .= chr($this->value));
 	}
 
 	/**

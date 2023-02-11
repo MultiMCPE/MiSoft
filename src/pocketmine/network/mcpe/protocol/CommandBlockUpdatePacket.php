@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class CommandBlockUpdatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::COMMAND_BLOCK_UPDATE_PACKET;
@@ -83,7 +85,7 @@ class CommandBlockUpdatePacket extends DataPacket{
 
 		$this->shouldTrackOutput = (($this->get(1) !== "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
-	    	$this->tickDelay = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+	    	$this->tickDelay = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	    	$this->executeOnFirstTick = (($this->get(1) !== "\x00"));
 		}
 	}
@@ -106,7 +108,7 @@ class CommandBlockUpdatePacket extends DataPacket{
 
 		($this->buffer .= ($this->shouldTrackOutput ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
-	    	($this->buffer .= (\pack("V", $this->tickDelay)));
+	    	($this->buffer .= (pack("V", $this->tickDelay)));
 	    	($this->buffer .= ($this->executeOnFirstTick ? "\x01" : "\x00"));
 		}
 	}

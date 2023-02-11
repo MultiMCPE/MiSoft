@@ -26,6 +26,7 @@ declare(strict_types=1);
  */
 namespace pocketmine\block;
 
+use InvalidArgumentException;
 use pocketmine\entity\Entity;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
@@ -124,7 +125,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 */
 	final public function setDamage(int $meta) : void{
 		if($meta < 0 or $meta > 0xf){
-			throw new \InvalidArgumentException("Block damage values must be 0-15, not $meta");
+			throw new InvalidArgumentException("Block damage values must be 0-15, not $meta");
 		}
 		$this->meta = $meta;
 	}
@@ -261,7 +262,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @param Item $item
 	 *
 	 * @return float
-	 * @throws \InvalidArgumentException if the item efficiency is not a positive number
+	 * @throws InvalidArgumentException if the item efficiency is not a positive number
 	 */
 	public function getBreakTime(Item $item) : float{
 		$base = $this->getHardness();
@@ -273,7 +274,7 @@ class Block extends Position implements BlockIds, Metadatable{
 
 		$efficiency = $item->getMiningEfficiency($this);
 		if($efficiency <= 0){
-			throw new \InvalidArgumentException(get_class($item) . " has invalid mining efficiency: expected >= 0, got $efficiency");
+			throw new InvalidArgumentException(get_class($item) . " has invalid mining efficiency: expected >= 0, got $efficiency");
 		}
 
 		$base /= $efficiency;

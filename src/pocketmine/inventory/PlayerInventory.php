@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use InvalidArgumentException;
+use LogicException;
 use pocketmine\entity\Human;
 use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\item\Item;
@@ -34,6 +36,8 @@ use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\CreativeGroup;
 use pocketmine\Player;
+use RuntimeException;
+use SplFixedArray;
 use function in_array;
 use function is_array;
 
@@ -43,7 +47,7 @@ class PlayerInventory extends BaseInventory{
 	protected $holder;
 	/** @var int */
 	protected $itemInHandIndex = 0;
-	/** @var \SplFixedArray<int> */
+	/** @var SplFixedArray<int> */
 	protected $hotbar;
 
 	/**
@@ -83,12 +87,12 @@ class PlayerInventory extends BaseInventory{
 	 * @param int $hotbarSlot
 	 * @param int $inventorySlot
 	 *
-	 * @throws \RuntimeException if the hotbar slot is out of range
-	 * @throws \InvalidArgumentException if the inventory slot is out of range
+	 * @throws RuntimeException if the hotbar slot is out of range
+	 * @throws InvalidArgumentException if the inventory slot is out of range
 	 */
 	public function setHotbarSlotIndex(int $hotbarSlot, int $inventorySlot){
 		if($inventorySlot < -1 or $inventorySlot >= $this->getSize()){
-			throw new \InvalidArgumentException("Inventory slot index \"$inventorySlot\" is out of range");
+			throw new InvalidArgumentException("Inventory slot index \"$inventorySlot\" is out of range");
 		}
 
 		if($inventorySlot !== -1 and ($alreadyEquippedIndex = array_search($inventorySlot, $this->getHotbar(), true)) !== false){
@@ -126,7 +130,7 @@ class PlayerInventory extends BaseInventory{
 	 * Resets hotbar links to their original defaults.
 	 */
 	public function resetHotbar(){
-		$this->hotbar = \SplFixedArray::fromArray(range(0, $this->getHotbarSize() - 1, 1));
+		$this->hotbar = SplFixedArray::fromArray(range(0, $this->getHotbarSize() - 1, 1));
 	}
 
     /**
@@ -141,11 +145,11 @@ class PlayerInventory extends BaseInventory{
 	/**
 	 * @param int $slot
 	 *
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function throwIfNotHotbarSlot(int $slot){
 		if(!$this->isHotbarSlot($slot)){
-			throw new \InvalidArgumentException("$slot is not a valid hotbar slot index (expected 0 - " . ($this->getHotbarSize() - 1) . ")");
+			throw new InvalidArgumentException("$slot is not a valid hotbar slot index (expected 0 - " . ($this->getHotbarSize() - 1) . ")");
 		}
 	}
 
@@ -164,7 +168,7 @@ class PlayerInventory extends BaseInventory{
 	 * @param bool $send Whether to send updates back to the inventory holder. This should usually be true for plugin calls.
 	 *                    It should only be false to prevent feedback loops of equipment packets between client and server.
 	 *
-	 * @throws \InvalidArgumentException if the hotbar slot is out of range
+	 * @throws InvalidArgumentException if the hotbar slot is out of range
 	 */
 	public function setHeldItemIndex(int $hotbarSlot, bool $send = true, ?int $inventorySlot = null){
 	    $this->throwIfNotHotbarSlot($hotbarSlot);
@@ -256,7 +260,7 @@ class PlayerInventory extends BaseInventory{
 		//TODO: this mess shouldn't be in here
 		$holder = $this->getHolder();
 		if(!($holder instanceof Player)){
-			throw new \LogicException("Cannot send creative inventory contents to non-player inventory holder");
+			throw new LogicException("Cannot send creative inventory contents to non-player inventory holder");
 		}
 
 		$items = [];

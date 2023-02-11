@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use InvalidStateException;
+use RuntimeException;
 use function array_change_key_case;
 use function array_keys;
 use function array_pop;
@@ -235,7 +237,7 @@ class Config{
 					$content = implode("\r\n", array_keys($this->config));
 					break;
 				default:
-					throw new \InvalidStateException("Config type is unknown, has not been set or not detected");
+					throw new InvalidStateException("Config type is unknown, has not been set or not detected");
 			}
 
 			file_put_contents($this->file, $content);
@@ -254,12 +256,12 @@ class Config{
 	 * @param int $options
 	 *
 	 * @return Config $this
-	 * @throws \RuntimeException if the Config is not in JSON
+	 * @throws RuntimeException if the Config is not in JSON
 	 * @see json_encode
 	 */
 	public function setJsonOptions(int $options) : Config{
 		if($this->type !== Config::JSON){
-			throw new \RuntimeException("Attempt to set JSON options for non-JSON config");
+			throw new RuntimeException("Attempt to set JSON options for non-JSON config");
 		}
 		$this->jsonOptions = $options;
 		$this->changed = true;
@@ -273,12 +275,12 @@ class Config{
 	 * @param int $option
 	 *
 	 * @return Config $this
-	 * @throws \RuntimeException if the Config is not in JSON
+	 * @throws RuntimeException if the Config is not in JSON
 	 * @see json_encode
 	 */
 	public function enableJsonOption(int $option) : Config{
 		if($this->type !== Config::JSON){
-			throw new \RuntimeException("Attempt to enable JSON option for non-JSON config");
+			throw new RuntimeException("Attempt to enable JSON option for non-JSON config");
 		}
 		$this->jsonOptions |= $option;
 		$this->changed = true;
@@ -292,12 +294,12 @@ class Config{
 	 * @param int $option
 	 *
 	 * @return Config $this
-	 * @throws \RuntimeException if the Config is not in JSON
+	 * @throws RuntimeException if the Config is not in JSON
 	 * @see json_encode
 	 */
 	public function disableJsonOption(int $option) : Config{
 		if($this->type !== Config::JSON){
-			throw new \RuntimeException("Attempt to disable JSON option for non-JSON config");
+			throw new RuntimeException("Attempt to disable JSON option for non-JSON config");
 		}
 		$this->jsonOptions &= ~$option;
 		$this->changed = true;
@@ -309,12 +311,12 @@ class Config{
 	 * Returns the options for the JSON encoding when saving
 	 *
 	 * @return int
-	 * @throws \RuntimeException if the Config is not in JSON
+	 * @throws RuntimeException if the Config is not in JSON
 	 * @see json_encode
 	 */
 	public function getJsonOptions() : int{
 		if($this->type !== Config::JSON){
-			throw new \RuntimeException("Attempt to get JSON options for non-JSON config");
+			throw new RuntimeException("Attempt to get JSON options for non-JSON config");
 		}
 		return $this->jsonOptions;
 	}

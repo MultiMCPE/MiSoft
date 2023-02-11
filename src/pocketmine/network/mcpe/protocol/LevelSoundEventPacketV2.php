@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 /**
  * Useless leftover from a 1.9 refactor, does nothing
@@ -48,7 +50,7 @@ class LevelSoundEventPacketV2 extends DataPacket{
 	public $disableRelativeVolume = false;
 
 	protected function decodePayload(){
-		$this->sound = (\ord($this->get(1)));
+		$this->sound = (ord($this->get(1)));
 		$this->position = $this->getVector3();
 		$this->extraData = $this->getVarInt();
 		$this->entityType = $this->getString();
@@ -57,7 +59,7 @@ class LevelSoundEventPacketV2 extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->sound));
+		($this->buffer .= chr($this->sound));
 		$this->putVector3($this->position);
 		$this->putVarInt($this->extraData);
 		$this->putString($this->entityType);

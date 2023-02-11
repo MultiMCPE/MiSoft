@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io;
 
+use InvalidStateException;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
 use pocketmine\level\format\io\exception\UnsupportedChunkFormatException;
@@ -172,7 +173,7 @@ abstract class BaseLevelProvider implements LevelProvider{
 
 	public function saveChunk(Chunk $chunk) : void{
 		if(!$chunk->isGenerated()){
-			throw new \InvalidStateException("Cannot save un-generated chunk");
+			throw new InvalidStateException("Cannot save un-generated chunk");
 		}
 		$this->writeChunk($chunk);
 	}

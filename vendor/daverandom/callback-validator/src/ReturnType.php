@@ -2,6 +2,8 @@
 
 namespace DaveRandom\CallbackValidator;
 
+use ReflectionFunctionAbstract;
+
 final class ReturnType extends Type
 {
     /**
@@ -16,7 +18,7 @@ final class ReturnType extends Type
     const COVARIANT = 0x02 << 16;
 
     /**
-     * @param \ReflectionFunctionAbstract $reflection
+     * @param ReflectionFunctionAbstract $reflection
      * @param int $flags
      * @return ReturnType
      */

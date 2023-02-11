@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace raklib\server;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 use raklib\protocol\ACK;
 use raklib\protocol\AdvertiseSystem;
@@ -34,6 +35,9 @@ use raklib\protocol\UnconnectedPingOpenConnections;
 use raklib\protocol\UnconnectedPong;
 use raklib\RakLib;
 use raklib\utils\InternetAddress;
+use SplFixedArray;
+use ThreadedLogger;
+use Throwable;
 use function asort;
 use function bin2hex;
 use function chr;
@@ -43,6 +47,7 @@ use function get_class;
 use function max;
 use function microtime;
 use function ord;
+use function pack;
 use function serialize;
 use function socket_strerror;
 use function strlen;
@@ -50,6 +55,7 @@ use function substr;
 use function time;
 use function time_sleep_until;
 use function trim;
+use function unpack;
 use const PHP_INT_MAX;
 use const SOCKET_ECONNRESET;
 use const SOCKET_EWOULDBLOCK;
@@ -59,7 +65,7 @@ class SessionManager{
 	private const RAKLIB_TPS = 100;
 	private const RAKLIB_TIME_PER_TICK = 1 / self::RAKLIB_TPS;
 
-	/** @var \SplFixedArray<Packet|null> */
+	/** @var SplFixedArray<Packet|null> */
 	protected $packetPool;
 
 	/** @var RakLibServer */
@@ -142,7 +148,7 @@ class SessionManager{
 		return $this->server->getProtocolVersion();
 	}
 
-	public function getLogger() : \ThreadedLogger{
+	public function getLogger() : ThreadedLogger{
 		return $this->server->getLogger();
 	}
 
@@ -273,9 +279,9 @@ class SessionManager{
 					try{
 						$pk->decode();
 						if(!$pk->isValid()){
-							throw new \InvalidArgumentException("Packet magic is invalid");
+							throw new InvalidArgumentException("Packet magic is invalid");
 						}
-					}catch(\Throwable $e){
+					}catch(Throwable $e){
 						$logger = $this->server->getLogger();
 						$logger->debug("Received garbage message from $address (" . $e->getMessage() . "): " . bin2hex($pk->getBuffer()));
 						foreach($this->server->getTrace(0, $e->getTrace()) as $line){
@@ -297,7 +303,7 @@ class SessionManager{
 			}else{
 				$this->streamRaw($address, $buffer);
 			}
-		}catch(\Throwable $e){
+		}catch(Throwable $e){
 			$logger = $this->getLogger();
 			$logger->debug("Packet from $address (" . strlen($buffer) . " bytes): 0x" . bin2hex($buffer));
 			$logger->logException($e);
@@ -319,7 +325,7 @@ class SessionManager{
 	}
 
 	public function streamRaw(InternetAddress $source, string $payload) : void{
-		$buffer = chr(RakLib::PACKET_RAW) . chr(strlen($source->ip)) . $source->ip . (\pack("n", $source->port)) . $payload;
+		$buffer = chr(RakLib::PACKET_RAW) . chr(strlen($source->ip)) . $source->ip . (pack("n", $source->port)) . $payload;
 		$this->server->pushThreadToMainPacket($buffer);
 	}
 
@@ -336,12 +342,12 @@ class SessionManager{
 	protected function streamOpen(Session $session) : void{
 		$address = $session->getAddress();
 		$identifier = $address->toString();
-		$buffer = chr(RakLib::PACKET_OPEN_SESSION) . chr(strlen($identifier)) . $identifier . chr(strlen($address->ip)) . $address->ip . (\pack("n", $address->port)) . (\pack("NN", $session->getID() >> 32, $session->getID() & 0xFFFFFFFF));
+		$buffer = chr(RakLib::PACKET_OPEN_SESSION) . chr(strlen($identifier)) . $identifier . chr(strlen($address->ip)) . $address->ip . (pack("n", $address->port)) . (pack("NN", $session->getID() >> 32, $session->getID() & 0xFFFFFFFF));
 		$this->server->pushThreadToMainPacket($buffer);
 	}
 
 	protected function streamACK(string $identifier, int $identifierACK) : void{
-		$buffer = chr(RakLib::PACKET_ACK_NOTIFICATION) . chr(strlen($identifier)) . $identifier . (\pack("N", $identifierACK));
+		$buffer = chr(RakLib::PACKET_ACK_NOTIFICATION) . chr(strlen($identifier)) . $identifier . (pack("N", $identifierACK));
 		$this->server->pushThreadToMainPacket($buffer);
 	}
 
@@ -356,7 +362,7 @@ class SessionManager{
 
 	public function streamPingMeasure(Session $session, int $pingMS) : void{
 		$identifier = $session->getAddress()->toString();
-		$buffer = chr(RakLib::PACKET_REPORT_PING) . chr(strlen($identifier)) . $identifier . (\pack("N", $pingMS));
+		$buffer = chr(RakLib::PACKET_REPORT_PING) . chr(strlen($identifier)) . $identifier . (pack("N", $pingMS));
 		$this->server->pushThreadToMainPacket($buffer);
 	}
 
@@ -380,7 +386,7 @@ class SessionManager{
 				$len = ord($packet[$offset++]);
 				$address = substr($packet, $offset, $len);
 				$offset += $len;
-				$port = (\unpack("n", substr($packet, $offset, 2))[1]);
+				$port = (unpack("n", substr($packet, $offset, 2))[1]);
 				$offset += 2;
 				$payload = substr($packet, $offset);
 				$this->socket->writePacket($payload, $address, $port);
@@ -418,7 +424,7 @@ class SessionManager{
 				$len = ord($packet[$offset++]);
 				$address = substr($packet, $offset, $len);
 				$offset += $len;
-				$timeout = (\unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
+				$timeout = (unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
 				$this->blockAddress($address, $timeout);
 			}elseif($id === RakLib::PACKET_UNBLOCK_ADDRESS){
 				$len = ord($packet[$offset++]);
@@ -552,7 +558,7 @@ class SessionManager{
 	}
 
 	private function registerPackets() : void{
-		$this->packetPool = new \SplFixedArray(256);
+		$this->packetPool = new SplFixedArray(256);
 
 		$this->registerPacket(UnconnectedPing::$ID, UnconnectedPing::class);
 		$this->registerPacket(UnconnectedPingOpenConnections::$ID, UnconnectedPingOpenConnections::class);

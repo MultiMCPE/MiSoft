@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class PlayerArmorDamagePacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_ARMOR_DAMAGE_PACKET;
@@ -70,7 +72,7 @@ class PlayerArmorDamagePacket extends DataPacket/* implements ClientboundPacket*
 	}
 
 	protected function decodePayload() : void{
-		$flags = (\ord($this->get(1)));
+		$flags = (ord($this->get(1)));
 
 		$this->headSlotDamage = $this->maybeReadDamage($flags, self::FLAG_HEAD);
 		$this->chestSlotDamage = $this->maybeReadDamage($flags, self::FLAG_CHEST);
@@ -89,7 +91,7 @@ class PlayerArmorDamagePacket extends DataPacket/* implements ClientboundPacket*
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= \chr( 			$this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) | 			$this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) | 			$this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) | 			$this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) 		));
+		($this->buffer .= chr( 			$this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) | 			$this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) | 			$this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) | 			$this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) 		));
 
 		$this->maybeWriteDamage($this->headSlotDamage);
 		$this->maybeWriteDamage($this->chestSlotDamage);

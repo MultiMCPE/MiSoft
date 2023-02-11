@@ -27,6 +27,8 @@ use pocketmine\level\biome\Biome;
 use pocketmine\level\biome\UnknownBiome;
 use pocketmine\level\generator\noise\Simplex;
 use pocketmine\utils\Random;
+use RuntimeException;
+use SplFixedArray;
 
 abstract class BiomeSelector{
 	/** @var Simplex */
@@ -34,7 +36,7 @@ abstract class BiomeSelector{
 	/** @var Simplex */
 	private $rainfall;
 
-	/** @var Biome[]|\SplFixedArray */
+	/** @var Biome[]|SplFixedArray */
 	private $map = null;
 
 	public function __construct(Random $random){
@@ -53,13 +55,13 @@ abstract class BiomeSelector{
 	abstract protected function lookup(float $temperature, float $rainfall) : int;
 
 	public function recalculate(){
-		$this->map = new \SplFixedArray(64 * 64);
+		$this->map = new SplFixedArray(64 * 64);
 
 		for($i = 0; $i < 64; ++$i){
 			for($j = 0; $j < 64; ++$j){
 				$biome = Biome::getBiome($this->lookup($i / 63, $j / 63));
 				if($biome instanceof UnknownBiome){
-					throw new \RuntimeException("Unknown biome returned by selector with ID " . $biome->getId());
+					throw new RuntimeException("Unknown biome returned by selector with ID " . $biome->getId());
 				}
 				$this->map[$i + ($j << 6)] = $biome;
 			}

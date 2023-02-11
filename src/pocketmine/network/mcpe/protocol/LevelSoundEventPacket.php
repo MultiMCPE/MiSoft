@@ -29,6 +29,8 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\multiversion\SoundEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use function array_search;
+use function chr;
+use function ord;
 
 class LevelSoundEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_SOUND_EVENT_PACKET;
@@ -72,7 +74,7 @@ class LevelSoundEventPacket extends DataPacket{
 	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
 	    	$this->sound = $this->getUnsignedVarInt();
 	    } else {
-	        $this->sound = (\ord($this->get(1)));
+	        $this->sound = (ord($this->get(1)));
 	    }
 		$this->sound = SoundEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
@@ -105,7 +107,7 @@ class LevelSoundEventPacket extends DataPacket{
 	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
 	    	$this->putUnsignedVarInt($sound);
 	    } else {
-	        ($this->buffer .= \chr($sound));
+	        ($this->buffer .= chr($sound));
 	    }
 		$this->putVector3($this->position);
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {

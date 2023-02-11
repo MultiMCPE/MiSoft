@@ -27,6 +27,8 @@ declare(strict_types=1);
 
 namespace pocketmine\scheduler;
 
+use InvalidStateException;
+use Logger;
 use pocketmine\utils\ReversePriorityQueue;
 
 class TaskScheduler{
@@ -53,10 +55,10 @@ class TaskScheduler{
 	protected $currentTick = 0;
 
 	/**
-	 * @param \Logger     $logger @deprecated
+	 * @param Logger     $logger @deprecated
 	 * @param null|string $owner
 	 */
-	public function __construct(\Logger $logger, ?string $owner = null){
+	public function __construct(Logger $logger, ?string $owner = null){
 		$this->owner = $owner;
 		$this->queue = new ReversePriorityQueue();
 	}
@@ -141,11 +143,11 @@ class TaskScheduler{
 	 *
 	 * @return TaskHandler
 	 *
-	 * @throws \InvalidStateException
+	 * @throws InvalidStateException
 	 */
 	private function addTask(Task $task, int $delay, int $period){
 		if(!$this->enabled){
-			throw new \InvalidStateException("Tried to schedule task to disabled scheduler");
+			throw new InvalidStateException("Tried to schedule task to disabled scheduler");
 		}
 
 		if($delay <= 0){

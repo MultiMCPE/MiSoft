@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine {
 
+	use BaseClassLoader;
+	use Logger;
+	use Phar;
 	use pocketmine\utils\MainLogger;
 	use pocketmine\utils\ServerKiller;
 	use pocketmine\utils\Terminal;
@@ -116,7 +119,7 @@ namespace pocketmine {
 		return $messages;
 	}
 
-	function emit_performance_warnings(\Logger $logger){
+	function emit_performance_warnings(Logger $logger){
 		if(extension_loaded("xdebug")){
 			$logger->warning("Xdebug extension is enabled. This has a major impact on performance.");
 		}
@@ -126,7 +129,7 @@ namespace pocketmine {
 		if(((int) ini_get('zend.assertions')) !== -1){
 			$logger->warning("Debugging assertions are enabled. This may degrade performance. To disable them, set `zend.assertions = -1` in php.ini.");
 		}
-		if(\Phar::running(true) === ""){
+		if(Phar::running(true) === ""){
 			$logger->warning("Non-packaged installation detected. This will degrade autoloading speed and make startup times longer.");
 		}
 	}
@@ -156,8 +159,8 @@ namespace pocketmine {
 		error_reporting(-1);
 		set_ini_entries();
 
-		if(\Phar::running(true) !== ""){
-			define('pocketmine\PATH', \Phar::running(true) . "/");
+		if(Phar::running(true) !== ""){
+			define('pocketmine\PATH', Phar::running(true) . "/");
 		}else{
 			define('pocketmine\PATH', dirname(__FILE__, 3) . DIRECTORY_SEPARATOR);
 		}
@@ -166,12 +169,12 @@ namespace pocketmine {
 		if(isset($opts["bootstrap"])){
 			$bootstrap = realpath($opts["bootstrap"]) ?: $opts["bootstrap"];
 		}else{
-			$bootstrap = \pocketmine\PATH . 'vendor/autoload.php';
+			$bootstrap = PATH . 'vendor/autoload.php';
 		}
 		define('pocketmine\COMPOSER_AUTOLOADER_PATH', $bootstrap);
 
-		if(\pocketmine\COMPOSER_AUTOLOADER_PATH !== false and is_file(\pocketmine\COMPOSER_AUTOLOADER_PATH)){
-			require_once(\pocketmine\COMPOSER_AUTOLOADER_PATH);
+		if(COMPOSER_AUTOLOADER_PATH !== false and is_file(COMPOSER_AUTOLOADER_PATH)){
+			require_once(COMPOSER_AUTOLOADER_PATH);
 		}else{
 			critical_error("Composer autoloader not found at " . $bootstrap);
 			critical_error("Please install/update Composer dependencies or use provided builds.");
@@ -180,12 +183,12 @@ namespace pocketmine {
 
 		set_error_handler([Utils::class, 'errorExceptionHandler']);
 
-		$version = new VersionString(\pocketmine\BASE_VERSION, \pocketmine\IS_DEVELOPMENT_BUILD, \pocketmine\BUILD_NUMBER);
+		$version = new VersionString(BASE_VERSION, IS_DEVELOPMENT_BUILD, BUILD_NUMBER);
 		define('pocketmine\VERSION', $version->getFullVersion(true));
 
 		$gitHash = str_repeat("00", 20);
 
-		if(\Phar::running(true) === ""){
+		if(Phar::running(true) === ""){
 			if(Utils::execute("git rev-parse HEAD", $out) === 0 and $out !== false and strlen($out = trim($out)) === 40){
 				$gitHash = trim($out);
 				if(Utils::execute("git diff --quiet") === 1 or Utils::execute("git diff --cached --quiet") === 1){ //Locally-modified
@@ -193,7 +196,7 @@ namespace pocketmine {
 				}
 			}
 		}else{
-			$phar = new \Phar(\Phar::running(false));
+			$phar = new Phar(Phar::running(false));
 			$meta = $phar->getMetadata();
 			if(isset($meta["git"])){
 				$gitHash = $meta["git"];
@@ -202,31 +205,31 @@ namespace pocketmine {
 
 		define('pocketmine\GIT_COMMIT', $gitHash);
 
-		define('pocketmine\RESOURCE_PATH', \pocketmine\PATH . 'src' . DIRECTORY_SEPARATOR . 'pocketmine' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR);
+		define('pocketmine\RESOURCE_PATH', PATH . 'src' . DIRECTORY_SEPARATOR . 'pocketmine' . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR);
 
 		$opts = getopt("", ["data:", "plugins:", "no-wizard", "enable-ansi", "disable-ansi"]);
 
 		define('pocketmine\DATA', isset($opts["data"]) ? $opts["data"] . DIRECTORY_SEPARATOR : realpath(getcwd()) . DIRECTORY_SEPARATOR);
 		define('pocketmine\PLUGIN_PATH', isset($opts["plugins"]) ? $opts["plugins"] . DIRECTORY_SEPARATOR : realpath(getcwd()) . DIRECTORY_SEPARATOR . "plugins" . DIRECTORY_SEPARATOR);
 
-		if(!file_exists(\pocketmine\DATA)){
-			mkdir(\pocketmine\DATA, 0777, true);
+		if(!file_exists(DATA)){
+			mkdir(DATA, 0777, true);
 		}
 
-		define('pocketmine\LOCK_FILE', fopen(\pocketmine\DATA . 'server.lock', "a+b"));
-		if(!flock(\pocketmine\LOCK_FILE, LOCK_EX | LOCK_NB)){
+		define('pocketmine\LOCK_FILE', fopen(DATA . 'server.lock', "a+b"));
+		if(!flock(LOCK_FILE, LOCK_EX | LOCK_NB)){
 			//wait for a shared lock to avoid race conditions if two servers started at the same time - this makes sure the
 			//other server wrote its PID and released exclusive lock before we get our lock
-			flock(\pocketmine\LOCK_FILE, LOCK_SH);
-			$pid = stream_get_contents(\pocketmine\LOCK_FILE);
-			critical_error("Another " . \pocketmine\NAME . " instance (PID $pid) is already using this folder (" . realpath(\pocketmine\DATA) . ").");
+			flock(LOCK_FILE, LOCK_SH);
+			$pid = stream_get_contents(LOCK_FILE);
+			critical_error("Another " . NAME . " instance (PID $pid) is already using this folder (" . realpath(DATA) . ").");
 			critical_error("Please stop the other server first before running a new one.");
 			exit(1);
 		}
-		ftruncate(\pocketmine\LOCK_FILE, 0);
-		fwrite(\pocketmine\LOCK_FILE, (string) getmypid());
-		fflush(\pocketmine\LOCK_FILE);
-		flock(\pocketmine\LOCK_FILE, LOCK_SH); //prevent acquiring an exclusive lock from another process, but allow reading
+		ftruncate(LOCK_FILE, 0);
+		fwrite(LOCK_FILE, (string) getmypid());
+		fflush(LOCK_FILE);
+		flock(LOCK_FILE, LOCK_SH); //prevent acquiring an exclusive lock from another process, but allow reading
 
 		//Logger has a dependency on timezone
 		$tzError = Timezone::init();
@@ -239,7 +242,7 @@ namespace pocketmine {
 			Terminal::init();
 		}
 
-		$logger = new MainLogger(\pocketmine\DATA . "server.log");
+		$logger = new MainLogger(DATA . "server.log");
 		$logger->registerStatic();
 
 		foreach($tzError as $e){
@@ -251,7 +254,7 @@ namespace pocketmine {
 
 		$exitCode = 0;
 		do{
-			if(!file_exists(\pocketmine\DATA . "server.properties") and !isset($opts["no-wizard"])){
+			if(!file_exists(DATA . "server.properties") and !isset($opts["no-wizard"])){
 				$installer = new SetupWizard();
 				if(!$installer->run()){
 					$exitCode = -1;
@@ -266,10 +269,10 @@ namespace pocketmine {
 			/*
 			 * We now use the Composer autoloader, but this autoloader is still for loading plugins.
 			 */
-			$autoloader = new \BaseClassLoader();
+			$autoloader = new BaseClassLoader();
 			$autoloader->register(false);
 
-			new Server($autoloader, $logger, \pocketmine\DATA, \pocketmine\PLUGIN_PATH);
+			new Server($autoloader, $logger, DATA, PLUGIN_PATH);
 
 			$logger->info("Stopping other threads");
 
@@ -292,6 +295,6 @@ namespace pocketmine {
 	}
 
 	if(!defined('pocketmine\_PHPSTAN_ANALYSIS')){
-		\pocketmine\server();
+		server();
 	}
 }

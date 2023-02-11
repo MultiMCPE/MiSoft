@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use InvalidArgumentException;
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
@@ -35,7 +36,7 @@ class OldPlayerInventory extends PlayerInventory{
      * @param bool $send
      * @param ?int $inventorySlot
      * 
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function setHeldItemIndex(int $hotbarSlot, bool $send = true, ?int $inventorySlot = null) : void{
         $this->throwIfNotHotbarSlot($hotbarSlot);

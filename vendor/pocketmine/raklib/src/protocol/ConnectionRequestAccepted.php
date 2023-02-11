@@ -21,7 +21,9 @@ use pocketmine\utils\Binary;
 
 use raklib\RakLib;
 use raklib\utils\InternetAddress;
+use function pack;
 use function strlen;
+use function unpack;
 
 class ConnectionRequestAccepted extends Packet{
 	public static $ID = MessageIdentifiers::ID_CONNECTION_REQUEST_ACCEPTED;
@@ -43,20 +45,20 @@ class ConnectionRequestAccepted extends Packet{
 
 	protected function encodePayload() : void{
 		$this->putAddress($this->address);
-		($this->buffer .= (\pack("n", 0)));
+		($this->buffer .= (pack("n", 0)));
 
 		$dummy = new InternetAddress("0.0.0.0", 0, 4);
 		for($i = 0; $i < RakLib::$SYSTEM_ADDRESS_COUNT; ++$i){
 			$this->putAddress($this->systemAddresses[$i] ?? $dummy);
 		}
 
-		($this->buffer .= (\pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
-		($this->buffer .= (\pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPingTime >> 32, $this->sendPingTime & 0xFFFFFFFF)));
+		($this->buffer .= (pack("NN", $this->sendPongTime >> 32, $this->sendPongTime & 0xFFFFFFFF)));
 	}
 
 	protected function decodePayload() : void{
 		$this->address = $this->getAddress();
-		((\unpack("n", $this->get(2))[1])); //TODO: check this
+		((unpack("n", $this->get(2))[1])); //TODO: check this
 
 		$len = strlen($this->buffer);
 		$dummy = new InternetAddress("0.0.0.0", 0, 4);

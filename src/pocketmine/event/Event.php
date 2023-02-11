@@ -26,6 +26,8 @@ declare(strict_types=1);
  */
 namespace pocketmine\event;
 
+use BadMethodCallException;
+use RuntimeException;
 use function assert;
 use function get_class;
 
@@ -49,11 +51,11 @@ abstract class Event{
 	/**
 	 * @return bool
 	 *
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function isCancelled() : bool{
 		if(!($this instanceof Cancellable)){
-			throw new \BadMethodCallException(get_class($this) . " is not Cancellable");
+			throw new BadMethodCallException(get_class($this) . " is not Cancellable");
 		}
 
 		return $this->isCancelled;
@@ -62,11 +64,11 @@ abstract class Event{
 	/**
 	 * @param bool $value
 	 *
-	 * @throws \BadMethodCallException
+	 * @throws BadMethodCallException
 	 */
 	public function setCancelled(bool $value = true) : void{
 		if(!($this instanceof Cancellable)){
-			throw new \BadMethodCallException(get_class($this) . " is not Cancellable");
+			throw new BadMethodCallException(get_class($this) . " is not Cancellable");
 		}
 
 		$this->isCancelled = $value;
@@ -75,12 +77,12 @@ abstract class Event{
 	/**
 	 * Calls event handlers registered for this event.
 	 *
-	 * @throws \RuntimeException if event call recursion reaches the max depth limit
+	 * @throws RuntimeException if event call recursion reaches the max depth limit
 	 */
 	public function call() : void{
 		if(self::$eventCallDepth >= self::MAX_EVENT_CALL_DEPTH){
 			//this exception will be caught by the parent event call if all else fails
-			throw new \RuntimeException("Recursive event call detected (reached max depth of " . self::MAX_EVENT_CALL_DEPTH . " calls)");
+			throw new RuntimeException("Recursive event call detected (reached max depth of " . self::MAX_EVENT_CALL_DEPTH . " calls)");
 		}
 
 		$handlerList = HandlerList::getHandlerListFor(get_class($this));

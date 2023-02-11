@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use Ahc\Json\Comment as CommentedJsonDecoder;
+use InvalidArgumentException;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use function implode;
 use function in_array;
@@ -68,24 +69,24 @@ class Skin{
 		try{
 			$this->validate();
 			return true;
-		}catch(\InvalidArgumentException $e){
+		}catch(InvalidArgumentException $e){
 			return false;
 		}
 	}
 
 	/**
-	 * @throws \InvalidArgumentException
+	 * @throws InvalidArgumentException
 	 */
 	public function validate() : void{
 		if($this->skinId === ""){
-			throw new \InvalidArgumentException("Skin ID must not be empty");
+			throw new InvalidArgumentException("Skin ID must not be empty");
 		}
 		$len = strlen($this->skinData);
 		if(!in_array($len, self::ACCEPTED_SKIN_SIZES, true)){
-			throw new \InvalidArgumentException("Invalid skin data size $len bytes (allowed sizes: " . implode(", ", self::ACCEPTED_SKIN_SIZES) . ")");
+			throw new InvalidArgumentException("Invalid skin data size $len bytes (allowed sizes: " . implode(", ", self::ACCEPTED_SKIN_SIZES) . ")");
 		}
 		if($this->capeData !== "" and strlen($this->capeData) !== 8192){
-			throw new \InvalidArgumentException("Invalid cape data size " . strlen($this->capeData) . " bytes (must be exactly 8192 bytes)");
+			throw new InvalidArgumentException("Invalid cape data size " . strlen($this->capeData) . " bytes (must be exactly 8192 bytes)");
 		}
 		//TODO: validate geometry
 	}

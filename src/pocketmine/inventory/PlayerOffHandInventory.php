@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use BadMethodCallException;
 use pocketmine\Player;
 use pocketmine\entity\Human;
 use pocketmine\item\Item;
@@ -86,6 +87,6 @@ class PlayerOffHandInventory extends BaseInventory{
 	}
 
 	public function setSize(int $size) : void{
-		throw new \BadMethodCallException("OffHand can only carry one item at a time");
+		throw new BadMethodCallException("OffHand can only carry one item at a time");
 	}
 }

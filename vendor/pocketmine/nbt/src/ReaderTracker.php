@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt;
 
+use Closure;
+use UnexpectedValueException;
+
 class ReaderTracker{
 
 	/** @var int */
@@ -35,13 +38,13 @@ class ReaderTracker{
 	}
 
 	/**
-	 * @param \Closure $execute
+	 * @param Closure $execute
 	 *
-	 * @throws \UnexpectedValueException if the recursion depth is too deep
+	 * @throws UnexpectedValueException if the recursion depth is too deep
 	 */
-	public function protectDepth(\Closure $execute) : void{
+	public function protectDepth(Closure $execute) : void{
 		if($this->maxDepth > 0 and ++$this->currentDepth > $this->maxDepth){
-			throw new \UnexpectedValueException("Nesting level too deep: reached max depth of $this->maxDepth tags");
+			throw new UnexpectedValueException("Nesting level too deep: reached max depth of $this->maxDepth tags");
 		}
 		try{
 			$execute();

@@ -10,6 +10,7 @@
 
 namespace FG\X509;
 
+use FG\ASN1\ASNObject;
 use FG\ASN1\OID;
 use FG\ASN1\Universal\NullObject;
 use FG\ASN1\Universal\Sequence;
@@ -20,7 +21,7 @@ class PrivateKey extends Sequence
 {
     /**
      * @param string $hexKey
-     * @param \FG\ASN1\ASNObject|string $algorithmIdentifierString
+     * @param ASNObject|string $algorithmIdentifierString
      */
     public function __construct($hexKey, $algorithmIdentifierString = OID::RSA_ENCRYPTION)
     {

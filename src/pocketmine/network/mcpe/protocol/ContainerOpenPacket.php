@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class ContainerOpenPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_OPEN_PACKET;
@@ -45,15 +47,15 @@ class ContainerOpenPacket extends DataPacket{
 	public $entityUniqueId = -1;
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
-		$this->type = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		$this->entityUniqueId = $this->getEntityUniqueId();
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->windowId));
+		($this->buffer .= chr($this->type));
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		$this->putEntityUniqueId($this->entityUniqueId);
 	}

@@ -21,6 +21,8 @@ use pocketmine\utils\Binary;
 
 
 use raklib\RakLib;
+use function chr;
+use function ord;
 use function str_pad;
 use function strlen;
 
@@ -34,13 +36,13 @@ class OpenConnectionRequest1 extends OfflineMessage{
 
 	protected function encodePayload() : void{
 		$this->writeMagic();
-		($this->buffer .= \chr($this->protocol));
+		($this->buffer .= chr($this->protocol));
 		$this->buffer = str_pad($this->buffer, $this->mtuSize, "\x00");
 	}
 
 	protected function decodePayload() : void{
 		$this->readMagic();
-		$this->protocol = (\ord($this->get(1)));
+		$this->protocol = (ord($this->get(1)));
 		$this->mtuSize = strlen($this->buffer);
 	}
 }

@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
+use FilesystemIterator;
+use InvalidArgumentException;
 use pocketmine\command\PluginCommand;
 use pocketmine\command\SimpleCommandMap;
 use pocketmine\event\Event;
@@ -38,6 +40,11 @@ use pocketmine\permission\PermissionManager;
 use pocketmine\Server;
 use pocketmine\timings\TimingsHandler;
 use pocketmine\utils\Utils;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
+use RuntimeException;
+use Throwable;
 use function array_intersect;
 use function array_map;
 use function array_pad;
@@ -106,7 +113,7 @@ class PluginManager{
 			if(!file_exists($this->pluginDataDirectory)){
 				@mkdir($this->pluginDataDirectory, 0777, true);
 			}elseif(!is_dir($this->pluginDataDirectory)){
-				throw new \RuntimeException("Plugin data path $this->pluginDataDirectory exists and is not a directory");
+				throw new RuntimeException("Plugin data path $this->pluginDataDirectory exists and is not a directory");
 			}
 		}
 	}
@@ -202,7 +209,7 @@ class PluginManager{
 						}
 
 						return $plugin;
-					}catch(\Throwable $e){
+					}catch(Throwable $e){
 						$this->server->getLogger()->logException($e);
 						return null;
 					}
@@ -239,7 +246,7 @@ class PluginManager{
 			$loaders = $this->fileAssociations;
 		}
 
-		$files = iterator_to_array(new \FilesystemIterator($directory, \FilesystemIterator::CURRENT_AS_PATHNAME | \FilesystemIterator::SKIP_DOTS));
+		$files = iterator_to_array(new FilesystemIterator($directory, FilesystemIterator::CURRENT_AS_PATHNAME | FilesystemIterator::SKIP_DOTS));
 		shuffle($files); //this prevents plugins implicitly relying on the filesystem name order when they should be using dependency properties
 		foreach($loaders as $loader){
 			foreach($files as $file){
@@ -296,7 +303,7 @@ class PluginManager{
 							$softDependencies[$before] = [$name];
 						}
 					}
-				}catch(\Throwable $e){
+				}catch(Throwable $e){
 					$this->server->getLogger()->error($this->server->getLanguage()->translateString("pocketmine.plugin.fileError", [$file, $directory, $e->getMessage()]));
 					$this->server->getLogger()->logException($e);
 				}
@@ -582,7 +589,7 @@ class PluginManager{
 				$this->enabledPlugins[$plugin->getDescription()->getName()] = $plugin;
 
 				(new PluginEnableEvent($plugin))->call();
-			}catch(\Throwable $e){
+			}catch(Throwable $e){
 				$this->server->getLogger()->logException($e);
 				$this->disablePlugin($plugin);
 			}
@@ -631,7 +638,7 @@ class PluginManager{
 					}elseif(is_string($data["permission"])){
 						$newCmd->setPermission($data["permission"]);
 					}else{
-						throw new \InvalidArgumentException("Permission must be a string or boolean, " . gettype($data["permission"]) . " given");
+						throw new InvalidArgumentException("Permission must be a string or boolean, " . gettype($data["permission"]) . " given");
 					}
 				}
 
@@ -664,7 +671,7 @@ class PluginManager{
 
 			try{
 				$plugin->setEnabled(false);
-			}catch(\Throwable $e){
+			}catch(Throwable $e){
 				$this->server->getLogger()->logException($e);
 			}
 			$plugin->getScheduler()->shutdown();
@@ -714,8 +721,8 @@ class PluginManager{
 			throw new PluginException("Plugin attempted to register " . get_class($listener) . " while not enabled");
 		}
 
-		$reflection = new \ReflectionClass(get_class($listener));
-		foreach($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method){
+		$reflection = new ReflectionClass(get_class($listener));
+		foreach($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method){
 			if(!$method->isStatic() and $method->getDeclaringClass()->implementsInterface(Listener::class)){
 				$tags = Utils::parseDocComment((string) $method->getDocComment());
 				if(isset($tags["notHandler"])){
@@ -731,7 +738,7 @@ class PluginManager{
 
 				try{
 					$eventClass = $parameters[0]->getClass();
-				}catch(\ReflectionException $e){ //class doesn't exist
+				}catch(ReflectionException $e){ //class doesn't exist
 					if(isset($tags["softDepend"]) && !isset($this->plugins[$tags["softDepend"]])){
 						$this->server->getLogger()->debug("Not registering @softDepend listener " . Utils::getNiceClosureName($handlerClosure) . "() because plugin \"" . $tags["softDepend"] . "\" not found");
 						continue;
@@ -745,7 +752,7 @@ class PluginManager{
 
 				try{
 					$priority = isset($tags["priority"]) ? EventPriority::fromString($tags["priority"]) : EventPriority::NORMAL;
-				}catch(\InvalidArgumentException $e){
+				}catch(InvalidArgumentException $e){
 					throw new PluginException("Event handler " . Utils::getNiceClosureName($handlerClosure) . "() declares invalid/unknown priority \"" . $tags["priority"] . "\"");
 				}
 
@@ -784,7 +791,7 @@ class PluginManager{
 			throw new PluginException($event . " is not an Event");
 		}
 
-		$tags = Utils::parseDocComment((string) (new \ReflectionClass($event))->getDocComment());
+		$tags = Utils::parseDocComment((string) (new ReflectionClass($event))->getDocComment());
 		if(isset($tags["deprecated"]) and $this->server->getProperty("settings.deprecated-verbose", true)){
 			$this->server->getLogger()->warning($this->server->getLanguage()->translateString("pocketmine.plugin.deprecatedEvent", [
 				$plugin->getName(),
@@ -798,7 +805,7 @@ class PluginManager{
 			throw new PluginException("Plugin attempted to register " . $event . " while not enabled");
 		}
 
-		$timings = new TimingsHandler("Plugin: " . $plugin->getDescription()->getFullName() . " Event: " . get_class($listener) . "::" . ($executor instanceof MethodEventExecutor ? $executor->getMethod() : "???") . "(" . (new \ReflectionClass($event))->getShortName() . ")");
+		$timings = new TimingsHandler("Plugin: " . $plugin->getDescription()->getFullName() . " Event: " . get_class($listener) . "::" . ($executor instanceof MethodEventExecutor ? $executor->getMethod() : "???") . "(" . (new ReflectionClass($event))->getShortName() . ")");
 
 		$this->getEventListeners($event)->register(new RegisteredListener($listener, $executor, $priority, $plugin, $ignoreCancelled, $timings));
 	}

@@ -58,6 +58,8 @@ use const CURLOPT_RETURNTRANSFER;
 use const CURLOPT_SSL_VERIFYHOST;
 use const CURLOPT_SSL_VERIFYPEER;
 use const CURLOPT_TIMEOUT_MS;
+use const pocketmine\NAME;
+use const pocketmine\VERSION;
 use const SOCK_DGRAM;
 use const SOL_UDP;
 
@@ -210,7 +212,7 @@ class Internet{
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_CONNECTTIMEOUT_MS => (int) ($timeout * 1000),
 			CURLOPT_TIMEOUT_MS => (int) ($timeout * 1000),
-			CURLOPT_HTTPHEADER => array_merge(["User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0 " . \pocketmine\NAME . "/" . \pocketmine\VERSION], $extraHeaders),
+			CURLOPT_HTTPHEADER => array_merge(["User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0 " . NAME . "/" . VERSION], $extraHeaders),
 			CURLOPT_HEADER => true
 		]);
 		try{

@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class ResourcePackChunkRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CHUNK_REQUEST_PACKET;
@@ -39,12 +41,12 @@ class ResourcePackChunkRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->packId = $this->getString();
-		$this->chunkIndex = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->chunkIndex = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->packId);
-		($this->buffer .= (\pack("V", $this->chunkIndex)));
+		($this->buffer .= (pack("V", $this->chunkIndex)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

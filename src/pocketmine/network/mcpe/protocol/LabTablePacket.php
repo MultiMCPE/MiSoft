@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class LabTablePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LAB_TABLE_PACKET;
@@ -44,15 +46,15 @@ class LabTablePacket extends DataPacket{
 	public $reactionType;
 
 	protected function decodePayload(){
-		$this->uselessByte = (\ord($this->get(1)));
+		$this->uselessByte = (ord($this->get(1)));
 		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
-		$this->reactionType = (\ord($this->get(1)));
+		$this->reactionType = (ord($this->get(1)));
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->uselessByte));
+		($this->buffer .= chr($this->uselessByte));
 		$this->putSignedBlockPosition($this->x, $this->y, $this->z);
-		($this->buffer .= \chr($this->reactionType));
+		($this->buffer .= chr($this->reactionType));
 	}
 
 	public function handle(NetworkSession $session) : bool{

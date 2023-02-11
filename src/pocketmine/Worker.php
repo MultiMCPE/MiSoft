@@ -23,12 +23,16 @@ declare(strict_types=1);
 
 namespace pocketmine;
 
+use ClassLoader;
+use ReflectionClass;
+use const PTHREADS_INHERIT_ALL;
+
 /**
  * This class must be extended by all custom threading classes
  */
 abstract class Worker extends \Worker{
 
-	/** @var \ClassLoader|null */
+	/** @var ClassLoader|null */
 	protected $classLoader;
 	/** @var string|null */
 	protected $composerAutoloaderPath;
@@ -39,8 +43,8 @@ abstract class Worker extends \Worker{
 		return $this->classLoader;
 	}
 
-	public function setClassLoader(\ClassLoader $loader = null){
-		$this->composerAutoloaderPath = \pocketmine\COMPOSER_AUTOLOADER_PATH;
+	public function setClassLoader(ClassLoader $loader = null){
+		$this->composerAutoloaderPath = COMPOSER_AUTOLOADER_PATH;
 
 		if($loader === null){
 			$loader = Server::getInstance()->getLoader();
@@ -64,7 +68,7 @@ abstract class Worker extends \Worker{
 		}
 	}
 
-	public function start(?int $options = \PTHREADS_INHERIT_ALL){
+	public function start(?int $options = PTHREADS_INHERIT_ALL){
 		ThreadManager::getInstance()->add($this);
 
 		if($this->getClassLoader() === null){
@@ -89,6 +93,6 @@ abstract class Worker extends \Worker{
 	}
 
 	public function getThreadName() : string{
-		return (new \ReflectionClass($this))->getShortName();
+		return (new ReflectionClass($this))->getShortName();
 	}
 }

@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
 
 class NetworkStackLatencyPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NETWORK_STACK_LATENCY_PACKET;
@@ -43,7 +44,7 @@ class NetworkStackLatencyPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (\pack("VV", $this->timestamp & 0xFFFFFFFF, $this->timestamp >> 32)));
+		($this->buffer .= (pack("VV", $this->timestamp & 0xFFFFFFFF, $this->timestamp >> 32)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
 	    	($this->buffer .= ($this->needResponse ? "\x01" : "\x00"));
 		}

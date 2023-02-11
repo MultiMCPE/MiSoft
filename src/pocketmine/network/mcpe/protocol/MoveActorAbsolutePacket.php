@@ -28,6 +28,10 @@ use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class MoveActorAbsolutePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_ACTOR_ABSOLUTE_PACKET;
@@ -52,9 +56,9 @@ class MoveActorAbsolutePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
-	        	$this->flags = (\ord($this->get(1)));
+	        	$this->flags = (ord($this->get(1)));
 	    	} else {
-		        $this->flags = (\unpack("v", $this->get(2))[1]);
+		        $this->flags = (unpack("v", $this->get(2))[1]);
 	    	}
 	    	$this->position = $this->getVector3();
 	    	$this->xRot = $this->getByteRotation();
@@ -83,9 +87,9 @@ class MoveActorAbsolutePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
-	        	($this->buffer .= \chr($this->flags));
+	        	($this->buffer .= chr($this->flags));
 	    	} else {
-		        ($this->buffer .= \pack("v", $this->flags));
+		        ($this->buffer .= pack("v", $this->flags));
 	    	}
 	    	$this->putVector3($this->position);
 	    	$this->putByteRotation($this->xRot);

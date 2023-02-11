@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use function chr;
+use function ord;
 
 class SpawnParticleEffectPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SPAWN_PARTICLE_EFFECT_PACKET;
@@ -42,7 +44,7 @@ class SpawnParticleEffectPacket extends DataPacket{
 	public $particleName;
 
 	protected function decodePayload(){
-		$this->dimensionId = (\ord($this->get(1)));
+		$this->dimensionId = (ord($this->get(1)));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
 	    	$this->entityUniqueId = $this->getEntityUniqueId();
 		}
@@ -51,7 +53,7 @@ class SpawnParticleEffectPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->dimensionId));
+		($this->buffer .= chr($this->dimensionId));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
 	    	$this->putEntityUniqueId($this->entityUniqueId);
 		}

@@ -24,8 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\nbt\tag;
 
 
+use InvalidArgumentException;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
+use RuntimeException;
 use function get_class;
 use function str_repeat;
 use function strlen;
@@ -42,11 +44,11 @@ abstract class NamedTag{
 
 	/**
 	 * @param string $name
-	 * @throws \InvalidArgumentException if the name is too long
+	 * @throws InvalidArgumentException if the name is too long
 	 */
 	public function __construct(string $name = ""){
 		if(strlen($name) > 32767){
-			throw new \InvalidArgumentException("Tag name cannot be more than 32767 bytes, got length " . strlen($name));
+			throw new InvalidArgumentException("Tag name cannot be more than 32767 bytes, got length " . strlen($name));
 		}
 		$this->__name = $name;
 	}
@@ -86,11 +88,11 @@ abstract class NamedTag{
 	 * Used for cloning tags in tags that have children.
 	 *
 	 * @return NamedTag
-	 * @throws \RuntimeException if a recursive dependency was detected
+	 * @throws RuntimeException if a recursive dependency was detected
 	 */
 	public function safeClone() : NamedTag{
 		if($this->cloning){
-			throw new \RuntimeException("Recursive NBT tag dependency detected");
+			throw new RuntimeException("Recursive NBT tag dependency detected");
 		}
 		$this->cloning = true;
 

@@ -30,6 +30,8 @@ use pocketmine\plugin\PluginManager;
 use pocketmine\utils\Utils;
 use pocketmine\utils\VersionString;
 use raklib\RakLib;
+use ReflectionClass;
+use RuntimeException;
 use function base64_encode;
 use function date;
 use function error_get_last;
@@ -113,7 +115,7 @@ class CrashDump{
 		$this->path = $this->server->getDataPath() . "crashdumps/" . date("D_M_j-H.i.s-T_Y", $this->time) . ".log";
 		$this->fp = @fopen($this->path, "wb");
 		if(!is_resource($this->fp)){
-			throw new \RuntimeException("Could not create Crash Dump");
+			throw new RuntimeException("Could not create Crash Dump");
 		}
 		$this->data["format_version"] = self::FORMAT_VERSION;
 		$this->data["time"] = $this->time;
@@ -149,7 +151,7 @@ class CrashDump{
 		$this->addLine("===BEGIN CRASH DUMP===");
 		$json = json_encode($this->data, JSON_UNESCAPED_SLASHES);
 		if($json === false){
-			throw new \RuntimeException("Failed to encode crashdump JSON: " . json_last_error_msg());
+			throw new RuntimeException("Failed to encode crashdump JSON: " . json_last_error_msg());
 		}
 		$this->encodedData = zlib_encode($json, ZLIB_ENCODING_DEFLATE, 9);
 		foreach(str_split(base64_encode($this->encodedData), 76) as $line){
@@ -301,7 +303,7 @@ class CrashDump{
 				$this->data["plugin_involvement"] = self::PLUGIN_INVOLVEMENT_INDIRECT;
 			}
 
-			$reflection = new \ReflectionClass(PluginBase::class);
+			$reflection = new ReflectionClass(PluginBase::class);
 			$file = $reflection->getProperty("file");
 			$file->setAccessible(true);
 			foreach($this->server->getPluginManager()->getPlugins() as $plugin){
@@ -318,14 +320,14 @@ class CrashDump{
 	}
 
 	private function generalData(){
-		$version = new VersionString(\pocketmine\BASE_VERSION, \pocketmine\IS_DEVELOPMENT_BUILD, \pocketmine\BUILD_NUMBER);
+		$version = new VersionString(BASE_VERSION, IS_DEVELOPMENT_BUILD, BUILD_NUMBER);
 		$this->data["general"] = [];
 		$this->data["general"]["name"] = $this->server->getName();
-		$this->data["general"]["base_version"] = \pocketmine\BASE_VERSION;
-		$this->data["general"]["build"] = \pocketmine\BUILD_NUMBER;
-		$this->data["general"]["is_dev"] = \pocketmine\IS_DEVELOPMENT_BUILD;
+		$this->data["general"]["base_version"] = BASE_VERSION;
+		$this->data["general"]["build"] = BUILD_NUMBER;
+		$this->data["general"]["is_dev"] = IS_DEVELOPMENT_BUILD;
 		$this->data["general"]["protocol"] = ProtocolInfo::CURRENT_PROTOCOL;
-		$this->data["general"]["git"] = \pocketmine\GIT_COMMIT;
+		$this->data["general"]["git"] = GIT_COMMIT;
 		$this->data["general"]["raklib"] = RakLib::VERSION;
 		$this->data["general"]["uname"] = php_uname("a");
 		$this->data["general"]["php"] = phpversion();
@@ -333,7 +335,7 @@ class CrashDump{
 		$this->data["general"]["php_os"] = PHP_OS;
 		$this->data["general"]["os"] = Utils::getOS();
 		$this->addLine($this->server->getName() . " version: " . $version->getFullVersion(true) . " [Protocol " . ProtocolInfo::CURRENT_PROTOCOL . "]");
-		$this->addLine("Git commit: " . \pocketmine\GIT_COMMIT);
+		$this->addLine("Git commit: " . GIT_COMMIT);
 		$this->addLine("uname -a: " . php_uname("a"));
 		$this->addLine("PHP Version: " . phpversion());
 		$this->addLine("Zend version: " . zend_version());

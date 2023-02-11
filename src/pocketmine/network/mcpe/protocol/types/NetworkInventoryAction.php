@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
+use InvalidArgumentException;
+use InvalidStateException;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -32,6 +34,7 @@ use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\Player;
+use UnexpectedValueException;
 
 class NetworkInventoryAction{
 	public const SOURCE_CONTAINER = 0;
@@ -117,7 +120,7 @@ class NetworkInventoryAction{
 				$this->windowId = $packet->getVarInt();
 				break;
 			default:
-				throw new \UnexpectedValueException("Unknown inventory action source type $this->sourceType");
+				throw new UnexpectedValueException("Unknown inventory action source type $this->sourceType");
 		}
 
 		$this->inventorySlot = $packet->getUnsignedVarInt();
@@ -153,7 +156,7 @@ class NetworkInventoryAction{
 				$packet->putVarInt($this->windowId);
 				break;
 			default:
-				throw new \InvalidArgumentException("Unknown inventory action source type $this->sourceType");
+				throw new InvalidArgumentException("Unknown inventory action source type $this->sourceType");
 		}
 
 		$packet->putUnsignedVarInt($this->inventorySlot);
@@ -163,7 +166,7 @@ class NetworkInventoryAction{
 		if($packet->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $packet->getProtocol() < ProtocolInfo::PROTOCOL_429){
 	    	if($hasItemStackIds){
 		    	if($this->newItemStackId === null){
-			    	throw new \InvalidStateException("Item stack ID for newItem must be provided");
+			    	throw new InvalidStateException("Item stack ID for newItem must be provided");
 		    	}
 		    	$packet->writeGenericTypeNetworkId($this->newItemStackId);
 	    	}
@@ -175,7 +178,7 @@ class NetworkInventoryAction{
 	 *
 	 * @return InventoryAction|null
 	 *
-	 * @throws \UnexpectedValueException
+	 * @throws UnexpectedValueException
 	 */
 	public function createInventoryAction(Player $player){
 		if($this->oldItem->equalsExact($this->newItem)){
@@ -191,17 +194,17 @@ class NetworkInventoryAction{
 					if($this->inventorySlot >= 28 and $this->inventorySlot <= 31){
 						$window = $player->getCraftingGrid();
 						if($window->getGridWidth() !== CraftingGrid::SIZE_SMALL){
-							throw new \UnexpectedValueException("Expected small crafting grid");
+							throw new UnexpectedValueException("Expected small crafting grid");
 						}
 						$slot = $this->inventorySlot - 28;
 					}elseif($this->inventorySlot >= 32 and $this->inventorySlot <= 40){
 						$window = $player->getCraftingGrid();
 						if($window->getGridWidth() !== CraftingGrid::SIZE_BIG){
-							throw new \UnexpectedValueException("Expected big crafting grid");
+							throw new UnexpectedValueException("Expected big crafting grid");
 						}
 						$slot = $this->inventorySlot - 32;
 					}else{
-						throw new \UnexpectedValueException("Unhandled magic UI slot offset $this->inventorySlot");
+						throw new UnexpectedValueException("Unhandled magic UI slot offset $this->inventorySlot");
 					}
 				}else{
 					$window = $player->getWindow($this->windowId);
@@ -211,10 +214,10 @@ class NetworkInventoryAction{
 					return new SlotChangeAction($window, $slot, $this->oldItem, $this->newItem);
 				}
 
-				throw new \UnexpectedValueException("Player " . $player->getName() . " has no open container with window ID $this->windowId");
+				throw new UnexpectedValueException("Player " . $player->getName() . " has no open container with window ID $this->windowId");
 			case self::SOURCE_WORLD:
 				if($this->inventorySlot !== self::ACTION_MAGIC_SLOT_DROP_ITEM){
-					throw new \UnexpectedValueException("Only expecting drop-item world actions from the client!");
+					throw new UnexpectedValueException("Only expecting drop-item world actions from the client!");
 				}
 
 				return new DropItemAction($this->newItem);
@@ -227,7 +230,7 @@ class NetworkInventoryAction{
 						$type = CreativeInventoryAction::TYPE_CREATE_ITEM;
 						break;
 					default:
-						throw new \UnexpectedValueException("Unexpected creative action type $this->inventorySlot");
+						throw new UnexpectedValueException("Unexpected creative action type $this->inventorySlot");
 
 				}
 
@@ -246,9 +249,9 @@ class NetworkInventoryAction{
 				}
 
 				//TODO: more stuff
-				throw new \UnexpectedValueException("Player " . $player->getName() . " has no open container with window ID $this->windowId");
+				throw new UnexpectedValueException("Player " . $player->getName() . " has no open container with window ID $this->windowId");
 			default:
-				throw new \UnexpectedValueException("Unknown inventory source type $this->sourceType");
+				throw new UnexpectedValueException("Unknown inventory source type $this->sourceType");
 		}
 	}
 }

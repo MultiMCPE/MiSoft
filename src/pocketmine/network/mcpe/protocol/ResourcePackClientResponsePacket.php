@@ -27,7 +27,11 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
 use function count;
+use function ord;
+use function pack;
+use function unpack;
 
 class ResourcePackClientResponsePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CLIENT_RESPONSE_PACKET;
@@ -43,16 +47,16 @@ class ResourcePackClientResponsePacket extends DataPacket{
 	public $packIds = [];
 
 	protected function decodePayload(){
-		$this->status = (\ord($this->get(1)));
-		$entryCount = ((\unpack("v", $this->get(2))[1]));
+		$this->status = (ord($this->get(1)));
+		$entryCount = ((unpack("v", $this->get(2))[1]));
 		while($entryCount-- > 0){
 			$this->packIds[] = $this->getString();
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->status));
-		($this->buffer .= (\pack("v", count($this->packIds))));
+		($this->buffer .= chr($this->status));
+		($this->buffer .= (pack("v", count($this->packIds))));
 		foreach($this->packIds as $id){
 			$this->putString($id);
 		}

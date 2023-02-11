@@ -23,9 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\entity;
 
+use ArrayAccess;
+use RuntimeException;
 use function array_filter;
 
-class AttributeMap implements \ArrayAccess{
+class AttributeMap implements ArrayAccess{
 	/** @var Attribute[] */
 	private $attributes = [];
 
@@ -80,6 +82,6 @@ class AttributeMap implements \ArrayAccess{
 	}
 
 	public function offsetUnset($offset) : void{
-		throw new \RuntimeException("Could not unset an attribute from an attribute map");
+		throw new RuntimeException("Could not unset an attribute from an attribute map");
 	}
 }

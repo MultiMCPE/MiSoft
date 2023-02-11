@@ -28,6 +28,9 @@ use pocketmine\utils\Binary;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
+use UnexpectedValueException;
+use function chr;
+use function ord;
 
 class PositionTrackingDBServerBroadcastPacket extends DataPacket/* implements ClientboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::POSITION_TRACKING_D_B_SERVER_BROADCAST_PACKET;
@@ -58,19 +61,19 @@ class PositionTrackingDBServerBroadcastPacket extends DataPacket/* implements Cl
 	public function getNbt() : CompoundTag{ return $this->nbt; }
 
 	protected function decodePayload() : void{
-		$this->action = (\ord($this->get(1)));
+		$this->action = (ord($this->get(1)));
 		$this->trackingId = $this->getVarInt();
 		$offset = $this->getOffset();
 		$nbt = (new NetworkLittleEndianNBTStream())->read($this->getBuffer(), false, $offset);
 		$this->setOffset($offset);
 		if(!($nbt instanceof CompoundTag)){
-			throw new \UnexpectedValueException("Expected TAG_Compound");
+			throw new UnexpectedValueException("Expected TAG_Compound");
 		}
 		$this->nbt = $nbt;
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= \chr($this->action));
+		($this->buffer .= chr($this->action));
 		$this->putVarInt($this->trackingId);
 		($this->buffer .= (new NetworkLittleEndianNBTStream())->write($this->nbt));
 	}

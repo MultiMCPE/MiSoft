@@ -27,8 +27,18 @@ declare(strict_types=1);
 
 namespace pocketmine\utils;
 
+use Closure;
 use DaveRandom\CallbackValidator\CallbackType;
+use DaveRandom\CallbackValidator\InvalidCallbackException;
+use ErrorException;
+use Exception;
+use InvalidArgumentException;
 use pocketmine\ThreadManager;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use RuntimeException;
+use TypeError;
 use function array_combine;
 use function array_map;
 use function array_reverse;
@@ -90,6 +100,8 @@ use const PHP_EOL;
 use const PHP_INT_MAX;
 use const PHP_INT_SIZE;
 use const PHP_MAXPATHLEN;
+use const pocketmine\PATH;
+use const pocketmine\PLUGIN_PATH;
 use const STR_PAD_LEFT;
 use const STR_PAD_RIGHT;
 
@@ -119,13 +131,13 @@ class Utils{
 	/**
 	 * Returns a readable identifier for the given Closure, including file and line.
 	 *
-	 * @param \Closure $closure
+	 * @param Closure $closure
 	 *
 	 * @return string
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
-	public static function getNiceClosureName(\Closure $closure) : string{
-		$func = new \ReflectionFunction($closure);
+	public static function getNiceClosureName(Closure $closure) : string{
+		$func = new ReflectionFunction($closure);
 		if(substr($func->getName(), -strlen('{closure}')) !== '{closure}'){
 			//closure wraps a named function, can be done with reflection or fromCallable()
 			//isClosure() is useless here because it just tells us if $func is reflecting a Closure object
@@ -150,10 +162,10 @@ class Utils{
 	 * @param object $obj
 	 *
 	 * @return string
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public static function getNiceClassName(object $obj) : string{
-		$reflect = new \ReflectionClass($obj);
+		$reflect = new ReflectionClass($obj);
 		if($reflect->isAnonymous()){
 			return "anonymous@" . self::cleanPath($reflect->getFileName()) . "#L" . $reflect->getStartLine();
 		}
@@ -487,7 +499,7 @@ class Utils{
 	 *
 	 * @return array a plain array of three [result body : string, headers : array[], HTTP response code : int]. Headers are grouped by requests with strtolower(header name) as keys and header value as values
 	 *
-	 * @throws \RuntimeException if a cURL error occurs
+	 * @throws RuntimeException if a cURL error occurs
 	 */
 	public static function simpleCurl(string $page, $timeout = 10, array $extraHeaders = [], array $extraOpts = [], callable $onSuccess = null){
 		return Internet::simpleCurl($page, $timeout, $extraHeaders, $extraOpts, $onSuccess);
@@ -632,7 +644,7 @@ class Utils{
 		if(function_exists("xdebug_get_function_stack")){
 			$trace = array_reverse(xdebug_get_function_stack());
 		}else{
-			$e = new \Exception();
+			$e = new Exception();
 			$trace = $e->getTrace();
 		}
 		for($i = 0; $i < $skipFrames; ++$i){
@@ -656,8 +668,8 @@ class Utils{
 		//remove relative paths
 		//TODO: make these paths dynamic so they can be unit-tested against
 		static $cleanPaths = [
-			\pocketmine\PLUGIN_PATH => "plugins", //this has to come BEFORE \pocketmine\PATH because it's inside that by default on src installations
-			\pocketmine\PATH => ""
+			PLUGIN_PATH => "plugins", //this has to come BEFORE \pocketmine\PATH because it's inside that by default on src installations
+			PATH => ""
 		];
 		foreach($cleanPaths as $cleanPath => $replacement){
 			$cleanPath = rtrim(str_replace(["\\", "phar://"], ["/", ""], $cleanPath), "/");
@@ -688,11 +700,11 @@ class Utils{
 	 * @param int    $line
 	 *
 	 * @return bool
-	 * @throws \ErrorException
+	 * @throws ErrorException
 	 */
 	public static function errorExceptionHandler(int $severity, string $message, string $file, int $line) : bool{
 		if(error_reporting() & $severity){
-			throw new \ErrorException($message, 0, $severity, $file, $line);
+			throw new ErrorException($message, 0, $severity, $file, $line);
 		}
 
 		return true; //stfu operator
@@ -700,22 +712,22 @@ class Utils{
 
 	public static function testValidInstance(string $className, string $baseName) : void{
 		try{
-			$base = new \ReflectionClass($baseName);
-		}catch(\ReflectionException $e){
-			throw new \InvalidArgumentException("Base class $baseName does not exist");
+			$base = new ReflectionClass($baseName);
+		}catch(ReflectionException $e){
+			throw new InvalidArgumentException("Base class $baseName does not exist");
 		}
 
 		try{
-			$class = new \ReflectionClass($className);
-		}catch(\ReflectionException $e){
-			throw new \InvalidArgumentException("Class $className does not exist");
+			$class = new ReflectionClass($className);
+		}catch(ReflectionException $e){
+			throw new InvalidArgumentException("Class $className does not exist");
 		}
 
 		if(!$class->isSubclassOf($baseName)){
-			throw new \InvalidArgumentException("Class $className does not " . ($base->isInterface() ? "implement" : "extend") . " " . $baseName);
+			throw new InvalidArgumentException("Class $className does not " . ($base->isInterface() ? "implement" : "extend") . " " . $baseName);
 		}
 		if(!$class->isInstantiable()){
-			throw new \InvalidArgumentException("Class $className cannot be constructed");
+			throw new InvalidArgumentException("Class $className cannot be constructed");
 		}
 	}
 
@@ -726,12 +738,12 @@ class Utils{
 	 * @param callable $signature Dummy callable with the required parameters and return type
 	 * @param callable $subject Callable to check the signature of
 	 *
-	 * @throws \DaveRandom\CallbackValidator\InvalidCallbackException
-	 * @throws \TypeError
+	 * @throws InvalidCallbackException
+	 * @throws TypeError
 	 */
 	public static function validateCallableSignature(callable $signature, callable $subject) : void{
 		if(!($sigType = CallbackType::createFromCallable($signature))->isSatisfiedBy($subject)){
-			throw new \TypeError("Declaration of callable `" . CallbackType::createFromCallable($subject) . "` must be compatible with `" . $sigType . "`");
+			throw new TypeError("Declaration of callable `" . CallbackType::createFromCallable($subject) . "` must be compatible with `" . $sigType . "`");
 		}
 	}
 }

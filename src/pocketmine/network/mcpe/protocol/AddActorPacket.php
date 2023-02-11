@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 use pocketmine\entity\Attribute;
@@ -30,8 +31,11 @@ use pocketmine\entity\EntityIds;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use UnexpectedValueException;
 use function array_search;
 use function count;
+use function pack;
+use function unpack;
 
 class AddActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ACTOR_PACKET;
@@ -167,25 +171,25 @@ class AddActorPacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
 	    	$this->type = array_search($t = $this->getString(), self::LEGACY_ID_MAP_BC, true);
 	    	if($this->type === false){
-		    	throw new \UnexpectedValueException("Can't map ID $t to legacy ID");
+		    	throw new UnexpectedValueException("Can't map ID $t to legacy ID");
 	    	}
 		} else {
 		    $this->type = $this->getUnsignedVarInt();
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->pitch = ((\unpack("g", $this->get(4))[1]));
-		$this->yaw = ((\unpack("g", $this->get(4))[1]));
+		$this->pitch = ((unpack("g", $this->get(4))[1]));
+		$this->yaw = ((unpack("g", $this->get(4))[1]));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
-	    	$this->headYaw = ((\unpack("g", $this->get(4))[1]));
+	    	$this->headYaw = ((unpack("g", $this->get(4))[1]));
 		}
 
 		$attrCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $attrCount; ++$i){
 			$name = $this->getString();
-			$min = ((\unpack("g", $this->get(4))[1]));
-			$current = ((\unpack("g", $this->get(4))[1]));
-			$max = ((\unpack("g", $this->get(4))[1]));
+			$min = ((unpack("g", $this->get(4))[1]));
+			$current = ((unpack("g", $this->get(4))[1]));
+			$max = ((unpack("g", $this->get(4))[1]));
 			$attr = Attribute::getAttributeByName($name);
 
 			if($attr !== null){
@@ -194,7 +198,7 @@ class AddActorPacket extends DataPacket{
 				$attr->setValue($current);
 				$this->attributes[] = $attr;
 			}else{
-				throw new \UnexpectedValueException("Unknown attribute type \"$name\"");
+				throw new UnexpectedValueException("Unknown attribute type \"$name\"");
 			}
 		}
 
@@ -210,7 +214,7 @@ class AddActorPacket extends DataPacket{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
 	    	if(!isset(self::LEGACY_ID_MAP_BC[$this->type])){
-			    throw new \InvalidArgumentException("Unknown entity numeric ID $this->type");
+			    throw new InvalidArgumentException("Unknown entity numeric ID $this->type");
 	    	}
 	    	$this->putString(self::LEGACY_ID_MAP_BC[$this->type]);
 		} else {
@@ -218,18 +222,18 @@ class AddActorPacket extends DataPacket{
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-		($this->buffer .= (\pack("g", $this->pitch)));
-		($this->buffer .= (\pack("g", $this->yaw)));
+		($this->buffer .= (pack("g", $this->pitch)));
+		($this->buffer .= (pack("g", $this->yaw)));
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
-	    	($this->buffer .= (\pack("g", $this->headYaw)));
+	    	($this->buffer .= (pack("g", $this->headYaw)));
 		}
 
 		$this->putUnsignedVarInt(count($this->attributes));
 		foreach($this->attributes as $attribute){
 			$this->putString($attribute->getName());
-			($this->buffer .= (\pack("g", $attribute->getMinValue())));
-			($this->buffer .= (\pack("g", $attribute->getValue())));
-			($this->buffer .= (\pack("g", $attribute->getMaxValue())));
+			($this->buffer .= (pack("g", $attribute->getMinValue())));
+			($this->buffer .= (pack("g", $attribute->getValue())));
+			($this->buffer .= (pack("g", $attribute->getMaxValue())));
 		}
 
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());

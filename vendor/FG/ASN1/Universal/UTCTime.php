@@ -10,6 +10,8 @@
 
 namespace FG\ASN1\Universal;
 
+use DateTime;
+use DateTimeZone;
 use FG\ASN1\AbstractTime;
 use FG\ASN1\Parsable;
 use FG\ASN1\Identifier;
@@ -60,7 +62,7 @@ class UTCTime extends AbstractTime implements Parsable
             $format .= 's';
         }
 
-        $dateTime = \DateTime::createFromFormat($format, $dateTimeString, new \DateTimeZone('UTC'));
+        $dateTime = DateTime::createFromFormat($format, $dateTimeString, new DateTimeZone('UTC'));
 
         // extract time zone settings
         if ($binaryData[$offsetIndex] == '+'

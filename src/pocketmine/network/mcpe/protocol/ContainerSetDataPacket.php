@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class ContainerSetDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_SET_DATA_PACKET;
@@ -49,13 +51,13 @@ class ContainerSetDataPacket extends DataPacket{
 	public $value;
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
 		$this->property = $this->getVarInt();
 		$this->value = $this->getVarInt();
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
+		($this->buffer .= chr($this->windowId));
 		$this->putVarInt($this->property);
 		$this->putVarInt($this->value);
 	}

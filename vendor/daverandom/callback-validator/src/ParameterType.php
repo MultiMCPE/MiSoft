@@ -2,6 +2,8 @@
 
 namespace DaveRandom\CallbackValidator;
 
+use ReflectionParameter;
+
 final class ParameterType extends Type
 {
     /**
@@ -49,7 +51,7 @@ final class ParameterType extends Type
     /**
      * Create a new ParameterType instance from a \ReflectionParameter instance
      *
-     * @param \ReflectionParameter $reflection
+     * @param ReflectionParameter $reflection
      * @param int $flags
      * @return ParameterType
      */

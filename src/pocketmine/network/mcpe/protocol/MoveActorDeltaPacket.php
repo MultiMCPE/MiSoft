@@ -26,6 +26,10 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class MoveActorDeltaPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_ACTOR_DELTA_PACKET;
@@ -57,7 +61,7 @@ class MoveActorDeltaPacket extends DataPacket{
 	private function maybeReadCoord(int $flag) {
 		if($this->flags & $flag){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        return ((\unpack("g", $this->get(4))[1]));
+		        return ((unpack("g", $this->get(4))[1]));
 		    }else{
 		    	return $this->getVarInt();
 		    }
@@ -75,9 +79,9 @@ class MoveActorDeltaPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-		    $this->flags = ((\unpack("v", $this->get(2))[1]));
+		    $this->flags = ((unpack("v", $this->get(2))[1]));
 		}else{
-	    	$this->flags = (\ord($this->get(1)));
+	    	$this->flags = (ord($this->get(1)));
 		}
 		$this->xPos = $this->maybeReadCoord(self::FLAG_HAS_X);
 		$this->yPos = $this->maybeReadCoord(self::FLAG_HAS_Y);
@@ -90,7 +94,7 @@ class MoveActorDeltaPacket extends DataPacket{
 	private function maybeWriteCoord(int $flag, $val) : void{
 		if($this->flags & $flag){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        ($this->buffer .= (\pack("g", $val)));
+		        ($this->buffer .= (pack("g", $val)));
 		    }else{
 		    	$this->putVarInt($val);
 		    }
@@ -106,9 +110,9 @@ class MoveActorDeltaPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-		    ($this->buffer .= (\pack("v", $this->flags)));
+		    ($this->buffer .= (pack("v", $this->flags)));
 		}else{
-	    	($this->buffer .= \chr($this->flags));
+	    	($this->buffer .= chr($this->flags));
 		}
 		$this->maybeWriteCoord(self::FLAG_HAS_X, $this->xPos);
 		$this->maybeWriteCoord(self::FLAG_HAS_Y, $this->yPos);

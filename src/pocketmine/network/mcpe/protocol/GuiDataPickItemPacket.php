@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class GuiDataPickItemPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::GUI_DATA_PICK_ITEM_PACKET;
@@ -42,7 +44,7 @@ class GuiDataPickItemPacket extends DataPacket{
 	    	$this->itemDescription = $this->getString();
 	    	$this->itemEffects = $this->getString();
 	    }
-		$this->hotbarSlot = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->hotbarSlot = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	}
 
 	protected function encodePayload(){
@@ -50,7 +52,7 @@ class GuiDataPickItemPacket extends DataPacket{
 	    	$this->putString($this->itemDescription);
 	    	$this->putString($this->itemEffects);
 	    }
-		($this->buffer .= (\pack("V", $this->hotbarSlot)));
+		($this->buffer .= (pack("V", $this->hotbarSlot)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

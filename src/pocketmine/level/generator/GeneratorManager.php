@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator;
 
+use InvalidArgumentException;
 use pocketmine\level\generator\hell\Nether;
 use pocketmine\level\generator\normal\Normal;
 use function array_keys;
@@ -51,11 +52,11 @@ final class GeneratorManager{
 	 */
 	public static function addGenerator(string $class, string $name, bool $overwrite = false) : void{
 		if(!is_subclass_of($class, Generator::class)){
-			throw new \InvalidArgumentException("Class $class does not extend " . Generator::class);
+			throw new InvalidArgumentException("Class $class does not extend " . Generator::class);
 		}
 
 		if(!$overwrite and isset(self::$list[$name = strtolower($name)])){
-			throw new \InvalidArgumentException("Alias \"$name\" is already assigned");
+			throw new InvalidArgumentException("Alias \"$name\" is already assigned");
 		}
 
 		self::$list[$name] = $class;
@@ -77,7 +78,7 @@ final class GeneratorManager{
 	 * @param bool   $throwOnMissing @deprecated this is for backwards compatibility only
 	 *
 	 * @return string|Generator Name of class that extends Generator (not an actual Generator object)
-	 * @throws \InvalidArgumentException if the generator type isn't registered
+	 * @throws InvalidArgumentException if the generator type isn't registered
 	 */
 	public static function getGenerator(string $name, bool $throwOnMissing = false){
 		if(isset(self::$list[$name = strtolower($name)])){
@@ -85,7 +86,7 @@ final class GeneratorManager{
 		}
 
 		if($throwOnMissing){
-			throw new \InvalidArgumentException("Alias \"$name\" does not map to any known generator");
+			throw new InvalidArgumentException("Alias \"$name\" does not map to any known generator");
 		}
 		return Normal::class;
 	}

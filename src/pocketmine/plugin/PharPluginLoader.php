@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
+use ClassLoader;
+use Phar;
+use PharFileInfo;
 use function is_file;
 use function strlen;
 use function substr;
@@ -32,10 +35,10 @@ use function substr;
  */
 class PharPluginLoader implements PluginLoader{
 
-	/** @var \ClassLoader */
+	/** @var ClassLoader */
 	private $loader;
 
-	public function __construct(\ClassLoader $loader){
+	public function __construct(ClassLoader $loader){
 		$this->loader = $loader;
 	}
 
@@ -61,10 +64,10 @@ class PharPluginLoader implements PluginLoader{
 	 * @return null|PluginDescription
 	 */
 	public function getPluginDescription(string $file) : ?PluginDescription{
-		$phar = new \Phar($file);
+		$phar = new Phar($file);
 		if(isset($phar["plugin.yml"])){
 			$pluginYml = $phar["plugin.yml"];
-			if($pluginYml instanceof \PharFileInfo){
+			if($pluginYml instanceof PharFileInfo){
 				return new PluginDescription($pluginYml->getContent());
 			}
 		}

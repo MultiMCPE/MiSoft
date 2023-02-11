@@ -28,6 +28,8 @@ use pocketmine\utils\Binary;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class MobEquipmentPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOB_EQUIPMENT_PACKET;
@@ -46,17 +48,17 @@ class MobEquipmentPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->item = $this->getSlot($this->getProtocol());
-		$this->inventorySlot = (\ord($this->get(1)));
-		$this->hotbarSlot = (\ord($this->get(1)));
-		$this->windowId = (\ord($this->get(1)));
+		$this->inventorySlot = (ord($this->get(1)));
+		$this->hotbarSlot = (ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putSlot($this->item, $this->getProtocol());
-		($this->buffer .= \chr($this->inventorySlot));
-		($this->buffer .= \chr($this->hotbarSlot));
-		($this->buffer .= \chr($this->windowId));
+		($this->buffer .= chr($this->inventorySlot));
+		($this->buffer .= chr($this->hotbarSlot));
+		($this->buffer .= chr($this->windowId));
 	}
 
 	public function handle(NetworkSession $session) : bool{

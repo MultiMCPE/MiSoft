@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace pocketmine\tile;
 
+use InvalidArgumentException;
 use pocketmine\inventory\ShulkerBoxInventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
@@ -60,7 +61,7 @@ class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameab
 
     public function setFacing(int $face) : void{
         if($face < 0 or $face > 5){
-            throw new \InvalidArgumentException("Facing must be in range 0-5, not " . $face);
+            throw new InvalidArgumentException("Facing must be in range 0-5, not " . $face);
         }
         $this->facing = $face;
     }

@@ -10,6 +10,8 @@
 
 namespace FG\ASN1\Universal;
 
+use DateTime;
+use DateTimeZone;
 use FG\ASN1\AbstractTime;
 use FG\ASN1\Parsable;
 use FG\ASN1\Identifier;
@@ -94,8 +96,8 @@ class GeneralizedTime extends AbstractTime implements Parsable
         $maximumBytesToRead -= $lengthOfMinimumTimeString;
 
         if ($contentLength == $lengthOfMinimumTimeString) {
-            $localTimeZone = new \DateTimeZone(date_default_timezone_get());
-            $dateTime = \DateTime::createFromFormat($format, $dateTimeString, $localTimeZone);
+            $localTimeZone = new DateTimeZone(date_default_timezone_get());
+            $dateTime = DateTime::createFromFormat($format, $dateTimeString, $localTimeZone);
         } else {
             if ($binaryData[$offsetIndex] == '.') {
                 $maximumBytesToRead--; // account for the '.'
@@ -114,7 +116,7 @@ class GeneralizedTime extends AbstractTime implements Parsable
                 $format .= '.u';
             }
 
-            $dateTime = \DateTime::createFromFormat($format, $dateTimeString, new \DateTimeZone('UTC'));
+            $dateTime = DateTime::createFromFormat($format, $dateTimeString, new DateTimeZone('UTC'));
 
             if ($maximumBytesToRead > 0) {
                 if ($binaryData[$offsetIndex] == '+'

@@ -23,8 +23,15 @@ declare(strict_types=1);
 
 namespace pocketmine\scheduler;
 
+use ClassLoader;
+use Closure;
+use InvalidArgumentException;
 use pocketmine\Server;
 use pocketmine\utils\Utils;
+use ReflectionClass;
+use ReflectionException;
+use Threaded;
+use ThreadedLogger;
 use function array_keys;
 use function assert;
 use function count;
@@ -45,9 +52,9 @@ class AsyncPool{
 	/** @var Server */
 	private $server;
 
-	/** @var \ClassLoader */
+	/** @var ClassLoader */
 	private $classLoader;
-	/** @var \ThreadedLogger */
+	/** @var ThreadedLogger */
 	private $logger;
 	/** @var int */
 	protected $size;
@@ -68,10 +75,10 @@ class AsyncPool{
 	/** @var int[] */
 	private $workerLastUsed = [];
 
-	/** @var \Closure[] */
+	/** @var Closure[] */
 	private $workerStartHooks = [];
 
-	public function __construct(Server $server, int $size, int $workerMemoryLimit, \ClassLoader $classLoader, \ThreadedLogger $logger){
+	public function __construct(Server $server, int $size, int $workerMemoryLimit, ClassLoader $classLoader, ThreadedLogger $logger){
 		$this->server = $server;
 		$this->size = $size;
 		$this->workerMemoryLimit = $workerMemoryLimit;
@@ -105,9 +112,9 @@ class AsyncPool{
 	 *
 	 * This function will call the hook for every already-running worker.
 	 *
-	 * @param \Closure $hook
+	 * @param Closure $hook
 	 */
-	public function addWorkerStartHook(\Closure $hook) : void{
+	public function addWorkerStartHook(Closure $hook) : void{
 		Utils::validateCallableSignature(function(int $worker) : void{}, $hook);
 		$this->workerStartHooks[spl_object_hash($hook)] = $hook;
 		foreach($this->workers as $i => $worker){
@@ -118,9 +125,9 @@ class AsyncPool{
 	/**
 	 * Removes a previously-registered callback listening for workers being started.
 	 *
-	 * @param \Closure $hook
+	 * @param Closure $hook
 	 */
-	public function removeWorkerStartHook(\Closure $hook) : void{
+	public function removeWorkerStartHook(Closure $hook) : void{
 		unset($this->workerStartHooks[spl_object_hash($hook)]);
 	}
 
@@ -164,13 +171,13 @@ class AsyncPool{
 	 */
 	public function submitTaskToWorker(AsyncTask $task, int $worker) : void{
 		if($worker < 0 or $worker >= $this->size){
-			throw new \InvalidArgumentException("Invalid worker $worker");
+			throw new InvalidArgumentException("Invalid worker $worker");
 		}
 		if($task->getTaskId() !== null){
-			throw new \InvalidArgumentException("Cannot submit the same AsyncTask instance more than once");
+			throw new InvalidArgumentException("Cannot submit the same AsyncTask instance more than once");
 		}
 
-		$task->progressUpdates = new \Threaded;
+		$task->progressUpdates = new Threaded;
 		$task->setTaskId($this->nextTaskId++);
 
 		$this->tasks[$task->getTaskId()] = $task;
@@ -226,7 +233,7 @@ class AsyncPool{
 	 */
 	public function submitTask(AsyncTask $task) : int{
 		if($task->getTaskId() !== null){
-			throw new \InvalidArgumentException("Cannot submit the same AsyncTask instance more than once");
+			throw new InvalidArgumentException("Cannot submit the same AsyncTask instance more than once");
 		}
 
 		$worker = $this->selectWorker();
@@ -301,7 +308,7 @@ class AsyncPool{
 	/**
 	 * Collects finished and/or crashed tasks from the workers, firing their on-completion hooks where appropriate.
 	 *
-	 * @throws \ReflectionException
+	 * @throws ReflectionException
 	 */
 	public function collectTasks() : void{
 		foreach($this->tasks as $task){
@@ -326,7 +333,7 @@ class AsyncPool{
 
 				$this->removeTask($task);
 			}elseif($task->isCrashed()){
-				$this->logger->critical("Could not execute asynchronous task " . (new \ReflectionClass($task))->getShortName() . ": Task crashed");
+				$this->logger->critical("Could not execute asynchronous task " . (new ReflectionClass($task))->getShortName() . ": Task crashed");
 				$this->removeTask($task, true);
 			}
 		}

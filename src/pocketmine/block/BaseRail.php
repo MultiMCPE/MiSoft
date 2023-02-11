@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use InvalidArgumentException;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
@@ -105,7 +106,7 @@ abstract class BaseRail extends Flowable{
 			$meta = array_search(array_reverse($connections), $lookup, true);
 		}
 		if($meta === false){
-			throw new \InvalidArgumentException("No meta value matches connections " . implode(", ", array_map('\dechex', $connections)));
+			throw new InvalidArgumentException("No meta value matches connections " . implode(", ", array_map('\dechex', $connections)));
 		}
 
 		return $meta;
@@ -118,7 +119,7 @@ abstract class BaseRail extends Flowable{
 	 *
 	 * @return int
 	 *
-	 * @throws \InvalidArgumentException if no state matches the given connections
+	 * @throws InvalidArgumentException if no state matches the given connections
 	 */
 	protected function getMetaForState(array $connections) : int{
 		return self::searchState($connections, self::CONNECTIONS);
@@ -184,7 +185,7 @@ abstract class BaseRail extends Flowable{
 			case 2:
 				return [];
 			default:
-				throw new \InvalidArgumentException("Expected at most 2 constraints, got " . count($constraints));
+				throw new InvalidArgumentException("Expected at most 2 constraints, got " . count($constraints));
 		}
 	}
 
@@ -251,7 +252,7 @@ abstract class BaseRail extends Flowable{
 		if(count($connections) === 1){
 			$connections[] = Vector3::getOppositeSide($connections[0] & ~self::FLAG_ASCEND);
 		}elseif(count($connections) !== 2){
-			throw new \InvalidArgumentException("Expected exactly 2 connections, got " . count($connections));
+			throw new InvalidArgumentException("Expected exactly 2 connections, got " . count($connections));
 		}
 
 		$this->meta = $this->getMetaForState($connections);

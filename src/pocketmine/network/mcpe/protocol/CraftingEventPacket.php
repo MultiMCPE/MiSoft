@@ -28,7 +28,9 @@ use pocketmine\utils\Binary;
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\utils\UUID;
+use function chr;
 use function count;
+use function ord;
 
 class CraftingEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_EVENT_PACKET;
@@ -51,7 +53,7 @@ class CraftingEventPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->windowId = (\ord($this->get(1)));
+		$this->windowId = (ord($this->get(1)));
 		$this->type = $this->getVarInt();
 		$this->id = $this->getUUID();
 
@@ -67,7 +69,7 @@ class CraftingEventPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->windowId));
+		($this->buffer .= chr($this->windowId));
 		$this->putVarInt($this->type);
 		$this->putUUID($this->id);
 

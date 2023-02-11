@@ -26,9 +26,11 @@ namespace pocketmine\network\rcon;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\Thread;
 use pocketmine\utils\Binary;
+use ThreadedLogger;
 use function count;
 use function ltrim;
 use function microtime;
+use function pack;
 use function socket_accept;
 use function socket_close;
 use function socket_getpeername;
@@ -45,6 +47,7 @@ use function str_replace;
 use function strlen;
 use function substr;
 use function trim;
+use function unpack;
 use const PTHREADS_INHERIT_NONE;
 use const SO_KEEPALIVE;
 use const SO_LINGER;
@@ -66,7 +69,7 @@ class RCONInstance extends Thread{
 	private $password;
 	/** @var int */
 	private $maxClients;
-	/** @var \ThreadedLogger */
+	/** @var ThreadedLogger */
 	private $logger;
 	/** @var resource */
 	private $ipcSocket;
@@ -77,11 +80,11 @@ class RCONInstance extends Thread{
 	 * @param resource             $socket
 	 * @param string               $password
 	 * @param int                  $maxClients
-	 * @param \ThreadedLogger      $logger
+	 * @param ThreadedLogger      $logger
 	 * @param resource             $ipcSocket
 	 * @param null|SleeperNotifier $notifier
 	 */
-	public function __construct($socket, string $password, int $maxClients = 50, \ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
+	public function __construct($socket, string $password, int $maxClients = 50, ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
@@ -96,11 +99,11 @@ class RCONInstance extends Thread{
 	}
 
 	private function writePacket($client, int $requestID, int $packetType, string $payload){
-		$pk = (\pack("V", $requestID))
-			. (\pack("V", $packetType))
+		$pk = (pack("V", $requestID))
+			. (pack("V", $packetType))
 			. $payload
 			. "\x00\x00"; //Terminate payload and packet
-		return socket_write($client, (\pack("V", strlen($pk))) . $pk);
+		return socket_write($client, (pack("V", strlen($pk))) . $pk);
 	}
 
 	private function readPacket($client, ?int &$requestID, ?int &$packetType, ?string &$payload){
@@ -120,7 +123,7 @@ class RCONInstance extends Thread{
 			}
 			return false;
 		}
-		$size = (\unpack("V", $d)[1] << 32 >> 32);
+		$size = (unpack("V", $d)[1] << 32 >> 32);
 		if($size < 0 or $size > 65535){
 			$this->logger->debug("Packet with too-large length header $size from $ip $port, disconnecting");
 			return false;
@@ -137,8 +140,8 @@ class RCONInstance extends Thread{
 			$this->logger->debug("Truncated packet from $ip $port (want $size bytes, have " . strlen($buf) . "), disconnecting");
 			return false;
 		}
-		$requestID = (\unpack("V", substr($buf, 0, 4))[1] << 32 >> 32);
-		$packetType = (\unpack("V", substr($buf, 4, 4))[1] << 32 >> 32);
+		$requestID = (unpack("V", substr($buf, 0, 4))[1] << 32 >> 32);
+		$packetType = (unpack("V", substr($buf, 4, 4))[1] << 32 >> 32);
 		$payload = substr($buf, 8, -2); //Strip two null bytes
 		return true;
 	}

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use BadMethodCallException;
 use pocketmine\Player;
 
 class PlayerCursorInventory extends BaseInventory{
@@ -43,7 +44,7 @@ class PlayerCursorInventory extends BaseInventory{
 	}
 
 	public function setSize(int $size){
-		throw new \BadMethodCallException("Cursor can only carry one item at a time");
+		throw new BadMethodCallException("Cursor can only carry one item at a time");
 	}
 
 	/**

@@ -199,7 +199,7 @@ abstract class ASNObject implements Parsable
      *
      * @throws ParserException
      *
-     * @return \FG\ASN1\ASNObject
+     * @return ASNObject
      */
     public static function fromBinary(&$binaryData, &$offsetIndex = 0)
     {

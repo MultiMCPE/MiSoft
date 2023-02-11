@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class PositionTrackingDBClientRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 	public const NETWORK_ID = ProtocolInfo::POSITION_TRACKING_D_B_CLIENT_REQUEST_PACKET;
@@ -49,12 +51,12 @@ class PositionTrackingDBClientRequestPacket extends DataPacket/* implements Serv
 	public function getTrackingId() : int{ return $this->trackingId; }
 
 	protected function decodePayload() : void{
-		$this->action = (\ord($this->get(1)));
+		$this->action = (ord($this->get(1)));
 		$this->trackingId = $this->getVarInt();
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= \chr($this->action));
+		($this->buffer .= chr($this->action));
 		$this->putVarInt($this->trackingId);
 	}
 

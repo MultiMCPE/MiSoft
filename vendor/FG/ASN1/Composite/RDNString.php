@@ -10,6 +10,8 @@
 
 namespace FG\ASN1\Composite;
 
+use FG\ASN1\ASNObject;
+use FG\ASN1\Universal\ObjectIdentifier;
 use FG\ASN1\Universal\PrintableString;
 use FG\ASN1\Universal\IA5String;
 use FG\ASN1\Universal\UTF8String;
@@ -17,8 +19,8 @@ use FG\ASN1\Universal\UTF8String;
 class RDNString extends RelativeDistinguishedName
 {
     /**
-     * @param string|\FG\ASN1\Universal\ObjectIdentifier $objectIdentifierString
-     * @param string|\FG\ASN1\ASNObject $value
+     * @param string|ObjectIdentifier $objectIdentifierString
+     * @param string|ASNObject $value
      */
     public function __construct($objectIdentifierString, $value)
     {

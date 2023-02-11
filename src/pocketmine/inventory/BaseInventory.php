@@ -37,6 +37,7 @@ use pocketmine\network\mcpe\protocol\InventorySlotPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\Player;
+use SplFixedArray;
 use function array_slice;
 use function count;
 use function max;
@@ -51,7 +52,7 @@ abstract class BaseInventory implements Inventory{
 	protected $name;
 	/** @var string */
 	protected $title;
-	/** @var \SplFixedArray|Item[] */
+	/** @var SplFixedArray|Item[] */
 	protected $slots;
 	/** @var Player[] */
 	protected $viewers = [];
@@ -64,7 +65,7 @@ abstract class BaseInventory implements Inventory{
 	 * @param string $title
 	 */
 	public function __construct(array $items = [], int $size = null, string $title = null){
-		$this->slots = new \SplFixedArray($size ?? $this->getDefaultSize());
+		$this->slots = new SplFixedArray($size ?? $this->getDefaultSize());
 		$this->title = $title ?? $this->getName();
 
 		$this->setContents($items, false);

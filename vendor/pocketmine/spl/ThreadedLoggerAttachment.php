@@ -15,7 +15,8 @@
  * GNU General Public License for more details.
 */
 
-abstract class ThreadedLoggerAttachment extends \Volatile implements \LoggerAttachment{
+abstract class ThreadedLoggerAttachment extends Volatile implements LoggerAttachment
+{
 
 	/**
 	 * @param mixed  $level

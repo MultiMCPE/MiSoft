@@ -24,6 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\permission;
 
 
+use InvalidStateException;
+
 class PermissionAttachmentInfo{
 	/** @var Permissible */
 	private $permissible;
@@ -43,7 +45,7 @@ class PermissionAttachmentInfo{
 	 * @param PermissionAttachment|null $attachment
 	 * @param bool                      $value
 	 *
-	 * @throws \InvalidStateException
+	 * @throws InvalidStateException
 	 */
 	public function __construct(Permissible $permissible, string $permission, PermissionAttachment $attachment = null, bool $value){
 		$this->permissible = $permissible;

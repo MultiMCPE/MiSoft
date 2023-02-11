@@ -26,6 +26,10 @@ namespace pocketmine\resourcepacks;
 
 
 use Ahc\Json\Comment as CommentedJsonDecoder;
+use InvalidArgumentException;
+use RuntimeException;
+use stdClass;
+use ZipArchive;
 use function count;
 use function fclose;
 use function feof;
@@ -43,11 +47,11 @@ class ZippedResourcePack implements ResourcePack{
 	 * Performs basic validation checks on a resource pack's manifest.json.
 	 * TODO: add more manifest validation
 	 *
-	 * @param \stdClass $manifest
+	 * @param stdClass $manifest
 	 *
 	 * @return bool
 	 */
-	public static function verifyManifest(\stdClass $manifest) : bool{
+	public static function verifyManifest(stdClass $manifest) : bool{
 		if(!isset($manifest->format_version) or !isset($manifest->header) or !isset($manifest->modules)){
 			return false;
 		}
@@ -64,7 +68,7 @@ class ZippedResourcePack implements ResourcePack{
 	/** @var string */
 	protected $path;
 
-	/** @var \stdClass */
+	/** @var stdClass */
 	protected $manifest;
 
 	/** @var string */
@@ -84,7 +88,7 @@ class ZippedResourcePack implements ResourcePack{
 			throw new ResourcePackException("File not found");
 		}
 
-		$archive = new \ZipArchive();
+		$archive = new ZipArchive();
 		if(($openResult = $archive->open($zipPath)) !== true){
 			throw new ResourcePackException("Encountered ZipArchive error code $openResult while trying to open $zipPath");
 		}
@@ -102,10 +106,10 @@ class ZippedResourcePack implements ResourcePack{
 		//maybe comments in the json, use stripped decoder (thanks mojang)
 		try{
 			$manifest = (new CommentedJsonDecoder())->decode($manifestData);
-		}catch(\RuntimeException $e){
+		}catch(RuntimeException $e){
 			throw new ResourcePackException("Failed to parse manifest.json: " . $e->getMessage(), $e->getCode(), $e);
 		}
-		if(!($manifest instanceof \stdClass)){
+		if(!($manifest instanceof stdClass)){
 			throw new ResourcePackException("manifest.json should contain a JSON object, not " . gettype($manifest));
 		}
 		if(!self::verifyManifest($manifest)){
@@ -151,7 +155,7 @@ class ZippedResourcePack implements ResourcePack{
 	public function getPackChunk(int $start, int $length) : string{
 		fseek($this->fileResource, $start);
 		if(feof($this->fileResource)){
-			throw new \InvalidArgumentException("Requested a resource pack chunk with invalid start offset");
+			throw new InvalidArgumentException("Requested a resource pack chunk with invalid start offset");
 		}
 		return fread($this->fileResource, $length);
 	}

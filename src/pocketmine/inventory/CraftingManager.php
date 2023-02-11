@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
+use Closure;
+use Generator;
 use pocketmine\item\Item;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -36,6 +38,7 @@ use function json_decode;
 use function json_encode;
 use function usort;
 use const DIRECTORY_SEPARATOR;
+use const pocketmine\RESOURCE_PATH;
 
 class CraftingManager{
 	/** @var ShapedRecipe[][] */
@@ -57,9 +60,9 @@ class CraftingManager{
 	}
 
 	public function init() : void{
-		$recipes = json_decode(file_get_contents(\pocketmine\RESOURCE_PATH . "vanilla" . DIRECTORY_SEPARATOR . "recipes.json"), true);
+		$recipes = json_decode(file_get_contents(RESOURCE_PATH . "vanilla" . DIRECTORY_SEPARATOR . "recipes.json"), true);
 
-		$itemDeserializerFunc = \Closure::fromCallable([Item::class, 'jsonDeserialize']);
+		$itemDeserializerFunc = Closure::fromCallable([Item::class, 'jsonDeserialize']);
 		foreach($recipes as $recipe){
 			switch($recipe["type"]){
 				case "shapeless":
@@ -305,9 +308,9 @@ class CraftingManager{
 	/**
 	 * @param Item[] $outputs
 	 *
-	 * @return CraftingRecipe[]|\Generator
+	 * @return CraftingRecipe[]|Generator
 	 */
-	public function matchRecipeByOutputs(array $outputs) : \Generator{
+	public function matchRecipeByOutputs(array $outputs) : Generator{
 		//TODO: try to match special recipes before anything else (first they need to be implemented!)
 
 		$outputHash = self::hashOutputs($outputs);

@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function pack;
+use function unpack;
 
 class TransferPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TRANSFER_PACKET;
@@ -37,12 +39,12 @@ class TransferPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->address = $this->getString();
-		$this->port = ((\unpack("v", $this->get(2))[1]));
+		$this->port = ((unpack("v", $this->get(2))[1]));
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->address);
-		($this->buffer .= (\pack("v", $this->port)));
+		($this->buffer .= (pack("v", $this->port)));
 	}
 
 	public function handle(NetworkSession $session) : bool{

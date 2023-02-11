@@ -23,11 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
+use UnexpectedValueException;
+use function chr;
 use function count;
+use function ord;
+use function pack;
+use function unpack;
 
 class SetScorePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_SCORE_PACKET;
@@ -41,14 +47,14 @@ class SetScorePacket extends DataPacket{
 	public $entries = [];
 
 	protected function decodePayload(){
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 		for($i = 0, $i2 = $this->getUnsignedVarInt(); $i < $i2; ++$i){
 			$entry = new ScorePacketEntry();
 			$entry->scoreboardId = $this->getVarLong();
 			$entry->objectiveName = $this->getString();
-			$entry->score = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+			$entry->score = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 			if($this->type !== self::TYPE_REMOVE){
-				$entry->type = (\ord($this->get(1)));
+				$entry->type = (ord($this->get(1)));
 				switch($entry->type){
 					case ScorePacketEntry::TYPE_PLAYER:
 					case ScorePacketEntry::TYPE_ENTITY:
@@ -58,7 +64,7 @@ class SetScorePacket extends DataPacket{
 						$entry->customName = $this->getString();
 						break;
 					default:
-						throw new \UnexpectedValueException("Unknown entry type $entry->type");
+						throw new UnexpectedValueException("Unknown entry type $entry->type");
 				}
 			}
 			$this->entries[] = $entry;
@@ -66,14 +72,14 @@ class SetScorePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->type));
 		$this->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			$this->putVarLong($entry->scoreboardId);
 			$this->putString($entry->objectiveName);
-			($this->buffer .= (\pack("V", $entry->score)));
+			($this->buffer .= (pack("V", $entry->score)));
 			if($this->type !== self::TYPE_REMOVE){
-				($this->buffer .= \chr($entry->type));
+				($this->buffer .= chr($entry->type));
 				switch($entry->type){
 					case ScorePacketEntry::TYPE_PLAYER:
 					case ScorePacketEntry::TYPE_ENTITY:
@@ -83,7 +89,7 @@ class SetScorePacket extends DataPacket{
 						$this->putString($entry->customName);
 						break;
 					default:
-						throw new \InvalidArgumentException("Unknown entry type $entry->type");
+						throw new InvalidArgumentException("Unknown entry type $entry->type");
 				}
 			}
 		}

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
+use Exception;
 use FG\ASN1\Exception\ParserException;
 use FG\ASN1\Universal\Integer;
 use FG\ASN1\Universal\Sequence;
 
 use InvalidArgumentException;
+use JsonException;
 use function base64_decode;
 use function base64_encode;
 use function count;
@@ -79,7 +81,7 @@ final class JwtUtils{
 
 	/**
 	 * @throws JwtException
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public static function verify(string $jwt, $signingKey) : bool{
 		[$header, $body, $signature] = self::split($jwt);
@@ -116,7 +118,7 @@ final class JwtUtils{
 	/**
 	 * @phpstan-param array<string, mixed> $header
 	 * @phpstan-param array<string, mixed> $claims
-	 * @throws \JsonException
+	 * @throws JsonException
 	 */
 	public static function create(array $header, array $claims, $signingKey) : string{
 		$jwtBody = JwtUtils::b64UrlEncode(json_encode($header, JSON_THROW_ON_ERROR)) . "." . JwtUtils::b64UrlEncode(json_encode($claims, JSON_THROW_ON_ERROR));

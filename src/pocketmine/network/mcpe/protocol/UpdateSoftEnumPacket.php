@@ -26,7 +26,9 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
 use function count;
+use function ord;
 
 class UpdateSoftEnumPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_SOFT_ENUM_PACKET;
@@ -47,7 +49,7 @@ class UpdateSoftEnumPacket extends DataPacket{
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$this->values[] = $this->getString();
 		}
-		$this->type = (\ord($this->get(1)));
+		$this->type = (ord($this->get(1)));
 	}
 
 	protected function encodePayload(){
@@ -56,7 +58,7 @@ class UpdateSoftEnumPacket extends DataPacket{
 		foreach($this->values as $v){
 			$this->putString($v);
 		}
-		($this->buffer .= \chr($this->type));
+		($this->buffer .= chr($this->type));
 	}
 
 	public function handle(NetworkSession $session) : bool{

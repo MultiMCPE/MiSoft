@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class NpcRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NPC_REQUEST_PACKET;
@@ -43,9 +45,9 @@ class NpcRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->requestType = (\ord($this->get(1)));
+		$this->requestType = (ord($this->get(1)));
 		$this->commandString = $this->getString();
-		$this->actionType = (\ord($this->get(1)));
+		$this->actionType = (ord($this->get(1)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 		    $this->sceneName = $this->getString();
 		}
@@ -53,9 +55,9 @@ class NpcRequestPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= \chr($this->requestType));
+		($this->buffer .= chr($this->requestType));
 		$this->putString($this->commandString);
-		($this->buffer .= \chr($this->actionType));
+		($this->buffer .= chr($this->actionType));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 		    $this->putString($this->sceneName);
 		}

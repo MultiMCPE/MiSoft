@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\command\defaults;
 
+use Exception;
+use InvalidArgumentException;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
@@ -63,7 +65,7 @@ class GiveCommand extends VanillaCommand{
 
 		try{
 			$item = ItemFactory::fromString($args[1]);
-		}catch(\InvalidArgumentException $e){
+		}catch(InvalidArgumentException $e){
 			$sender->sendMessage(new TranslationContainer(TextFormat::RED . "%commands.give.item.notFound", [$args[1]]));
 			return true;
 		}
@@ -79,7 +81,7 @@ class GiveCommand extends VanillaCommand{
 			$data = implode(" ", array_slice($args, 3));
 			try{
 				$tags = JsonNbtParser::parseJson($data);
-			}catch(\Exception $ex){
+			}catch(Exception $ex){
 				$exception = $ex;
 			}
 

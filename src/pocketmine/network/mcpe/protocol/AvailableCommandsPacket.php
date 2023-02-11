@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidStateException;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
@@ -33,8 +34,14 @@ use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandEnumConstraint;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\utils\BinaryDataException;
+use UnexpectedValueException;
+use function chr;
 use function count;
 use function dechex;
+use function json_encode;
+use function ord;
+use function pack;
+use function unpack;
 
 class AvailableCommandsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::AVAILABLE_COMMANDS_PACKET;
@@ -163,7 +170,7 @@ class AvailableCommandsPacket extends DataPacket{
 	 * @param string[] $enumValueList
 	 *
 	 * @return CommandEnum
-	 * @throws \UnexpectedValueException
+	 * @throws UnexpectedValueException
 	 * @throws BinaryDataException
 	 */
 	protected function getEnum(array $enumValueList) : CommandEnum{
@@ -175,7 +182,7 @@ class AvailableCommandsPacket extends DataPacket{
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$index = $this->getEnumValueIndex($listSize);
 			if(!isset($enumValueList[$index])){
-				throw new \UnexpectedValueException("Invalid enum value index $index");
+				throw new UnexpectedValueException("Invalid enum value index $index");
 			}
 			//Get the enum value from the initial pile of mess
 			$retval->enumValues[] = $enumValueList[$index];
@@ -208,7 +215,7 @@ class AvailableCommandsPacket extends DataPacket{
 		foreach($enum->enumValues as $value){
 			$index = $enumValueMap[$value] ?? -1;
 			if($index === -1){
-				throw new \InvalidStateException("Enum value '$value' not found");
+				throw new InvalidStateException("Enum value '$value' not found");
 			}
 			$this->putEnumValueIndex($index, $listSize);
 		}
@@ -231,21 +238,21 @@ class AvailableCommandsPacket extends DataPacket{
 	 */
 	protected function getEnumValueIndex(int $valueCount) : int{
 		if($valueCount < 256){
-			return (\ord($this->get(1)));
+			return (ord($this->get(1)));
 		}elseif($valueCount < 65536){
-			return ((\unpack("v", $this->get(2))[1]));
+			return ((unpack("v", $this->get(2))[1]));
 		}else{
-			return ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+			return ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		}
 	}
 
 	protected function putEnumValueIndex(int $index, int $valueCount) : void{
 		if($valueCount < 256){
-			($this->buffer .= \chr($index));
+			($this->buffer .= chr($index));
 		}elseif($valueCount < 65536){
-			($this->buffer .= (\pack("v", $index)));
+			($this->buffer .= (pack("v", $index)));
 		}else{
-			($this->buffer .= (\pack("V", $index)));
+			($this->buffer .= (pack("V", $index)));
 		}
 	}
 
@@ -257,23 +264,23 @@ class AvailableCommandsPacket extends DataPacket{
 	 */
 	protected function getEnumConstraint(array $enums, array $enumValues) : CommandEnumConstraint{
 		//wtf, what was wrong with an offset inside the enum? :(
-		$valueIndex = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$valueIndex = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		if(!isset($enumValues[$valueIndex])){
-			throw new \UnexpectedValueException("Enum constraint refers to unknown enum value index $valueIndex");
+			throw new UnexpectedValueException("Enum constraint refers to unknown enum value index $valueIndex");
 		}
-		$enumIndex = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$enumIndex = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		if(!isset($enums[$enumIndex])){
-			throw new \UnexpectedValueException("Enum constraint refers to unknown enum index $enumIndex");
+			throw new UnexpectedValueException("Enum constraint refers to unknown enum index $enumIndex");
 		}
 		$enum = $enums[$enumIndex];
 		$valueOffset = array_search($enumValues[$valueIndex], $enum->enumValues, true);
 		if($valueOffset === false){
-			throw new \UnexpectedValueException("Value \"" . $enumValues[$valueIndex] . "\" does not belong to enum \"$enum->enumName\"");
+			throw new UnexpectedValueException("Value \"" . $enumValues[$valueIndex] . "\" does not belong to enum \"$enum->enumName\"");
 		}
 
 		$constraintIds = [];
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$constraintIds[] = (\ord($this->get(1)));
+			$constraintIds[] = (ord($this->get(1)));
 		}
 
 		return new CommandEnumConstraint($enum, $valueOffset, $constraintIds);
@@ -285,11 +292,11 @@ class AvailableCommandsPacket extends DataPacket{
 	 * @param int[]                 $enumValueIndexes string value -> int index
 	 */
 	protected function putEnumConstraint(CommandEnumConstraint $constraint, array $enumIndexes, array $enumValueIndexes) : void{
-		($this->buffer .= (\pack("V", $enumValueIndexes[$constraint->getAffectedValue()])));
-		($this->buffer .= (\pack("V", $enumIndexes[$constraint->getEnum()->enumName])));
+		($this->buffer .= (pack("V", $enumValueIndexes[$constraint->getAffectedValue()])));
+		($this->buffer .= (pack("V", $enumIndexes[$constraint->getEnum()->enumName])));
 		$this->putUnsignedVarInt(count($constraint->getConstraints()));
 		foreach($constraint->getConstraints() as $v){
-			($this->buffer .= \chr($v));
+			($this->buffer .= chr($v));
 		}
 	}
 
@@ -298,7 +305,7 @@ class AvailableCommandsPacket extends DataPacket{
 	 * @param string[]      $postfixes
 	 *
 	 * @return CommandData
-	 * @throws \UnexpectedValueException
+	 * @throws UnexpectedValueException
 	 * @throws BinaryDataException
 	 */
 	protected function getCommandData(array $enums, array $postfixes) : CommandData{
@@ -306,38 +313,38 @@ class AvailableCommandsPacket extends DataPacket{
 		$retval->commandName = $this->getString();
 		$retval->commandDescription = $this->getString();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
-	    	$retval->flags = (\ord($this->get(1)));
+	    	$retval->flags = (ord($this->get(1)));
 		}else{
 		    $retval->flags = $this->getLShort();
 		}
-		$retval->permission = (\ord($this->get(1)));
-		$retval->aliases = $enums[((\unpack("V", $this->get(4))[1] << 32 >> 32))] ?? null;
+		$retval->permission = (ord($this->get(1)));
+		$retval->aliases = $enums[((unpack("V", $this->get(4))[1] << 32 >> 32))] ?? null;
 
 		for($overloadIndex = 0, $overloadCount = $this->getUnsignedVarInt(); $overloadIndex < $overloadCount; ++$overloadIndex){
 			$retval->overloads[$overloadIndex] = [];
 			for($paramIndex = 0, $paramCount = $this->getUnsignedVarInt(); $paramIndex < $paramCount; ++$paramIndex){
 				$parameter = new CommandParameter();
 				$parameter->paramName = $this->getString();
-				$parameter->paramType = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+				$parameter->paramType = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 				$parameter->isOptional = (($this->get(1) !== "\x00"));
 				if($this->getProtocol() === ProtocolInfo::PROTOCOL_340 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-			    	$parameter->flags = (\ord($this->get(1)));
+			    	$parameter->flags = (ord($this->get(1)));
 				}
 
 				if($parameter->paramType & self::ARG_FLAG_ENUM){
 					$index = ($parameter->paramType & 0xffff);
 					$parameter->enum = $enums[$index] ?? null;
 					if($parameter->enum === null){
-						throw new \UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: expected enum at $index, but got none");
+						throw new UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: expected enum at $index, but got none");
 					}
 				}elseif($parameter->paramType & self::ARG_FLAG_POSTFIX){
 					$index = ($parameter->paramType & 0xffff);
 					$parameter->postfix = $postfixes[$index] ?? null;
 					if($parameter->postfix === null){
-						throw new \UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: expected postfix at $index, but got none");
+						throw new UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: expected postfix at $index, but got none");
 					}
 				}elseif(($parameter->paramType & self::ARG_FLAG_VALID) === 0){
-					throw new \UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: Invalid parameter type 0x" . dechex($parameter->paramType));
+					throw new UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: Invalid parameter type 0x" . dechex($parameter->paramType));
 				}
 
 				$retval->overloads[$overloadIndex][$paramIndex] = $parameter;
@@ -356,16 +363,16 @@ class AvailableCommandsPacket extends DataPacket{
 		$this->putString($data->commandName);
 		$this->putString($data->commandDescription);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
-	    	($this->buffer .= \chr($data->flags));
+	    	($this->buffer .= chr($data->flags));
 		}else{
 		    $this->putLShort($data->flags);
 		}
-		($this->buffer .= \chr($data->permission));
+		($this->buffer .= chr($data->permission));
 
 		if($data->aliases !== null){
-			($this->buffer .= (\pack("V", $enumIndexes[$data->aliases->enumName] ?? -1)));
+			($this->buffer .= (pack("V", $enumIndexes[$data->aliases->enumName] ?? -1)));
 		}else{
-			($this->buffer .= (\pack("V", -1)));
+			($this->buffer .= (pack("V", -1)));
 		}
 
 		$this->putUnsignedVarInt(count($data->overloads));
@@ -380,7 +387,7 @@ class AvailableCommandsPacket extends DataPacket{
 				}elseif($parameter->postfix !== null){
 					$key = $postfixIndexes[$parameter->postfix] ?? -1;
 					if($key === -1){
-						throw new \InvalidStateException("Postfix '$parameter->postfix' not in postfixes array");
+						throw new InvalidStateException("Postfix '$parameter->postfix' not in postfixes array");
 					}
 					$type = self::ARG_FLAG_POSTFIX | $key;
 				}else{
@@ -392,10 +399,10 @@ class AvailableCommandsPacket extends DataPacket{
                     $type |= self::ARG_FLAG_VALID;
 				}
 
-				($this->buffer .= (\pack("V", $type)));
+				($this->buffer .= (pack("V", $type)));
 				($this->buffer .= ($parameter->isOptional ? "\x01" : "\x00"));
 				if($this->getProtocol() === ProtocolInfo::PROTOCOL_340 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-			    	($this->buffer .= \chr($parameter->flags));
+			    	($this->buffer .= chr($parameter->flags));
 				}
 			}
 		}
@@ -434,7 +441,7 @@ class AvailableCommandsPacket extends DataPacket{
 
 			return "int (postfix $postfix)";
 		}else{
-			throw new \UnexpectedValueException("Unknown arg type 0x" . dechex($argtype));
+			throw new UnexpectedValueException("Unknown arg type 0x" . dechex($argtype));
 		}
 
 		return "unknown ($argtype)";
@@ -515,7 +522,7 @@ class AvailableCommandsPacket extends DataPacket{
 	        	}
 	    	}
 	    } else {
-	        $this->putString(\json_encode(new CommandListJson($this->commandData)));
+	        $this->putString(json_encode(new CommandListJson($this->commandData)));
 	        $this->putString($this->unknown);
 	    }
 	}

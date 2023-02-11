@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\math;
 
+use InvalidArgumentException;
 use function abs;
 use function ceil;
 use function floor;
@@ -238,14 +239,14 @@ class Vector3{
 	 * @param int $side 0-5 one of the Vector3::SIDE_* constants
 	 * @return int
 	 *
-	 * @throws \InvalidArgumentException if an invalid side is supplied
+	 * @throws InvalidArgumentException if an invalid side is supplied
 	 */
 	public static function getOppositeSide(int $side) : int{
 		if($side >= 0 and $side <= 5){
 			return $side ^ 0x01;
 		}
 
-		throw new \InvalidArgumentException("Invalid side $side given to getOppositeSide");
+		throw new InvalidArgumentException("Invalid side $side given to getOppositeSide");
 	}
 
 	public function distance(Vector3 $pos) : float{

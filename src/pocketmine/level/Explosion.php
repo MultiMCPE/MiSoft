@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level;
 
+use InvalidArgumentException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\TNT;
@@ -75,13 +76,13 @@ class Explosion{
 	 */
 	public function __construct(Position $center, float $size, $what = null){
 		if(!$center->isValid()){
-			throw new \InvalidArgumentException("Position does not have a valid world");
+			throw new InvalidArgumentException("Position does not have a valid world");
 		}
 		$this->source = $center;
 		$this->level = $center->getLevel();
 
 		if($size <= 0){
-			throw new \InvalidArgumentException("Explosion radius must be greater than 0, got $size");
+			throw new InvalidArgumentException("Explosion radius must be greater than 0, got $size");
 		}
 		$this->size = $size;
 

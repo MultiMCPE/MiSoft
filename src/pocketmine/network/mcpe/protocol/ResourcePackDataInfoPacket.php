@@ -28,6 +28,10 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\multiversion\ResourceEnums;
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
+use function pack;
+use function unpack;
 
 class ResourcePackDataInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET;
@@ -60,25 +64,25 @@ class ResourcePackDataInfoPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->packId = $this->getString();
-		$this->maxChunkSize = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
-		$this->chunkCount = ((\unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->maxChunkSize = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->chunkCount = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		$this->compressedPackSize = (Binary::readLLong($this->get(8)));
 		$this->sha256 = $this->getString();
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 	    	$this->isPremium = (($this->get(1) !== "\x00"));
-	    	$this->packType = (\ord($this->get(1)));
+	    	$this->packType = (ord($this->get(1)));
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->packId);
-		($this->buffer .= (\pack("V", $this->maxChunkSize)));
-		($this->buffer .= (\pack("V", $this->chunkCount)));
-		($this->buffer .= (\pack("VV", $this->compressedPackSize & 0xFFFFFFFF, $this->compressedPackSize >> 32)));
+		($this->buffer .= (pack("V", $this->maxChunkSize)));
+		($this->buffer .= (pack("V", $this->chunkCount)));
+		($this->buffer .= (pack("VV", $this->compressedPackSize & 0xFFFFFFFF, $this->compressedPackSize >> 32)));
 		$this->putString($this->sha256);
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 	    	($this->buffer .= ($this->isPremium ? "\x01" : "\x00"));
-	    	($this->buffer .= \chr(ResourceEnums::getPackTypeId($this->getProtocol(), $this->packType)));
+	    	($this->buffer .= chr(ResourceEnums::getPackTypeId($this->getProtocol(), $this->packType)));
 		}
 	}
 

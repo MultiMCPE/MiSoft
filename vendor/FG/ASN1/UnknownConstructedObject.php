@@ -10,6 +10,8 @@
 
 namespace FG\ASN1;
 
+use FG\ASN1\Exception\ParserException;
+
 class UnknownConstructedObject extends Construct
 {
     private $identifier;
@@ -19,7 +21,7 @@ class UnknownConstructedObject extends Construct
      * @param string $binaryData
      * @param int $offsetIndex
      *
-     * @throws \FG\ASN1\Exception\ParserException
+     * @throws ParserException
      */
     public function __construct($binaryData, &$offsetIndex)
     {

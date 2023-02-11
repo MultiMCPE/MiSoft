@@ -27,6 +27,8 @@ use pocketmine\utils\Binary;
 
 
 use pocketmine\network\mcpe\NetworkSession;
+use function chr;
+use function ord;
 
 class MobEffectPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOB_EFFECT_PACKET;
@@ -50,7 +52,7 @@ class MobEffectPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->eventId = (\ord($this->get(1)));
+		$this->eventId = (ord($this->get(1)));
 		$this->effectId = $this->getVarInt();
 		$this->amplifier = $this->getVarInt();
 		$this->particles = (($this->get(1) !== "\x00"));
@@ -59,7 +61,7 @@ class MobEffectPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= \chr($this->eventId));
+		($this->buffer .= chr($this->eventId));
 		$this->putVarInt($this->effectId);
 		$this->putVarInt($this->amplifier);
 		($this->buffer .= ($this->particles ? "\x01" : "\x00"));

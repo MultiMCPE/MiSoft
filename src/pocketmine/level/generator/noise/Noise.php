@@ -27,6 +27,8 @@ declare(strict_types=1);
 namespace pocketmine\level\generator\noise;
 
 
+use InvalidArgumentException;
+use SplFixedArray;
 use function array_fill;
 use function assert;
 
@@ -154,17 +156,17 @@ abstract class Noise{
 	 * @param int $y
 	 * @param int $z
 	 *
-	 * @return \SplFixedArray
+	 * @return SplFixedArray
 	 */
-	public function getFastNoise1D(int $xSize, int $samplingRate, int $x, int $y, int $z) : \SplFixedArray{
+	public function getFastNoise1D(int $xSize, int $samplingRate, int $x, int $y, int $z) : SplFixedArray{
 		if($samplingRate === 0){
-			throw new \InvalidArgumentException("samplingRate cannot be 0");
+			throw new InvalidArgumentException("samplingRate cannot be 0");
 		}
 		if($xSize % $samplingRate !== 0){
-			throw new \InvalidArgumentException("xSize % samplingRate must return 0");
+			throw new InvalidArgumentException("xSize % samplingRate must return 0");
 		}
 
-		$noiseArray = new \SplFixedArray($xSize + 1);
+		$noiseArray = new SplFixedArray($xSize + 1);
 
 		for($xx = 0; $xx <= $xSize; $xx += $samplingRate){
 			$noiseArray[$xx] = $this->noise3D($xx + $x, $y, $z);
@@ -188,18 +190,18 @@ abstract class Noise{
 	 * @param int $y
 	 * @param int $z
 	 *
-	 * @return \SplFixedArray
+	 * @return SplFixedArray
 	 */
-	public function getFastNoise2D(int $xSize, int $zSize, int $samplingRate, int $x, int $y, int $z) : \SplFixedArray{
-		assert($samplingRate !== 0, new \InvalidArgumentException("samplingRate cannot be 0"));
+	public function getFastNoise2D(int $xSize, int $zSize, int $samplingRate, int $x, int $y, int $z) : SplFixedArray{
+		assert($samplingRate !== 0, new InvalidArgumentException("samplingRate cannot be 0"));
 
-		assert($xSize % $samplingRate === 0, new \InvalidArgumentException("xSize % samplingRate must return 0"));
-		assert($zSize % $samplingRate === 0, new \InvalidArgumentException("zSize % samplingRate must return 0"));
+		assert($xSize % $samplingRate === 0, new InvalidArgumentException("xSize % samplingRate must return 0"));
+		assert($zSize % $samplingRate === 0, new InvalidArgumentException("zSize % samplingRate must return 0"));
 
-		$noiseArray = new \SplFixedArray($xSize + 1);
+		$noiseArray = new SplFixedArray($xSize + 1);
 
 		for($xx = 0; $xx <= $xSize; $xx += $samplingRate){
-			$noiseArray[$xx] = new \SplFixedArray($zSize + 1);
+			$noiseArray[$xx] = new SplFixedArray($zSize + 1);
 			for($zz = 0; $zz <= $zSize; $zz += $samplingRate){
 				$noiseArray[$xx][$zz] = $this->noise3D($x + $xx, $y, $z + $zz);
 			}
@@ -207,7 +209,7 @@ abstract class Noise{
 
 		for($xx = 0; $xx < $xSize; ++$xx){
 			if($xx % $samplingRate !== 0){
-				$noiseArray[$xx] = new \SplFixedArray($zSize + 1);
+				$noiseArray[$xx] = new SplFixedArray($zSize + 1);
 			}
 
 			for($zz = 0; $zz < $zSize; ++$zz){
@@ -241,13 +243,13 @@ abstract class Noise{
 	 */
 	public function getFastNoise3D(int $xSize, int $ySize, int $zSize, int $xSamplingRate, int $ySamplingRate, int $zSamplingRate, int $x, int $y, int $z) : array{
 
-		assert($xSamplingRate !== 0, new \InvalidArgumentException("xSamplingRate cannot be 0"));
-		assert($zSamplingRate !== 0, new \InvalidArgumentException("zSamplingRate cannot be 0"));
-		assert($ySamplingRate !== 0, new \InvalidArgumentException("ySamplingRate cannot be 0"));
+		assert($xSamplingRate !== 0, new InvalidArgumentException("xSamplingRate cannot be 0"));
+		assert($zSamplingRate !== 0, new InvalidArgumentException("zSamplingRate cannot be 0"));
+		assert($ySamplingRate !== 0, new InvalidArgumentException("ySamplingRate cannot be 0"));
 
-		assert($xSize % $xSamplingRate === 0, new \InvalidArgumentException("xSize % xSamplingRate must return 0"));
-		assert($zSize % $zSamplingRate === 0, new \InvalidArgumentException("zSize % zSamplingRate must return 0"));
-		assert($ySize % $ySamplingRate === 0, new \InvalidArgumentException("ySize % ySamplingRate must return 0"));
+		assert($xSize % $xSamplingRate === 0, new InvalidArgumentException("xSize % xSamplingRate must return 0"));
+		assert($zSize % $zSamplingRate === 0, new InvalidArgumentException("zSize % zSamplingRate must return 0"));
+		assert($ySize % $ySamplingRate === 0, new InvalidArgumentException("ySize % ySamplingRate must return 0"));
 
 		$noiseArray = array_fill(0, $xSize + 1, array_fill(0, $zSize + 1, []));
 

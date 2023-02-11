@@ -28,6 +28,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
+use function pack;
 
 class AdventureSettingsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADVENTURE_SETTINGS_PACKET;
@@ -100,7 +101,7 @@ class AdventureSettingsPacket extends DataPacket{
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
 	        	$this->putUnsignedVarInt($this->customFlags);
 	    	}
-	    	($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
+	    	($this->buffer .= (pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 		}
 	}
 
