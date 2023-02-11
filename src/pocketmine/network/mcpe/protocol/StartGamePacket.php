@@ -189,6 +189,8 @@ class StartGamePacket extends DataPacket{
 	public $enableNewInventorySystem = false; //TODO
 	/** @var string */
 	public $serverSoftwareVersion;
+	/** @var int */
+	public $blockPaletteChecksum;
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
@@ -369,6 +371,9 @@ class StartGamePacket extends DataPacket{
 	        	        $this->enableNewInventorySystem = (($this->get(1) !== "\x00"));
 	        	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
 	        	            $this->serverSoftwareVersion = $this->getString();
+							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+								$this->blockPaletteChecksum = $this->getLLong();
+							}
 	        	        }
 	            	}
 	        	}
@@ -540,6 +545,9 @@ class StartGamePacket extends DataPacket{
 	    	            ($this->buffer .= ($this->enableNewInventorySystem ? "\x01" : "\x00"));
 	    	            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
 	    	                $this->putString($this->serverSoftwareVersion);
+							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+								$this->putLLong($this->blockPaletteChecksum);
+							}
 	    	            }
 	    	        }
 	    	    }
