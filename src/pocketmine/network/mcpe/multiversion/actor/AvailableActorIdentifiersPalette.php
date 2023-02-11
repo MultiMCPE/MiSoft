@@ -29,6 +29,7 @@ use const pocketmine\RESOURCE_PATH;
 
 class AvailableActorIdentifiersPalette{
     protected const ACTOR_IDS_CACHE = [
+		ProtocolInfo::PROTOCOL_475 => RESOURCE_PATH . '/vanilla/actor/475/entity_identifiers.nbt',
 		ProtocolInfo::PROTOCOL_471 => RESOURCE_PATH . '/vanilla/actor/471/entity_identifiers.nbt',
         ProtocolInfo::PROTOCOL_440 => RESOURCE_PATH . '/vanilla/actor/440/entity_identifiers.nbt',
         ProtocolInfo::PROTOCOL_419 => RESOURCE_PATH . '/vanilla/actor/419/entity_identifiers.nbt',
