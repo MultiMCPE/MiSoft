@@ -159,7 +159,7 @@ final class ProtocolInfo implements PacketMagicNumbers{
 
 	public const PROTOCOL_440 = 440; // 1.17.0.54, 1.17.0.56, 1.17.0.58, 1.17.0, 1.17.1, 1.17.2
 	public const PROTOCOL_448 = 448; // 1.17.10.22, 1.17.10.23, 1.17.10, 1.17.11
-    public const PROTOCOL_465 = 465; // 1.17.30.25
+	public const PROTOCOL_465 = 465; // 1.17.30.25
 	public const PROTOCOL_471 = 471; // 1.17.40.06;
 	/**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
