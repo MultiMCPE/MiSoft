@@ -37,21 +37,21 @@ class HurtArmorPacket extends DataPacket{
 
 	protected function decodePayload(){
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-	        $this->cause = $this->getVarInt();
+			$this->cause = $this->getVarInt();
 	    }
 		$this->health = $this->getVarInt();
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-            $this->armorSlotFlags = $this->getUnsignedVarLong();
+			$this->armorSlotFlags = $this->getUnsignedVarLong();
         }
 	}
 
 	protected function encodePayload(){
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-	        $this->putVarInt($this->cause);
+			$this->putVarInt($this->cause);
 	    }
 		$this->putVarInt($this->health);
         if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-            $this->putUnsignedVarLong($this->armorSlotFlags);
+			$this->putUnsignedVarLong($this->armorSlotFlags);
         }
 	}
 

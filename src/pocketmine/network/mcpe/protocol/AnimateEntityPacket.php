@@ -58,7 +58,9 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 		$result->animation = $animation;
 		$result->nextState = $nextState;
 		$result->stopExpression = $stopExpression;
-        $result->stopExpressionVersion = $stopExpressionVersion;
+		if ($result->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$result->stopExpressionVersion = $stopExpressionVersion;
+		}
 		$result->controller = $controller;
 		$result->blendOutTime = $blendOutTime;
 		$result->actorRuntimeIds = $actorRuntimeIds;
@@ -87,7 +89,9 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 		$this->animation = $this->getString();
 		$this->nextState = $this->getString();
 		$this->stopExpression = $this->getString();
-        $this->stopExpressionVersion = $this->getLInt();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$this->stopExpressionVersion = $this->getLInt();
+		}
 		$this->controller = $this->getString();
 		$this->blendOutTime = ((\unpack("g", $this->get(4))[1]));
 		$this->actorRuntimeIds = [];
@@ -100,7 +104,9 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 		$this->putString($this->animation);
 		$this->putString($this->nextState);
 		$this->putString($this->stopExpression);
-        $this->putLInt($this->stopExpressionVersion);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$this->putLInt($this->stopExpressionVersion);
+		}
 		$this->putString($this->controller);
 		($this->buffer .= (\pack("g", $this->blendOutTime)));
 		$this->putUnsignedVarInt(count($this->actorRuntimeIds));

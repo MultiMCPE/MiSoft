@@ -22,6 +22,7 @@
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 use Ahc\Json\Comment;
 use pocketmine\entity\Skin;
@@ -92,6 +93,8 @@ class SerializedSkin{
     protected $resourcePatch;
     /** @var string */
     protected $geometryData;
+	/** @var string */
+	protected $geometryDataEngineVersion;
     /** @var string */
     protected $animationData;
     /** @var SkinAnimation[] */
@@ -134,7 +137,7 @@ class SerializedSkin{
 	 * @param \SplFixedArray  $personaPieces
 	 * @param \SplFixedArray  $pieceTintColors
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, \SplFixedArray $personaPieces, \SplFixedArray $pieceTintColors){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, \SplFixedArray $personaPieces, \SplFixedArray $pieceTintColors){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === \false){
@@ -156,6 +159,7 @@ class SerializedSkin{
         $this->capeImage = $capeImage;
         $this->resourcePatch = $resourcePatch;
         $this->geometryData = $geometryData;
+		$this->geometryDataEngineVersion = $geometryDataEngineVersion;
         $this->animationData = $animationData;
         $this->animationFrames = $animationFrames;
         $this->premiumSkin = $premiumSkin;
@@ -216,6 +220,8 @@ class SerializedSkin{
     public function getGeometryData() : string{
         return $this->geometryData;
     }
+
+	public function getGeometryDataEngineVersion() : string{ return $this->geometryDataEngineVersion; }
 
     /**
      * @return string

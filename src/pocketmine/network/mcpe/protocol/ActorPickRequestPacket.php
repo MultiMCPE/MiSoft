@@ -40,12 +40,17 @@ class ActorPickRequestPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = (Binary::readLLong($this->get(8)));
 		$this->hotbarSlot = (\ord($this->get(1)));
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+            $this->addUserData = $this->getBool();
+        }
 	}
 
 	protected function encodePayload(){
 		($this->buffer .= (\pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
 		($this->buffer .= \chr($this->hotbarSlot));
-        ($this->buffer .= $this->addUserData);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			($this->buffer .= $this->addUserData);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

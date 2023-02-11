@@ -43,7 +43,9 @@ class AddVolumeEntityPacket extends DataPacket{
 		$result = new self;
 		$result->entityNetId = $entityNetId;
 		$result->data = $data;
-        $result->engineVersion = $engineVersion;
+		if ($result->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$result->engineVersion = $engineVersion;
+		}
 		return $result;
 	}
 
@@ -56,13 +58,17 @@ class AddVolumeEntityPacket extends DataPacket{
 	protected function decodePayload() : void{
 		$this->entityNetId = $this->getUnsignedVarInt();
 		$this->data = $this->getNbtCompoundRoot();
-        $this->engineVersion = $this->getString();
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$this->engineVersion = $this->getString();
+		}
 	}
 
 	protected function encodePayload() : void{
 		$this->putUnsignedVarInt($this->entityNetId);
 		$this->put((new NetworkLittleEndianNBTStream())->write($this->data));
-        $this->putString($this->engineVersion);
+		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_465) {
+			$this->putString($this->engineVersion);
+		}
 	}
 
 	public function handle(NetworkSession $handler) : bool{

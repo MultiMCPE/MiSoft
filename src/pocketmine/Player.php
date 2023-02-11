@@ -2028,7 +2028,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
 		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
 		    	base64_decode($packet->clientData["SkinGeometryData"] ?? ""),
-                //base64_decode($packet->clientData["SkinGeometryDataEngineVersion" ?? ""]), рома помоги + со скинами не доделал.
+                base64_decode($packet->clientData["SkinGeometryDataEngineVersion"] ?? true),
 		    	base64_decode($packet->clientData["AnimationData"] ?? ""),
 		    	$animations,
 		    	$packet->clientData["PremiumSkin"] ?? false,
