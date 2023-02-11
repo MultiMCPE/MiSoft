@@ -30,7 +30,7 @@ const _VERSION_INFO_INCLUDED = true;
 
 
 const NAME = "IceSoft";
-const BASE_VERSION = "1.3.0";
+const BASE_VERSION = "1.3.3.2";
 const PMAPI_VERSION = "3.9.8";
 const IS_DEVELOPMENT_BUILD = true;
 const BUILD_NUMBER = 0;
