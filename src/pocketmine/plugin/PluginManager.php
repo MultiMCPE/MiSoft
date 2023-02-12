@@ -754,7 +754,7 @@ class PluginManager{
 
 					throw $e;
 				}
-				if($eventClass === null or !$eventClass->isSubclassOf(Event::class)){
+				if($eventClass === null or !is_subclass_of($eventClass, Event::class){
 					continue;
 				}
 
