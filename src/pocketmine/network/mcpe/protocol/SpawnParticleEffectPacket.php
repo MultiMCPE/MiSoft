@@ -42,23 +42,31 @@ class SpawnParticleEffectPacket extends DataPacket{
 	public $position;
 	/** @var string */
 	public $particleName;
+	/** @var string */
+	public $molangVariablesJson = "";
 
 	protected function decodePayload(){
 		$this->dimensionId = (ord($this->get(1)));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	    	$this->entityUniqueId = $this->getEntityUniqueId();
 		}
 		$this->position = $this->getVector3();
 		$this->particleName = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->molangVariablesJson = $this->getString();
+		}
 	}
 
 	protected function encodePayload(){
 		($this->buffer .= chr($this->dimensionId));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_330) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	    	$this->putEntityUniqueId($this->entityUniqueId);
 		}
 		$this->putVector3($this->position);
 		$this->putString($this->particleName);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->putString($this->molangVariablesJson);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

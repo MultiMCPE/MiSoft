@@ -22,9 +22,8 @@
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
-use InvalidArgumentException;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
+use InvalidArgumentException;
 use Ahc\Json\Comment;
 use pocketmine\entity\Skin;
 use pocketmine\utils\Binary;
@@ -146,7 +145,7 @@ class SerializedSkin{
 	 * @param SplFixedArray   $pieceTintColors
 	 * @param bool            $isPrimaryUser
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, $isPrimaryUser = true){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, bool $isPrimaryUser = true){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === false){

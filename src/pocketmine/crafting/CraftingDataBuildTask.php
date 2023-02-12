@@ -62,7 +62,10 @@ class CraftingDataBuildTask extends AsyncTask{
         ProtocolInfo::PROTOCOL_429,
         ProtocolInfo::PROTOCOL_440,
         ProtocolInfo::PROTOCOL_448,
-        ProtocolInfo::PROTOCOL_465
+        ProtocolInfo::PROTOCOL_465,
+        ProtocolInfo::PROTOCOL_475,
+        ProtocolInfo::PROTOCOL_486,
+        ProtocolInfo::PROTOCOL_503
     ];
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel){

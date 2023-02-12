@@ -44,8 +44,6 @@ class ChunkRequestTask extends AsyncTask {
 	protected $chunkX;
 	/** @var int */
 	protected $chunkZ;
-	/** @var int */
-	protected $subChunkCount;
 	/** @var string */
     protected $tiles;
     /** @var int */
@@ -59,7 +57,9 @@ class ChunkRequestTask extends AsyncTask {
 	    ProtocolInfo::PROTOCOL_310,
 	    ProtocolInfo::PROTOCOL_331,
 	    ProtocolInfo::PROTOCOL_360,
-	    ProtocolInfo::PROTOCOL_406
+	    ProtocolInfo::PROTOCOL_406,
+	    ProtocolInfo::PROTOCOL_475,
+	    ProtocolInfo::PROTOCOL_503
 	];
 
 	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk){
@@ -69,7 +69,6 @@ class ChunkRequestTask extends AsyncTask {
 		$this->chunkX = $chunkX;
 		$this->chunkZ = $chunkZ;
 		$this->chunk = $chunk->fastSerialize();
-		$this->subChunkCount = $chunk->getSubChunkSendCount();
 
         $tiles = "";
 		foreach($chunk->getTiles() as $tile){
@@ -87,7 +86,7 @@ class ChunkRequestTask extends AsyncTask {
 
 	    $buffers = [];
 	    foreach($this->protocols as $protocol){
-	    	$pk = LevelChunkPacket::withoutCache($this->chunkX, $this->chunkZ, $this->subChunkCount, $chunk->networkSerialize($protocol) . $this->tiles);
+	    	$pk = LevelChunkPacket::withoutCache($this->chunkX, $this->chunkZ, ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
 	    	$pk->setProtocol($protocol);
 
 	    	$batch = new BatchPacket();

@@ -30,6 +30,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\GameMode;
 use pocketmine\utils\UUID;
 use function count;
 use function pack;
@@ -64,6 +65,8 @@ class AddPlayerPacket extends DataPacket{
 	public $headYaw = null; //TODO
 	/** @var Item */
 	public $item;
+	/** @var int */
+	public $gameMode = GameMode::SURVIVAL;
 	/** @var array */
 	public $metadata = [];
 
@@ -87,13 +90,13 @@ class AddPlayerPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
 		$this->username = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 			$this->thirdPartyName = $this->getString();
 			$this->platform = $this->getVarInt();
 		}
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	    	$this->platformChatId = $this->getString();
 		}
 		$this->position = $this->getVector3();
@@ -102,26 +105,29 @@ class AddPlayerPacket extends DataPacket{
 		$this->yaw = ((unpack("g", $this->get(4))[1]));
 		$this->headYaw = ((unpack("g", $this->get(4))[1]));
 		$this->item = $this->getSlot($this->getProtocol());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->gameMode = $this->getVarInt();
+		}
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->uvarint1 = $this->getUnsignedVarInt();
 	    	$this->uvarint2 = $this->getUnsignedVarInt();
 	    	$this->uvarint3 = $this->getUnsignedVarInt();
 	    	$this->uvarint4 = $this->getUnsignedVarInt();
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
 	        	$this->uvarint5 = $this->getUnsignedVarInt();
 	    	}
 
 	    	$this->long1 = (Binary::readLLong($this->get(8)));
 
-            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$linkCount = $this->getUnsignedVarInt();
 	        	for($i = 0; $i < $linkCount; ++$i){
 		        	$this->links[$i] = $this->getEntityLink($this->getProtocol());
 	        	}
 
-                if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
 	            	$this->deviceId = $this->getString();
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	            	    $this->buildPlatform = ((unpack("V", $this->get(4))[1] << 32 >> 32));
@@ -134,13 +140,13 @@ class AddPlayerPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUUID($this->uuid);
 		$this->putString($this->username);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 			$this->putString($this->thirdPartyName);
 			$this->putVarInt($this->platform);
 		}
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	    	$this->putString($this->platformChatId);
 		}
 		$this->putVector3($this->position);
@@ -149,26 +155,29 @@ class AddPlayerPacket extends DataPacket{
 		($this->buffer .= (pack("g", $this->yaw)));
 		($this->buffer .= (pack("g", $this->headYaw ?? $this->yaw)));
 		$this->putSlot($this->item, $this->getProtocol());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->putVarInt($this->gameMode);
+		}
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->putUnsignedVarInt($this->uvarint1);
 	    	$this->putUnsignedVarInt($this->uvarint2);
 	    	$this->putUnsignedVarInt($this->uvarint3);
 	    	$this->putUnsignedVarInt($this->uvarint4);
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
 	        	$this->putUnsignedVarInt($this->uvarint5);
 	    	}
 
 	    	($this->buffer .= (pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
 
-            if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_132) {
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$this->putUnsignedVarInt(count($this->links));
 	        	foreach($this->links as $link){
 		        	$this->putEntityLink($link, $this->getProtocol());
 	        	}
 
-                if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_282) {
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
 	            	$this->putString($this->deviceId);
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	            	    ($this->buffer .= (pack("V", $this->buildPlatform)));

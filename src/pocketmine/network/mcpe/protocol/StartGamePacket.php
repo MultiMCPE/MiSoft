@@ -211,7 +211,11 @@ class StartGamePacket extends DataPacket{
 		$this->yaw = ((unpack("g", $this->get(4))[1]));
 
 		//Level settings
-		$this->seed = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->seed = $this->getLLong();
+		}else{
+	    	$this->seed = $this->getVarInt();
+		}
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_400){
 		    $this->get(1);
 		    $this->get(1);
@@ -398,7 +402,11 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= (pack("g", $this->yaw)));
 
 		//Level settings
-		$this->putVarInt($this->seed);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+		    $this->putLLong($this->seed);
+		}else{
+	    	$this->putVarInt($this->seed);
+		}
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_400){
 		    ($this->buffer .= (chr(0)));
 		    ($this->buffer .= (chr(0)));
