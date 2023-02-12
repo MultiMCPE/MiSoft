@@ -33,6 +33,7 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
+use pocketmine\network\mcpe\protocol\types\EducationUriResource;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
 use pocketmine\network\mcpe\protocol\types\GeneratorType;
@@ -164,6 +165,8 @@ class StartGamePacket extends DataPacket{
 	public $limitedWorldLength = 0;
 	/** @var bool */
 	public $isNewNether = true;
+	/** @var EducationUriResource|null */
+	public $eduSharedUriResource = null;
 	/** @var bool|null */
 	public $experimentalGameplayOverride = null;
 
@@ -298,6 +301,9 @@ class StartGamePacket extends DataPacket{
 	                            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
 	                                	$this->isNewNether = (($this->get(1) !== "\x00"));
 	                                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
+	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
+	                                	        $this->eduSharedUriResource = EducationUriResource::read($this);
+	                                	    }
 	                                	    if((($this->get(1) !== "\x00"))){
 	                                	    	$this->experimentalGameplayOverride = (($this->get(1) !== "\x00"));
 	                                	    }else{
@@ -482,6 +488,9 @@ class StartGamePacket extends DataPacket{
 	                            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
 	                                	($this->buffer .= ($this->isNewNether ? "\x01" : "\x00"));
 	                                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
+	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
+	                                	        ($this->eduSharedUriResource ?? new EducationUriResource("", ""))->write($this);
+	                                	    }
 	                                	    ($this->buffer .= ($this->experimentalGameplayOverride !== null ? "\x01" : "\x00"));
 	                                	    if($this->experimentalGameplayOverride !== null){
 	                                	        ($this->buffer .= ($this->experimentalGameplayOverride ? "\x01" : "\x00"));

@@ -56,6 +56,7 @@ class SerializedSkin{
             json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
             self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
             "",
+            "",
             [],
             false,
             false,
@@ -64,7 +65,8 @@ class SerializedSkin{
             "",
             new Color(0, 0, 0),
             SplFixedArray::fromArray([]),
-            SplFixedArray::fromArray([])
+            SplFixedArray::fromArray([]),
+            true
         );
     }
 
@@ -120,6 +122,8 @@ class SerializedSkin{
     protected $pieceTintColors;
     /** @var bool */
     protected $isTrusted = false;
+    /** @var bool */
+    protected $isPrimaryUser = true;
 
 	/**
 	 * @param string          $skinId
@@ -129,6 +133,7 @@ class SerializedSkin{
 	 * @param SkinImage       $capeImage
 	 * @param string          $resourcePatch
 	 * @param string          $geometryData
+	 * @param string          $geometryDataEngineVersion
 	 * @param string          $animationData
 	 * @param SkinAnimation[] $animationFrames
 	 * @param bool            $premiumSkin
@@ -137,10 +142,11 @@ class SerializedSkin{
 	 * @param string|null     $fullSkinId
 	 * @param string          $armSize
 	 * @param Color           $skinColor
-	 * @param SplFixedArray  $personaPieces
-	 * @param SplFixedArray  $pieceTintColors
+	 * @param SplFixedArray   $personaPieces
+	 * @param SplFixedArray   $pieceTintColors
+	 * @param bool            $isPrimaryUser
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, $isPrimaryUser = true){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === false){
@@ -173,6 +179,7 @@ class SerializedSkin{
         $this->skinColor = $skinColor;
         $this->personaPieces = $personaPieces;
         $this->pieceTintColors = $pieceTintColors;
+        $this->isPrimaryUser = $isPrimaryUser;
     }
 
     /**
@@ -224,7 +231,12 @@ class SerializedSkin{
         return $this->geometryData;
     }
 
-	public function getGeometryDataEngineVersion() : string{ return $this->geometryDataEngineVersion; }
+    /**
+     * @return string
+     */
+	public function getGeometryDataEngineVersion() : string{
+	    return $this->geometryDataEngineVersion;
+	}
 
     /**
      * @return string
@@ -259,6 +271,13 @@ class SerializedSkin{
      */
     public function isCapeOnClassicSkin() : bool{
         return $this->capeOnClassicSkin;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrimaryUser() : bool{
+        return $this->isPrimaryUser;
     }
 
     /**

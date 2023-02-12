@@ -119,13 +119,15 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$capeData = $this->getSkinImage();
 		$geometryData = $this->getString();
-        if ($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_465){
             $geometryDataVersion = $this->getString();
         }
 		$animationData = $this->getString();
-		$premium = (($this->get(1) !== "\x00"));
-		$persona = (($this->get(1) !== "\x00"));
-		$capeOnClassic = (($this->get(1) !== "\x00"));
+		if($playerProtocol < ProtocolInfo::PROTOCOL_465){
+	    	$premium = (($this->get(1) !== "\x00"));
+	    	$persona = (($this->get(1) !== "\x00"));
+	    	$capeOnClassic = (($this->get(1) !== "\x00"));
+		}
 		$capeId = $this->getString();
 		$fullSkinId = $this->getString();
 
@@ -159,6 +161,12 @@ class NetworkBinaryStream extends BinaryStream{
 	    	}
 	    	$personaPieces = SplFixedArray::fromArray($personaPieces);
 	    	$pieceTintColors = SplFixedArray::fromArray($pieceTintColors);
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+	        	$premium = (($this->get(1) !== "\x00"));
+	        	$persona = (($this->get(1) !== "\x00"));
+	        	$capeOnClassic = (($this->get(1) !== "\x00"));
+	        	$isPrimaryUser = (($this->get(1) !== "\x00"));
+	    	}
 		}else{
             $armSize = "wide";
             $skinColor = new Color(0, 0, 0);
@@ -166,7 +174,7 @@ class NetworkBinaryStream extends BinaryStream{
             $pieceTintColors = SplFixedArray::fromArray([]);
 		}
 
-        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $geometryDataVersion, $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors))->toSkin();
+        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $geometryDataVersion ?? "", $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors, $isPrimaryUser ?? true))->toSkin();
 	}
 
 	public function putSkin(Skin $skin, int $playerProtocol){
@@ -188,13 +196,15 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$this->putSkinImage($skin->getCapeImage());
 		$this->putString($skin->getGeometryData());
-        if ($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_465){
             $this->putString($skin->getGeometryDataEngineVersion());
         }
 		$this->putString($skin->getAnimationData());
-		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
-		($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
-		($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
+		if($playerProtocol < ProtocolInfo::PROTOCOL_465){
+    		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
+	    	($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
+	    	($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
+		}
 		$this->putString($skin->getCapeId());
 		$this->putString($skin->getFullSkinId());
 		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
@@ -215,6 +225,12 @@ class NetworkBinaryStream extends BinaryStream{
 		    	foreach($tint->getColors() as $color){
 			    	$this->putString($color);
 		    	}
+	    	}
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_465){
+        		($this->buffer .= ($skin->isPremiumSkin() ? "\x01" : "\x00"));
+	        	($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
+	        	($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
+	        	($this->buffer .= ($skin->isPrimaryUser() ? "\x01" : "\x00"));
 	    	}
 		}
 	}

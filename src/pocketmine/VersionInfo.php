@@ -23,14 +23,13 @@ namespace pocketmine;
 
 // composer autoload doesn't use require_once and also pthreads can inherit things
 // TODO: drop this file and use a final class with constants
-if (defined('pocketmine\_VERSION_INFO_INCLUDED')) {
+if(defined('pocketmine\_VERSION_INFO_INCLUDED')){
 	return;
 }
 const _VERSION_INFO_INCLUDED = true;
 
 
-const NAME = "IceSoft";
-const BASE_VERSION = "1.3.3.2";
-const PMAPI_VERSION = "3.9.8";
+const NAME = "MiSoft";
+const BASE_VERSION = "1.2.0";
 const IS_DEVELOPMENT_BUILD = true;
 const BUILD_NUMBER = 0;

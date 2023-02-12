@@ -4,8 +4,6 @@
 
 namespace Composer\Autoload;
 
-use Closure;
-
 class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
 {
     public static $files = array (
@@ -883,6 +881,10 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\level\\sound\\PopSound' => __DIR__ . '/../..' . '/src/pocketmine/level/sound/PopSound.php',
         'pocketmine\\level\\sound\\Sound' => __DIR__ . '/../..' . '/src/pocketmine/level/sound/Sound.php',
         'pocketmine\\level\\utils\\SubChunkIteratorManager' => __DIR__ . '/../..' . '/src/pocketmine/level/utils/SubChunkIteratorManager.php',
+        'pocketmine\\world\\format\\PalettedBlockArray' => __DIR__ . '/../..' . '/src/pocketmine/world/format/PalettedBlockArray.php',
+        'pocketmine\\world\\format\\io\\SubChunkConverter' => __DIR__ . '/../..' . '/src/pocketmine/world/format/io/SubChunkConverter.php',
+        'pocketmine\\world\\format\\storage\\BlockStorage' => __DIR__ . '/../..' . '/src/pocketmine/world/format/storage/BlockStorage.php',
+        'pocketmine\\world\\format\\storage\\Palette' => __DIR__ . '/../..' . '/src/pocketmine/world/format/storage/Palette.php',
         'pocketmine\\math\\AxisAlignedBB' => __DIR__ . '/..' . '/pocketmine/math/src/AxisAlignedBB.php',
         'pocketmine\\math\\Math' => __DIR__ . '/..' . '/pocketmine/math/src/Math.php',
         'pocketmine\\math\\Matrix' => __DIR__ . '/..' . '/pocketmine/math/src/Matrix.php',
@@ -950,6 +952,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette431' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette431.php',
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette440' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette440.php',
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette448' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette448.php',
+        'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\ItemPalette465' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/ItemPalette465.php',
         'pocketmine\\network\\mcpe\\multiversion\\inventory\\palettes\\Palette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/inventory/palettes/Palette.php',
         'pocketmine\\network\\mcpe\\multiversion\\biomes\\BiomeDefinitionPalette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/biomes/BiomeDefinitionPalette.php',
         'pocketmine\\network\\mcpe\\multiversion\\actor\\AvailableActorIdentifiersPalette' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/multiversion/actor/AvailableActorIdentifiersPalette.php',
@@ -1175,6 +1178,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\types\\CreativeGroup' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/CreativeGroup.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\DeviceOS' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/DeviceOS.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\EducationEditionOffer' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/EducationEditionOffer.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\EducationUriResource' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/EducationUriResource.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\GameMode' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/GameMode.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\GameRuleType' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/GameRuleType.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\GeneratorType' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/GeneratorType.php',
@@ -1187,6 +1191,8 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\types\\ItemComponentPacketEntry' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/ItemComponentPacketEntry.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PlayerMovementSettings' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PlayerMovementSettings.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PlayerMovementType' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PlayerMovementType.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\recipes\\MaterialReducerRecideOutput' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/recipes/MaterialReducerRecideOutput.php',
+        'pocketmine\\network\\mcpe\\protocol\\types\\recipes\\MaterialReducerRecipe' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/recipes/MaterialReducerRecipe.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataFlags' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataFlags.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\entity\\EntityMetadataProperties' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/entity/EntityMetadataProperties.php',
         'pocketmine\\network\\query\\QueryHandler' => __DIR__ . '/../..' . '/src/pocketmine/network/query/QueryHandler.php',
@@ -1282,7 +1288,6 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\utils\\RegistryTrait' => __DIR__ . '/../..' . '/src/pocketmine/utils/RegistryTrait.php',
         'pocketmine\\utils\\VersionString' => __DIR__ . '/../..' . '/src/pocketmine/utils/VersionString.php',
         'pocketmine\\wizard\\SetupWizard' => __DIR__ . '/../..' . '/src/pocketmine/wizard/SetupWizard.php',
->>>>>>> parent of a6f6882 (вендор нах)
         'raklib\\RakLib' => __DIR__ . '/..' . '/pocketmine/raklib/src/RakLib.php',
         'raklib\\protocol\\ACK' => __DIR__ . '/..' . '/pocketmine/raklib/src/protocol/ACK.php',
         'raklib\\protocol\\AcknowledgePacket' => __DIR__ . '/..' . '/pocketmine/raklib/src/protocol/AcknowledgePacket.php',
@@ -1320,7 +1325,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
 
     public static function getInitializer(ClassLoader $loader)
     {
-        return Closure::bind(function () use ($loader) {
+        return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit82b4d11f66f86822eb7086c700823eb9::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit82b4d11f66f86822eb7086c700823eb9::$prefixDirsPsr4;
             $loader->fallbackDirsPsr4 = ComposerStaticInit82b4d11f66f86822eb7086c700823eb9::$fallbackDirsPsr4;

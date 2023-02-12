@@ -40,7 +40,7 @@ class ItemPalette{
      */
     public static function init() : void{
         $pool = [
-			ProtocolInfo::PROTOCOL_465 => new ItemPallete465(),
+			ProtocolInfo::PROTOCOL_465 => new ItemPalette465(),
             ProtocolInfo::PROTOCOL_448 => new ItemPalette448(),
             ProtocolInfo::PROTOCOL_440 => new ItemPalette440(),
             ProtocolInfo::PROTOCOL_431 => new ItemPalette431(),

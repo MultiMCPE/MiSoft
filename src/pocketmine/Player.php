@@ -2033,7 +2033,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
 		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
 		    	base64_decode($packet->clientData["SkinGeometryData"] ?? ""),
-                base64_decode($packet->clientData["SkinGeometryDataEngineVersion"] ?? true),
+                base64_decode($packet->clientData["SkinGeometryDataEngineVersion"] ?? ""),
 		    	base64_decode($packet->clientData["AnimationData"] ?? ""),
 		    	$animations,
 		    	$packet->clientData["PremiumSkin"] ?? false,
@@ -2043,7 +2043,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$armSize,
 		    	$skinColor,
 		    	$personaPieces,
-		    	$pieceTintColors
+		    	$pieceTintColors,
+		    	true, //assume this is true? there's no field for it ...
 	    	);
 
 	    	$skin = $serializedSkin->toSkin();
