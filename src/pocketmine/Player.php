@@ -3239,6 +3239,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
         if(!$this->selectHotbarSlot($packet->hotbarSlot, $packet->inventorySlot)){
             $this->inventory->sendHeldItem($this);
+            $this->inventory->sendHeldItem($this->getViewers());
         }
 
         return true;

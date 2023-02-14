@@ -37,7 +37,21 @@ use function strrev;
 final class MetadataConvertor{
 	public const METADATA = [
 		ProtocolInfo::PROTOCOL_110 => [
+		    "DATA_ENDERMAN_HELD_ITEM_ID" => 23,
+		    "DATA_ENDERMAN_HELD_ITEM_DAMAGE" => 24,
+		    "DATA_ENTITY_AGE" => 25,
+
+            "DATA_PLAYER_FLAGS" => 27,
+            "DATA_PLAYER_INDEX" => 28,
+            "DATA_PLAYER_BED_POSITION" => 29,
+		    "DATA_FIREBALL_POWER_X" => 30,
+		    "DATA_FIREBALL_POWER_Y" => 31,
+		    "DATA_FIREBALL_POWER_Z" => 32,
+
+		    "DATA_POTION_AUX_VALUE" => 37,
+		    "DATA_LEAD_HOLDER_EID" => 38,
 			"DATA_SCALE" => 39,
+			"DATA_INTERACTIVE_TAG" => 40,
 			"DATA_NPC_SKIN_INDEX" => 41,
 			"DATA_NPC_ACTIONS" => 42,
 			"DATA_MAX_AIR" => 43,

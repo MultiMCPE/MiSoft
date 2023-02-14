@@ -27,7 +27,6 @@ use Error;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use pocketmine\utils\Binary;
-
 use pocketmine\network\mcpe\CachedEncapsulatedPacket;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
@@ -265,8 +264,12 @@ abstract class DataPacket extends NetworkBinaryStream{
      */
 	public static function getActualMeta(int $id, int $meta) : int{
 		if($id === BlockIds::ITEM_FRAME_BLOCK){
-			$array = [3 => 8, 4 => 5, 5 => 4];
-			return $array[$meta] ?? $meta;
+			$faces = [
+			    2 => 8,
+			    1 => 5,
+			    0 => 4
+		    ];
+			return $faces[$meta] ?? $meta;
 		}
 
 		if($id === BlockIds::LEAVES2 && $meta > 7){
