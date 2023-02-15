@@ -56,6 +56,22 @@ class OldPlayerInventory extends PlayerInventory{
         return $this->getHotbarSlotIndex($this->itemInHandIndex);
     }
 
+	public function onSlotChange(int $index, Item $before, bool $send) : void{
+		if($send){
+			$holder = $this->holder;
+			if(!($holder instanceof Player) or !$holder->spawned){
+				return;
+			}
+			parent::onSlotChange($index, $before, $send);
+		}
+		if($index === $this->itemInHandIndex){
+			$this->sendHeldItem($this->holder->getViewers());
+			if($send){
+				$this->sendHeldItem($this->holder);
+			}
+		}
+	}
+
 	public function sendCreativeContents(){
 		$pk = new ContainerSetContentPacket();
 		$pk->windowid = ContainerIds::CREATIVE;

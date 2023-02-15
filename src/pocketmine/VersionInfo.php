@@ -31,6 +31,5 @@ const _VERSION_INFO_INCLUDED = true;
 
 const NAME = "MiSoft";
 const BASE_VERSION = "1.2.0";
-const API_VERSION = "3.13.0";
 const IS_DEVELOPMENT_BUILD = true;
 const BUILD_NUMBER = 0;

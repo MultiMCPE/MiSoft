@@ -330,10 +330,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $randomClientId;
 	/** @var string */
 	protected $xuid = "";
-	/** @var mixed */
-	protected $deviceModel;
-	/** @var mixed */
-	protected $deviceOS;
 
 	protected $windowCnt = 2;
 	/** @var int[] */
@@ -868,20 +864,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function getDisplayName() : string{
 		return $this->displayName;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getDeviceModel(){
-		return $this->deviceModel;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getDeviceOS(){
-		return $this->deviceOS;
 	}
 
 	/**
@@ -2715,7 +2697,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					    	$this->inventory->setItemInHand($slot);
 					    	$this->inventory->addItem($slot->getResidue());
 					    	$this->inventory->sendHeldItem($this);
-					    	$this->inventory->sendHeldItem($this->getViewers());
+					    	$this->inventory->sendHeldItem($this->hasSpawned);
 				    	}
 
                         $this->setUsingItem(false);
@@ -3273,9 +3255,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             return false;
         }
 
-        if($hotbarSlot === $this->inventory->getHeldItemIndex() && ($inventorySlot === null || $this->inventory->getHeldItemSlot() === $inventorySlot)){
+        /*if($hotbarSlot === $this->inventory->getHeldItemIndex() && ($inventorySlot === null || $this->inventory->getHeldItemSlot() === $inventorySlot)){
             return true;
-        }
+        }*/
 
         $ev = new PlayerItemHeldEvent($this, $this->inventory->getItem($hotbarSlot), $hotbarSlot);
         $ev->call();
