@@ -330,6 +330,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $randomClientId;
 	/** @var string */
 	protected $xuid = "";
+	/** @var mixed */
+	protected $deviceModel;
+	/** @var mixed */
+	protected $deviceOS;
 
 	protected $windowCnt = 2;
 	/** @var int[] */
@@ -864,6 +868,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function getDisplayName() : string{
 		return $this->displayName;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getDeviceModel(){
+		return $this->deviceModel;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getDeviceOS(){
+		return $this->deviceOS;
 	}
 
 	/**
@@ -3239,7 +3257,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
         if(!$this->selectHotbarSlot($packet->hotbarSlot, $packet->inventorySlot)){
             $this->inventory->sendHeldItem($this);
-            $this->inventory->sendHeldItem($this->getViewers());
         }
 
         return true;
