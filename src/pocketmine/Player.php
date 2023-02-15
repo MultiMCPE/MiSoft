@@ -409,6 +409,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $lineHeight = null;
 	/** @var string */
 	protected $locale = "en_US";
+    /** @var string|null */
+    protected $deviceOS = null;
+    /** @var string|null */
+    protected $deviceModel = null;
 
 	/** @var int */
 	protected $startAction = -1;
@@ -883,6 +887,22 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function getLocale() : string{
 		return $this->locale;
 	}
+
+	/**
+	 * Returns the player's device OS.
+	 * @return ?string
+	 */
+    public function getDeviceOS() : ?string{
+        return $this->deviceOS;
+    }
+
+	/**
+	 * Returns the player's device model name.
+	 * @return ?string
+	 */
+    public function getDeviceModel() : ?string{
+        return $this->deviceModel;
+    }
 
 	/**
 	 * Called when a player changes their skin.
@@ -1985,6 +2005,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($packet->locale !== null){
 			$this->locale = $packet->locale;
 		}
+
+        $this->deviceOS = $packet->clientData["DeviceOS"] ?? "";
+        $this->deviceModel = $packet->clientData["DeviceModel"] ?? "";
 
         $this->vanillaVersion = $packet->clientData["GameVersion"] ?? "";
 
@@ -3255,9 +3278,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             return false;
         }
 
-        /*if($hotbarSlot === $this->inventory->getHeldItemIndex() && ($inventorySlot === null || $this->inventory->getHeldItemSlot() === $inventorySlot)){
-            return true;
-        }*/
+        if($inventorySlot !== null && ($inventorySlot < -1 || $inventorySlot >= $this->inventory->getSize())){
+            return false;
+        }
 
         $ev = new PlayerItemHeldEvent($this, $this->inventory->getItem($hotbarSlot), $hotbarSlot);
         $ev->call();
