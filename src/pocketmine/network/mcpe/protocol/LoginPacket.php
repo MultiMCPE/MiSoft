@@ -62,6 +62,10 @@ class LoginPacket extends DataPacket{
 	public $serverAddress;
 	/** @var string */
 	public $locale;
+	/** @var mixed */
+	public $deviceModel;
+	/** @var mixed */
+	public $deviceOS;
 
 	/** @var array (the "chain" index contains one or more JWTs) */
 	public $chainData = [];
@@ -162,6 +166,14 @@ class LoginPacket extends DataPacket{
 		$this->serverAddress = $this->clientData["ServerAddress"] ?? null;
 
 		$this->locale = $this->clientData["LanguageCode"] ?? null;
+
+		if(isset($this->clientData["DeviceModel"])){
+			$this->deviceModel = $this->clientData["DeviceModel"];
+		}
+
+		if(isset($this->clientData["DeviceOS"])){
+			$this->deviceOS = $this->clientData["DeviceOS"];
+		}
 	}
 
 	protected function encodePayload(){
