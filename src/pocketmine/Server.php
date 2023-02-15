@@ -379,7 +379,7 @@ class Server{
 	 * @return string
 	 */
 	public function getApiVersion() : string{
-		return \pocketmine\BASE_VERSION;
+		return \pocketmine\API_VERSION;
 	}
 
 	/**
