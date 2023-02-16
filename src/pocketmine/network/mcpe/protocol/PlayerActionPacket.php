@@ -44,6 +44,8 @@ class PlayerActionPacket extends DataPacket{
 	/** @var int */
 	public $face;
 
+	// тут должна была быть еще одна хуйня с blockPosition, ноооо...
+
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->action = $this->getVarInt();

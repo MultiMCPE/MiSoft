@@ -30,6 +30,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
@@ -41,6 +42,7 @@ use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
 use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
+use Cassandra\UuidInterface;
 use UnexpectedValueException;
 use function chr;
 use function count;
@@ -72,6 +74,9 @@ class StartGamePacket extends DataPacket{
 	public $pitch;
 	/** @var float */
 	public $yaw;
+
+	/** @var CacheableNbt */
+	public $playerActorProperties; //same as SyncActorPropertyPacket content
 
 	/** @var int */
 	public $seed;
@@ -192,6 +197,8 @@ class StartGamePacket extends DataPacket{
 	public $enableNewInventorySystem = false; //TODO
 	/** @var string */
 	public $serverSoftwareVersion;
+	/** @var UuidInterface */
+	public $worldTemplateId; //why is this here twice ??? mojang
 	/** @var int */
 	public $blockPaletteChecksum;
 
@@ -199,6 +206,8 @@ class StartGamePacket extends DataPacket{
 	public $blockTable = null;
 	/** @var array|null string (name) => int16 (legacyID) */
 	public $itemTable = null;
+
+	// а где create()? тут я кое че не доделал, рома ты пон.
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
@@ -383,6 +392,9 @@ class StartGamePacket extends DataPacket{
 	        	            $this->serverSoftwareVersion = $this->getString();
 							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
 								$this->blockPaletteChecksum = $this->getLLong();
+								if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+									$this->playerActorProperties = new CacheableNbt($this->getNbtCompoundRoot()); // CacheableNbt ???
+								}
 							}
 	        	        }
 	            	}
@@ -564,6 +576,10 @@ class StartGamePacket extends DataPacket{
 	    	                $this->putString($this->serverSoftwareVersion);
 							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
 								$this->putLLong($this->blockPaletteChecksum);
+								if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+									$this->put($this->playerActorProperties->getEncodedNbt()); // wtf
+									$this->putUUID($this->worldTemplateId);
+								}
 							}
 	    	            }
 	    	        }
