@@ -1162,6 +1162,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\types\\DimensionIds' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/DimensionIds.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\EntityLink' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/EntityLink.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\InputMode' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/InputMode.php',
+		'pocketmine\\network\\mcpe\\protocol\\types\\InteractionMode' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/InteractionMode.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\MapTrackedObject' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/MapTrackedObject.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\NetworkInventoryAction' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/NetworkInventoryAction.php',
         'pocketmine\\network\\mcpe\\protocol\\types\\PersonaPieceTintColor' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/types/PersonaPieceTintColor.php',

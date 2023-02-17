@@ -1111,6 +1111,7 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\types\\DeviceOS' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/DeviceOS.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\EducationEditionOffer' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/EducationEditionOffer.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\EducationUriResource' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/EducationUriResource.php',
+	'pocketmine\\network\\mcpe\\protocol\\types\\InteractionMode' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/InteractionMode.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\GameMode' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/GameMode.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\GameRuleType' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/GameRuleType.php',
     'pocketmine\\network\\mcpe\\protocol\\types\\GeneratorType' => $baseDir . '/src/pocketmine/network/mcpe/protocol/types/GeneratorType.php',
