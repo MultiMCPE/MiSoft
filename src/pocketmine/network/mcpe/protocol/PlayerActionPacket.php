@@ -42,14 +42,21 @@ class PlayerActionPacket extends DataPacket{
 	/** @var int */
 	public $z;
 	/** @var int */
+	public $rx;
+	/** @var int */
+	public $ry;
+	/** @var int */
+	public $rz;
+	/** @var int */
 	public $face;
-
-	// тут должна была быть еще одна хуйня с blockPosition, ноооо...
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->action = $this->getVarInt();
 		$this->getBlockPosition($this->x, $this->y, $this->z);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+		    $this->getBlockPosition($this->rx, $this->ry, $this->rz);
+		}
 		$this->face = $this->getVarInt();
 	}
 
@@ -57,6 +64,9 @@ class PlayerActionPacket extends DataPacket{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putVarInt($this->action);
 		$this->putBlockPosition($this->x, $this->y, $this->z);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+		    $this->putBlockPosition($this->rx, $this->ry, $this->rz);
+		}
 		$this->putVarInt($this->face);
 	}
 

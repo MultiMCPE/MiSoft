@@ -24,22 +24,13 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\actor;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use function array_diff;
+use function scandir;
 use function file_get_contents;
+use function krsort;
 use const pocketmine\RESOURCE_PATH;
 
 class AvailableActorIdentifiersPalette{
-    protected const ACTOR_IDS_CACHE = [
-		ProtocolInfo::PROTOCOL_526 => RESOURCE_PATH . '/vanilla/actor/526/entity_identifiers.nbt',
-		ProtocolInfo::PROTOCOL_475 => RESOURCE_PATH . '/vanilla/actor/475/entity_identifiers.nbt',
-		ProtocolInfo::PROTOCOL_471 => RESOURCE_PATH . '/vanilla/actor/471/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_440 => RESOURCE_PATH . '/vanilla/actor/440/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_419 => RESOURCE_PATH . '/vanilla/actor/419/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_408 => RESOURCE_PATH . '/vanilla/actor/408/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_400 => RESOURCE_PATH . '/vanilla/actor/400/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_390 => RESOURCE_PATH . '/vanilla/actor/390/entity_identifiers.nbt',
-        ProtocolInfo::PROTOCOL_331 => RESOURCE_PATH . '/vanilla/actor/331/entity_identifiers.nbt'
-    ];
-
     /** @var string[] */
     protected static $actorIds = null;
 
@@ -48,9 +39,11 @@ class AvailableActorIdentifiersPalette{
      */
     public static function init() : void{
         self::$actorIds = [];
-        foreach(self::ACTOR_IDS_CACHE as $protocol => $cache){
-            self::$actorIds[$protocol] = file_get_contents($cache);
+        $actorIdsDirectory = RESOURCE_PATH . '/vanilla/actor/';
+        foreach(array_diff(scandir($actorIdsDirectory), ["..", "."]) as $protocol){
+            self::$actorIds[$protocol] = file_get_contents($actorIdsDirectory . $protocol . '/entity_identifiers.nbt');
         }
+        krsort(self::$actorIds);
     }
 
     /**
@@ -64,7 +57,6 @@ class AvailableActorIdentifiersPalette{
                 return $cache;
             }
         }
-
         return "";
     }
 }

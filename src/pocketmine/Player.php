@@ -2409,7 +2409,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->experiments = new Experiments([], false);
 		$pk->playerMovementSettings = new PlayerMovementSettings(PlayerMovementType::LEGACY, 0, false);
 		$pk->serverSoftwareVersion = sprintf("%s %s", NAME, VERSION);
+		$pk->playerActorProperties = new CompoundTag("");
 		$pk->blockPaletteChecksum = 0; //we don't bother with this (0 skips verification) - the preimage is some dumb stringified NBT, not even actual NBT
+		$pk->worldTemplateId = UUID::fromBinary(str_repeat("\x00", 16), 0);
 		$pk->vanillaVersion = $this->vanillaVersion;
 		$this->dataPacket($pk);
 
@@ -3493,6 +3495,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				break;
 			case 'ACTION_CREATIVE_PLAYER_DESTROY_BLOCK':
 				//TODO: do we need to handle this?
+				break;
+			case 'ACTION_START_ITEM_USE_ON':
+			case 'ACTION_STOP_ITEM_USE_ON':
+				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
 				break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());

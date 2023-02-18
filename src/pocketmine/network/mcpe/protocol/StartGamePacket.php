@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
 
-
+use pocketmine\utils\UUID;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
@@ -42,7 +42,6 @@ use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
 use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
-use Cassandra\UuidInterface;
 use UnexpectedValueException;
 use function chr;
 use function count;
@@ -74,9 +73,6 @@ class StartGamePacket extends DataPacket{
 	public $pitch;
 	/** @var float */
 	public $yaw;
-
-	/** @var CacheableNbt */
-	public $playerActorProperties; //same as SyncActorPropertyPacket content
 
 	/** @var int */
 	public $seed;
@@ -197,17 +193,17 @@ class StartGamePacket extends DataPacket{
 	public $enableNewInventorySystem = false; //TODO
 	/** @var string */
 	public $serverSoftwareVersion;
-	/** @var UuidInterface */
-	public $worldTemplateId; //why is this here twice ??? mojang
+	/** @var CompoundTag */
+	public $playerActorProperties;
 	/** @var int */
 	public $blockPaletteChecksum;
+    /** @var UUID */
+    public $worldTemplateId;
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
 	/** @var array|null string (name) => int16 (legacyID) */
 	public $itemTable = null;
-
-	// а где create()? тут я кое че не доделал, рома ты пон.
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
@@ -390,10 +386,13 @@ class StartGamePacket extends DataPacket{
 	        	        $this->enableNewInventorySystem = (($this->get(1) !== "\x00"));
 	        	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
 	        	            $this->serverSoftwareVersion = $this->getString();
-							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+	        	            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+	        	                $this->playerActorProperties = $this->getNbtCompoundRoot();
+	        	            }
+							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
 								$this->blockPaletteChecksum = $this->getLLong();
-								if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
-									$this->playerActorProperties = new CacheableNbt($this->getNbtCompoundRoot()); // CacheableNbt ???
+								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+								    $this->worldTemplateId = $this->getUUID();
 								}
 							}
 	        	        }
@@ -574,11 +573,13 @@ class StartGamePacket extends DataPacket{
 	    	            ($this->buffer .= ($this->enableNewInventorySystem ? "\x01" : "\x00"));
 	    	            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_440){
 	    	                $this->putString($this->serverSoftwareVersion);
-							if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+	    	                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+	    	                    $this->put((new NetworkLittleEndianNBTStream())->write($this->playerActorProperties));
+	    	                }
+							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
 								$this->putLLong($this->blockPaletteChecksum);
-								if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
-									$this->put($this->playerActorProperties->getEncodedNbt()); // wtf
-									$this->putUUID($this->worldTemplateId);
+								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+								    $this->putUUID($this->worldTemplateId);
 								}
 							}
 	    	            }

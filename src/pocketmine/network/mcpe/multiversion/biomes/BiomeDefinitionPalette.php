@@ -24,20 +24,13 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\biomes;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use function array_diff;
+use function scandir;
 use function file_get_contents;
+use function krsort;
 use const pocketmine\RESOURCE_PATH;
 
 class BiomeDefinitionPalette{
-    protected const BIOMES_CACHE = [
-		ProtocolInfo::PROTOCOL_526 => RESOURCE_PATH . '/vanilla/biomes/526/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_486 => RESOURCE_PATH . '/vanilla/biomes/486/biome_definitions.nbt',
-		ProtocolInfo::PROTOCOL_475 => RESOURCE_PATH . '/vanilla/biomes/475/biome_definitions.nbt',
-		ProtocolInfo::PROTOCOL_471 => RESOURCE_PATH . '/vanilla/biomes/471/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_428 => RESOURCE_PATH . '/vanilla/biomes/428/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_400 => RESOURCE_PATH . '/vanilla/biomes/400/biome_definitions.nbt',
-        ProtocolInfo::PROTOCOL_331 => RESOURCE_PATH . '/vanilla/biomes/331/biome_definitions.nbt'
-    ];
-
     /** @var string[] */
     protected static $biomeDefs = null;
 
@@ -46,9 +39,11 @@ class BiomeDefinitionPalette{
      */
     public static function init() : void{
         self::$biomeDefs = [];
-        foreach(self::BIOMES_CACHE as $protocol => $cache){
-            self::$biomeDefs[$protocol] = file_get_contents($cache);
+        $biomeDefsDirectory = RESOURCE_PATH . '/vanilla/biomes/';
+        foreach(array_diff(scandir($biomeDefsDirectory), ["..", "."]) as $protocol){
+            self::$biomeDefs[$protocol] = file_get_contents($biomeDefsDirectory . $protocol . '/biome_definitions.nbt');
         }
+        krsort(self::$biomeDefs);
     }
 
     /**
@@ -62,7 +57,6 @@ class BiomeDefinitionPalette{
                 return $cache;
             }
         }
-
         return "";
     }
 }
