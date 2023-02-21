@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\SoundEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use function array_search;
@@ -71,31 +72,31 @@ class LevelSoundEventPacket extends DataPacket{
 	public $disableRelativeVolume = false;
 
 	protected function decodePayload(){
-	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
 	    	$this->sound = $this->getUnsignedVarInt();
-	    } else {
+	    }else{
 	        $this->sound = (ord($this->get(1)));
 	    }
 		$this->sound = SoundEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	$runtimeId = $this->getVarInt();
-	    	if ($runtimeId < 0) {
-		    	$this->extraData = -1;
-	    	} else {
-		    	$blockData = self::getBlockIDByRuntime($runtimeId, $this->getProtocol());
-		    	$this->extraData = $blockData[0];
+	    	if($runtimeId < 0){
+	    	    $this->extraData = -1;
+	    	}else{
+	        	$palette = BlockPalette::getPalette($this->getProtocol());
+	        	$blockData = $palette::fromStaticRuntimeId($runtimeId);
+		        $this->extraData = $blockData[0];
 	    	}
-		} else {
+		}else{
 		    $this->extraData = $this->getVarInt();
 		}
-		
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->entityType = array_search($t = $this->getString(), AddActorPacket::LEGACY_ID_MAP_BC, true);
-	    	if ($this->entityType === false) {
+	    	if($this->entityType === false){
 	    	    $this->entityType = 1;
 	    	}
-		} else {
+		}else{
 		    $this->entityType = $this->getVarInt();
 		}
 		$this->isBabyMob = (($this->get(1) !== "\x00"));
@@ -104,25 +105,26 @@ class LevelSoundEventPacket extends DataPacket{
 
 	protected function encodePayload(){
 	    $sound = SoundEnums::getLevelSoundEventId($this->getProtocol(), $this->sound);
-	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_332) {
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
 	    	$this->putUnsignedVarInt($sound);
-	    } else {
+	    }else{
 	        ($this->buffer .= chr($sound));
 	    }
 		$this->putVector3($this->position);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
-	    	if ($this->extraData < 0) {
-		    	$this->putVarInt($this->extraData);
-	    	} else {
-		    	$runtimeId = self::getBlockRuntimeID($this->extraData, 0, $this->getProtocol());
-		    	$this->putVarInt($runtimeId);
-	    	}
-		} else {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
+		    if($this->extraData < 0){
+		        $this->putVarInt($this->extraData);
+		    }else{
+		        $palette = BlockPalette::getPalette($this->getProtocol());
+		        $runtimeId = $palette::toStaticRuntimeId($this->extraData);
+		        $this->putVarInt($runtimeId);
+		    }
+		}else{
 		    $this->putVarInt($this->extraData);
 		}
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->putString(AddActorPacket::LEGACY_ID_MAP_BC[$this->entityType] ?? ":");
-		} else {
+		}else{
 		    $this->putVarInt($this->entityType);
 		}
 		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));

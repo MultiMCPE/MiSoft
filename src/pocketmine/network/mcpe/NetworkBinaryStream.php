@@ -42,8 +42,8 @@ use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\NamedTag;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
-use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
@@ -514,7 +514,8 @@ class NetworkBinaryStream extends BinaryStream{
 		if($isBlockItem){
 			$block = $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
-			    $blockRuntimeId = DataPacket::getBlockRuntimeID($block->getId(), $block->getDamage(), $playerProtocol);
+			    $palette = BlockPalette::getPalette($playerProtocol);
+			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());
 			}
 		}
 		$this->putVarInt($blockRuntimeId);
@@ -1138,16 +1139,16 @@ class NetworkBinaryStream extends BinaryStream{
 		];
 
 		$skinData .= str_repeat("\x00", 8192);
-		foreach ($parts as $part) {
-			for ($z = 0; $z < $part["height"]; $z++) {
+		foreach($parts as $part){
+			for($z = 0; $z < $part["height"]; $z++){
 				$baseZOffset = ($part["baseZOffset"] + $z) * 64 * 4;
 				$targetZOffset = ($part["targetZOffset"] + $z) * 64 * 4;
-				for ($x = 0; $x < $part["width"]; $x++) {
+				for($x = 0; $x < $part["width"]; $x++){
 					$baseOffset = $baseZOffset + ($part["baseXOffset"] + $x) * 4;
 
-					if ($part["isRevers"]) {
+					if($part["isRevers"]){
 						$targetOffset = $targetZOffset + ($part["targetXOffset"] + ($part["width"] - $x - 1)) * 4;
-					} else {
+					}else{
 						$targetOffset = $targetZOffset + ($part["targetXOffset"] + $x) * 4;
 					}
 
@@ -1163,10 +1164,9 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	protected function prepareGeometryDataForOld(?string $skinGeometryData) : ?string{
-		if (!empty($skinGeometryData)) {
-			if (($tempData = @json_decode($skinGeometryData, true))) {
+		if(!empty($skinGeometryData)){
+			if(($tempData = @json_decode($skinGeometryData, true))){
 				unset($tempData["format_version"]);
-
 				return json_encode($tempData);
 			}
 		}

@@ -30,6 +30,7 @@ use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\multiversion\actor\AvailableActorIdentifiersPalette;
 use pocketmine\Server;
@@ -57,6 +58,7 @@ class Network{
 	public function __construct(Server $server){
 		PacketPool::init();
         ItemPalette::init();
+        BlockPalette::init();
         BiomeDefinitionPalette::init();
         AvailableActorIdentifiersPalette::init();
 

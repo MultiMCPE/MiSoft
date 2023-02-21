@@ -73,7 +73,6 @@ class ItemPalette{
                 return clone $paletteClass;
             }
         }
-
         return new ItemPalette419();
     }
 }

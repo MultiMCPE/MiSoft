@@ -30,7 +30,6 @@ use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\CachedEncapsulatedPacket;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\multiversion\BlockPallet;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\utils\Utils;
 use pocketmine\block\BlockIds;
@@ -65,8 +64,6 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $recipientSubId = 0x0;
 	/** @var int|null */
 	private $packetProtocol;
-	/** @var BlockPallet[] */
-	protected static $blockPalletes = [];
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -216,93 +213,6 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	public function __set($name, $value){
 		throw new Error("Undefined property: " . get_class($this) . "::\$" . $name);
-	}
-
-    /**
-     * @param array $palleteData
-     * 
-     * @return void
-     */
-	public static function initPalletes(array $palleteData) : void{
-		self::$blockPalletes = $palleteData;
-	}
-
-    /**
-     * @param int $runtimeId
-     * @param int $playerProtocol
-     * 
-     * @return array
-     */
-	public static function getBlockIDByRuntime(int $runtimeId, int $playerProtocol) : array{
-		$pallet = self::getPallet($playerProtocol);
-
-		return is_null($pallet) ? [0, 0, ""] : $pallet->getBlockDataByRuntimeID($runtimeId);
-	}
-
-    /**
-     * @param int $id
-     * @param int $meta
-     * @param int $playerProtocol
-     * 
-     * @return int
-     */
-	public static function getBlockRuntimeID(int $id, int $meta, int $playerProtocol) : int{
-		$pallet = self::getPallet($playerProtocol);
-
-		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-			$meta = self::getActualMeta($id, $meta);
-		}
-
-		return is_null($pallet) ? 0 : $pallet->getBlockRuntimeIDByData($id, $meta);
-	}
-
-    /**
-     * @param int $id
-     * @param int $meta
-     * 
-     * @return int
-     */
-	public static function getActualMeta(int $id, int $meta) : int{
-		if($id === BlockIds::ITEM_FRAME_BLOCK){
-			$faces = [
-			    2 => 8,
-			    1 => 5,
-			    0 => 4
-		    ];
-			return $faces[$meta] ?? $meta;
-		}
-
-		if($id === BlockIds::LEAVES2 && $meta > 7){
-			return 7;
-		}
-
-		return $meta;
-	}
-
-    /**
-     * @param int $playerProtocol
-     * 
-     * @return string
-     */
-	public static function getBlockPalletData(int $playerProtocol) : string{
-		$pallet = self::getPallet($playerProtocol);
-
-		return is_null($pallet) ? "" : $pallet->getDataForPackets();
-	}
-
-	/**
-	 * @param int $playerProtocol
-	 * 
-	 * @return BlockPallet
-	 */
-	public static function getPallet(int $playerProtocol) : ?BlockPallet{
-		foreach (self::$blockPalletes as $protocol => $pallet) {
-			if ($playerProtocol >= $protocol) {
-				return $pallet;
-			}
-		}
-
-		return null;
 	}
 
 }

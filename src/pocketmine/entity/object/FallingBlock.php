@@ -34,7 +34,7 @@ use pocketmine\item\ItemFactory;
 use pocketmine\level\Position;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use UnexpectedValueException;
@@ -166,9 +166,9 @@ class FallingBlock extends Entity{
 	    	$pk->attributes = $this->attributeMap->getAll();
 	    	$pk->metadata = $this->propertyManager->getAll();
 	    	if(isset($pk->metadata[self::DATA_VARIANT])){
-		    	$pallet = DataPacket::getPallet($player->getProtocol());
-		    	if(!is_null($pallet)){ // for version higher than 1.1
-			    	$pk->metadata[self::DATA_VARIANT][1] = $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage());
+		    	$palette = BlockPalette::getPalette($player->getProtocol());
+		    	if(!is_null($palette)){
+			    	$pk->metadata[self::DATA_VARIANT][1] = $palette::toStaticRuntimeId($this->getBlock(), $this->getDamage());
 		    	}
 			}
 
@@ -191,9 +191,9 @@ class FallingBlock extends Entity{
 
 		foreach($player as $p){
 		    if(isset($pk->metadata[self::DATA_VARIANT])){
-		    	$pallet = DataPacket::getPallet($p->getProtocol());
-		    	if(!is_null($pallet)){ // for version higher than 1.1
-			    	$pk->metadata[self::DATA_VARIANT][1] = $pallet->getBlockRuntimeIDByData($this->getBlock(), $this->getDamage());
+		    	$palette = BlockPalette::getPalette($p->getProtocol());
+		    	if(!is_null($palette)){
+			    	$pk->metadata[self::DATA_VARIANT][1] = $palette::toStaticRuntimeId($this->getBlock(), $this->getDamage());
 		    	}
 			}
 

@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\NetworkSession;
 
 class LevelEventPacket extends DataPacket{
@@ -129,20 +130,28 @@ class LevelEventPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVarInt($this->evid);
 		$this->putVector3Nullable($this->position);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
-	    	switch ($this->evid) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
+	    	switch($this->evid){
 		    	case self::EVENT_PARTICLE_DESTROY:
+			    	$id = $this->data & 0xff;
+			    	$meta = $this->data >> 8;
+			    	$palette = BlockPalette::getPalette($this->getProtocol());
+			    	$runtimeId = $palette::toStaticRuntimeId($id, $meta);
+			    	$this->putVarInt($runtimeId);
+			    	break;
 		    	case self::EVENT_PARTICLE_PUNCH_BLOCK:
 			    	$id = $this->data & 0xff;
 			    	$meta = ($this->data >> 8) & 0x0f;
-			    	$runtimeId = self::getBlockRuntimeID($id, $meta, $this->getProtocol());
+			    	$face = $this->data >> 16;
+			    	$palette = BlockPalette::getPalette($this->getProtocol());
+			    	$runtimeId = $palette::toStaticRuntimeId($id, $meta) | ($face << 24);
 			    	$this->putVarInt($runtimeId);
 			    	break;
-		    	default :
+		    	default:
 			    	$this->putVarInt($this->data);
 			    	break;
 	    	}
-    	} else {
+    	}else{
     	    $this->putVarInt($this->data);
     	}
 	}

@@ -33,6 +33,8 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
 use pocketmine\network\mcpe\protocol\types\EducationEditionOffer;
 use pocketmine\network\mcpe\protocol\types\EducationUriResource;
 use pocketmine\network\mcpe\protocol\types\Experiments;
@@ -202,6 +204,8 @@ class StartGamePacket extends DataPacket{
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
+	/** @var BlockPaletteEntry[] */
+	public $blockPalette = [];
 	/** @var array|null string (name) => int16 (legacyID) */
 	public $itemTable = null;
 
@@ -351,7 +355,14 @@ class StartGamePacket extends DataPacket{
 	        $this->enchantmentSeed = $this->getVarInt();
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	            	$this->blockPalette = [];
+	            	for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
+		             	$blockName = $this->getString();
+		            	$state = $this->getNbtCompoundRoot();
+		            	$this->blockPalette[] = new BlockPaletteEntry($blockName, $state);
+	            	}
+                }elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	            	$blockTable = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
 	            	if(!($blockTable instanceof ListTag)){
 		            	throw new UnexpectedValueException("Wrong block table root NBT tag type");
@@ -362,12 +373,11 @@ class StartGamePacket extends DataPacket{
 	            	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		            	$id = $this->getString();
 		            	$data = ((unpack("v", $this->get(2))[1] << 48 >> 48));
-		            	$unknown = 0;
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 		                	$unknown = ((unpack("v", $this->get(2))[1] << 48 >> 48));
 			            }
 
-		            	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown];
+		            	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $unknown ?? 0];
 	            	}
 	        	}
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
@@ -375,7 +385,9 @@ class StartGamePacket extends DataPacket{
 	            	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		            	$id = $this->getString();
 		            	$legacyId = ((unpack("v", $this->get(2))[1] << 48 >> 48));
-		            	$this->get(1);
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		                	$this->get(1);
+		            	}
 
 		            	$this->itemTable[$id] = $legacyId;
 	            	}
@@ -548,9 +560,15 @@ class StartGamePacket extends DataPacket{
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
                 if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
-                    $this->put(self::getBlockPalletData($this->getProtocol()));
+                    $palette = BlockPalette::getPalette($this->getProtocol());
+                    $this->put($palette::getEncodedPalette());
                 }else{
-                    $this->putUnsignedVarInt(0);
+	            	$this->putUnsignedVarInt(count($this->blockPalette));
+	            	$nbtWriter = new NetworkLittleEndianNBTStream();
+	            	foreach($this->blockPalette as $entry){
+		            	$this->putString($entry->getName());
+		            	$this->put($nbtWriter->write($entry->getStates()));
+	            	}
                 }
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){

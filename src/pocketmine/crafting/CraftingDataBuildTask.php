@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
@@ -78,26 +79,29 @@ class CraftingDataBuildTask extends AsyncTask{
 
 	public function onRun(){
 	    ItemPalette::init();
+	    BlockPalette::init();
 	    PacketPool::init();
 	    ItemFactory::init();
 
 	    $buffers = [];
-	    foreach ($this->protocols as $protocol) {
+	    foreach($this->protocols as $protocol){
 	    	$pk = new CraftingDataPacket();
 	    	$pk->cleanRecipes = true;
-	    	foreach ($this->shapelessRecipes as $list) {
-		    	foreach ($list as $recipe) {
+
+	    	foreach($this->shapelessRecipes as $list){
+		    	foreach($list as $recipe){
 			    	$pk->addShapelessRecipe($recipe);
 		    	}
 	    	}
-	    	foreach ($this->shapedRecipes as $list) {
-		    	foreach ($list as $recipe) {
+	    	foreach($this->shapedRecipes as $list){
+		    	foreach($list as $recipe){
 			    	$pk->addShapedRecipe($recipe);
 		    	}
 	    	}
-	    	foreach ($this->furnaceRecipes as $recipe) {
+	    	foreach($this->furnaceRecipes as $recipe){
 		    	$pk->addFurnaceRecipe($recipe);
 	    	}
+
             $pk->setProtocol($protocol);
 	    	$pk->encode();
 
