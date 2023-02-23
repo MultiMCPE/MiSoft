@@ -50,6 +50,7 @@ use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette486;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette503;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette526;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\Server;
 
 class BlockPalette{
 	/** @var Palette[] */
@@ -58,8 +59,8 @@ class BlockPalette{
     /**
      * @return void
      */
-    public static function init() : void{
-        $pool = [
+    public static function init(bool $asynchronous = true) : void{
+        $pools = [
             ProtocolInfo::PROTOCOL_526 => new BlockPalette526(),
             ProtocolInfo::PROTOCOL_503 => new BlockPalette503(),
             ProtocolInfo::PROTOCOL_486 => new BlockPalette486(),
@@ -88,9 +89,21 @@ class BlockPalette{
         ];
 
         self::$palettes = [];
-        foreach($pool as $protocol => $blockPalette){
-            $blockPalette::init();
-            self::$palettes[$protocol] = $blockPalette;
+        if($asynchronous){
+            foreach($pools as $poolProtocol => $pool){
+                Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
+                    $pool,
+                    $poolProtocol,
+                    function(Palette $palette, int $poolProtocol) : void{
+                        self::$palettes[$poolProtocol] = $palette;
+                    }
+                ));
+            }
+        }else{
+            foreach($pools as $poolProtocol => $pool){
+                $pool::init();
+                self::$palettes[$poolProtocol] = $pool;
+            }
         }
     }
 

@@ -82,7 +82,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
     public function checkProtocol() : void{
-        if ($this->packetProtocol === null) {
+        if($this->packetProtocol === null){
             throw new InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
         }
     }
@@ -119,16 +119,16 @@ abstract class DataPacket extends NetworkBinaryStream{
 	 * @throws UnexpectedValueException
 	 */
 	protected function decodeHeader(){
-        if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
+        if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
             (ord($this->get(1)));
-            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
+            if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
                 $this->senderSubId = (ord($this->get(1)));
                 $this->recipientSubId = (ord($this->get(1)));
-                if ($this->senderSubId > 0x4 || $this->recipientSubId > 0x4) {
+                if($this->senderSubId > 0x4 || $this->recipientSubId > 0x4){
                     throw new BinaryDataException(($this) . ": Packet decode headers error");
                 }
             }
-        } else {
+        }else{
             $pid = $this->getUnsignedVarInt();
             $this->senderSubId = ($pid >> self::SENDER_SUBCLIENT_ID_SHIFT) & self::SUBCLIENT_ID_MASK;
             $this->recipientSubId = ($pid >> self::RECIPIENT_SUBCLIENT_ID_SHIFT) & self::SUBCLIENT_ID_MASK;
@@ -155,13 +155,13 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	protected function encodeHeader(){
 	    $pid = PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
-        if ($this->packetProtocol < ProtocolInfo::PROTOCOL_280) {
+        if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
             ($this->buffer .= chr($pid));
-            if ($this->packetProtocol >= ProtocolInfo::PROTOCOL_130) {
+            if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
                 ($this->buffer .= chr($this->senderSubId));
                 ($this->buffer .= chr($this->recipientSubId));
             }
-        } else {
+        }else{
             $this->putUnsignedVarInt($pid | ($this->senderSubId << self::SENDER_SUBCLIENT_ID_SHIFT) | ($this->recipientSubId << self::RECIPIENT_SUBCLIENT_ID_SHIFT));
         }
 	}

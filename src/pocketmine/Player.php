@@ -3190,7 +3190,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         }
 
         if($currentRecipe === null){
-            throw new InvalidArgumentException("Recipe not founded");
+            $this->inventory->sendContents($this);
+            return true;
         }
 
         $baseInventory = new class([], 36) extends BaseInventory{

@@ -64,16 +64,11 @@ class BatchPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$data = $this->getRemaining();
-		//var_dump($data[0]);
-		//if($data[0] === "\170"){
-	    	try{
-		    	$this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
-	    	}catch(ErrorException $e){ //zlib decode error
-		    	$this->payload = "";
-	    	}
-		/*}else{
-		    $this->payload = Binary::writeUnsignedVarInt(strlen($data)) . $data;
-		}*/
+	    try{
+		    $this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
+	    }catch(ErrorException $e){ //zlib decode error
+		    $this->payload = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
+	    }
 	}
 
 	protected function encodeHeader(){

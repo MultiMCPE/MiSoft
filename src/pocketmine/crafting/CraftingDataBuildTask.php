@@ -79,7 +79,7 @@ class CraftingDataBuildTask extends AsyncTask{
 
 	public function onRun(){
 	    ItemPalette::init();
-	    BlockPalette::init();
+	    BlockPalette::init(false);
 	    PacketPool::init();
 	    ItemFactory::init();
 

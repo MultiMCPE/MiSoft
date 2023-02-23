@@ -49,6 +49,7 @@ use function implode;
 use function rtrim;
 use function spl_object_hash;
 use function unserialize;
+use function chr;
 use const pocketmine\COMPOSER_AUTOLOADER_PATH;
 use const PTHREADS_INHERIT_CONSTANTS;
 
@@ -255,6 +256,9 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			    $buffer = $packet->buffer;
 		    	$cipher = $player->getCipher();
 		    	$rawBuffer = substr($buffer, 1);
+		    	if($player->getProtocol() < ProtocolInfo::PROTOCOL_110){
+		    	    $rawBuffer = chr(0x6) . $rawBuffer;
+		    	}
 		    	$buffer = self::MCPE_RAKNET_PACKET_ID . ($cipher !== null ? $cipher->encrypt($rawBuffer) : $rawBuffer);
 
 		    	$pk = new EncapsulatedPacket();
