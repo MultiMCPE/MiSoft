@@ -197,6 +197,12 @@ use pocketmine\network\mcpe\protocol\ItemStackResponsePacket;
 use pocketmine\network\mcpe\protocol\DebugInfoPacket;
 use pocketmine\network\mcpe\protocol\CodeBuilderPacket;
 use pocketmine\network\mcpe\protocol\EmoteListPacket;
+use pocketmine\network\mcpe\protocol\EduUriResourcePacket;
+use pocketmine\network\mcpe\protocol\CreatePhotoPacket;
+use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
+use pocketmine\network\mcpe\protocol\PhotoInfoRequestPacket;
+use pocketmine\network\mcpe\protocol\SubChunkPacket;
+use pocketmine\network\mcpe\protocol\SubChunkRequestPacket;
 
 abstract class NetworkSession{
 
@@ -892,5 +898,29 @@ abstract class NetworkSession{
 
 	public function handleNpcDialogue(NpcDialoguePacket $packet) : bool{
 	    return false;
+	}
+
+	public function handleEduUriResource(EduUriResourcePacket $packet) : bool{
+		return false;
+	}
+
+	public function handleCreatePhoto(CreatePhotoPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUpdateSubChunkBlocks(UpdateSubChunkBlocksPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePhotoInfoRequest(PhotoInfoRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSubChunk(SubChunkPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSubChunkRequest(SubChunkRequestPacket $packet) : bool{
+		return false;
 	}
 }

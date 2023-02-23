@@ -192,18 +192,24 @@ interface PacketMagicNumbers{
 	public const REMOVE_VOLUME_ENTITY_PACKET = 0xa7;
 	public const SIMULATION_TYPE_PACKET = 0xa8;
 	public const NPC_DIALOGUE_PACKET = 0xa9;
+	public const EDU_URI_RESOURCE_PACKET = 0xaa;
+	public const CREATE_PHOTO_PACKET = 0xab;
+	public const UPDATE_SUB_CHUNK_BLOCKS_PACKET = 0xac;
+	public const PHOTO_INFO_REQUEST_PACKET = 0xad;
+	public const SUB_CHUNK_PACKET = 0xae;
+	public const SUB_CHUNK_REQUEST_PACKET = 0xaf;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xaa;
+	public const EXPLODE_PACKET = 0xb0;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xab;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xac;
-	public const DROP_ITEM_PACKET = 0xad;
-	public const USE_ITEM_PACKET = 0xae;
-	public const REMOVE_BLOCK_PACKET = 0xaf;
-	public const COMMAND_STEP_PACKET = 0xb0;
-	public const ADD_HANGING_ACTOR_PACKET = 0xb1;
-	public const INVENTORY_ACTION_PACKET = 0xb2;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xb3;
-	public const ADD_ITEM_PACKET = 0xb4;
+	public const CONTAINER_SET_SLOT_PACKET = 0xb1;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xb2;
+	public const DROP_ITEM_PACKET = 0xb3;
+	public const USE_ITEM_PACKET = 0xb4;
+	public const REMOVE_BLOCK_PACKET = 0xb5;
+	public const COMMAND_STEP_PACKET = 0xb6;
+	public const ADD_HANGING_ACTOR_PACKET = 0xb7;
+	public const INVENTORY_ACTION_PACKET = 0xb8;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xb9;
+	public const ADD_ITEM_PACKET = 0xba;
 
 }

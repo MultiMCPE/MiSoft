@@ -39,6 +39,8 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds422;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds428;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds440;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds448;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds465;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds471;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -46,6 +48,8 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_471 => PacketsIds471::class,
+        ProtocolInfo::PROTOCOL_465 => PacketsIds465::class,
         ProtocolInfo::PROTOCOL_448 => PacketsIds448::class,
         ProtocolInfo::PROTOCOL_440 => PacketsIds440::class,
         ProtocolInfo::PROTOCOL_428 => PacketsIds428::class,
@@ -257,6 +261,12 @@ class PacketPool {
 		self::registerPacket(new RemoveVolumeEntityPacket());
 		self::registerPacket(new SimulationTypePacket());
 		self::registerPacket(new NpcDialoguePacket());
+		self::registerPacket(new EduUriResourcePacket());
+		self::registerPacket(new CreatePhotoPacket());
+		self::registerPacket(new UpdateSubChunkBlocksPacket());
+		self::registerPacket(new PhotoInfoRequestPacket());
+		self::registerPacket(new SubChunkPacket());
+		self::registerPacket(new SubChunkRequestPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

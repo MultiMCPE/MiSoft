@@ -157,6 +157,8 @@ class AddActorPacket extends DataPacket{
 	public $yaw = 0.0;
 	/** @var float */
 	public $headYaw = 0.0;
+    /** @var float */
+    public $bodyYaw = 0.0;
 
 	/** @var Attribute[] */
 	public $attributes = [];
@@ -168,20 +170,23 @@ class AddActorPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->type = array_search($t = $this->getString(), self::LEGACY_ID_MAP_BC, true);
 	    	if($this->type === false){
 		    	throw new UnexpectedValueException("Can't map ID $t to legacy ID");
 	    	}
-		} else {
+		}else{
 		    $this->type = $this->getUnsignedVarInt();
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
 		$this->pitch = ((unpack("g", $this->get(4))[1]));
 		$this->yaw = ((unpack("g", $this->get(4))[1]));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	$this->headYaw = ((unpack("g", $this->get(4))[1]));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	    	    $this->bodyYaw = ((unpack("g", $this->get(4))[1]));
+	    	}
 		}
 
 		$attrCount = $this->getUnsignedVarInt();
@@ -212,20 +217,23 @@ class AddActorPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_310) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	if(!isset(self::LEGACY_ID_MAP_BC[$this->type])){
 			    throw new InvalidArgumentException("Unknown entity numeric ID $this->type");
 	    	}
 	    	$this->putString(self::LEGACY_ID_MAP_BC[$this->type]);
-		} else {
+		}else{
 		    $this->putUnsignedVarInt($this->type);
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
 		($this->buffer .= (pack("g", $this->pitch)));
 		($this->buffer .= (pack("g", $this->yaw)));
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	($this->buffer .= (pack("g", $this->headYaw)));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	    	    ($this->buffer .= (pack("g", $this->bodyYaw)));
+	    	}
 		}
 
 		$this->putUnsignedVarInt(count($this->attributes));
