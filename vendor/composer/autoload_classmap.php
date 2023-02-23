@@ -449,6 +449,7 @@ return array(
     'pocketmine\\event\\inventory\\InventoryPickupArrowEvent' => $baseDir . '/src/pocketmine/event/inventory/InventoryPickupArrowEvent.php',
     'pocketmine\\event\\inventory\\InventoryPickupItemEvent' => $baseDir . '/src/pocketmine/event/inventory/InventoryPickupItemEvent.php',
     'pocketmine\\event\\inventory\\InventoryTransactionEvent' => $baseDir . '/src/pocketmine/event/inventory/InventoryTransactionEvent.php',
+    'pocketmine\\event\\inventory\\InventoryClickEvent' => $baseDir . '/src/pocketmine/event/inventory/InventoryClickEvent.php',
     'pocketmine\\event\\level\\ChunkEvent' => $baseDir . '/src/pocketmine/event/level/ChunkEvent.php',
     'pocketmine\\event\\level\\ChunkLoadEvent' => $baseDir . '/src/pocketmine/event/level/ChunkLoadEvent.php',
     'pocketmine\\event\\level\\ChunkPopulateEvent' => $baseDir . '/src/pocketmine/event/level/ChunkPopulateEvent.php',

@@ -23,8 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory\PETransaction;
 
+use pocketmine\event\inventory\InventoryClickEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\inventory\CraftingGrid;
+use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\ContainerInventory;
 use pocketmine\Player;
 use SplQueue;
 use function get_class;
@@ -92,6 +95,16 @@ class TransactionQueue{
 
         while(!$this->transactionQueue->isEmpty()){
             $transaction = $this->transactionQueue->dequeue();
+
+            if(!$transaction instanceof DropItemTransaction){
+		    	if($transaction->getInventory() instanceof ContainerInventory || $transaction->getInventory() instanceof PlayerInventory){
+			    	$this->player->getServer()->getPluginManager()->callEvent($event = new InventoryClickEvent($transaction->getInventory(), $this->player, $transaction->getSlot(), $transaction->getInventory()->getItem($transaction->getSlot())));
+
+			    	if($event->isCancelled()){
+					    $ev->setCancelled(true);
+			    	}
+				}
+			}
 
 			if($ev->isCancelled()){
 				$transaction->revert($this->player); //Send update back to client for cancelled transaction

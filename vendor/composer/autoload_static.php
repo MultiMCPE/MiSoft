@@ -520,6 +520,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\event\\inventory\\InventoryPickupArrowEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/inventory/InventoryPickupArrowEvent.php',
         'pocketmine\\event\\inventory\\InventoryPickupItemEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/inventory/InventoryPickupItemEvent.php',
         'pocketmine\\event\\inventory\\InventoryTransactionEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/inventory/InventoryTransactionEvent.php',
+        'pocketmine\\event\\inventory\\InventoryClickEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/inventory/InventoryClickEvent.php',
         'pocketmine\\event\\level\\ChunkEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/level/ChunkEvent.php',
         'pocketmine\\event\\level\\ChunkLoadEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/level/ChunkLoadEvent.php',
         'pocketmine\\event\\level\\ChunkPopulateEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/level/ChunkPopulateEvent.php',

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use InvalidArgumentException;
 use pocketmine\utils\Binary;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds110;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds130;
@@ -40,8 +39,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds428;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds440;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds448;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
-use ReflectionClass;
-use SplFixedArray;
+use function array_key_last;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
@@ -61,32 +59,32 @@ class PacketPool {
         ProtocolInfo::PROTOCOL_110 => PacketsIds110::class
     ];
 
-	/** @var SplFixedArray<int>[] */
+	/** @var \SplFixedArray<int>[] */
 	protected static $magicPoolTo = null;
-	/** @var SplFixedArray<int>[] */
+	/** @var \SplFixedArray<int>[] */
 	protected static $magicPoolFrom = null;
-	/** @var SplFixedArray<DataPacket> */
+	/** @var \SplFixedArray<DataPacket> */
     protected static $pool = null;
 	/** @var int[] */
 	protected static $protocolList = null;
 
 	public static function init() {
-		$magicNumbers = (new ReflectionClass(PacketMagicNumbers::class))->getConstants();
+		$magicNumbers = (new \ReflectionClass(PacketMagicNumbers::class))->getConstants();
 		self::$magicPoolTo = [];
 		self::$magicPoolFrom = [];
-	    self::$pool = new SplFixedArray(356);
+	    self::$pool = new \SplFixedArray(356);
 		self::$protocolList = array_keys(self::PROTOCOL_POOL);
 		foreach(self::$protocolList as $protocol){
 			$protocolInfoClass = self::PROTOCOL_POOL[$protocol];
-			$protocolMagicNumbers = (new ReflectionClass($protocolInfoClass))->getConstants();
-			self::$magicPoolTo[$protocol] = new SplFixedArray(356);
-			self::$magicPoolFrom[$protocol] = new SplFixedArray(356);
+			$protocolMagicNumbers = (new \ReflectionClass($protocolInfoClass))->getConstants();
+			self::$magicPoolTo[$protocol] = new \SplFixedArray(356);
+			self::$magicPoolFrom[$protocol] = new \SplFixedArray(356);
 			foreach($protocolMagicNumbers as $name => $magic){
 				if(isset($magicNumbers[$name])){
 					self::$magicPoolTo[$protocol][$magicNumbers[$name]] = $magic;
 					self::$magicPoolFrom[$protocol][$magic] = $magicNumbers[$name];
 				}else{
-					throw new InvalidArgumentException("Packet $name not founded in magic numbers class.($protocolInfoClass $magic)");
+					throw new \InvalidArgumentException("Packet $name not founded in magic numbers class.($protocolInfoClass $magic)");
 				}
 			}
         }
@@ -303,16 +301,21 @@ class PacketPool {
      * @param int $magic
      * @param int $playerProtocol
      * 
-     * @return ?int
+     * @return int
      */
-    public static function getPacketIdByMagic(int $magic, int $playerProtocol) : ?int{
-        foreach(self::$protocolList as $protocol){
+    public static function getPacketIdByMagic(int $magic, int $playerProtocol) : int{
+        foreach(($protocols = self::$protocolList) as $protocol){
             if($playerProtocol >= $protocol){
-                return isset(self::$magicPoolTo[$protocol][$magic]) ? self::$magicPoolTo[$protocol][$magic] : null;
+                $poolProtocol = $protocol;
+                break;
             }
         }
 
-        return null;
+        if(!isset($poolProtocol)){
+            $poolProtocol = $protocols[array_key_last($protocols)];
+        }
+
+        return isset(self::$magicPoolTo[$poolProtocol][$magic]) ? self::$magicPoolTo[$poolProtocol][$magic] : 0;
     }
 
     /**

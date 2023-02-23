@@ -409,7 +409,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $lineHeight = null;
 	/** @var string */
 	protected $locale = "en_US";
-    /** @var string|null */
+    /** @var int|null */
     protected $deviceOS = null;
     /** @var string|null */
     protected $deviceModel = null;
@@ -890,7 +890,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/**
 	 * Returns the player's device OS.
-	 * @return ?string
+	 * @return ?int
 	 */
     public function getDeviceOS() : ?int{
         return $this->deviceOS;
@@ -2006,7 +2006,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->locale = $packet->locale;
 		}
 
-        $this->deviceOS = $packet->clientData["DeviceOS"] ?? "";
+        $this->deviceOS = $packet->clientData["DeviceOS"] ?? null;
         $this->deviceModel = $packet->clientData["DeviceModel"] ?? "";
 
         $this->vanillaVersion = $packet->clientData["GameVersion"] ?? "";
