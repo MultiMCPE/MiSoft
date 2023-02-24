@@ -2431,14 +2431,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->setImmobile(); //disable pre-spawn movement
 
 		$this->server->getLogger()->info($this->getServer()->getLanguage()->translateString("pocketmine.player.logIn", [
-			TextFormat::AQUA . $this->username . TextFormat::WHITE,
+			TextFormat::GREEN . $this->username . TextFormat::WHITE,
 			$this->ip,
 			$this->port,
 			$this->id,
 			$this->level->getName(),
 			round($this->x, 4),
 			round($this->y, 4),
-			round($this->z, 4)
+			round($this->z, 4),
+			TextFormat::RED . $this->vanillaVersion . TextFormat::WHITE,
+			TextFormat::AQUA . $this->deviceModel . TextFormat::WHITE,
+			$this->deviceOS,
+			$this->getProtocol(),
+			TextFormat::AQUA . $this->getClientId() . TextFormat::WHITE,
 		]));
 
 		if($this->isOp()){
@@ -4310,7 +4315,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->server->removePlayer($this);
 
 			$this->server->getLogger()->info($this->getServer()->getLanguage()->translateString("pocketmine.player.logOut", [
-				TextFormat::AQUA . $this->getName() . TextFormat::WHITE,
+				TextFormat::GREEN . $this->getName() . TextFormat::WHITE,
 				$this->ip,
 				$this->port,
 				$this->getServer()->getLanguage()->translateString($reason)
