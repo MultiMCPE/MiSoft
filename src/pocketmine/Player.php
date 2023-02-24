@@ -3721,7 +3721,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if(!is_bool($isFlying)){
 				throw new InvalidArgumentException("Flying ability should always have a bool value");
 			}
-			if($isFlying !== $this->player->isFlying()){
+			if($isFlying !== $this->isFlying()){
 		    	$ev = new PlayerToggleFlightEvent($this, $isFlying);
 		    	$ev->call();
 		    	if($ev->isCancelled()){
