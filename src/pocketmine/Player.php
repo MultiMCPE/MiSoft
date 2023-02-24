@@ -2443,7 +2443,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			TextFormat::AQUA . $this->deviceModel . TextFormat::WHITE,
 			$this->deviceOS,
 			$this->getProtocol(),
-			TextFormat::AQUA . $this->getClientId() . TextFormat::WHITE,
+			TextFormat::AQUA . $this->getClientId() . TextFormat::WHITE
 		]));
 
 		if($this->isOp()){
