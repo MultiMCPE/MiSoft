@@ -205,18 +205,22 @@ interface PacketMagicNumbers{
 	public const DIMENSION_DATA_PACKET = 0xb4;
 	public const AGENT_ACTION_EVENT_PACKET = 0xb5;
 	public const CHANGE_MOB_PROPERTY_PACKET = 0xb6;
+	public const LESSON_PROGRESS_PACKET = 0xb7;
+	public const REQUEST_ABILITY_PACKET = 0xb8;
+	public const REQUEST_PERMISSIONS_PACKET = 0xb9;
+	public const TOAST_REQUEST_PACKET = 0xba;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xb7;
+	public const EXPLODE_PACKET = 0xbb;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xb8;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xb9;
-	public const DROP_ITEM_PACKET = 0xba;
-	public const USE_ITEM_PACKET = 0xbb;
-	public const REMOVE_BLOCK_PACKET = 0xbc;
-	public const COMMAND_STEP_PACKET = 0xbd;
-	public const ADD_HANGING_ACTOR_PACKET = 0xbe;
-	public const INVENTORY_ACTION_PACKET = 0xbf;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xc0;
-	public const ADD_ITEM_PACKET = 0xc1;
+	public const CONTAINER_SET_SLOT_PACKET = 0xbc;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xbd;
+	public const DROP_ITEM_PACKET = 0xbe;
+	public const USE_ITEM_PACKET = 0xbf;
+	public const REMOVE_BLOCK_PACKET = 0xc0;
+	public const COMMAND_STEP_PACKET = 0xc1;
+	public const ADD_HANGING_ACTOR_PACKET = 0xc2;
+	public const INVENTORY_ACTION_PACKET = 0xc3;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xc4;
+	public const ADD_ITEM_PACKET = 0xc5;
 
 }

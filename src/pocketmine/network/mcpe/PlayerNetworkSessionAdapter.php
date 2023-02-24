@@ -64,6 +64,7 @@ use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
+use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
@@ -246,6 +247,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleMapInfoRequest(MapInfoRequestPacket $packet) : bool{
 		return false; //TODO
+	}
+
+	public function handleRequestAbility(RequestAbilityPacket $packet) : bool{
+		return $this->player->handleRequestAbility($packet);
 	}
 
 	public function handleRequestChunkRadius(RequestChunkRadiusPacket $packet) : bool{

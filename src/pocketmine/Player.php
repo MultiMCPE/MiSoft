@@ -114,6 +114,7 @@ use pocketmine\network\mcpe\multiversion\ProtocolConvertor;
 use pocketmine\network\mcpe\multiversion\ActionEnums;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
+use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
@@ -212,6 +213,7 @@ use function gettype;
 use function implode;
 use function in_array;
 use function is_int;
+use function is_bool;
 use function is_object;
 use function is_string;
 use function json_encode;
@@ -3676,11 +3678,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130 && $packet->entityUniqueId !== $this->getId()){
-			return false; //TODO
-		}
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
+	        return true; //no longer used, but the client still sends it for flight changes
+	    }
 
-		$handled = false;
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130 && $packet->entityUniqueId !== $this->getId()){
+		    return false; //TODO
+	    }
+
+	    $handled = false;
 
 		$isFlying = $packet->getFlag(AdventureSettingsPacket::FLYING);
 		if($isFlying and !$this->allowFlight){
@@ -3707,6 +3713,29 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		//TODO: check other changes
 
 		return $handled;
+	}
+
+	public function handleRequestAbility(RequestAbilityPacket $packet) : bool{
+		if($packet->getAbilityId() === RequestAbilityPacket::ABILITY_FLYING){
+			$isFlying = $packet->getAbilityValue();
+			if(!is_bool($isFlying)){
+				throw new InvalidArgumentException("Flying ability should always have a bool value");
+			}
+			if($isFlying !== $this->player->isFlying()){
+		    	$ev = new PlayerToggleFlightEvent($this, $isFlying);
+		    	$ev->call();
+		    	if($ev->isCancelled()){
+		    		$this->sendSettings();
+		    	}else{ //don't use setFlying() here, to avoid feedback loops
+			     	$this->flying = $ev->isFlying();
+			    	$this->resetFallDistance();
+		    	}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public function handleBlockEntityData(BlockActorDataPacket $packet) : bool{
