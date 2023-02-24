@@ -94,6 +94,8 @@ class StartGamePacket extends DataPacket{
 	public $spawnZ;
 	/** @var bool */
 	public $hasAchievementsDisabled = true;
+	/** @var bool */
+	public $isEditorMode = false;
 	/** @var int */
 	public $time = -1;
 	/** @var int */
@@ -236,6 +238,9 @@ class StartGamePacket extends DataPacket{
 		$this->difficulty = $this->getVarInt();
 		$this->getBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+		    $this->isEditorMode = (($this->get(1) !== "\x00"));
+		}
 		$this->time = $this->getVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    if($this->getProtocol() === ProtocolInfo::PROTOCOL_400){
@@ -441,6 +446,9 @@ class StartGamePacket extends DataPacket{
 		$this->putVarInt($this->difficulty);
 		$this->putBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+		    ($this->buffer .= ($this->isEditorMode ? "\x01" : "\x00"));
+		}
 		$this->putVarInt($this->time);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    if($this->getProtocol() === ProtocolInfo::PROTOCOL_400){

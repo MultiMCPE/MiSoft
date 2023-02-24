@@ -31,6 +31,8 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\GameMode;
+use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
+use pocketmine\network\mcpe\protocol\types\UpdateAbilitiesPacketLayer;
 use pocketmine\utils\UUID;
 use function count;
 use function pack;
@@ -70,6 +72,12 @@ class AddPlayerPacket extends DataPacket{
 	/** @var array */
 	public $metadata = [];
 
+    //TODO: update abilities stuff
+	private $commandPermission = AdventureSettingsPacket::PERMISSION_NORMAL;
+	private $playerPermission = PlayerPermissions::MEMBER;
+	private $targetActorUniqueId; //This is a little-endian long, NOT a var-long. (WTF Mojang)
+	private $abilityLayers;
+
 	//TODO: adventure settings stuff
 	public $uvarint1 = 0;
 	public $uvarint2 = 0;
@@ -94,7 +102,9 @@ class AddPlayerPacket extends DataPacket{
 			$this->thirdPartyName = $this->getString();
 			$this->platform = $this->getVarInt();
 		}
-		$this->entityUniqueId = $this->getEntityUniqueId();
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_534){
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+		}
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	    	$this->platformChatId = $this->getString();
@@ -111,15 +121,26 @@ class AddPlayerPacket extends DataPacket{
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	$this->uvarint1 = $this->getUnsignedVarInt();
-	    	$this->uvarint2 = $this->getUnsignedVarInt();
-	    	$this->uvarint3 = $this->getUnsignedVarInt();
-	    	$this->uvarint4 = $this->getUnsignedVarInt();
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
-	        	$this->uvarint5 = $this->getUnsignedVarInt();
-	    	}
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	        	$this->targetActorUniqueId = $this->getLLong(); //WHY IS THIS NON-STANDARD?
+	        	$this->playerPermission = $this->getByte();
+	        	$this->commandPermission = $this->getByte();
 
-	    	$this->long1 = (Binary::readLLong($this->get(8)));
+	        	$this->abilityLayers = [];
+	        	for($i = 0, $len = $this->getByte(); $i < $len; $i++){
+		        	$this->abilityLayers[] = UpdateAbilitiesPacketLayer::decode($this);
+	        	}
+            }else{
+	        	$this->uvarint1 = $this->getUnsignedVarInt();
+	        	$this->uvarint2 = $this->getUnsignedVarInt();
+	        	$this->uvarint3 = $this->getUnsignedVarInt();
+	        	$this->uvarint4 = $this->getUnsignedVarInt();
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
+	            	$this->uvarint5 = $this->getUnsignedVarInt();
+	        	}
+
+	        	$this->long1 = (Binary::readLLong($this->get(8)));
+            }
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$linkCount = $this->getUnsignedVarInt();
@@ -144,7 +165,9 @@ class AddPlayerPacket extends DataPacket{
 			$this->putString($this->thirdPartyName);
 			$this->putVarInt($this->platform);
 		}
-		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_534){
+	    	$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+		}
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	    	$this->putString($this->platformChatId);
@@ -161,15 +184,26 @@ class AddPlayerPacket extends DataPacket{
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	$this->putUnsignedVarInt($this->uvarint1);
-	    	$this->putUnsignedVarInt($this->uvarint2);
-	    	$this->putUnsignedVarInt($this->uvarint3);
-	    	$this->putUnsignedVarInt($this->uvarint4);
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
-	        	$this->putUnsignedVarInt($this->uvarint5);
-	    	}
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	        	$this->putLLong($this->targetActorUniqueId);
+	        	$this->putByte($this->playerPermission);
+	        	$this->putByte($this->commandPermission);
 
-	    	($this->buffer .= (pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
+	        	$this->putByte(count($this->abilityLayers));
+	        	foreach($this->abilityLayers as $layer){
+		        	$layer->encode($this);
+	        	}
+            }else{
+	        	$this->putUnsignedVarInt($this->uvarint1);
+	        	$this->putUnsignedVarInt($this->uvarint2);
+	        	$this->putUnsignedVarInt($this->uvarint3);
+	        	$this->putUnsignedVarInt($this->uvarint4);
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_133){
+	             	$this->putUnsignedVarInt($this->uvarint5);
+	        	}
+
+	        	($this->buffer .= (pack("VV", $this->long1 & 0xFFFFFFFF, $this->long1 >> 32)));
+            }
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$this->putUnsignedVarInt(count($this->links));

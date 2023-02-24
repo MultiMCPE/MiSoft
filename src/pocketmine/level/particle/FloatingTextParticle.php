@@ -75,7 +75,6 @@ class FloatingTextParticle extends Particle{
 		$p = [];
 
 		if($this->entityId === null){
-			//$this->entityId = bcadd("1095216660480", mt_rand(0, 0x7fffffff)); //No conflict with other things
 			$this->entityId = Entity::$entityCount++;
 		}else{
 			$pk0 = new RemoveActorPacket();
@@ -99,6 +98,7 @@ class FloatingTextParticle extends Particle{
 			$pk->entityRuntimeId = $this->entityId;
 			$pk->position = $this->asVector3(); //TODO: check offset
 			$pk->item = ItemFactory::get(Item::AIR, 0, 0);
+            $pk->targetActorUniqueId = $this->entityId;
 
 			$flags = (
 				1 << Entity::DATA_FLAG_IMMOBILE
