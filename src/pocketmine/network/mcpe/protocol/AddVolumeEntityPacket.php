@@ -29,7 +29,6 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
-use function list;
 
 class AddVolumeEntityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_VOLUME_ENTITY_PACKET;
@@ -74,8 +73,8 @@ class AddVolumeEntityPacket extends DataPacket{
 		$result->data = $data;
 		$result->jsonIdentifier = $jsonIdentifier;
 		$result->instanceName = $instanceName;
-		list($result->minX, $result->minY, $result->minZ) = [$minBound->x, $minBound->y, $minBound->z];
-		list($result->maxX, $result->maxY, $result->maxZ) = [$maxBound->x, $maxBound->y, $maxBound->z];
+		[$result->minX, $result->minY, $result->minZ] = [$minBound->x, $minBound->y, $minBound->z];
+		[$result->maxX, $result->maxY, $result->maxZ] = [$maxBound->x, $maxBound->y, $maxBound->z];
 		$result->dimension = $dimension;
 		$result->engineVersion = $engineVersion;
 		return $result;
