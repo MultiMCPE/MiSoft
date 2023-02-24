@@ -76,7 +76,7 @@ class AddPlayerPacket extends DataPacket{
 	private $commandPermission = AdventureSettingsPacket::PERMISSION_NORMAL;
 	private $playerPermission = PlayerPermissions::MEMBER;
 	private $targetActorUniqueId; //This is a little-endian long, NOT a var-long. (WTF Mojang)
-	private $abilityLayers;
+	private $abilityLayers = [];
 
 	//TODO: adventure settings stuff
 	public $uvarint1 = 0;

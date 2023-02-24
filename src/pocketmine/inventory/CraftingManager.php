@@ -93,6 +93,9 @@ class CraftingManager{
 					break;
 			}
 		}
+
+        Server::getInstance()->getAsyncPool()->submitTask($task = new CraftingDataBuildTask($this->shapelessRecipes, $this->shapedRecipes, $this->furnaceRecipes, Server::getInstance()->networkCompressionLevel));
+        $this->craftingDataTask = $task;
 	}
 
     /**
