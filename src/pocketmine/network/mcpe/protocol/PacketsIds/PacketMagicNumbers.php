@@ -198,18 +198,25 @@ interface PacketMagicNumbers{
 	public const PHOTO_INFO_REQUEST_PACKET = 0xad;
 	public const SUB_CHUNK_PACKET = 0xae;
 	public const SUB_CHUNK_REQUEST_PACKET = 0xaf;
+	public const PLAYER_START_ITEM_COOLDOWN_PACKET = 0xb0;
+	public const SCRIPT_MESSAGE_PACKET = 0xb1;
+	public const CODE_BUILDER_SOURCE_PACKET = 0xb2;
+	public const TICKING_AREAS_LOAD_STATUS_PACKET = 0xb3;
+	public const DIMENSION_DATA_PACKET = 0xb4;
+	public const AGENT_ACTION_EVENT_PACKET = 0xb5;
+	public const CHANGE_MOB_PROPERTY_PACKET = 0xb6;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xb0;
+	public const EXPLODE_PACKET = 0xb7;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xb1;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xb2;
-	public const DROP_ITEM_PACKET = 0xb3;
-	public const USE_ITEM_PACKET = 0xb4;
-	public const REMOVE_BLOCK_PACKET = 0xb5;
-	public const COMMAND_STEP_PACKET = 0xb6;
-	public const ADD_HANGING_ACTOR_PACKET = 0xb7;
-	public const INVENTORY_ACTION_PACKET = 0xb8;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xb9;
-	public const ADD_ITEM_PACKET = 0xba;
+	public const CONTAINER_SET_SLOT_PACKET = 0xb8;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xb9;
+	public const DROP_ITEM_PACKET = 0xba;
+	public const USE_ITEM_PACKET = 0xbb;
+	public const REMOVE_BLOCK_PACKET = 0xbc;
+	public const COMMAND_STEP_PACKET = 0xbd;
+	public const ADD_HANGING_ACTOR_PACKET = 0xbe;
+	public const INVENTORY_ACTION_PACKET = 0xbf;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xc0;
+	public const ADD_ITEM_PACKET = 0xc1;
 
 }

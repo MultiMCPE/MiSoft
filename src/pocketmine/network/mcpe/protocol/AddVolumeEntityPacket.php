@@ -25,9 +25,11 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
+use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
+use function list;
 
 class AddVolumeEntityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_VOLUME_ENTITY_PACKET;
@@ -40,15 +42,41 @@ class AddVolumeEntityPacket extends DataPacket{
 	private $jsonIdentifier;
     /** @var string */
 	private $instanceName;
+	/** @var int */
+	private $minX;
+	/** @var int */
+	private $minY;
+	/** @var int */
+	private $minZ;
+	/** @var int */
+	private $maxX;
+	/** @var int */
+	private $maxY;
+	/** @var int */
+	private $maxZ;
+	/** @var int */
+	private $dimension;
     /** @var string */
     private $engineVersion;
 
-	public static function create(int $entityNetId, CompoundTag $data, string $jsonIdentifier, string $instanceName, string $engineVersion) : self{
+	public static function create(
+	    int $entityNetId,
+	    CompoundTag $data,
+	    string $jsonIdentifier,
+	    string $instanceName,
+	    Vector3 $minBound,
+	    Vector3 $maxBound,
+	    int $dimension,
+	    string $engineVersion
+	) : self{
 		$result = new self;
 		$result->entityNetId = $entityNetId;
 		$result->data = $data;
 		$result->jsonIdentifier = $jsonIdentifier;
 		$result->instanceName = $instanceName;
+		list($result->minX, $result->minY, $result->minZ) = [$minBound->x, $minBound->y, $minBound->z];
+		list($result->maxX, $result->maxY, $result->maxZ) = [$maxBound->x, $maxBound->y, $maxBound->z];
+		$result->dimension = $dimension;
 		$result->engineVersion = $engineVersion;
 		return $result;
 	}
@@ -61,15 +89,26 @@ class AddVolumeEntityPacket extends DataPacket{
 
 	public function getInstanceName() : string{ return $this->instanceName; }
 
+	public function getMinBound() : Vector3{ return new Vector3($this->minX, $this->minY, $this->minZ); }
+
+	public function getMaxBound() : Vector3{ return new Vector3($this->maxX, $this->maxY, $this->maxZ); }
+
+	public function getDimension() : int{ return $this->dimension; }
+
     public function getEngineVersion() : string{ return $this->engineVersion; }
 
 	protected function decodePayload() : void{
 		$this->entityNetId = $this->getUnsignedVarInt();
 		$this->data = $this->getNbtCompoundRoot();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_486){
 	        	$this->jsonIdentifier = $in->getString();
 	        	$this->instanceName = $in->getString();
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+	        	    $this->getBlockPosition($this->minX, $this->minY, $this->minZ);
+	        	    $this->getBlockPosition($this->maxX, $this->maxY, $this->maxZ);
+	        	    $this->dimension = $this->getVarInt();
+	        	}
 		    }
 			$this->engineVersion = $this->getString();
 		}
@@ -79,9 +118,14 @@ class AddVolumeEntityPacket extends DataPacket{
 		$this->putUnsignedVarInt($this->entityNetId);
 		$this->put((new NetworkLittleEndianNBTStream())->write($this->data));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_475){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_486){
 	        	$out->putString($this->jsonIdentifier);
 	        	$out->putString($this->instanceName);
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
+	            	$this->putBlockPosition($this->minX, $this->minY, $this->minZ);
+	            	$this->putBlockPosition($this->maxX, $this->maxY, $this->maxZ);
+	            	$this->putVarInt($this->dimension);
+	        	}
 		    }
 			$this->putString($this->engineVersion);
 		}

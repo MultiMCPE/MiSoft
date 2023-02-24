@@ -201,8 +201,13 @@ use pocketmine\network\mcpe\protocol\EduUriResourcePacket;
 use pocketmine\network\mcpe\protocol\CreatePhotoPacket;
 use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use pocketmine\network\mcpe\protocol\PhotoInfoRequestPacket;
-use pocketmine\network\mcpe\protocol\SubChunkPacket;
-use pocketmine\network\mcpe\protocol\SubChunkRequestPacket;
+use pocketmine\network\mcpe\protocol\CodeBuilderSourcePacket;
+use pocketmine\network\mcpe\protocol\PlayerStartItemCooldownPacket;
+use pocketmine\network\mcpe\protocol\ScriptMessagePacket;
+use pocketmine\network\mcpe\protocol\DimensionDataPacket;
+use pocketmine\network\mcpe\protocol\TickingAreasLoadStatusPacket;
+use pocketmine\network\mcpe\protocol\AgentActionEventPacket;
+use pocketmine\network\mcpe\protocol\ChangeMobPropertyPacket;
 
 abstract class NetworkSession{
 
@@ -916,11 +921,33 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleSubChunk(SubChunkPacket $packet) : bool{
+	public function handleCodeBuilderSource(CodeBuilderSourcePacket $packet) : bool{
 		return false;
 	}
 
-	public function handleSubChunkRequest(SubChunkRequestPacket $packet) : bool{
+	public function handlePlayerStartItemCooldown(PlayerStartItemCooldownPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleScriptMessage(ScriptMessagePacket $packet) : bool{
+		return false;
+	}
+
+
+
+	public function handleDimensionData(DimensionDataPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleTickingAreasLoadStatus(TickingAreasLoadStatusPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleAgentActionEvent(AgentActionEventPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleChangeMobProperty(ChangeMobPropertyPacket $packet) : bool{
 		return false;
 	}
 }

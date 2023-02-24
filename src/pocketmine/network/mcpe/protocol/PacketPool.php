@@ -41,6 +41,8 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds440;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds448;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds465;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds471;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds486;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds503;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -48,6 +50,8 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_503 => PacketsIds503::class,
+        ProtocolInfo::PROTOCOL_486 => PacketsIds486::class,
         ProtocolInfo::PROTOCOL_471 => PacketsIds471::class,
         ProtocolInfo::PROTOCOL_465 => PacketsIds465::class,
         ProtocolInfo::PROTOCOL_448 => PacketsIds448::class,
@@ -265,8 +269,13 @@ class PacketPool {
 		self::registerPacket(new CreatePhotoPacket());
 		self::registerPacket(new UpdateSubChunkBlocksPacket());
 		self::registerPacket(new PhotoInfoRequestPacket());
-		self::registerPacket(new SubChunkPacket());
-		self::registerPacket(new SubChunkRequestPacket());
+		self::registerPacket(new PlayerStartItemCooldownPacket());
+		self::registerPacket(new ScriptMessagePacket());
+		self::registerPacket(new CodeBuilderSourcePacket());
+		self::registerPacket(new TickingAreasLoadStatusPacket());
+		self::registerPacket(new DimensionDataPacket());
+		self::registerPacket(new AgentActionEventPacket());
+		self::registerPacket(new ChangeMobPropertyPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1
