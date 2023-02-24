@@ -49,6 +49,7 @@ use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette471;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette486;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette503;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette526;
+use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette534;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Server;
 
@@ -61,6 +62,7 @@ class BlockPalette{
      */
     public static function init(bool $asynchronous = true) : void{
         $pools = [
+            ProtocolInfo::PROTOCOL_534 => new BlockPalette534(),
             ProtocolInfo::PROTOCOL_526 => new BlockPalette526(),
             ProtocolInfo::PROTOCOL_503 => new BlockPalette503(),
             ProtocolInfo::PROTOCOL_486 => new BlockPalette486(),

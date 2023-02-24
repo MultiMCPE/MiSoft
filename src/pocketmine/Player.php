@@ -178,8 +178,11 @@ use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
+use pocketmine\network\mcpe\protocol\types\UpdateAbilitiesPacketLayer;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
@@ -535,7 +538,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function setAllowFlight(bool $value){
 		$this->allowFlight = $value;
-		$this->sendSettings();
+		$this->syncAbilities();
 	}
 
 	public function getAllowFlight() : bool{
@@ -546,7 +549,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->flying !== $value){
 			$this->flying = $value;
 			$this->resetFallDistance();
-			$this->sendSettings();
+			$this->syncAbilities();
 		}
 	}
 
@@ -556,7 +559,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function setAutoJump(bool $value){
 		$this->autoJump = $value;
-		$this->sendSettings();
+		$this->syncAdventureSettings();
 	}
 
 	public function hasAutoJump() : bool{
@@ -704,7 +707,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->server->removeOp($this->getName());
 		}
 
-		$this->sendSettings();
+        $this->syncAbilitiesAndAdventureSettings();
 	}
 
 	/**
@@ -1534,7 +1537,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->inventory->sendContents($this);
 		$this->inventory->sendHeldItem($this->hasSpawned);
 
-		$this->sendSettings();
+		$this->syncAbilitiesAndAdventureSettings(); //TODO: we might be able to do this with the abilities packet alone
 		$this->inventory->sendCreativeContents();
 
 		return true;
@@ -1550,25 +1553,76 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->dataPacket($pk);
 	}
 
-	/**
-	 * Sends all the option flags
-	 */
-	public function sendSettings(){
-		$pk = new AdventureSettingsPacket();
+    public function syncAbilities(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	    	//ALL of these need to be set for the base layer, otherwise the client will cry
+	    	$boolAbilities = [
+		    	UpdateAbilitiesPacketLayer::ABILITY_ALLOW_FLIGHT => $this->getAllowFlight(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_FLYING => $this->isFlying(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_NO_CLIP => $this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_OPERATOR => $this->isOp(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_TELEPORT => $this->hasPermission("pocketmine.command.teleport"),
+		    	UpdateAbilitiesPacketLayer::ABILITY_INVULNERABLE => $this->isCreative(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_MUTED => false,
+		    	UpdateAbilitiesPacketLayer::ABILITY_WORLD_BUILDER => false,
+		    	UpdateAbilitiesPacketLayer::ABILITY_INFINITE_RESOURCES => !$this->hasFiniteResources(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_LIGHTNING => false,
+		    	UpdateAbilitiesPacketLayer::ABILITY_BUILD => !$this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_MINE => !$this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_DOORS_AND_SWITCHES => !$this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_OPEN_CONTAINERS => !$this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_ATTACK_PLAYERS => !$this->isSpectator(),
+		    	UpdateAbilitiesPacketLayer::ABILITY_ATTACK_MOBS => !$this->isSpectator(),
+	    	];
 
-		$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
-		$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
-		$pk->setFlag(AdventureSettingsPacket::AUTO_JUMP, $this->autoJump);
-		$pk->setFlag(AdventureSettingsPacket::ALLOW_FLIGHT, $this->allowFlight);
-		$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
-		$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
+	    	$this->sendDataPacket(UpdateAbilitiesPacket::create(
+		    	($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL),
+		    	($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER),
+		    	$this->getId(),
+		    	[
+			    	//TODO: dynamic flying speed! FINALLY!!!!!!!!!!!!!!!!!
+			    	new UpdateAbilitiesPacketLayer(UpdateAbilitiesPacketLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
+		    	]
+	    	));
+        }else{
+	    	$pk = new AdventureSettingsPacket();
 
-		$pk->commandPermission = ($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
-		$pk->playerPermission = ($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
-		$pk->entityUniqueId = $this->getId();
+	    	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
+	    	$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
+	    	$pk->setFlag(AdventureSettingsPacket::AUTO_JUMP, $this->autoJump);
+	    	$pk->setFlag(AdventureSettingsPacket::ALLOW_FLIGHT, $this->allowFlight);
+	    	$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
+	    	$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
 
-		$this->dataPacket($pk);
+	    	$pk->commandPermission = ($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
+	    	$pk->playerPermission = ($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
+	    	$pk->entityUniqueId = $this->getId();
+
+	    	$this->dataPacket($pk);
+        }
+    }
+
+	public function syncAdventureSettings(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+	    	//everything except auto jump is handled via UpdateAbilitiesPacket
+	    	$this->sendDataPacket(UpdateAdventureSettingsPacket::create(
+		    	false, // noAttackingMobs
+		    	false, // noAttackingPlayers
+		    	false, // worldImmutable
+		    	true, // showNameTags
+		    	$this->hasAutoJump() // autoJump
+	    	));
+        }else{
+            $this->syncAbilities();
+        }
 	}
+
+    public function syncAbilitiesAndAdventureSettings(){
+        $this->syncAbilities();
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+            $this->syncAdventureSettings();
+        }
+    }
 
 	/**
 	 * NOTE: Because Survival and Adventure Mode share some similar behaviour, this method will also return true if the player is
@@ -1623,6 +1677,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function isSpectator() : bool{
 		return $this->gamemode === Player::SPECTATOR;
+	}
+
+	/**
+	 * TODO: make this a dynamic ability instead of being hardcoded
+	 */
+	public function hasFiniteResources() : bool{
+		return $this->gamemode === Player::SURVIVAL || $this->gamemode === Player::ADVENTURE;
 	}
 
 	public function isFireProof() : bool{
@@ -2451,7 +2512,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$this->sendCommandData();
-		$this->sendSettings();
+		$this->syncAbilitiesAndAdventureSettings();
 		$this->sendPotionEffects($this);
 		$this->sendData($this);
 
@@ -3701,7 +3762,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$ev = new PlayerToggleFlightEvent($this, $isFlying);
 			$ev->call();
 			if($ev->isCancelled()){
-				$this->sendSettings();
+				$this->syncAbilities();
 			}else{ //don't use setFlying() here, to avoid feedback loops
 				$this->flying = $ev->isFlying();
 				$this->resetFallDistance();
@@ -3730,7 +3791,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$ev = new PlayerToggleFlightEvent($this, $isFlying);
 		    	$ev->call();
 		    	if($ev->isCancelled()){
-		    		$this->sendSettings();
+		    		$this->syncAbilities();
 		    	}else{ //don't use setFlying() here, to avoid feedback loops
 			     	$this->flying = $ev->isFlying();
 			    	$this->resetFallDistance();
@@ -3776,7 +3837,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($packet->gamemode !== $this->gamemode){
 			//Set this back to default. TODO: handle this properly
 			$this->sendGamemode();
-			$this->sendSettings();
+			$this->syncAbilitiesAndAdventureSettings(); //TODO: we might be able to do this with the abilities packet alone
 		}
 		return true;
 	}
@@ -4467,7 +4528,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->sendData($this);
 		$this->sendData($this->getViewers());
 
-		$this->sendSettings();
+		$this->syncAbilities();
 		$this->sendAllInventories();
 
 		$this->spawnToAll();

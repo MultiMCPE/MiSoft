@@ -914,6 +914,7 @@ return array(
     'pocketmine\\network\\mcpe\\multiversion\\block\\palettes\\BlockPalette486' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/block/palettes/BlockPalette486.php',
     'pocketmine\\network\\mcpe\\multiversion\\block\\palettes\\BlockPalette503' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/block/palettes/BlockPalette503.php',
     'pocketmine\\network\\mcpe\\multiversion\\block\\palettes\\BlockPalette526' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/block/palettes/BlockPalette526.php',
+    'pocketmine\\network\\mcpe\\multiversion\\block\\palettes\\BlockPalette534' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/block/palettes/BlockPalette534.php',
     'pocketmine\\network\\mcpe\\multiversion\\block\\palettes\\Palette' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/block/palettes/Palette.php',
     'pocketmine\\network\\mcpe\\multiversion\\biomes\\BiomeDefinitionPalette' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/biomes/BiomeDefinitionPalette.php',
     'pocketmine\\network\\mcpe\\multiversion\\actor\\AvailableActorIdentifiersPalette' => $baseDir . '/src/pocketmine/network/mcpe/multiversion/actor/AvailableActorIdentifiersPalette.php',
