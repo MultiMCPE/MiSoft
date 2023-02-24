@@ -77,7 +77,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->sourceName = $this->getString();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->sourceThirdPartyName = $this->getString();
 		        	$this->sourcePlatform = $this->getVarInt();
 				}
@@ -89,12 +89,11 @@ class TextPacket extends DataPacket{
 				$this->message = $this->getString();
 				break;
 			case self::TYPE_POPUP:
-			    if ($this->getProtocol() < ProtocolInfo::PROTOCOL_134) {
+			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_134){
 			        $this->sourceName = $this->getString();
 			        $this->message = $this->getString();
 			        break;
 			    }
-			case self::TYPE_POPUP:
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->message = $this->getString();
@@ -105,9 +104,9 @@ class TextPacket extends DataPacket{
 				break;
 		}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_134) {
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_134){
 	    	$this->xboxUserId = $this->getString();
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->platformChatId = $this->getString();
 	    	}
 		}
@@ -125,7 +124,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->sourceName);
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290) {
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->putString($this->sourceThirdPartyName);
 		        	$this->putVarInt($this->sourcePlatform);
 				}
@@ -137,12 +136,11 @@ class TextPacket extends DataPacket{
 				$this->putString($this->message);
 				break;
 			case self::TYPE_POPUP:
-			    if ($this->getProtocol() < ProtocolInfo::PROTOCOL_134) {
+			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_134){
 			        $this->putString($this->sourceName);
 			        $this->putString($this->message);
 			        break;
 			    }
-			case self::TYPE_POPUP:
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->putString($this->message);
@@ -153,9 +151,9 @@ class TextPacket extends DataPacket{
 				break;
 		}
 
-        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_134) {
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_134){
 	    	$this->putString($this->xboxUserId);
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->putString($this->platformChatId);
 	    	}
 		}
