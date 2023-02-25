@@ -174,10 +174,10 @@ final class ProtocolInfo implements PacketMagicNumbers{
     /**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
-	public const MINECRAFT_VERSION = '1.1.x - 1.19.x';
+	public const MINECRAFT_VERSION = '1.1 - 1.19';
 	/**
 	 * Version number sent to clients in ping responses.
 	 */
-	public const MINECRAFT_VERSION_NETWORK = '1.19.62';
+	public const MINECRAFT_VERSION_NETWORK = '1.19.63';
 
 }
