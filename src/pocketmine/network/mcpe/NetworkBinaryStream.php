@@ -45,6 +45,7 @@ use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\types\entity\AttributeModifier;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\GameRuleType;
@@ -727,7 +728,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @throws UnexpectedValueException if reading an attribute with an unrecognized name
 	 */
-	public function getAttributeList() : array{
+	public function getAttributeList(int $playerProtocol) : array{
 		$list = [];
 		$count = $this->getUnsignedVarInt();
 
@@ -737,6 +738,12 @@ class NetworkBinaryStream extends BinaryStream{
 			$current = ((unpack("g", $this->get(4))[1]));
 			$default = ((unpack("g", $this->get(4))[1]));
 			$name = $this->getString();
+			$modifiers = [];
+			if($playerProtocol >= ProtocolInfo::PROTOCOL_544){
+		    	for($j = 0, $modifierCount = $this->getUnsignedVarInt(); $j < $modifierCount; $j++){
+			    	$modifiers[] = AttributeModifier::read($this);
+		    	}
+			}
 
 			$attr = Attribute::getAttributeByName($name);
 			if($attr !== null){
@@ -744,6 +751,7 @@ class NetworkBinaryStream extends BinaryStream{
 				$attr->setMaxValue($max);
 				$attr->setValue($current);
 				$attr->setDefaultValue($default);
+				$attr->setModifiers($modifiers);
 
 				$list[] = $attr;
 			}else{
@@ -759,7 +767,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param Attribute ...$attributes
 	 */
-	public function putAttributeList(Attribute ...$attributes) : void{
+	public function putAttributeList(Attribute ...$attributes, int $playerProtocol) : void{
 		$this->putUnsignedVarInt(count($attributes));
 		foreach($attributes as $attribute){
 			($this->buffer .= (pack("g", $attribute->getMinValue())));
@@ -767,6 +775,12 @@ class NetworkBinaryStream extends BinaryStream{
 			($this->buffer .= (pack("g", $attribute->getValue())));
 			($this->buffer .= (pack("g", $attribute->getDefaultValue())));
 			$this->putString($attribute->getName());
+			if($playerProtocol >= ProtocolInfo::PROTOCOL_544){
+		    	$this->putUnsignedVarInt(count($attribute->getModifiers()));
+		    	foreach($attribute->getModifiers() as $modifier){
+		    	    $modifier->write($this);
+		    	}
+			}
 		}
 	}
 

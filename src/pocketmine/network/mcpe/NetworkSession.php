@@ -212,6 +212,7 @@ use pocketmine\network\mcpe\protocol\LessonProgressPacket;
 use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\RequestPermissionsPacket;
 use pocketmine\network\mcpe\protocol\ToastRequestPacket;
+use pocketmine\network\mcpe\protocol\FeatureRegistryPacket;
 
 abstract class NetworkSession{
 
@@ -937,8 +938,6 @@ abstract class NetworkSession{
 		return false;
 	}
 
-
-
 	public function handleDimensionData(DimensionDataPacket $packet) : bool{
 		return false;
 	}
@@ -968,6 +967,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleToastRequest(ToastRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleFeatureRegistry(FeatureRegistryPacket $packet) : bool{
 		return false;
 	}
 }

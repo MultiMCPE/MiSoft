@@ -30,19 +30,45 @@ use pocketmine\network\mcpe\NetworkSession;
 class ModalFormResponsePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MODAL_FORM_RESPONSE_PACKET;
 
+	public const CANCEL_REASON_CLOSED = 0;
+	/** Sent if a form is sent when the player is on a loading screen */
+	public const CANCEL_REASON_USER_BUSY = 1;
+
 	/** @var int */
 	public $formId;
-	/** @var string */
+	/** @var ?string */
 	public $formData; //json
+    /** @var ?int */
+    public $cancelReason;
 
 	protected function decodePayload(){
 		$this->formId = $this->getUnsignedVarInt();
-		$this->formData = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+		    $this->formData = $this->getBool() ? $this->getString() : null;
+		    $this->cancelReason = $this->getBool() ? $this->getByte() : null;
+		}else{
+	    	$this->formData = $this->getString();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->formId);
-		$this->putString($this->formData);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	        if($this->formData !== null){
+		        $this->putBool(true);
+	        	$this->putString($this->formData);
+	        }else{
+		        $this->putBool(false);
+	       	}
+	        if($this->cancelReason !== null){
+		        $this->putBool(true);
+	        	$this->putByte($this->cancelReason);
+	        }else{
+		        $this->putBool(false);
+	       	}
+		}else{
+	    	$this->putString($this->formData);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

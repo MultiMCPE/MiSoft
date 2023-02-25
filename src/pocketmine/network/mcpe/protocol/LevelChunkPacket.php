@@ -26,16 +26,15 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\ChunkPosition;
 use function count;
 use function pack;
 
 class LevelChunkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LEVEL_CHUNK_PACKET;
 
-	/** @var int */
-	private $chunkX;
-	/** @var int */
-	private $chunkZ;
+    /** @var ChunkPosition */
+    private $chunkPosition;
 	/** @var int */
 	private $subChunkCount;
 	/** @var bool */
@@ -45,10 +44,9 @@ class LevelChunkPacket extends DataPacket{
 	/** @var string */
 	private $extraPayload;
 
-	public static function withoutCache(int $chunkX, int $chunkZ, int $subChunkCount, string $payload) : self{
+	public static function withoutCache(ChunkPosition $chunkPosition, int $subChunkCount, string $payload) : self{
 		$result = new self;
-		$result->chunkX = $chunkX;
-		$result->chunkZ = $chunkZ;
+		$result->chunkPosition = $chunkPosition;
 		$result->subChunkCount = $subChunkCount;
 		$result->extraPayload = $payload;
 
@@ -57,11 +55,10 @@ class LevelChunkPacket extends DataPacket{
 		return $result;
 	}
 
-	public static function withCache(int $chunkX, int $chunkZ, int $subChunkCount, array $usedBlobHashes, string $extraPayload) : self{
+	public static function withCache(ChunkPosition $chunkPosition, int $subChunkCount, array $usedBlobHashes, string $extraPayload) : self{
 		(static function(int ...$hashes){})(...$usedBlobHashes);
 		$result = new self;
-		$result->chunkX = $chunkX;
-		$result->chunkZ = $chunkZ;
+		$result->chunkPosition = $chunkPosition;
 		$result->subChunkCount = $subChunkCount;
 		$result->extraPayload = $extraPayload;
 
@@ -71,19 +68,12 @@ class LevelChunkPacket extends DataPacket{
 		return $result;
 	}
 
-	/**
-	 * @return int
-	 */
-	public function getChunkX() : int{
-		return $this->chunkX;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getChunkZ() : int{
-		return $this->chunkZ;
-	}
+    /**
+     * @var ChunkPosition
+     */
+    public function getChunkPosition() : ChunkPosition{
+        return $this->chunkPosition;
+    }
 
 	/**
 	 * @return int
@@ -114,9 +104,8 @@ class LevelChunkPacket extends DataPacket{
 	}
 
 	protected function decodePayload() : void{
-		$this->chunkX = $this->getVarInt();
-		$this->chunkZ = $this->getVarInt();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    $this->chunkPosition = ChunkPosition::read($this);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	$this->subChunkCount = $this->getUnsignedVarInt();
 	    	$this->cacheEnabled = (($this->get(1) !== "\x00"));
 	    	if($this->cacheEnabled){
@@ -129,9 +118,8 @@ class LevelChunkPacket extends DataPacket{
 	}
 
 	protected function encodePayload() : void{
-		$this->putVarInt($this->chunkX);
-		$this->putVarInt($this->chunkZ);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+	    $this->chunkPosition->write($this);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	$this->putUnsignedVarInt($this->subChunkCount);
 	    	($this->buffer .= ($this->cacheEnabled ? "\x01" : "\x00"));
 	    	if($this->cacheEnabled){

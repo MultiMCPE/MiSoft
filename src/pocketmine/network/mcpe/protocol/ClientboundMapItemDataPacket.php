@@ -56,6 +56,13 @@ class ClientboundMapItemDataPacket extends DataPacket{
 	/** @var bool */
 	public $isLocked = false;
 
+    /** @var int */
+    public $originX;
+    /** @var int */
+    public $originY;
+    /** @var int */
+    public $originZ;
+
 	/** @var int[] */
 	public $eids = [];
 	/** @var int */
@@ -85,6 +92,9 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
 	    	$this->isLocked = (($this->get(1) !== "\x00"));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	    $this->getSignedBlockPosition($this->originX, $this->originY, $this->originZ);
+	    	}
 		}
 
 		if(($this->type & 0x08) !== 0){
@@ -181,6 +191,9 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
 	    	($this->buffer .= ($this->isLocked ? "\x01" : "\x00"));
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	    $this->putSignedBlockPosition($this->originX, $this->originY, $this->originZ);
+	    	}
 		}
 
 		if(($type & 0x08) !== 0){ //TODO: find out what these are for

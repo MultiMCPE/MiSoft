@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe;
 
-
+use RuntimeException;
 use InvalidArgumentException;
 use pocketmine\event\server\DataPacketReceiveEvent;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -312,7 +312,14 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleModalFormResponse(ModalFormResponsePacket $packet) : bool{
-		return $this->player->onFormSubmit($packet->formId, self::stupid_json_decode($packet->formData, true));
+		if($packet->cancelReason !== null){
+			//TODO: make APIs for this to allow plugins to use this information
+			return $this->player->onFormSubmit($packet->formId, null);
+		}elseif($packet->formData !== null){
+			return $this->player->onFormSubmit($packet->formId, self::stupid_json_decode($packet->formData, true));
+		}else{
+			throw new RuntimeException("Expected either formData or cancelReason to be set in ModalFormResponsePacket");
+		}
 	}
 
 	/**

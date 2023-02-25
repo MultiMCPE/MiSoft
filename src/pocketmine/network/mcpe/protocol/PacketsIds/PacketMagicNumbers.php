@@ -213,18 +213,19 @@ interface PacketMagicNumbers{
 	public const UPDATE_ADVENTURE_SETTINGS_PACKET = 0xbc;
 	public const DEATH_INFO_PACKET = 0xbd;
 	public const EDITOR_NETWORK_PACKET = 0xbe;
+	public const FEATURE_REGISTRY_PACKET = 0xbf;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xbf;
+	public const EXPLODE_PACKET = 0xc0;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xc0;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xc1;
-	public const DROP_ITEM_PACKET = 0xc2;
-	public const USE_ITEM_PACKET = 0xc3;
-	public const REMOVE_BLOCK_PACKET = 0xc4;
-	public const COMMAND_STEP_PACKET = 0xc5;
-	public const ADD_HANGING_ACTOR_PACKET = 0xc6;
-	public const INVENTORY_ACTION_PACKET = 0xc7;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xc8;
-	public const ADD_ITEM_PACKET = 0xc9;
+	public const CONTAINER_SET_SLOT_PACKET = 0xc1;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xc2;
+	public const DROP_ITEM_PACKET = 0xc3;
+	public const USE_ITEM_PACKET = 0xc4;
+	public const REMOVE_BLOCK_PACKET = 0xc5;
+	public const COMMAND_STEP_PACKET = 0xc6;
+	public const ADD_HANGING_ACTOR_PACKET = 0xc7;
+	public const INVENTORY_ACTION_PACKET = 0xc8;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xc9;
+	public const ADD_ITEM_PACKET = 0xca;
 
 }

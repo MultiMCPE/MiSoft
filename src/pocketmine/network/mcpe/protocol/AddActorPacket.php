@@ -201,6 +201,7 @@ class AddActorPacket extends DataPacket{
 				$attr->setMinValue($min);
 				$attr->setMaxValue($max);
 				$attr->setValue($current);
+				$attr->setModifiers([]);
 				$this->attributes[] = $attr;
 			}else{
 				throw new UnexpectedValueException("Unknown attribute type \"$name\"");

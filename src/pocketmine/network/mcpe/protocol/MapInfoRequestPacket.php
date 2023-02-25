@@ -25,22 +25,36 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\MapInfoRequestPacketClientPixel;
+use function count;
 
 class MapInfoRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MAP_INFO_REQUEST_PACKET;
 
 	/** @var int */
 	public $mapId;
+	/** @var MapInfoRequestPacketClientPixel[] */
+	public $clientPixels = [];
 
 	protected function decodePayload(){
 		$this->mapId = $this->getEntityUniqueId();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	$this->clientPixels = [];
+	    	for($i = 0, $count = $this->getLInt(); $i < $count; $i++){
+		    	$this->clientPixels[] = MapInfoRequestPacketClientPixel::read($this);
+	    	}
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->mapId);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	$this->putLInt(count($this->clientPixels));
+	    	foreach($this->clientPixels as $pixel){
+	    	    $pixel->write($this);
+	    	}
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

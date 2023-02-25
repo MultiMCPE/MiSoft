@@ -24,8 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
-
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\ChunkPosition;
+use function count;
 
 class NetworkChunkPublisherUpdatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NETWORK_CHUNK_PUBLISHER_UPDATE_PACKET;
@@ -38,15 +39,28 @@ class NetworkChunkPublisherUpdatePacket extends DataPacket{
 	public $z;
 	/** @var int */
 	public $radius;
+	/** @var ChunkPosition[] */
+	public $savedChunks = [];
 
 	protected function decodePayload(){
 		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
 		$this->radius = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	for($i = 0, $this->savedChunks = [], $count = $this->getLInt(); $i < $count; $i++){
+		    	$this->savedChunks[] = ChunkPosition::read($this);
+	    	}
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putSignedBlockPosition($this->x, $this->y, $this->z);
 		$this->putUnsignedVarInt($this->radius);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	    	$this->putLInt(count($this->savedChunks));
+	    	foreach($this->savedChunks as $chunk){
+	    	    $chunk->write($this);
+	    	}
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -30,6 +30,7 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
+use pocketmine\network\mcpe\protocol\types\ChunkPosition;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use function assert;
@@ -86,7 +87,7 @@ class ChunkRequestTask extends AsyncTask {
 
 	    $buffers = [];
 	    foreach($this->protocols as $protocol){
-	    	$pk = LevelChunkPacket::withoutCache($this->chunkX, $this->chunkZ, ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
+	    	$pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
 	    	$pk->setProtocol($protocol);
 
 	    	$batch = new BatchPacket();

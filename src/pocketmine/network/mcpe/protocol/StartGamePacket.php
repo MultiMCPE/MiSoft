@@ -44,7 +44,9 @@ use pocketmine\network\mcpe\protocol\types\MultiplayerGameVisibility;
 use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
+use pocketmine\network\mcpe\protocol\types\ChatRestrictionLevel;
 use UnexpectedValueException;
+use function ord;
 use function chr;
 use function count;
 use function file_get_contents;
@@ -162,6 +164,10 @@ class StartGamePacket extends DataPacket{
 	public $isWorldTemplateOptionLocked = false;
 	/** @var bool */
 	public $onlySpawnV1Villagers = false;
+	/** @var bool */
+	public $disablePersona = false;
+	/** @var bool */
+	public $disableCustomSkins = false;
 	/** @var string */
 	public $vanillaVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
 	/** @var int */
@@ -174,6 +180,10 @@ class StartGamePacket extends DataPacket{
 	public $eduSharedUriResource = null;
 	/** @var bool|null */
 	public $experimentalGameplayOverride = null;
+	/** @var int */
+	public $chatRestrictionLevel = ChatRestrictionLevel::NONE;
+	/** @var bool */
+	public $disablePlayerInteractions = false;
 
 	/** @var string */
 	public $levelId = ""; //base64 string, usually the same as world folder name in vanilla
@@ -203,6 +213,8 @@ class StartGamePacket extends DataPacket{
 	public $blockPaletteChecksum;
     /** @var UUID */
     public $worldTemplateId;
+    /** @var bool */
+    public $enableClientSideChunkGeneration = false;
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
@@ -311,6 +323,10 @@ class StartGamePacket extends DataPacket{
 	                	$this->isWorldTemplateOptionLocked = (($this->get(1) !== "\x00"));
 	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
 	                    	$this->onlySpawnV1Villagers = (($this->get(1) !== "\x00"));
+	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                    	    $this->disablePersona = (($this->get(1) !== "\x00"));
+	                    	    $this->disableCustomSkins = (($this->get(1) !== "\x00"));
+	                    	}
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	                        	$this->vanillaVersion = $this->getString();
 	                        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
@@ -326,6 +342,10 @@ class StartGamePacket extends DataPacket{
 	                                	    	$this->experimentalGameplayOverride = (($this->get(1) !== "\x00"));
 	                                	    }else{
 	                                	    	$this->experimentalGameplayOverride = null;
+	                                	    }
+	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                                	        $this->chatRestrictionLevel = ord($this->get(1));
+	                                	        $this->disablePlayerInteractions = (($this->get(1) !== "\x00"));
 	                                	    }
 	                                	}
 	                            	}
@@ -410,6 +430,9 @@ class StartGamePacket extends DataPacket{
 								$this->blockPaletteChecksum = $this->getLLong();
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
 								    $this->worldTemplateId = $this->getUUID();
+								    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+								        $this->enableClientSideChunkGeneration = (($this->get(1) !== "\x00"));
+								    }
 								}
 							}
 	        	        }
@@ -519,6 +542,10 @@ class StartGamePacket extends DataPacket{
 	                	($this->buffer .= ($this->isWorldTemplateOptionLocked ? "\x01" : "\x00"));
 	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
 	                    	($this->buffer .= ($this->onlySpawnV1Villagers ? "\x01" : "\x00"));
+	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                    	    ($this->buffer .= ($this->disablePersona ? "\x01" : "\x00"));
+	                    	    ($this->buffer .= ($this->disableCustomSkins ? "\x01" : "\x00"));
+	                    	}
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	        	                $this->putString($this->vanillaVersion);
                                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
@@ -533,6 +560,10 @@ class StartGamePacket extends DataPacket{
 	                                	    ($this->buffer .= ($this->experimentalGameplayOverride !== null ? "\x01" : "\x00"));
 	                                	    if($this->experimentalGameplayOverride !== null){
 	                                	        ($this->buffer .= ($this->experimentalGameplayOverride ? "\x01" : "\x00"));
+	                                	    }
+	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                                	        ($this->buffer .= (chr($this->chatRestrictionLevel)));
+	                                	        ($this->buffer .= ($this->disablePlayerInteractions ? "\x01" : "\x00"));
 	                                	    }
 	                                	}
                                     }
@@ -606,6 +637,9 @@ class StartGamePacket extends DataPacket{
 								$this->putLLong($this->blockPaletteChecksum);
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
 								    $this->putUUID($this->worldTemplateId);
+								    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+								        ($this->buffer .= ($this->enableClientSideChunkGeneration ? "\x01" : "\x00"));
+								    }
 								}
 							}
 	    	            }
