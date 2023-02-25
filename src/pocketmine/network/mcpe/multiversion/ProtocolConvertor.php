@@ -299,6 +299,7 @@ abstract class ProtocolConvertor{
 	public static function convertCraftingProtocol(int $playerProtocol) : int{
 		switch($playerProtocol){
 			case ProtocolInfo::PROTOCOL_553:
+			    return ProtocolInfo::PROTOCOL_553;
 			case ProtocolInfo::PROTOCOL_544:
 			case ProtocolInfo::PROTOCOL_534:
 			    return ProtocolInfo::PROTOCOL_534;

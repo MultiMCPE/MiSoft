@@ -130,13 +130,18 @@ class BatchPacket extends DataPacket{
 	        if($session->isCompressionEnabled() && $this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 		        $data = "";
 	        }else{
-	            if(!(PacketPool::getPacket($data, $session->getProtocol())) instanceof UnknownPacket){
-	                $data = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
+	            if($session->isCompressionEnabled()){
+	                if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
+	                    if(!(PacketPool::getPacket($data, $session->getProtocol())) instanceof UnknownPacket){
+	                        $data = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
+	                    }
+	                }
 	            }
 	        }
 	    }
+        $this->payload = $data;
 
-        if($data === ""){
+        if($this->payload === ""){
             return false;
         }
 

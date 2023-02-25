@@ -2049,10 +2049,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_553 || !in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)){
 	    	$packet = new PlayStatusPacket();
 	    	$packet->status = ($this->protocol < ProtocolInfo::CURRENT_PROTOCOL ? PlayStatusPacket::LOGIN_FAILED_CLIENT : PlayStatusPacket::LOGIN_FAILED_SERVER);
+	    	$packet->setProtocol($this->protocol);
 
 	    	$pk = new BatchPacket();
 	    	$pk->addPacket($packet);
 	    	$pk->compressionEnabled = false;
+	    	$pk->setProtocol($this->protocol);
 	    	$this->sendDataPacket($pk, false, true);
 
 			//This pocketmine disconnect message will only be seen by the console (PlayStatusPacket causes the messages to be shown for the client)
@@ -2069,10 +2071,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			0,
 			0
 		);
+		$packet->setProtocol($this->protocol);
 
 		$pk = new BatchPacket();
 		$pk->addPacket($packet);
 		$pk->compressionEnabled = false;
+		$pk->setProtocol($this->protocol);
 		$this->sendDataPacket($pk);
 
         $this->enableCompression = true;
@@ -2086,6 +2090,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         $this->protocol = $packet->protocol;
+        if($this->protocol < ProtocolInfo::PROTOCOL_553){
+            $this->enableCompression = true;
+        }
 		if(!$packet->isValidProtocol){
 			if($packet->protocol < ProtocolInfo::CURRENT_PROTOCOL){
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_CLIENT, true);
@@ -4369,9 +4376,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$pk = new DisconnectPacket();
 				$pk->message = $reason;
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553 && !$this->isCompressionEnabled()){
+				    $pk->setProtocol($this->protocol);
+
 	            	$packet = new BatchPacket();
 	            	$packet->addPacket($pk);
 	            	$packet->compressionEnabled = false;
+	            	$packet->setProtocol($this->protocol);
 
 	            	$this->directDataPacket($packet);
 				}else{

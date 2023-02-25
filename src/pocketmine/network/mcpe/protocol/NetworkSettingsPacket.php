@@ -39,8 +39,6 @@ class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 	/** @var int */
 	private $compressionThreshold;
 	/** @var int */
-	private $compressionThreshold;
-	/** @var int */
 	private $compressionAlgorithm;
 	/** @var bool */
 	private $enableClientThrottling;

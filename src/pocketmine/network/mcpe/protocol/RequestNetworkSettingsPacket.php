@@ -42,12 +42,11 @@ class RequestNetworkSettingsPacket extends DataPacket/* implements ServerboundPa
 
 	public function getProtocolVersion() : int{ return $this->protocolVersion; }
 
+	protected function decodeHeader(){
+	    $this->getUnsignedVarInt();
+	}
+
 	protected function decodePayload() : void{
-        if(((unpack("N", $this->get(4))[1] << 32 >> 32)) === 0x0){
-            $this->setOffset($this->getOffset() - 0x2);
-        }else{
-            $this->setOffset($this->getOffset() - 0x4);
-        }
 		$this->protocolVersion = $this->getInt();
 	}
 

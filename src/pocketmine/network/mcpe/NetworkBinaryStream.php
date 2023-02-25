@@ -56,6 +56,11 @@ use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\StructureEditorData;
 use pocketmine\network\mcpe\protocol\types\StructureSettings;
+use pocketmine\network\mcpe\protocol\types\recipe\IntIdMetaItemDescriptor;
+use pocketmine\network\mcpe\protocol\types\recipe\ItemDescriptorType;
+use pocketmine\network\mcpe\protocol\types\recipe\MolangItemDescriptor;
+use pocketmine\network\mcpe\protocol\types\recipe\StringIdMetaItemDescriptor;
+use pocketmine\network\mcpe\protocol\types\recipe\TagItemDescriptor;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\UUID;
 use pocketmine\utils\Color;
@@ -585,24 +590,39 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	public function putRecipeIngredient(Item $item, int $playerProtocol) : void{
-		if($item->isNull()){
-			$this->putVarInt(0);
-		}else{
-		    $id = $item->getId();
-		    $damage = $item->getDamage();
-		    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-		        $palette = ItemPalette::getPalette($playerProtocol);
-		        if($item->hasAnyDamageValue()){
-		            [$id, ] = $palette::getRuntimeFromLegacyId($id, 0);
-		            $damage = 0x7fff;
+	    if($playerProtocol < ProtocolInfo::PROTOCOL_553){
+	    	if($item->isNull()){
+		    	$this->putVarInt(0);
+	    	}else{
+		        $id = $item->getId();
+		        $damage = $item->getDamage();
+		        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+		            $palette = ItemPalette::getPalette($playerProtocol);
+		            if($item->hasAnyDamageValue()){
+		                [$id, ] = $palette::getRuntimeFromLegacyId($id, 0);
+		                $damage = 0x7fff;
+		            }else{
+		                [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
+		            }
 		        }else{
-		            [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
+		            $damage = $damage & 0x7fff;
 		        }
-		    }else{
-		        $damage = $damage & 0x7fff;
-		    }
-			$this->putVarInt($id);
-			$this->putVarInt($damage);
+		    	$this->putVarInt($id);
+		    	$this->putVarInt($damage);
+		    	$this->putVarInt($item->getCount());
+	    	}
+		}else{
+			$this->putByte(1); // internal item descriptor type
+			$palette = ItemPalette::getPalette($playerProtocol);
+			$id = $item->getId();
+			if($id !== 0){
+			    [$netId, ] = $palette::getRuntimeFromLegacyId($id, 0);
+			}
+			$this->putLShort($netId ?? 0);
+			if($id !== 0){
+			    [$netId, $netData] = $palette::getRuntimeFromLegacyId($id, $item->getDamage());
+				$this->putLShort($netData);
+			}
 			$this->putVarInt($item->getCount());
 		}
 	}
