@@ -767,7 +767,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 *
 	 * @param Attribute ...$attributes
 	 */
-	public function putAttributeList(Attribute ...$attributes, int $playerProtocol) : void{
+	public function putAttributeList(int $playerProtocol, Attribute ...$attributes) : void{
 		$this->putUnsignedVarInt(count($attributes));
 		foreach($attributes as $attribute){
 			($this->buffer .= (pack("g", $attribute->getMinValue())));

@@ -30,6 +30,7 @@ use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\crafting\CraftingDataBuildTask;
 use pocketmine\timings\Timings;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use function is_null;
 use function count;
 use function array_map;
@@ -93,9 +94,6 @@ class CraftingManager{
 					break;
 			}
 		}
-
-        Server::getInstance()->getAsyncPool()->submitTask($task = new CraftingDataBuildTask($this->shapelessRecipes, $this->shapedRecipes, $this->furnaceRecipes, Server::getInstance()->networkCompressionLevel));
-        $this->craftingDataTask = $task;
 	}
 
     /**
@@ -106,17 +104,14 @@ class CraftingManager{
     public function sendCraftingData(Player $p) : void{
         Timings::$craftingDataCacheRebuildTimer->startTiming();
 
-        try {
+        try{
             $craftingData = $this->getCraftingData();
-
-            if ($craftingData === null) {
+            if($craftingData === null){
                 $this->craftingDataQueue[$p->getId()] = $p;
-                
                 return;
             }
-
             $p->dataPacket($craftingData[$p->getCraftingProtocol()]);
-        } finally {
+        }finally{
             Timings::$craftingDataCacheRebuildTimer->stopTiming();
         }
     }
@@ -143,11 +138,11 @@ class CraftingManager{
      * @return void
      */
     public function sendCraftingDataToQueue(array $buffers) : void{
-        foreach ($this->craftingDataQueue as $p) {
+        foreach($this->craftingDataQueue as $p){
             $p->dataPacket($buffers[$p->getCraftingProtocol()]);
         }
 
-        if (!is_null($this->craftingDataTask)) {
+        if(!is_null($this->craftingDataTask)){
             $this->craftingDataTask->cancelRun();
         }
 
@@ -159,9 +154,9 @@ class CraftingManager{
      * @return void
      */
     public function scheduleQueueUpdate() : void{
-        if (count($this->craftingDataQueue) > 0) {
-            if (!is_null($this->craftingDataTask)) {
-                if ($this->craftingDataTask->isCrashed()) {
+        if(count($this->craftingDataQueue) > 0){
+            if(!is_null($this->craftingDataTask)){
+                if($this->craftingDataTask->isCrashed()){
                     $this->craftingDataTask = null;
                     Server::getInstance()->getLogger()->error("Failed to prepare CraftingDataPacket, retrying...");
                 }
@@ -169,13 +164,12 @@ class CraftingManager{
                 return;
             }
 
-            if (!is_null($this->getCraftingData())) {
+            if(!is_null($this->getCraftingData())){
                 $this->sendCraftingDataToQueue();
-
                 return;
             }
 
-            Server::getInstance()->getAsyncPool()->submitTask($task = new CraftingDataBuildTask($this->shapelessRecipes, $this->shapedRecipes, $this->furnaceRecipes, Server::getInstance()->networkCompressionLevel));
+            Server::getInstance()->getAsyncPool()->submitTask($task = new CraftingDataBuildTask($this->shapelessRecipes, $this->shapedRecipes, $this->furnaceRecipes, BlockPalette::getPalettes(), Server::getInstance()->networkCompressionLevel));
             $this->craftingDataTask = $task;
         }
     }

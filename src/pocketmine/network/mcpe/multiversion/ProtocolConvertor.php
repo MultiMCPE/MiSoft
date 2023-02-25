@@ -33,6 +33,7 @@ abstract class ProtocolConvertor{
      */
 	public final static function convertProtocol(int $playerProtocol) : int{
 		switch($playerProtocol){
+			case ProtocolInfo::PROTOCOL_545:
 			case ProtocolInfo::PROTOCOL_544:
 				return ProtocolInfo::PROTOCOL_544;
 			case ProtocolInfo::PROTOCOL_534:

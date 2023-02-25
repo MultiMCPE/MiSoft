@@ -59,9 +59,16 @@ class BlockPalette{
     protected static $palettes = null;
 
     /**
+     * @param array $palettes
+     * 
      * @return void
      */
-    public static function init(bool $asynchronous = true) : void{
+    public static function init(array $palettes = null) : void{
+        if(!empty($palettes)){
+            self::$palettes = $palettes;
+            return;
+        }
+
         $pools = [
             ProtocolInfo::PROTOCOL_544 => new BlockPalette544(),
             ProtocolInfo::PROTOCOL_534 => new BlockPalette534(),
@@ -93,21 +100,14 @@ class BlockPalette{
         ];
 
         self::$palettes = [];
-        if($asynchronous){
-            foreach($pools as $poolProtocol => $pool){
-                Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
-                    $pool,
-                    $poolProtocol,
-                    function(Palette $palette, int $poolProtocol) : void{
-                        self::$palettes[$poolProtocol] = $palette;
-                    }
-                ));
-            }
-        }else{
-            foreach($pools as $poolProtocol => $pool){
-                $pool::init();
-                self::$palettes[$poolProtocol] = $pool;
-            }
+        foreach($pools as $poolProtocol => $pool){
+            Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
+                $pool,
+                $poolProtocol,
+                function(Palette $palette, int $poolProtocol) : void{
+                    self::$palettes[$poolProtocol] = $palette;
+                }
+            ));
         }
     }
 
@@ -123,5 +123,12 @@ class BlockPalette{
             }
         }
         return null;
+    }
+
+    /**
+     * @return Palette[]|null
+     */
+    public static function getPalettes() : ?array{
+        return self::$palettes;
     }
 }

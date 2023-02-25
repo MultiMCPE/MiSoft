@@ -35,6 +35,8 @@ use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use function assert;
 use function strlen;
+use function serialize;
+use function unserialize;
 
 class CraftingDataBuildTask extends AsyncTask{
     /** @var array */
@@ -43,6 +45,8 @@ class CraftingDataBuildTask extends AsyncTask{
     protected $shapedRecipes;
     /** @var array */
     protected $furnaceRecipes;
+    /** @var array */
+    protected $palettes;
     /** @var int */
     protected $compressionLevel;
     /** @var array */
@@ -71,16 +75,17 @@ class CraftingDataBuildTask extends AsyncTask{
         ProtocolInfo::PROTOCOL_534
     ];
 
-	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $networkCompressionLevel){
+	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, array $palettes, int $networkCompressionLevel){
 	    $this->shapelessRecipes = $shapelessRecipes;
 	    $this->shapedRecipes = $shapedRecipes;
 	    $this->furnaceRecipes = $furnaceRecipes;
+	    $this->palettes = serialize($palettes);
 		$this->compressionLevel = $networkCompressionLevel;
 	}
 
 	public function onRun(){
 	    ItemPalette::init();
-	    BlockPalette::init(false);
+	    BlockPalette::init(unserialize($this->palettes));
 	    PacketPool::init();
 	    ItemFactory::init();
 
