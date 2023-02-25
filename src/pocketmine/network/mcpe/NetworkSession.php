@@ -140,6 +140,7 @@ use pocketmine\network\mcpe\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
 use pocketmine\network\mcpe\protocol\RespawnPacket;
+use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\RiderJumpPacket;
 use pocketmine\network\mcpe\protocol\ScriptCustomEventPacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
@@ -213,14 +214,25 @@ use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\RequestPermissionsPacket;
 use pocketmine\network\mcpe\protocol\ToastRequestPacket;
 use pocketmine\network\mcpe\protocol\FeatureRegistryPacket;
+use pocketmine\network\mcpe\protocol\GameTestRequestPacket;
+use pocketmine\network\mcpe\protocol\GameTestResultsPacket;
+use pocketmine\network\mcpe\protocol\ServerStatsPacket;
 
 abstract class NetworkSession{
 
 	abstract public function handleDataPacket(DataPacket $packet);
 
+    public function isCompressionEnabled() : bool{
+        return true;
+    }
+
 	public function getProtocol() : int{
 	    return ProtocolInfo::CURRENT_PROTOCOL;
 	}
+
+    public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
+        return false;
+    }
 
 	public function handleLogin(LoginPacket $packet) : bool{
 		return false;
@@ -971,6 +983,18 @@ abstract class NetworkSession{
 	}
 
 	public function handleFeatureRegistry(FeatureRegistryPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleGameTestRequest(GameTestRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleGameTestResults(GameTestResultsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleServerStats(ServerStatsPacket $packet) : bool{
 		return false;
 	}
 }

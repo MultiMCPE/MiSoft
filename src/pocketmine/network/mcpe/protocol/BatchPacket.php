@@ -39,6 +39,7 @@ use function ord;
 use function strlen;
 use function zlib_decode;
 use function zlib_encode;
+use function mb_strpos;
 use const ZLIB_ENCODING_RAW;
 
 class BatchPacket extends DataPacket{
@@ -46,6 +47,8 @@ class BatchPacket extends DataPacket{
 
 	/** @var string */
 	public $payload = "";
+	/** @var bool */
+	public $compressionEnabled = true;
 	/** @var int */
 	protected $compressionLevel = 7;
 
@@ -63,12 +66,7 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$data = $this->getRemaining();
-	    try{
-		    $this->payload = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
-	    }catch(ErrorException $e){ //zlib decode error
-		    $this->payload = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
-	    }
+		$this->payload = $this->getRemaining();
 	}
 
 	protected function encodeHeader(){
@@ -76,7 +74,11 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+	    if($this->compressionEnabled){
+	    	$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+	    }else{
+	        $payload = $this->payload;
+	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 		    ($this->buffer .= $payload);
 		}else{
@@ -121,9 +123,22 @@ class BatchPacket extends DataPacket{
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		if($this->payload === ""){
-			return false;
-		}
+	    $data = $this->payload;
+	    try{
+	        $data = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
+	    }catch(ErrorException $e){ //zlib decode error
+	        if($session->isCompressionEnabled() && $this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		        $data = "";
+	        }else{
+	            if(!(PacketPool::getPacket($data, $session->getProtocol())) instanceof UnknownPacket){
+	                $data = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
+	            }
+	        }
+	    }
+
+        if($data === ""){
+            return false;
+        }
 
 		foreach($this->getPackets() as $buf){
 			$pk = PacketPool::getPacket($buf, $session->getProtocol());

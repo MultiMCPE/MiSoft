@@ -143,6 +143,7 @@ use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormRequestPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\NetworkChunkPublisherUpdatePacket;
+use pocketmine\network\mcpe\protocol\NetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -152,6 +153,7 @@ use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\mcpe\protocol\ResourcePackDataInfoPacket;
 use pocketmine\network\mcpe\protocol\ResourcePacksInfoPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackStackPacket;
+use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\RespawnPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\mcpe\protocol\SetSpawnPositionPacket;
@@ -164,6 +166,7 @@ use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
+use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
@@ -278,6 +281,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * TODO: remove this once player and network are divorced properly
 	 */
 	protected $sessionAdapter;
+
+    /** @var bool */
+    protected $enableCompression = false;
 
     /** @var ?EncryptionContext */
 	protected $cipher = null;
@@ -843,6 +849,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->sessionAdapter = new PlayerNetworkSessionAdapter($this->server, $this);
 	}
+
+    /**
+     * @return bool
+     */
+    public function isCompressionEnabled() : bool{
+        return $this->enableCompression;
+    }
 
 	/**
 	 * @return bool
@@ -2029,6 +2042,42 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected function initEntity() : void{
 		parent::initEntity();
 		$this->addDefaultWindows();
+	}
+
+	public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
+		$this->protocol = $packet->getProtocolVersion();
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_553 || !in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)){
+	    	$packet = new PlayStatusPacket();
+	    	$packet->status = ($this->protocol < ProtocolInfo::CURRENT_PROTOCOL ? PlayStatusPacket::LOGIN_FAILED_CLIENT : PlayStatusPacket::LOGIN_FAILED_SERVER);
+
+	    	$pk = new BatchPacket();
+	    	$pk->addPacket($packet);
+	    	$pk->compressionEnabled = false;
+	    	$this->sendDataPacket($pk, false, true);
+
+			//This pocketmine disconnect message will only be seen by the console (PlayStatusPacket causes the messages to be shown for the client)
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.incompatibleProtocol", [$this->protocol ?? "unknown"]), false);
+
+			return true;
+		}
+
+		//TODO: we're filling in the defaults to get pre-1.19.30 behaviour back for now, but we should explore the new options in the future
+		$packet = NetworkSettingsPacket::create(
+			NetworkSettingsPacket::COMPRESS_EVERYTHING,
+			CompressionAlgorithm::ZLIB,
+			false,
+			0,
+			0
+		);
+
+		$pk = new BatchPacket();
+		$pk->addPacket($packet);
+		$pk->compressionEnabled = false;
+		$this->sendDataPacket($pk);
+
+        $this->enableCompression = true;
+
+		return true;
 	}
 
 	public function handleLogin(LoginPacket $packet) : bool{
@@ -4319,7 +4368,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if($notify and strlen($reason) > 0){
 				$pk = new DisconnectPacket();
 				$pk->message = $reason;
-				$this->directDataPacket($pk);
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553 && !$this->isCompressionEnabled()){
+	            	$packet = new BatchPacket();
+	            	$packet->addPacket($pk);
+	            	$packet->compressionEnabled = false;
+
+	            	$this->directDataPacket($packet);
+				}else{
+				    $this->directDataPacket($pk);
+				}
 			}
 			$this->interface->close($this, $notify ? $reason : "");
 			$this->sessionAdapter = null;

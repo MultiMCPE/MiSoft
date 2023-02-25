@@ -45,6 +45,7 @@ class TextPacket extends DataPacket{
 	public const TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT";
 	public const TYPE_JSON_WHISPER = "TYPE_JSON_WHISPER";
 	public const TYPE_JSON = "TYPE_JSON";
+	public const TYPE_JSON_ANNOUNCEMENT = "TYPE_JSON_ANNOUNCEMENT";
 
 	/** @var int */
 	public $type;
@@ -86,6 +87,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_SYSTEM:
 			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
+			case self::TYPE_JSON_ANNOUNCEMENT:
 				$this->message = $this->getString();
 				break;
 			case self::TYPE_POPUP:
@@ -133,6 +135,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_SYSTEM:
 			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
+			case self::TYPE_JSON_ANNOUNCEMENT:
 				$this->putString($this->message);
 				break;
 			case self::TYPE_POPUP:

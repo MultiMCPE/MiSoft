@@ -22,10 +22,8 @@ use raklib\protocol\EncapsulatedPacket;
 use raklib\RakLib;
 use function chr;
 use function ord;
-use function pack;
 use function strlen;
 use function substr;
-use function unpack;
 
 class ServerHandler{
 
@@ -45,7 +43,7 @@ class ServerHandler{
 	}
 
 	public function sendRaw(string $address, int $port, string $payload) : void{
-		$buffer = chr(RakLib::PACKET_RAW) . chr(strlen($address)) . $address . (pack("n", $port)) . $payload;
+		$buffer = chr(RakLib::PACKET_RAW) . chr(strlen($address)) . $address . (\pack("n", $port)) . $payload;
 		$this->server->pushMainToThreadPacket($buffer);
 	}
 
@@ -64,7 +62,7 @@ class ServerHandler{
 	}
 
 	public function blockAddress(string $address, int $timeout) : void{
-		$buffer = chr(RakLib::PACKET_BLOCK_ADDRESS) . chr(strlen($address)) . $address . (pack("N", $timeout));
+		$buffer = chr(RakLib::PACKET_BLOCK_ADDRESS) . chr(strlen($address)) . $address . (\pack("N", $timeout));
 		$this->server->pushMainToThreadPacket($buffer);
 	}
 
@@ -103,7 +101,7 @@ class ServerHandler{
 				$len = ord($packet[$offset++]);
 				$address = substr($packet, $offset, $len);
 				$offset += $len;
-				$port = (unpack("n", substr($packet, $offset, 2))[1]);
+				$port = (\unpack("n", substr($packet, $offset, 2))[1]);
 				$offset += 2;
 				$payload = substr($packet, $offset);
 				$this->instance->handleRaw($address, $port, $payload);
@@ -120,7 +118,7 @@ class ServerHandler{
 				$len = ord($packet[$offset++]);
 				$address = substr($packet, $offset, $len);
 				$offset += $len;
-				$port = (unpack("n", substr($packet, $offset, 2))[1]);
+				$port = (\unpack("n", substr($packet, $offset, 2))[1]);
 				$offset += 2;
 				$clientID = Binary::readLong(substr($packet, $offset, 8));
 				$this->instance->openSession($identifier, $address, $port, $clientID);
@@ -139,13 +137,13 @@ class ServerHandler{
 				$len = ord($packet[$offset++]);
 				$identifier = substr($packet, $offset, $len);
 				$offset += $len;
-				$identifierACK = (unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
+				$identifierACK = (\unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
 				$this->instance->notifyACK($identifier, $identifierACK);
 			}elseif($id === RakLib::PACKET_REPORT_PING){
 				$len = ord($packet[$offset++]);
 				$identifier = substr($packet, $offset, $len);
 				$offset += $len;
-				$pingMS = (unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
+				$pingMS = (\unpack("N", substr($packet, $offset, 4))[1] << 32 >> 32);
 				$this->instance->updatePing($identifier, $pingMS);
 			}
 

@@ -69,6 +69,7 @@ use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackChunkRequestPacket;
 use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\mcpe\protocol\RespawnPacket;
+use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
 use pocketmine\network\mcpe\protocol\SetLocalPlayerAsInitializedPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
@@ -102,6 +103,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		$this->player = $player;
 	}
 
+    public function isCompressionEnabled() : bool{
+        return $this->player->isCompressionEnabled();
+    }
+
 	public function getProtocol() : int{
 	    return $this->player->getProtocol();
 	}
@@ -128,6 +133,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 		$timings->stopTiming();
 	}
+
+    public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
+        return $this->player->handleRequestNetworkSettings($packet);
+    }
 
 	public function handleLogin(LoginPacket $packet) : bool{
 		return $this->player->handleLogin($packet);
