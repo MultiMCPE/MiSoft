@@ -31,6 +31,7 @@ use pocketmine\entity\EntityIds;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use UnexpectedValueException;
 use function array_search;
 use function count;
@@ -164,6 +165,8 @@ class AddActorPacket extends DataPacket{
 	public $attributes = [];
 	/** @var array */
 	public $metadata = [];
+	/** @var PropertySyncData */
+	public $syncedProperties;
 	/** @var EntityLink[] */
 	public $links = [];
 
@@ -209,6 +212,9 @@ class AddActorPacket extends DataPacket{
 		}
 
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+		    $this->syncedProperties = PropertySyncData::read($this);
+		}
 		$linkCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $linkCount; ++$i){
 			$this->links[] = $this->getEntityLink($this->getProtocol());
@@ -246,6 +252,9 @@ class AddActorPacket extends DataPacket{
 		}
 
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+		    $this->syncedProperties->write($this);
+		}
 		$this->putUnsignedVarInt(count($this->links));
 		foreach($this->links as $link){
 			$this->putEntityLink($link, $this->getProtocol());

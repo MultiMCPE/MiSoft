@@ -37,6 +37,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use UnexpectedValueException;
 use function abs;
 use function floor;
@@ -166,6 +167,7 @@ class FallingBlock extends Entity{
 	    	$pk->pitch = $this->pitch;
 	    	$pk->attributes = $this->attributeMap->getAll();
 	    	$pk->metadata = $this->propertyManager->getAll();
+	    	$pk->syncedProperties = new PropertySyncData([], []);
 	    	if(isset($pk->metadata[self::DATA_VARIANT])){
 		    	$palette = BlockPalette::getPalette($player->getProtocol());
 		    	if(!is_null($palette)){
@@ -189,6 +191,7 @@ class FallingBlock extends Entity{
 		$pk = new SetActorDataPacket();
 		$pk->entityRuntimeId = $this->getId();
 		$pk->metadata = $data ?? $this->propertyManager->getAll();
+		$pk->syncedProperties = new PropertySyncData([], []);
 
 		foreach($player as $p){
 		    if(isset($pk->metadata[self::DATA_VARIANT])){

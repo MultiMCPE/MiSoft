@@ -24,9 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 
 class SetActorDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_ACTOR_DATA_PACKET;
@@ -35,6 +34,8 @@ class SetActorDataPacket extends DataPacket{
 	public $entityRuntimeId;
 	/** @var array */
 	public $metadata;
+	/** @var PropertySyncData */
+	public $syncedProperties;
 	/** @var int */
 	public $tick = 0;
 
@@ -42,6 +43,9 @@ class SetActorDataPacket extends DataPacket{
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+		        $this->syncedProperties = PropertySyncData::read($this);
+		    }
 		    $this->tick = $this->getUnsignedVarLong();
 		}
 	}
@@ -50,6 +54,9 @@ class SetActorDataPacket extends DataPacket{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+		        $this->syncedProperties->write($this);
+		    }
 		    $this->putUnsignedVarLong($this->tick);
 		}
 	}

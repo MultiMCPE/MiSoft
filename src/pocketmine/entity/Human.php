@@ -59,6 +59,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
 use ReflectionClass;
@@ -916,6 +917,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$pk->item = $this->getInventory()->getItemInHand();
 		$pk->targetActorUniqueId = $this->getId();
 		$pk->metadata = $this->propertyManager->getAll();
+	    $pk->syncedProperties = new PropertySyncData([], []);
 		$player->dataPacket($pk);
 
         if ($player->getProtocol() >= ProtocolInfo::PROTOCOL_220) {

@@ -33,6 +33,7 @@ use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\GameMode;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\UpdateAbilitiesPacketLayer;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\utils\UUID;
 use function count;
 use function pack;
@@ -71,6 +72,8 @@ class AddPlayerPacket extends DataPacket{
 	public $gameMode = GameMode::SURVIVAL;
 	/** @var array */
 	public $metadata = [];
+	/** @var PropertySyncData */
+	public $syncedProperties;
 
     //TODO: update abilities stuff
 	public $commandPermission = AdventureSettingsPacket::PERMISSION_NORMAL;
@@ -122,6 +125,9 @@ class AddPlayerPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+                    $this->syncedProperties = PropertySyncData::read($this);
+                }
 	        	$this->targetActorUniqueId = $this->getLLong(); //WHY IS THIS NON-STANDARD?
 	        	$this->playerPermission = $this->getByte();
 	        	$this->commandPermission = $this->getByte();
@@ -185,6 +191,9 @@ class AddPlayerPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
+                    $this->syncedProperties->write($this);
+                }
 	        	$this->putLLong($this->targetActorUniqueId);
 	        	$this->putByte($this->playerPermission);
 	        	$this->putByte($this->commandPermission);

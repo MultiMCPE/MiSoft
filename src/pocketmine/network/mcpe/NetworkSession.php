@@ -217,6 +217,7 @@ use pocketmine\network\mcpe\protocol\FeatureRegistryPacket;
 use pocketmine\network\mcpe\protocol\GameTestRequestPacket;
 use pocketmine\network\mcpe\protocol\GameTestResultsPacket;
 use pocketmine\network\mcpe\protocol\ServerStatsPacket;
+use pocketmine\network\mcpe\protocol\UpdateClientInputLocksPacket;
 
 abstract class NetworkSession{
 
@@ -995,6 +996,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleServerStats(ServerStatsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUpdateClientInputLocks(UpdateClientInputLocksPacket $packet) : bool{
 		return false;
 	}
 }

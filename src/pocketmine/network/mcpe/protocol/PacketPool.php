@@ -47,6 +47,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds526;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds534;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds544;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds553;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds560;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -54,6 +55,7 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_560 => PacketsIds560::class,
         ProtocolInfo::PROTOCOL_553 => PacketsIds553::class,
         ProtocolInfo::PROTOCOL_544 => PacketsIds544::class,
         ProtocolInfo::PROTOCOL_534 => PacketsIds534::class,
@@ -297,6 +299,7 @@ class PacketPool {
 		self::registerPacket(new RequestNetworkSettingsPacket());
 		self::registerPacket(new GameTestRequestPacket());
 		self::registerPacket(new GameTestResultsPacket());
+		self::registerPacket(new UpdateClientInputLocksPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

@@ -72,6 +72,7 @@ use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\Player;
@@ -1843,6 +1844,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$pk->pitch = $this->pitch;
 		$pk->attributes = $this->attributeMap->getAll();
 		$pk->metadata = $this->propertyManager->getAll();
+		$pk->syncedProperties = new PropertySyncData([], []);
 
 		$player->dataPacket($pk);
 	}
@@ -2015,6 +2017,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$pk = new SetActorDataPacket();
 		$pk->entityRuntimeId = $this->getId();
 		$pk->metadata = $data ?? $this->propertyManager->getAll();
+		$pk->syncedProperties = new PropertySyncData([], []);
 
 		foreach($player as $p){
 			if($p === $this){

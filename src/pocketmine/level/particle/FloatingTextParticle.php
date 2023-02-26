@@ -33,6 +33,7 @@ use pocketmine\network\mcpe\protocol\AddPlayerPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\utils\UUID;
 use function str_repeat;
 
@@ -99,6 +100,7 @@ class FloatingTextParticle extends Particle{
 			$pk->position = $this->asVector3(); //TODO: check offset
 			$pk->item = ItemFactory::get(Item::AIR, 0, 0);
             $pk->targetActorUniqueId = $this->entityId;
+            $pk->syncedProperties = new PropertySyncData([], []);
 
 			$flags = (
 				1 << Entity::DATA_FLAG_IMMOBILE
