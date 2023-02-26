@@ -921,7 +921,6 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$pk->yaw = $this->yaw;
 		$pk->pitch = $this->pitch;
 		$pk->item = $this->getInventory()->getItemInHand();
-		$pk->targetActorUniqueId = $this->getId();
 		$pk->metadata = $this->propertyManager->getAll();
 	    $pk->syncedProperties = new PropertySyncData([], []);
 	    $pk->abilitiesData = UpdateAbilitiesPacket::create(new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->getId() /* TODO: this should be unique ID */, [
