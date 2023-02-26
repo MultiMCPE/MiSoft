@@ -33,7 +33,6 @@ use pocketmine\network\mcpe\protocol\AddPlayerPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
-use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData;
@@ -106,14 +105,14 @@ class FloatingTextParticle extends Particle{
 			$pk->position = $this->asVector3(); //TODO: check offset
 			$pk->item = ItemFactory::get(Item::AIR, 0, 0);
             $pk->syncedProperties = new PropertySyncData([], []);
-	        $pk->abilitiesData = UpdateAbilitiesPacket::create(new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->entityId /* TODO: this should be unique ID */, [
+	        $pk->abilitiesData = new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->entityId /* TODO: this should be unique ID */, [
 		    	new AbilitiesLayer(
 			    	AbilitiesLayer::LAYER_BASE,
 			    	array_fill(0, AbilitiesLayer::NUMBER_OF_ABILITIES, false),
 			    	0.0,
 			    	0.0
 		    	)
-	    	]));
+	    	]);
 
 			$flags = (
 				1 << Entity::DATA_FLAG_IMMOBILE

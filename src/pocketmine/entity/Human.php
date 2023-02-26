@@ -59,7 +59,6 @@ use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
-use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData;
@@ -923,14 +922,14 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$pk->item = $this->getInventory()->getItemInHand();
 		$pk->metadata = $this->propertyManager->getAll();
 	    $pk->syncedProperties = new PropertySyncData([], []);
-	    $pk->abilitiesData = UpdateAbilitiesPacket::create(new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->getId() /* TODO: this should be unique ID */, [
+	    $pk->abilitiesData = new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->getId() /* TODO: this should be unique ID */, [
 			new AbilitiesLayer(
 				AbilitiesLayer::LAYER_BASE,
 				array_fill(0, AbilitiesLayer::NUMBER_OF_ABILITIES, false),
 				0.0,
 				0.0
 			)
-		]));
+		]);
 		$player->dataPacket($pk);
 
         if ($player->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
