@@ -142,8 +142,12 @@ final class BlockPalette419 extends Palette{
 	 */
 	public static function fromStaticRuntimeId(int $runtimeId) : array{
 		self::lazyInit();
-		$v = self::$runtimeToLegacyMap[$runtimeId];
-		return [$v >> 4, $v & 0xf];
+		if(isset(self::$runtimeToLegacyMap[$runtimeId])){
+	    	$v = self::$runtimeToLegacyMap[$runtimeId];
+	    	return [$v >> 4, $v & 0xf];
+		}else{
+		    return [0, 0];
+		}
 	}
 
 	private static function registerMapping(int $staticRuntimeId, int $legacyId, int $legacyMeta) : void{

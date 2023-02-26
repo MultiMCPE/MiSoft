@@ -88,8 +88,12 @@ final class BlockPalette340 extends Palette{
 	 * @return int[] [id, meta]
 	 */
 	public static function fromStaticRuntimeId(int $runtimeId) : array{
-		$v = self::$legacyIdMap[$runtimeId];
-		return [$v >> 4, $v & 0xf];
+	    if(isset(self::$legacyIdMap[$runtimeId])){
+	    	$v = self::$legacyIdMap[$runtimeId];
+	    	return [$v >> 4, $v & 0xf];
+    	}else{
+    	    return [0, 0];
+    	}
 	}
 
 	private static function registerMapping(int $staticRuntimeId, int $legacyId, int $legacyMeta) : void{
