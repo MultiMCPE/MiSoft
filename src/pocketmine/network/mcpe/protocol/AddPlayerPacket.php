@@ -31,8 +31,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\GameMode;
-use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
-use pocketmine\network\mcpe\protocol\types\UpdateAbilitiesPacketLayer;
+use pocketmine\network\mcpe\protocol\types\AbilitiesData;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\utils\UUID;
 use function count;
@@ -74,12 +73,8 @@ class AddPlayerPacket extends DataPacket{
 	public $metadata = [];
 	/** @var PropertySyncData */
 	public $syncedProperties;
-
-    //TODO: update abilities stuff
-	public $commandPermission = AdventureSettingsPacket::PERMISSION_NORMAL;
-	public $playerPermission = PlayerPermissions::MEMBER;
-	public $targetActorUniqueId; //This is a little-endian long, NOT a var-long. (WTF Mojang)
-	public $abilityLayers = [];
+    /** @var AbilitiesData */
+    public $abilitiesData;
 
 	//TODO: adventure settings stuff
 	public $uvarint1 = 0;
@@ -128,14 +123,7 @@ class AddPlayerPacket extends DataPacket{
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
                     $this->syncedProperties = PropertySyncData::read($this);
                 }
-	        	$this->targetActorUniqueId = $this->getLLong(); //WHY IS THIS NON-STANDARD?
-	        	$this->playerPermission = $this->getByte();
-	        	$this->commandPermission = $this->getByte();
-
-	        	$this->abilityLayers = [];
-	        	for($i = 0, $len = $this->getByte(); $i < $len; $i++){
-		        	$this->abilityLayers[] = UpdateAbilitiesPacketLayer::decode($this);
-	        	}
+                $this->abilitiesData = AbilitiesData::decode($this);
             }else{
 	        	$this->uvarint1 = $this->getUnsignedVarInt();
 	        	$this->uvarint2 = $this->getUnsignedVarInt();
@@ -194,14 +182,7 @@ class AddPlayerPacket extends DataPacket{
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
                     $this->syncedProperties->write($this);
                 }
-	        	$this->putLLong($this->targetActorUniqueId);
-	        	$this->putByte($this->playerPermission);
-	        	$this->putByte($this->commandPermission);
-
-	        	$this->putByte(count($this->abilityLayers));
-	        	foreach($this->abilityLayers as $layer){
-		        	$layer->encode($this);
-	        	}
+                $this->abilitiesData->encode($this);
             }else{
 	        	$this->putUnsignedVarInt($this->uvarint1);
 	        	$this->putUnsignedVarInt($this->uvarint2);

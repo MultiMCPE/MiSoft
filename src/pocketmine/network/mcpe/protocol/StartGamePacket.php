@@ -168,6 +168,8 @@ class StartGamePacket extends DataPacket{
 	public $disablePersona = false;
 	/** @var bool */
 	public $disableCustomSkins = false;
+	/** @var bool */
+	public $muteEmoteAnnouncements = false;
 	/** @var string */
 	public $vanillaVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
 	/** @var int */
@@ -326,6 +328,9 @@ class StartGamePacket extends DataPacket{
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	                    	    $this->disablePersona = (($this->get(1) !== "\x00"));
 	                    	    $this->disableCustomSkins = (($this->get(1) !== "\x00"));
+	                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+	                    	        $this->muteEmoteAnnouncements = (($this->get(1) !== "\x00"));
+	                    	    }
 	                    	}
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	                        	$this->vanillaVersion = $this->getString();
@@ -545,6 +550,9 @@ class StartGamePacket extends DataPacket{
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	                    	    ($this->buffer .= ($this->disablePersona ? "\x01" : "\x00"));
 	                    	    ($this->buffer .= ($this->disableCustomSkins ? "\x01" : "\x00"));
+	                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+	                    	        ($this->buffer .= ($this->muteEmoteAnnouncements ? "\x01" : "\x00"));
+	                    	    }
 	                    	}
 	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	        	                $this->putString($this->vanillaVersion);

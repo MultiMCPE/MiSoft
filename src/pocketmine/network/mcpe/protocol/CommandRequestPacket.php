@@ -39,23 +39,31 @@ class CommandRequestPacket extends DataPacket{
 	public $originData;
 	/** @var bool */
 	public $isInternal;
+    /** @var int */
+    public $version;
 
 	protected function decodePayload(){
 		$this->command = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_140) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_140){
 	    	$this->originData = $this->getCommandOriginData();
 	    	$this->isInternal = (($this->get(1) !== "\x00"));
-		} else {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+	    	    $this->version = $this->getVarInt();
+	    	}
+		}else{
 		    $this->playerUniqueId = $this->getEntityUniqueId();
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->command);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_140) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_140){
 	    	$this->putCommandOriginData($this->originData);
 	    	($this->buffer .= ($this->isInternal ? "\x01" : "\x00"));
-		} else {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+	    	    $this->putVarInt($this->version);
+	    	}
+		}else{
 		    $this->putEntityUniqueId($this->playerUniqueId);
 		}
 	}

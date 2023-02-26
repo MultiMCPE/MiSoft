@@ -54,15 +54,21 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AddPlayerPacket;
+use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
+use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
+use pocketmine\network\mcpe\protocol\types\AbilitiesData;
+use pocketmine\network\mcpe\protocol\types\AbilitiesLayer;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\Player;
 use pocketmine\utils\UUID;
 use ReflectionClass;
+use function array_fill;
 use function array_filter;
 use function array_merge;
 use function array_rand;
@@ -918,6 +924,14 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$pk->targetActorUniqueId = $this->getId();
 		$pk->metadata = $this->propertyManager->getAll();
 	    $pk->syncedProperties = new PropertySyncData([], []);
+	    $pk->abilitiesData = UpdateAbilitiesPacket::create(new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->getId() /* TODO: this should be unique ID */, [
+			new AbilitiesLayer(
+				AbilitiesLayer::LAYER_BASE,
+				array_fill(0, AbilitiesLayer::NUMBER_OF_ABILITIES, false),
+				0.0,
+				0.0
+			)
+		]));
 		$player->dataPacket($pk);
 
         if ($player->getProtocol() >= ProtocolInfo::PROTOCOL_220) {

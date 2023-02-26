@@ -219,18 +219,19 @@ interface PacketMagicNumbers{
 	public const GAME_TEST_REQUEST_PACKET = 0xc2;
 	public const GAME_TEST_RESULTS_PACKET = 0xc3;
 	public const UPDATE_CLIENT_INPUT_LOCKS_PACKET = 0xc4;
+	public const CLIENT_CHEAT_ABILITY_PACKET = 0xc5;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xc5;
+	public const EXPLODE_PACKET = 0xc6;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xc6;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xc7;
-	public const DROP_ITEM_PACKET = 0xc8;
-	public const USE_ITEM_PACKET = 0xc9;
-	public const REMOVE_BLOCK_PACKET = 0xca;
-	public const COMMAND_STEP_PACKET = 0xcb;
-	public const ADD_HANGING_ACTOR_PACKET = 0xcc;
-	public const INVENTORY_ACTION_PACKET = 0xcd;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xce;
-	public const ADD_ITEM_PACKET = 0xcf;
+	public const CONTAINER_SET_SLOT_PACKET = 0xc7;
+	public const CONTAINER_SET_CONTENT_PACKET = 0xc8;
+	public const DROP_ITEM_PACKET = 0xc9;
+	public const USE_ITEM_PACKET = 0xca;
+	public const REMOVE_BLOCK_PACKET = 0xcb;
+	public const COMMAND_STEP_PACKET = 0xcc;
+	public const ADD_HANGING_ACTOR_PACKET = 0xcd;
+	public const INVENTORY_ACTION_PACKET = 0xce;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xcf;
+	public const ADD_ITEM_PACKET = 0xd0;
 
 }

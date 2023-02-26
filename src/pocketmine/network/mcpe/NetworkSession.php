@@ -218,6 +218,7 @@ use pocketmine\network\mcpe\protocol\GameTestRequestPacket;
 use pocketmine\network\mcpe\protocol\GameTestResultsPacket;
 use pocketmine\network\mcpe\protocol\ServerStatsPacket;
 use pocketmine\network\mcpe\protocol\UpdateClientInputLocksPacket;
+use pocketmine\network\mcpe\protocol\ClientCheatAbilityPacket;
 
 abstract class NetworkSession{
 
@@ -1000,6 +1001,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleUpdateClientInputLocks(UpdateClientInputLocksPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleClientCheatAbility(ClientCheatAbilityPacket $packet) : bool{
 		return false;
 	}
 }

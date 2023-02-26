@@ -181,7 +181,8 @@ use pocketmine\network\mcpe\protocol\types\SkinAnimation;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
-use pocketmine\network\mcpe\protocol\types\UpdateAbilitiesPacketLayer;
+use pocketmine\network\mcpe\protocol\types\AbilitiesData;
+use pocketmine\network\mcpe\protocol\types\AbilitiesLayer;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
@@ -713,7 +714,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->server->removeOp($this->getName());
 		}
 
-        $this->syncAbilitiesAndAdventureSettings();
+        $this->syncAbilities();
 	}
 
 	/**
@@ -1570,33 +1571,33 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
 	    	//ALL of these need to be set for the base layer, otherwise the client will cry
 	    	$boolAbilities = [
-		    	UpdateAbilitiesPacketLayer::ABILITY_ALLOW_FLIGHT => $this->getAllowFlight(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_FLYING => $this->isFlying(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_NO_CLIP => $this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_OPERATOR => $this->isOp(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_TELEPORT => $this->hasPermission("pocketmine.command.teleport"),
-		    	UpdateAbilitiesPacketLayer::ABILITY_INVULNERABLE => $this->isCreative(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_MUTED => false,
-		    	UpdateAbilitiesPacketLayer::ABILITY_WORLD_BUILDER => false,
-		    	UpdateAbilitiesPacketLayer::ABILITY_INFINITE_RESOURCES => !$this->hasFiniteResources(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_LIGHTNING => false,
-		    	UpdateAbilitiesPacketLayer::ABILITY_BUILD => !$this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_MINE => !$this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_DOORS_AND_SWITCHES => !$this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_OPEN_CONTAINERS => !$this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_ATTACK_PLAYERS => !$this->isSpectator(),
-		    	UpdateAbilitiesPacketLayer::ABILITY_ATTACK_MOBS => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_ALLOW_FLIGHT => $this->getAllowFlight(),
+		    	AbilitiesLayer::ABILITY_FLYING => $this->isFlying(),
+		    	AbilitiesLayer::ABILITY_NO_CLIP => $this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_OPERATOR => $this->isOp(),
+		    	AbilitiesLayer::ABILITY_TELEPORT => $this->hasPermission("pocketmine.command.teleport"),
+		    	AbilitiesLayer::ABILITY_INVULNERABLE => $this->isCreative(),
+		    	AbilitiesLayer::ABILITY_MUTED => false,
+		    	AbilitiesLayer::ABILITY_WORLD_BUILDER => false,
+		    	AbilitiesLayer::ABILITY_INFINITE_RESOURCES => !$this->hasFiniteResources(),
+		    	AbilitiesLayer::ABILITY_LIGHTNING => false,
+		    	AbilitiesLayer::ABILITY_BUILD => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_MINE => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_DOORS_AND_SWITCHES => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_OPEN_CONTAINERS => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_ATTACK_PLAYERS => !$this->isSpectator(),
+		    	AbilitiesLayer::ABILITY_ATTACK_MOBS => !$this->isSpectator(),
 	    	];
 
-	    	$this->sendDataPacket(UpdateAbilitiesPacket::create(
+	    	$this->sendDataPacket(UpdateAbilitiesPacket::create(new AbilitiesData(
 		    	($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL),
 		    	($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER),
 		    	$this->getId(),
 		    	[
 			    	//TODO: dynamic flying speed! FINALLY!!!!!!!!!!!!!!!!!
-			    	new UpdateAbilitiesPacketLayer(UpdateAbilitiesPacketLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
+			    	new AbilitiesLayer(AbilitiesLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
 		    	]
-	    	));
+	    	)));
         }else{
 	    	$pk = new AdventureSettingsPacket();
 
