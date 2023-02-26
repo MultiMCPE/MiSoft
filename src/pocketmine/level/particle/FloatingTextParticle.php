@@ -105,7 +105,6 @@ class FloatingTextParticle extends Particle{
 			$pk->entityRuntimeId = $this->entityId;
 			$pk->position = $this->asVector3(); //TODO: check offset
 			$pk->item = ItemFactory::get(Item::AIR, 0, 0);
-            $pk->targetActorUniqueId = $this->entityId;
             $pk->syncedProperties = new PropertySyncData([], []);
 	        $pk->abilitiesData = UpdateAbilitiesPacket::create(new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->entityId /* TODO: this should be unique ID */, [
 		    	new AbilitiesLayer(
