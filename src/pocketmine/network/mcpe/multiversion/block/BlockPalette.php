@@ -59,19 +59,12 @@ use function krsort;
 
 class BlockPalette{
 	/** @var Palette[] */
-    protected static $palettes = null;
+    protected static $palettes = [];
 
     /**
-     * @param array $palettes
-     * 
      * @return void
      */
-    public static function init(array $palettes = null) : void{
-        if(!empty($palettes)){
-            self::$palettes = $palettes;
-            return;
-        }
-
+    public static function init() : void{
         $pools = [
             ProtocolInfo::PROTOCOL_567 => new BlockPalette567(),
             ProtocolInfo::PROTOCOL_560 => new BlockPalette560(),
@@ -104,7 +97,6 @@ class BlockPalette{
             ProtocolInfo::PROTOCOL_220 => new BlockPalette220()
         ];
 
-        self::$palettes = [];
         foreach($pools as $poolProtocol => $pool){
             Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
                 $pool,
@@ -132,9 +124,14 @@ class BlockPalette{
     }
 
     /**
-     * @return Palette[]|null
+     * @param Palette $palette
+     * @param int $paletteProtocol
+     * 
+     * @return void
      */
-    public static function getPalettes() : ?array{
-        return self::$palettes;
+    public static function addPalette(Palette $palette, int $paletteProtocol) : void{
+        // TODO: как по мне, подойдет для каких-нибудь плагинов. Но вообще, это сделано для CraftingBuildDataTask
+        self::$palettes[$paletteProtocol] = $palette;
+        krsort(self::$palettes);
     }
 }

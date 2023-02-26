@@ -2188,6 +2188,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	$personaPieces,
 		    	$pieceTintColors,
 		    	true, //assume this is true? there's no field for it ...
+		    	$packet->clientData["OverrideSkin"] ?? true,
 	    	);
 
 	    	$skin = $serializedSkin->toSkin();
@@ -2576,7 +2577,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->sendAllInventories();
 		$this->inventory->sendCreativeContents();
 		$this->inventory->sendHeldItem($this);
-        $this->server->getCraftingManager()->sendCraftingData($this);
+        $this->server->getCraftingManager()->requestCraftingDataPacket($this);
 
 		$this->server->addOnlinePlayer($this);
 		$this->server->sendFullPlayerListData($this);

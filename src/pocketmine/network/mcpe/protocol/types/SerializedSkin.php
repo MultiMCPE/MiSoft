@@ -65,6 +65,7 @@ class SerializedSkin{
             new Color(0, 0, 0),
             SplFixedArray::fromArray([]),
             SplFixedArray::fromArray([]),
+            true,
             true
         );
     }
@@ -123,6 +124,8 @@ class SerializedSkin{
     protected $isTrusted = false;
     /** @var bool */
     protected $isPrimaryUser = true;
+    /** @var bool */
+    protected $override = true;
 
 	/**
 	 * @param string          $skinId
@@ -144,8 +147,9 @@ class SerializedSkin{
 	 * @param SplFixedArray   $personaPieces
 	 * @param SplFixedArray   $pieceTintColors
 	 * @param bool            $isPrimaryUser
+	 * @param bool            $override
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, bool $isPrimaryUser = true){
+    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, bool $isPrimaryUser = true, bool $override = true){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === false){
@@ -179,6 +183,7 @@ class SerializedSkin{
         $this->personaPieces = $personaPieces;
         $this->pieceTintColors = $pieceTintColors;
         $this->isPrimaryUser = $isPrimaryUser;
+        $this->override = $override;
     }
 
     /**
@@ -277,6 +282,13 @@ class SerializedSkin{
      */
     public function isPrimaryUser() : bool{
         return $this->isPrimaryUser;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOverride() : bool{
+        return $this->override;
     }
 
     /**

@@ -172,6 +172,9 @@ class NetworkBinaryStream extends BinaryStream{
 	        	$persona = (($this->get(1) !== "\x00"));
 	        	$capeOnClassic = (($this->get(1) !== "\x00"));
 	        	$isPrimaryUser = (($this->get(1) !== "\x00"));
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_567){
+	        	    $override = (($this->get(1) !== "\x00"));
+	        	}
 	    	}
 		}else{
             $armSize = "wide";
@@ -180,7 +183,7 @@ class NetworkBinaryStream extends BinaryStream{
             $pieceTintColors = SplFixedArray::fromArray([]);
 		}
 
-        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $geometryDataVersion ?? "", $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors, $isPrimaryUser ?? true))->toSkin();
+        return (new SerializedSkin($skinId, $skinPlayFabId ?? "", $skinData, $capeId, $capeData, $skinResourcePatch, $geometryData, $geometryDataVersion ?? "", $animationData, $animations, $premium, $persona, $capeOnClassic, $fullSkinId, $armSize, $skinColor, $personaPieces, $pieceTintColors, $isPrimaryUser ?? true, $override ?? true))->toSkin();
 	}
 
 	public function putSkin(Skin $skin, int $playerProtocol){
@@ -237,6 +240,9 @@ class NetworkBinaryStream extends BinaryStream{
 	        	($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
 	        	($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
 	        	($this->buffer .= ($skin->isPrimaryUser() ? "\x01" : "\x00"));
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_567){
+	        	    ($this->buffer .= ($skin->isOverride() ? "\x01" : "\x00"));
+	        	}
 	    	}
 		}
 	}

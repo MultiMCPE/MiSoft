@@ -30,6 +30,8 @@ use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\crafting\CraftingDataBuildTask;
 use pocketmine\timings\Timings;
+use pocketmine\network\mcpe\protocol\BatchPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use function is_null;
 use function count;
@@ -49,12 +51,12 @@ class CraftingManager{
 	/** @var FurnaceRecipe[] */
 	protected $furnaceRecipes = [];
 
+    /** @var BatchPacket[]|null[] */
+    protected $craftingDataCache = [];
+    /** @var CraftingDataBuildTask[]|null[] */
+    protected $craftingDataBuildTask = [];
     /** @var Player[] */
-    private $craftingDataQueue = [];
-    /** @var CraftingDataBuildTask|null */
-    private $craftingDataTask = null;
-    /** @var BatchPacket|null */
-    private $craftingData;
+    protected $waitingPlayers = [];
 
 	public function __construct(){
 		$this->init();
@@ -97,81 +99,50 @@ class CraftingManager{
 	}
 
     /**
-     * @param Player $p
+     * @param BatchPacket
+     * @param int $protocol
      * 
      * @return void
      */
-    public function sendCraftingData(Player $p) : void{
-        Timings::$craftingDataCacheRebuildTimer->startTiming();
+    public function buildCraftingDataCache(BatchPacket $payload, int $protocol) : void{
+        unset($this->craftingDataBuildTask[$protocol]);
+        $this->craftingDataCache[$protocol] = $payload;
 
-        try{
-            $craftingData = $this->getCraftingData();
-            if($craftingData === null){
-                $this->craftingDataQueue[$p->getId()] = $p;
-                return;
+        foreach($this->waitingPlayers[$protocol] as $player){
+            if($player instanceof Player && $player->isConnected()){
+                $this->requestCraftingDataPacket($player);
             }
-            $p->dataPacket($craftingData[$p->getCraftingProtocol()]);
-        }finally{
-            Timings::$craftingDataCacheRebuildTimer->stopTiming();
         }
+
+        unset($this->waitingPlayers[$protocol]);
     }
 
     /**
-     * @return ?array
-     */
-    public function getCraftingData() : ?array{
-        return $this->craftingData;
-    }
-
-    /**
-     * @param array $buffers
+     * @param Player $player
      * 
      * @return void
      */
-    public function setCraftingData(array $buffers) : void{
-        $this->craftingData = $buffers;
-    }
+    public function requestCraftingDataPacket(Player $player) : void{
+        if(!isset($this->craftingDataCache[$player->getCraftingProtocol()])){
+            if(!isset($this->craftingDataBuildTask[$player->getCraftingProtocol()])){
+                Timings::$craftingDataCacheRebuildTimer->startTiming();
 
-    /**
-     * @param array $buffers
-     * 
-     * @return void
-     */
-    public function sendCraftingDataToQueue(array $buffers) : void{
-        foreach($this->craftingDataQueue as $p){
-            $p->dataPacket($buffers[$p->getCraftingProtocol()]);
-        }
+                $player->getServer()->getAsyncPool()->submitTask($this->craftingDataBuildTask[$player->getCraftingProtocol()] = new CraftingDataBuildTask(
+                    $this->shapelessRecipes,
+                    $this->shapedRecipes,
+                    $this->furnaceRecipes,
+                    $player->getCraftingProtocol(),
+                    ($player->getCraftingProtocol() >= ProtocolInfo::PROTOCOL_429 ? BlockPalette::getPalette($player->getCraftingProtocol()) : null),
+                    Server::getInstance()->networkCompressionLevel
+                ));
 
-        if(!is_null($this->craftingDataTask)){
-            $this->craftingDataTask->cancelRun();
-        }
-
-        $this->craftingDataQueue = [];
-        $this->craftingDataTask = null;
-    }
-
-    /**
-     * @return void
-     */
-    public function scheduleQueueUpdate() : void{
-        if(count($this->craftingDataQueue) > 0){
-            if(!is_null($this->craftingDataTask)){
-                if($this->craftingDataTask->isCrashed()){
-                    $this->craftingDataTask = null;
-                    Server::getInstance()->getLogger()->error("Failed to prepare CraftingDataPacket, retrying...");
-                }
-
-                return;
+                Timings::$craftingDataCacheRebuildTimer->stopTiming();
             }
-
-            if(!is_null($this->getCraftingData())){
-                $this->sendCraftingDataToQueue();
-                return;
-            }
-
-            Server::getInstance()->getAsyncPool()->submitTask($task = new CraftingDataBuildTask($this->shapelessRecipes, $this->shapedRecipes, $this->furnaceRecipes, BlockPalette::getPalettes(), Server::getInstance()->networkCompressionLevel));
-            $this->craftingDataTask = $task;
+            $this->waitingPlayers[$player->getCraftingProtocol()][] = $player;
+            return;
         }
+
+        $player->dataPacket($this->craftingDataCache[$player->getCraftingProtocol()]);
     }
 
 	/**

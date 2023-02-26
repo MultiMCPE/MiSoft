@@ -2454,10 +2454,6 @@ class Server{
 				$this->getLogger()->debug(sprintf("World \"%s\" took too long to tick: %gms (%g ticks)", $level->getName(), $tickMs, round($tickMs / 50, 2)));
 			}
 		}
-
-		if($this->craftingManager instanceof CraftingManager){
-		    $this->craftingManager->scheduleQueueUpdate();
-		}
 	}
 
 	public function doAutoSave(){
