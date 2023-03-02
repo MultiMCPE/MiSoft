@@ -172,7 +172,7 @@ class NetworkBinaryStream extends BinaryStream{
 	        	$persona = (($this->get(1) !== "\x00"));
 	        	$capeOnClassic = (($this->get(1) !== "\x00"));
 	        	$isPrimaryUser = (($this->get(1) !== "\x00"));
-	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_567){
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_568){
 	        	    $override = (($this->get(1) !== "\x00"));
 	        	}
 	    	}
@@ -240,7 +240,7 @@ class NetworkBinaryStream extends BinaryStream{
 	        	($this->buffer .= ($skin->isPersonaSkin() ? "\x01" : "\x00"));
 	        	($this->buffer .= ($skin->isCapeOnClassicSkin() ? "\x01" : "\x00"));
 	        	($this->buffer .= ($skin->isPrimaryUser() ? "\x01" : "\x00"));
-	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_567){
+	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_568){
 	        	    ($this->buffer .= ($skin->isOverride() ? "\x01" : "\x00"));
 	        	}
 	    	}
