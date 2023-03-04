@@ -38,7 +38,7 @@ class LevelEventPacket extends DataPacket{
 	public const EVENT_SOUND_DOOR = 1003;
 	public const EVENT_SOUND_FIZZ = 1004;
 	public const EVENT_SOUND_IGNITE = 1005;
-
+    public const EVENT_SOUND_PLAY_RECORDING = 1006;
 	public const EVENT_SOUND_GHAST = 1007;
 	public const EVENT_SOUND_GHAST_SHOOT = 1008;
 	public const EVENT_SOUND_BLAZE_SHOOT = 1009;
@@ -46,6 +46,8 @@ class LevelEventPacket extends DataPacket{
 
 	public const EVENT_SOUND_DOOR_CRASH = 1012;
 
+	public const EVENT_SOUND_ZOMBIE_INFECTED = 1016;
+	public const EVENT_SOUND_ZOMBIE_CONVERT = 1017;
 	public const EVENT_SOUND_ENDERMAN_TELEPORT = 1018;
 
 	public const EVENT_SOUND_ANVIL_BREAK = 1020;
@@ -70,24 +72,47 @@ class LevelEventPacket extends DataPacket{
 	public const EVENT_SOUND_ARMOR_STAND_HIT = 1061;
 	public const EVENT_SOUND_ARMOR_STAND_FALL = 1062;
 	public const EVENT_SOUND_ARMOR_STAND_PLACE = 1063;
-
+    public const EVENT_SOUND_POINTED_DRIPSTONE_FALL = 1064;
 	public const EVENT_SOUND_DYE_USED = 1065;
 	public const EVENT_SOUND_INK_SAC_USED = 1066;
 
-	//TODO: check 2000-2017
 	public const EVENT_PARTICLE_SHOOT = 2000;
-	public const EVENT_PARTICLE_DESTROY = 2001;
+	public const EVENT_PARTICLE_DESTROY = 2001; //sound + particles
 	public const EVENT_PARTICLE_SPLASH = 2002;
 	public const EVENT_PARTICLE_EYE_DESPAWN = 2003;
 	public const EVENT_PARTICLE_SPAWN = 2004;
-
+    public const EVENT_BONE_MEAL_USE = 2005; //sound + green particles
 	public const EVENT_GUARDIAN_CURSE = 2006;
-
+    public const EVENT_PARTICLE_DEATH_SMOKE = 2007;
 	public const EVENT_PARTICLE_BLOCK_FORCE_FIELD = 2008;
 	public const EVENT_PARTICLE_PROJECTILE_HIT = 2009;
-
+	public const EVENT_PARTICLE_DRAGON_EGG_TELEPORT = 2010;
+	public const EVENT_PARTICLE_CROP_EATEN = 2011;
+	public const EVENT_PARTICLE_CRITICAL_HIT = 2012;
 	public const EVENT_PARTICLE_ENDERMAN_TELEPORT = 2013;
 	public const EVENT_PARTICLE_PUNCH_BLOCK = 2014;
+	public const EVENT_PARTICLE_BUBBLE = 2015;
+	public const EVENT_PARTICLE_EVAPORATE = 2016;
+	public const EVENT_PARTICLE_ARMOR_STAND_DESTROY = 2017;
+	public const EVENT_PARTICLE_EGG_PUNCH = 2018;
+	public const EVENT_PARTICLE_EGG_BREAK = 2019;
+	public const EVENT_PARTICLE_ICE_EVAPORATE = 2020;
+	public const EVENT_PARTICLE_DESTROY_NO_SOUND = 2021;
+	public const EVENT_PARTICLE_KNOCKBACK_ROAR = 2022; //spews out tons of white particles
+	public const EVENT_PARTICLE_TELEPORT_TRAIL = 2023;
+	public const EVENT_PARTICLE_POINT_CLOUD = 2024;
+	public const EVENT_PARTICLE_EXPLODE = 2025; //data >= 2 = huge explode seed, otherwise huge explode
+	public const EVENT_PARTICLE_BLOCK_EXPLODE = 2026;
+	public const EVENT_PARTICLE_VIBRATION_SIGNAL = 2027;
+	public const EVENT_PARTICLE_DRIPSTONE_DRIP = 2028;
+	public const EVENT_PARTICLE_FIZZ = 2029;
+	public const EVENT_COPPER_WAX_ON = 2030; //sound + particles
+	public const EVENT_COPPER_WAX_OFF = 2031; //sound + particles
+	public const EVENT_COPPER_SCRAPE = 2032; //sound + particles
+	public const EVENT_PARTICLE_ELECTRIC_SPARK = 2033; //lightning rod
+	public const EVENT_PARTICLE_TURTLE_EGG_GROW = 2034;
+	public const EVENT_PARTICLE_SCULK_SHRIEK = 2035;
+	public const EVENT_PARTICLE_SCULK_CATALYST_BLOOM = 2036;
 
 	public const EVENT_START_RAIN = 3001;
 	public const EVENT_START_THUNDER = 3002;
@@ -106,14 +131,22 @@ class LevelEventPacket extends DataPacket{
 	public const EVENT_CAULDRON_FILL_WATER = 3506;
 	public const EVENT_CAULDRON_TAKE_WATER = 3507;
 	public const EVENT_CAULDRON_ADD_DYE = 3508;
-	public const EVENT_CAULDRON_CLEAN_BANNER = 3509;
+	public const EVENT_CAULDRON_CLEAN_BANNER = 3509; //particle + sound
+	public const EVENT_PARTICLE_CAULDRON_FLUSH = 3510;
+	public const EVENT_PARTICLE_AGENT_SPAWN = 3511;
+	public const EVENT_SOUND_CAULDRON_FILL_LAVA = 3512;
+	public const EVENT_SOUND_CAULDRON_TAKE_LAVA = 3513;
+	public const EVENT_SOUND_CAULDRON_FILL_POWDER_SNOW = 3514;
+	public const EVENT_SOUND_CAULDRON_TAKE_POWDER_SNOW = 3515;
 
 	public const EVENT_BLOCK_START_BREAK = 3600;
 	public const EVENT_BLOCK_STOP_BREAK = 3601;
+	public const EVENT_BLOCK_BREAK_SPEED = 3602;
+	public const EVENT_PLAYERS_SLEEPING = 3603;
 
 	public const EVENT_SET_DATA = 4000;
 
-	public const EVENT_PLAYERS_SLEEPING = 9800;
+	public const EVENT_NUMBER_OF_SLEEPING_PLAYERS = 9801;
 
 	public const EVENT_ADD_PARTICLE_MASK = 0x4000;
 
