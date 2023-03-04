@@ -123,27 +123,13 @@ class BatchPacket extends DataPacket{
 	}
 
 	public function handle(NetworkSession $session) : bool{
-	    $data = $this->payload;
-	    try{
-	        $data = zlib_decode($data, 1024 * 1024 * 2); //Max 2MB
-	    }catch(ErrorException $e){ //zlib decode error
-	        if($session->isCompressionEnabled() && $this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
-		        $data = "";
-	        }else{
-	            if($session->isCompressionEnabled()){
-	                if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-	                    if(!(PacketPool::getPacket($data, $session->getProtocol())) instanceof UnknownPacket){
-	                        $data = Binary::writeUnsignedVarInt(strlen($data)) . $data; // for <= 1.0
-	                    }
-	                }
-	            }
+	    if($session->isCompressionEnabled()){
+	        try{
+	            $this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
+	        }catch(ErrorException $e){ //zlib decode error
+	            $this->payload = Binary::writeUnsignedVarInt(strlen($this->payload)) . $this->payload; // for <= 1.0
 	        }
 	    }
-        $this->payload = $data;
-
-        if($this->payload === ""){
-            return false;
-        }
 
 		foreach($this->getPackets() as $buf){
 			$pk = PacketPool::getPacket($buf, $session->getProtocol());

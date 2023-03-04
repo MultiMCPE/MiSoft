@@ -117,6 +117,5 @@ final class PacketsIds110{
 	public const STRUCTURE_BLOCK_UPDATE_PACKET = 0x5b;
 	public const SHOW_STORE_OFFER_PACKET = 0x5c;
 	public const PURCHASE_RECEIPT_PACKET = 0x5d;
-	public const REQUEST_NETWORK_SETTINGS_PACKET = 0xc1; //TODO: 1.19.30
 
 }

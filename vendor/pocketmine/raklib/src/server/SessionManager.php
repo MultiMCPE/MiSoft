@@ -113,6 +113,9 @@ class SessionManager{
 
 	protected $reusableAddress;
 
+	/** @var array */
+	protected $temporaryProtocols = [];
+
 	public function __construct(RakLibServer $server, UDPServerSocket $socket, int $maxMtuSize){
 		$this->server = $server;
 		$this->socket = $socket;
@@ -222,6 +225,11 @@ class SessionManager{
 		++$this->ticks;
 	}
 
+	public function storeProtocol(int $protocol, InternetAddress $address) : void{
+		$this->checkTemporaryProtocols();
+
+		$this->temporaryProtocols[$address->toString()] = $protocol;
+	}
 
 	private function receivePacket() : bool{
 		$address = $this->reusableAddress;
@@ -343,7 +351,7 @@ class SessionManager{
 	protected function streamOpen(Session $session) : void{
 		$address = $session->getAddress();
 		$identifier = $address->toString();
-		$buffer = chr(RakLib::PACKET_OPEN_SESSION) . chr(strlen($identifier)) . $identifier . chr(strlen($address->ip)) . $address->ip . (pack("n", $address->port)) . (pack("NN", $session->getID() >> 32, $session->getID() & 0xFFFFFFFF));
+		$buffer = chr(RakLib::PACKET_OPEN_SESSION) . chr(strlen($identifier)) . $identifier . chr(strlen($address->ip)) . $address->ip . (pack("n", $address->port)) . chr($session->getProtocol()) . (pack("NN", $session->getID() >> 32, $session->getID() & 0xFFFFFFFF));
 		$this->server->pushThreadToMainPacket($buffer);
 	}
 
@@ -485,7 +493,10 @@ class SessionManager{
 	public function createSession(InternetAddress $address, int $clientId, int $mtuSize) : Session{
 		$this->checkSessions();
 
-		$this->sessions[$address->toString()] = $session = new Session($this, clone $address, $clientId, $mtuSize);
+		$protocol = $this->temporaryProtocols[$address->toString()] ?? RakLib::DEFAULT_PROTOCOL_VERSION;
+		unset($this->temporaryProtocols[$address->toString()]);
+
+		$this->sessions[$address->toString()] = $session = new Session($this, clone $address, $clientId, $mtuSize, $protocol);
 		$this->getLogger()->debug("Created session for $address with MTU size $mtuSize");
 
 		return $session;
@@ -516,6 +527,18 @@ class SessionManager{
 					if(count($this->sessions) <= 4096){
 						break;
 					}
+				}
+			}
+		}
+	}
+
+	private function checkTemporaryProtocols() : void{
+		$count = count($this->temporaryProtocols);
+		if($count > 2048){
+			foreach($this->temporaryProtocols as $ip => $protocol){
+				unset($this->temporaryProtocols[$ip]);
+				if(--$count <= 2048){
+					break;
 				}
 			}
 		}

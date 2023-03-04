@@ -157,7 +157,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->interface->emergencyShutdown();
 	}
 
-	public function openSession(string $identifier, string $address, int $port, int $clientID) : void{
+	public function openSession(string $identifier, string $address, int $port, int $clientID, int $protocolVersion) : void{
 		$ev = new PlayerCreationEvent($this, Player::class, Player::class, $address, $port);
 		$ev->call();
 		$class = $ev->getPlayerClass();
@@ -166,7 +166,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		 * @var Player $player
 		 * @see Player::__construct()
 		 */
-		$player = new $class($this, $ev->getAddress(), $ev->getPort());
+		$player = new $class($this, $ev->getAddress(), $ev->getPort(), $protocolVersion);
 		$this->players[$identifier] = $player;
 		$this->identifiersACK[$identifier] = 0;
 		$this->identifiers[spl_object_hash($player)] = $identifier;

@@ -82,6 +82,8 @@ class Session{
 	/** @var int */
 	private $mtuSize;
 	/** @var int */
+	private $protocol;
+	/** @var int */
 	private $id;
 	/** @var int */
 	private $splitID = 0;
@@ -138,7 +140,7 @@ class Session{
 	/** @var int */
 	private $lastPingMeasure = 1;
 
-	public function __construct(SessionManager $sessionManager, InternetAddress $address, int $clientId, int $mtuSize){
+	public function __construct(SessionManager $sessionManager, InternetAddress $address, int $clientId, int $mtuSize, int $protocol){
 		if($mtuSize < self::MIN_MTU_SIZE){
 			throw new InvalidArgumentException("MTU size must be at least " . self::MIN_MTU_SIZE . ", got $mtuSize");
 		}
@@ -163,6 +165,8 @@ class Session{
 		$this->receiveOrderedPackets = array_fill(0, self::CHANNEL_COUNT, []);
 
 		$this->mtuSize = $mtuSize;
+
+		$this->protocol = $protocol;
 	}
 
 	public function getAddress() : InternetAddress{
@@ -171,6 +175,10 @@ class Session{
 
 	public function getID() : int{
 		return $this->id;
+	}
+
+	public function getProtocol() : int{
+		return $this->protocol;
 	}
 
 	public function getState() : int{

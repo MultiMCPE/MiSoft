@@ -122,8 +122,9 @@ class ServerHandler{
 				$offset += $len;
 				$port = (unpack("n", substr($packet, $offset, 2))[1]);
 				$offset += 2;
+				$protocol = ord($packet[$offset++]);
 				$clientID = Binary::readLong(substr($packet, $offset, 8));
-				$this->instance->openSession($identifier, $address, $port, $clientID);
+				$this->instance->openSession($identifier, $address, $port, $clientID, $protocol);
 			}elseif($id === RakLib::PACKET_CLOSE_SESSION){
 				$len = ord($packet[$offset++]);
 				$identifier = substr($packet, $offset, $len);

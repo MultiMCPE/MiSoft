@@ -63,6 +63,7 @@ class OfflineMessageHandler{
 					$pk->mtuSize = $packet->mtuSize + 28; //IP header size (20 bytes) + UDP header size (8 bytes)
 					$pk->serverID = $this->sessionManager->getID();
 					$this->sessionManager->sendPacket($pk, $address);
+					$this->sessionManager->storeProtocol($packet->protocol, $address);
 				}
 				return true;
 			case OpenConnectionRequest2::$ID:

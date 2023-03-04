@@ -26,8 +26,9 @@ interface ServerInstance{
 	 * @param string $address
 	 * @param int    $port
 	 * @param int    $clientID
+	 * @param int    $protocolVersion
 	 */
-	public function openSession(string $identifier, string $address, int $port, int $clientID) : void;
+	public function openSession(string $identifier, string $address, int $port, int $clientID, int $protocolVersion) : void;
 
 	/**
 	 * @param string $identifier

@@ -284,7 +284,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $sessionAdapter;
 
     /** @var bool */
-    protected $enableCompression = false;
+    protected $enableCompression = true;
 
     /** @var ?EncryptionContext */
 	protected $cipher = null;
@@ -293,6 +293,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $ip;
 	/** @var int */
 	protected $port;
+    /** @var int */
+    protected $raknetProtocol;
 
 	/** @var bool[] */
 	private $needACK = [];
@@ -829,14 +831,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * @param SourceInterface $interface
 	 * @param string          $ip
 	 * @param int             $port
+	 * @param int             $raknetProtocol
 	 */
-	public function __construct(SourceInterface $interface, string $ip, int $port){
+	public function __construct(SourceInterface $interface, string $ip, int $port, int $raknetProtocol){
 		$this->interface = $interface;
 		$this->perm = new PermissibleBase($this);
 		$this->namedtag = new CompoundTag();
 		$this->server = Server::getInstance();
 		$this->ip = $ip;
 		$this->port = $port;
+		$this->raknetProtocol = $raknetProtocol;
+		if($this->raknetProtocol >= 11){ // MCBE_RAKNET_PROTOCOL_VERSION_WITHOUT_ZLIB_COMPRESSION
+		    $this->enableCompression = false;
+		    $this->protocol = ProtocolInfo::PROTOCOL_567;
+		}
 		$this->loaderId = Level::generateChunkLoaderId($this);
 		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
 		$this->spawnThreshold = (int) (($this->server->getProperty("chunk-sending.spawn-radius", 4) ** 2) * M_PI);
@@ -975,6 +983,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function getPort() : int{
 		return $this->port;
 	}
+
+    /**
+     * @return int
+     */
+    public function getRaknetProtocol() : int{
+        return $this->raknetProtocol;
+    }
 
 	/**
 	 * Returns the last measured latency for this player, in milliseconds. This is measured automatically and reported
@@ -2091,9 +2106,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         $this->protocol = $packet->protocol;
-        if($this->protocol < ProtocolInfo::PROTOCOL_553){
-            $this->enableCompression = true;
-        }
 		if(!$packet->isValidProtocol){
 			if($packet->protocol < ProtocolInfo::CURRENT_PROTOCOL){
 				$this->sendPlayStatus(PlayStatusPacket::LOGIN_FAILED_CLIENT, true);
