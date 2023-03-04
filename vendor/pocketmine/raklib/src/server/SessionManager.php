@@ -38,6 +38,7 @@ use raklib\utils\InternetAddress;
 use SplFixedArray;
 use ThreadedLogger;
 use Throwable;
+use Volatile;
 use function asort;
 use function bin2hex;
 use function chr;
@@ -144,8 +145,8 @@ class SessionManager{
 		return $this->maxMtuSize;
 	}
 
-	public function getProtocolVersion() : int{
-		return $this->server->getProtocolVersion();
+	public function getProtocolVersions() : Volatile{
+		return $this->server->getProtocolVersions();
 	}
 
 	public function getLogger() : ThreadedLogger{

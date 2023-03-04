@@ -58,7 +58,11 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	 * Sometimes this gets changed when the MCPE-layer protocol gets broken to the point where old and new can't
 	 * communicate. It's important that we check this to avoid catastrophes.
 	 */
-	private const MCPE_RAKNET_PROTOCOL_VERSION = 11;
+	private const MCBE_RAKNET_PROTOCOL_VERSION_WITHOUT_ZLIB_COMPRESSION = 11;
+	private const MCBE_RAKNET_PROTOCOL_VERSION_WITH_RAW_ZLIB_ENCODING = 10;
+	private const MCBE_RAKNET_PROTOCOL_VERSION = 9;
+	private const MCPE_RAKNET_PROTOCOL_VERSION = 8;
+
 	private const MCPE_RAKNET_PACKET_ID = "\xfe";
 
 	/** @var Server */
@@ -94,7 +98,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			COMPOSER_AUTOLOADER_PATH,
 			new InternetAddress($this->server->getIp(), $this->server->getPort(), 4),
 			(int) $this->server->getProperty("network.max-mtu-size", 1492),
-			self::MCPE_RAKNET_PROTOCOL_VERSION,
+			[
+			    self::MCBE_RAKNET_PROTOCOL_VERSION_WITHOUT_ZLIB_COMPRESSION,
+			    self::MCBE_RAKNET_PROTOCOL_VERSION_WITH_RAW_ZLIB_ENCODING,
+			    self::MCBE_RAKNET_PROTOCOL_VERSION,
+			    self::MCPE_RAKNET_PROTOCOL_VERSION
+			],
 			$this->sleeper
 		);
 		$this->interface = new ServerHandler($this->rakLib, $this);

@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace raklib\server;
 
+use Volatile;
 use Exception;
 use Phar;
 use Thread;
@@ -46,6 +47,7 @@ use function str_replace;
 use function strval;
 use function substr;
 use function trim;
+use function count;
 use function xdebug_get_function_stack;
 use const DIRECTORY_SEPARATOR;
 use const E_ALL;
@@ -91,21 +93,21 @@ class RakLibServer extends Thread{
 	protected $serverId = 0;
 	/** @var int */
 	protected $maxMtuSize;
-	/** @var int */
-	private $protocolVersion;
+	/** @var Volatile|int[] */
+	private $protocolVersions;
 
 	/** @var SleeperNotifier */
 	protected $mainThreadNotifier;
 
 	/**
-	 * @param ThreadedLogger      $logger
+	 * @param ThreadedLogger       $logger
 	 * @param string               $autoloaderPath Path to Composer autoloader
 	 * @param InternetAddress      $address
 	 * @param int                  $maxMtuSize
-	 * @param int|null             $overrideProtocolVersion Optional custom protocol version to use, defaults to current RakLib's protocol
+	 * @param int[]                $protocolVersions
 	 * @param SleeperNotifier|null $sleeper
 	 */
-	public function __construct(ThreadedLogger $logger, string $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, ?int $overrideProtocolVersion = null, ?SleeperNotifier $sleeper = null){
+	public function __construct(ThreadedLogger $logger, string $autoloaderPath, InternetAddress $address, int $maxMtuSize = 1492, $protocolVersions = [], ?SleeperNotifier $sleeper = null){
 		$this->address = $address;
 
 		$this->serverId = mt_rand(0, PHP_INT_MAX);
@@ -123,7 +125,7 @@ class RakLibServer extends Thread{
 			$this->mainPath = realpath(getcwd()) . DIRECTORY_SEPARATOR;
 		}
 
-		$this->protocolVersion = $overrideProtocolVersion ?? RakLib::DEFAULT_PROTOCOL_VERSION;
+		$this->protocolVersions = count($protocolVersions) === 0 ? [RakLib::DEFAULT_PROTOCOL_VERSION] : $protocolVersions;
 
 		$this->mainThreadNotifier = $sleeper;
 	}
@@ -144,8 +146,8 @@ class RakLibServer extends Thread{
 		return $this->serverId;
 	}
 
-	public function getProtocolVersion() : int{
-		return $this->protocolVersion;
+	public function getProtocolVersions() : Volatile{
+		return $this->protocolVersions;
 	}
 
 	/**

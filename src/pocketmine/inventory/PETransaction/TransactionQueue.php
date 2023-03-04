@@ -59,18 +59,17 @@ class TransactionQueue{
     }
 
     /**
+     * @return ?SplQueue
+     */ 
+    public function getTransactions() : ?SplQueue{
+    	return $this->transactionQueue;
+    }
+
+    /**
      * @return CraftingGrid
      */
     public function getInventory() : CraftingGrid{
         return $this->transactionInventory;
-    }
-    
-    /**
-     * @return SplQueue
-     */ 
-	
-    public function getTransactions(){
-	return $this->transactionQueue;
     }
 
     /**

@@ -27,6 +27,9 @@ use raklib\protocol\UnconnectedPing;
 use raklib\protocol\UnconnectedPong;
 use raklib\utils\InternetAddress;
 use function min;
+use function reset;
+use function in_array;
+use function implode;
 
 class OfflineMessageHandler{
 	/** @var SessionManager */
@@ -48,10 +51,19 @@ class OfflineMessageHandler{
 				return true;
 			case OpenConnectionRequest1::$ID:
 				/** @var OpenConnectionRequest1 $packet */
-				$pk = new OpenConnectionReply1();
-				$pk->mtuSize = $packet->mtuSize + 28; //IP header size (20 bytes) + UDP header size (8 bytes)
-				$pk->serverID = $this->sessionManager->getID();
-				$this->sessionManager->sendPacket($pk, $address);
+				$serverProtocols = (array) $this->sessionManager->getProtocolVersions();
+				if(!in_array($packet->protocol, $serverProtocols, true)){
+					$pk = new IncompatibleProtocolVersion();
+					$pk->protocolVersion = reset($serverProtocols);
+					$pk->serverId = $this->sessionManager->getID();
+					$this->sessionManager->sendPacket($pk, $address);
+					$this->sessionManager->getLogger()->notice("Refused connection from $address due to incompatible RakNet protocol version (expected " . implode(" ", $serverProtocols) . ", got $packet->protocol)");
+				}else{
+					$pk = new OpenConnectionReply1();
+					$pk->mtuSize = $packet->mtuSize + 28; //IP header size (20 bytes) + UDP header size (8 bytes)
+					$pk->serverID = $this->sessionManager->getID();
+					$this->sessionManager->sendPacket($pk, $address);
+				}
 				return true;
 			case OpenConnectionRequest2::$ID:
 				/** @var OpenConnectionRequest2 $packet */
