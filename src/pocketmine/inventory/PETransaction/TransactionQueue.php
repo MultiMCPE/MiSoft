@@ -64,6 +64,14 @@ class TransactionQueue{
     public function getInventory() : CraftingGrid{
         return $this->transactionInventory;
     }
+    
+    /**
+     * @return SplQueue
+     */ 
+	
+    public function getTransactions(){
+	return $this->transactionQueue;
+    }
 
     /**
      * @param Transaction $transaction
