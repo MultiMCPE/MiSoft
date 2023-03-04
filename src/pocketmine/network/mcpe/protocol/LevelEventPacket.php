@@ -71,6 +71,9 @@ class LevelEventPacket extends DataPacket{
 	public const EVENT_SOUND_ARMOR_STAND_FALL = 1062;
 	public const EVENT_SOUND_ARMOR_STAND_PLACE = 1063;
 
+	public const EVENT_SOUND_DYE_USED = 1065;
+	public const EVENT_SOUND_INK_SAC_USED = 1066;
+
 	//TODO: check 2000-2017
 	public const EVENT_PARTICLE_SHOOT = 2000;
 	public const EVENT_PARTICLE_DESTROY = 2001;

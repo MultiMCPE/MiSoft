@@ -3627,6 +3627,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case 'ACTION_STOP_ITEM_USE_ON':
 				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
 				break;
+			case 'ACTION_HANDLED_TELEPORT':
+			    break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());
 				return false;
