@@ -36,7 +36,6 @@ use function microtime;
 use function random_int;
 
 class SerializedSkin{
-
     public const GEOMETRY_CUSTOM = "geometry.humanoid.custom";
     public const GEOMETRY_CUSTOM_SLIM = "geometry.humanoid.customSlim";
 
@@ -53,7 +52,7 @@ class SerializedSkin{
             "",
             $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
             json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
-            self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
+            $skin->getGeometryData(),
             "",
             "",
             [],
@@ -68,20 +67,6 @@ class SerializedSkin{
             true,
             true
         );
-    }
-
-    /**
-     * @param string $skinGeometryData
-     * @param string $skinGeometryName
-     * 
-     * @return string
-     */
-    public static function updateGeometry(string $skinGeometryData, string $skinGeometryName) : string{
-        if($skinGeometryData === "" || $skinGeometryName === "" || $skinGeometryName === self::GEOMETRY_CUSTOM || $skinGeometryName === self::GEOMETRY_CUSTOM_SLIM){
-            return "";
-        }
-
-        return $skinGeometryData;
     }
 
     /** @var string */
@@ -121,7 +106,7 @@ class SerializedSkin{
     /** @var SplFixedArray */
     protected $pieceTintColors;
     /** @var bool */
-    protected $isTrusted = false;
+    protected $isTrusted = true;
     /** @var bool */
     protected $isPrimaryUser = true;
     /** @var bool */
@@ -149,7 +134,28 @@ class SerializedSkin{
 	 * @param bool            $isPrimaryUser
 	 * @param bool            $override
 	 */
-    public function __construct(string $skinId, string $playFabId, SkinImage $skinImage, string $capeId, SkinImage $capeImage, string $resourcePatch, string $geometryData, string $geometryDataEngineVersion, string $animationData, array $animationFrames, bool $premiumSkin, bool $personaSkin, bool $capeOnClassicSkin, ?string $fullSkinId, string $armSize, Color $skinColor, SplFixedArray $personaPieces, SplFixedArray $pieceTintColors, bool $isPrimaryUser = true, bool $override = true){
+    public function __construct(
+        string $skinId,
+        string $playFabId,
+        SkinImage $skinImage,
+        string $capeId,
+        SkinImage $capeImage,
+        string $resourcePatch,
+        string $geometryData,
+        string $geometryDataEngineVersion,
+        string $animationData,
+        array $animationFrames,
+        bool $premiumSkin,
+        bool $personaSkin,
+        bool $capeOnClassicSkin,
+        ?string $fullSkinId,
+        string $armSize,
+        Color $skinColor,
+        SplFixedArray $personaPieces,
+        SplFixedArray $pieceTintColors,
+        bool $isPrimaryUser = true,
+        bool $override = true
+    ){
         if($geometryData !== ""){
             $decodedData = (new Comment())->decode($geometryData);
             if($decodedData === false){
