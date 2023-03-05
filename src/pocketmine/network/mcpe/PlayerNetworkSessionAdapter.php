@@ -77,6 +77,7 @@ use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\TickSyncPacket;
+use pocketmine\network\mcpe\protocol\EmoteListPacket;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
@@ -184,6 +185,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleTickSync(TickSyncPacket $packet) : bool{
 		return true; //Not used
+	}
+
+	public function handleEmoteList(EmoteListPacket $packet) : bool{
+		return true; // Not used
 	}
 
 	public function handleInteract(InteractPacket $packet) : bool{
