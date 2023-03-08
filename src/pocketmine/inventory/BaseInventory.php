@@ -102,7 +102,7 @@ abstract class BaseInventory implements Inventory{
 	}
 
 	public function getItem(int $index) : Item{
-		return $this->slots[$index] !== null ? clone $this->slots[$index] : ItemFactory::get(Item::AIR, 0, 0);
+		return isset($this->slots[$index]) ? clone $this->slots[$index] : ItemFactory::get(Item::AIR, 0, 0);
 	}
 
 	/**
@@ -262,6 +262,7 @@ abstract class BaseInventory implements Inventory{
                 return $i;
             }
         }
+
         return -1;
     }
 
