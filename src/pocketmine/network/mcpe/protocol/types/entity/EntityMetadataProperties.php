@@ -14,11 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\entity;
 
-final class EntityMetadataProperties{
-
-	private function __construct(){
-		//NOOP
-	}
+interface EntityMetadataProperties{
 
 	/*
 	 * Readers beware: this isn't a nice list. Some of the properties have different types for different entities, and

@@ -14,11 +14,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types\entity;
 
-final class EntityMetadataFlags{
+interface EntityMetadataFlags{
 
-	private function __construct(){
-		//NOOP
-	}
     public const DATA_FLAG_ONFIRE = 0;
     public const DATA_FLAG_SNEAKING = 1;
     public const DATA_FLAG_RIDING = 2;
