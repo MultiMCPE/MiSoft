@@ -24,8 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
-
-use pocketmine\network\mcpe\multiversion\TextEnums;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function count;
@@ -34,18 +33,18 @@ use function ord;
 class TextPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TEXT_PACKET;
 
-	public const TYPE_RAW = "TYPE_RAW";
-	public const TYPE_CHAT = "TYPE_CHAT";
-	public const TYPE_TRANSLATION = "TYPE_TRANSLATION";
-	public const TYPE_POPUP = "TYPE_POPUP";
-	public const TYPE_JUKEBOX_POPUP = "TYPE_JUKEBOX_POPUP";
-	public const TYPE_TIP = "TYPE_TIP";
-	public const TYPE_SYSTEM = "TYPE_SYSTEM";
-	public const TYPE_WHISPER = "TYPE_WHISPER";
-	public const TYPE_ANNOUNCEMENT = "TYPE_ANNOUNCEMENT";
-	public const TYPE_JSON_WHISPER = "TYPE_JSON_WHISPER";
-	public const TYPE_JSON = "TYPE_JSON";
-	public const TYPE_JSON_ANNOUNCEMENT = "TYPE_JSON_ANNOUNCEMENT";
+	public const TYPE_RAW = 0;
+	public const TYPE_CHAT = 1;
+	public const TYPE_TRANSLATION = 2;
+	public const TYPE_POPUP = 3;
+	public const TYPE_JUKEBOX_POPUP = 4;
+	public const TYPE_TIP = 5;
+	public const TYPE_SYSTEM = 6;
+	public const TYPE_WHISPER = 7;
+	public const TYPE_ANNOUNCEMENT = 8;
+	public const TYPE_JSON_WHISPER = 9;
+	public const TYPE_JSON = 10;
+	public const TYPE_JSON_ANNOUNCEMENT = 11;
 
 	/** @var int */
 	public $type;
@@ -67,8 +66,7 @@ class TextPacket extends DataPacket{
 	public $platformChatId = "";
 
 	protected function decodePayload(){
-		$this->type = (ord($this->get(1)));
-		$this->type = TextEnums::getMessageType($this->getProtocol(), $this->type);
+		$this->type = MultiversionEnums::getMessageType($this->getProtocol(), (ord($this->get(1))));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->needsTranslation = (($this->get(1) !== "\x00"));
 		}
@@ -115,8 +113,7 @@ class TextPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$typeId = TextEnums::getMessageTypeId($this->getProtocol(), $this->type);
-		($this->buffer .= chr($typeId));
+		($this->buffer .= chr(MultiversionEnums::getMessageTypeId($this->getProtocol(), $this->type)));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
 		}

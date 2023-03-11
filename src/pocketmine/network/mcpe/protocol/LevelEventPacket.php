@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\utils\Binary;
 
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\NetworkSession;
 
@@ -164,7 +165,12 @@ class LevelEventPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->evid);
+        if($this->evid >= self::EVENT_ADD_PARTICLE_MASK){
+            $evid = self::EVENT_ADD_PARTICLE_MASK | MultiversionEnums::getParticleId($this->getProtocol(), $this->evid % self::EVENT_ADD_PARTICLE_MASK);
+        }else{
+            $evid = $this->evid;
+        }
+		$this->putVarInt($evid);
 		$this->putVector3Nullable($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	switch($this->evid){

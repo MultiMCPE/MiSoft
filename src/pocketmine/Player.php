@@ -3523,16 +3523,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handlePlayerAction(PlayerActionPacket $packet) : bool{
-        $action = ActionEnums::getPlayerAction($this->protocol, $packet->action);
-        if(!$this->spawned or (!$this->isAlive() && $action !== "ACTION_DIMENSION_CHANGE_REQUEST" && $action !== "ACTION_RESPAWN")){
+        if(!$this->spawned or (!$this->isAlive() && $packet->action !== PlayerActionPacket::ACTION_DIMENSION_CHANGE_REQUEST && $packet->action !== PlayerActionPacket::ACTION_RESPAWN)){
             return false;
         }
 
 		$packet->entityRuntimeId = $this->id;
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 
-		switch($action){
-		    case 'ACTION_RELEASE_ITEM':
+		switch($packet->action){
+		    case PlayerActionPacket::ACTION_RELEASE_ITEM:
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 		            try{
 				    	if($this->isUsingItem()){
@@ -3554,7 +3553,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		        }
 
 		        break;
-			case 'ACTION_START_BREAK':
+			case PlayerActionPacket::ACTION_START_BREAK:
 				if($pos->distanceSquared($this) > 10000){
 					break;
 				}
@@ -3588,58 +3587,58 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				break;
 
-			case 'ACTION_ABORT_BREAK':
-			case 'ACTION_STOP_BREAK':
+			case PlayerActionPacket::ACTION_ABORT_BREAK:
+			case PlayerActionPacket::ACTION_STOP_BREAK:
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_STOP_BREAK);
 				break;
-			case 'ACTION_STOP_SLEEPING':
+			case PlayerActionPacket::ACTION_STOP_SLEEPING:
 				$this->stopSleep();
 				break;
-			case 'ACTION_DIMENSION_CHANGE_REQUEST':
-			case 'ACTION_RESPAWN':
+			case PlayerActionPacket::ACTION_DIMENSION_CHANGE_REQUEST:
+			case PlayerActionPacket::ACTION_RESPAWN:
 				if($this->isAlive()){
 					break;
 				}
 
 				$this->respawn();
 				break;
-			case 'ACTION_JUMP':
+			case PlayerActionPacket::ACTION_JUMP:
 				$this->jump();
 				return true;
-			case 'ACTION_START_SPRINT':
+			case PlayerActionPacket::ACTION_START_SPRINT:
 				$this->toggleSprint(true);
 				return true;
-			case 'ACTION_STOP_SPRINT':
+			case PlayerActionPacket::ACTION_STOP_SPRINT:
 				$this->toggleSprint(false);
 				return true;
-			case 'ACTION_START_SNEAK':
+			case PlayerActionPacket::ACTION_START_SNEAK:
 				$this->toggleSneak(true);
 				return true;
-			case 'ACTION_STOP_SNEAK':
+			case PlayerActionPacket::ACTION_STOP_SNEAK:
 				$this->toggleSneak(false);
 				return true;
-			case 'ACTION_CONTINUE_BREAK':
+			case PlayerActionPacket::ACTION_CONTINUE_BREAK:
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $data | ($packet->face << 24));
 				
 				//TODO: destroy-progress level event
 				break;
-			case 'ACTION_START_SWIMMING':
+			case PlayerActionPacket::ACTION_START_SWIMMING:
 				break; //TODO
-			case 'ACTION_STOP_SWIMMING':
+			case PlayerActionPacket::ACTION_STOP_SWIMMING:
 				//TODO: handle this when it doesn't spam every damn tick (yet another spam bug!!)
 				break;
-			case 'ACTION_INTERACT_BLOCK': //TODO: ignored (for now)
+			case PlayerActionPacket::ACTION_INTERACT_BLOCK: //TODO: ignored (for now)
 				break;
-			case 'ACTION_CREATIVE_PLAYER_DESTROY_BLOCK':
+			case PlayerActionPacket::ACTION_CREATIVE_PLAYER_DESTROY_BLOCK:
 				//TODO: do we need to handle this?
 				break;
-			case 'ACTION_START_ITEM_USE_ON':
-			case 'ACTION_STOP_ITEM_USE_ON':
+			case PlayerActionPacket::ACTION_START_ITEM_USE_ON:
+			case PlayerActionPacket::ACTION_STOP_ITEM_USE_ON:
 				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
 				break;
-			case 'ACTION_HANDLED_TELEPORT':
+			case PlayerActionPacket::ACTION_HANDLED_TELEPORT:
 			    break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());

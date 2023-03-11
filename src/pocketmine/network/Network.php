@@ -29,6 +29,8 @@ namespace pocketmine\network;
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
 use pocketmine\network\mcpe\protocol\PacketPool;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
+use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
@@ -57,6 +59,8 @@ class Network{
 
 	public function __construct(Server $server){
 		PacketPool::init();
+		MultiversionEnums::init();
+		MetadataConvertor::init();
         ItemPalette::init();
         BlockPalette::init();
         BiomeDefinitionPalette::init();

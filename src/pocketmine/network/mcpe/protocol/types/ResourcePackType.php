@@ -21,12 +21,21 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\level\particle;
+namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\math\Vector3;
+final class ResourcePackType{
 
-class SlimeParticle extends GenericParticle{
-	public function __construct(Vector3 $pos){
-		parent::__construct($pos, Particle::TYPE_SLIME);
+	private function __construct(){
+		//NOOP
 	}
+
+	public const INVALID = 0;
+	public const ADDON = 1;
+	public const CACHED = 2;
+	public const COPY_PROTECTED = 3;
+	public const BEHAVIORS = 4;
+	public const PERSONA_PIECE = 5;
+	public const RESOURCES = 6;
+	public const SKINS = 7;
+	public const WORLD_TEMPLATE = 8;
 }

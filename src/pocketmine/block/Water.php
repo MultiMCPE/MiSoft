@@ -53,11 +53,11 @@ class Water extends Liquid{
 		return BlockFactory::get(Block::FLOWING_WATER, $this->meta);
 	}
 
-	public function getBucketFillSound() : string{
+	public function getBucketFillSound() : int{
 		return LevelSoundEventPacket::SOUND_BUCKET_FILL_WATER;
 	}
 
-	public function getBucketEmptySound() : string{
+	public function getBucketEmptySound() : int{
 		return LevelSoundEventPacket::SOUND_BUCKET_EMPTY_WATER;
 	}
 

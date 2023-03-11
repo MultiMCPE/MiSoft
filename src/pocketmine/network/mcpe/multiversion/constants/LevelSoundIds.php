@@ -21,12 +21,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\constants;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class SoundEnums{
-    private static $levelSoundEvent = [
+final class LevelSoundIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const LEVEL_SOUND_IDS = [
         ProtocolInfo::PROTOCOL_560 => [
             "SOUND_ITEM_USE_ON" => 0,
             "SOUND_HIT" => 1,
@@ -2477,52 +2481,5 @@ abstract class SoundEnums{
 			"SOUND_DEFAULT" => 106,
 			"SOUND_UNDEFINED" => 107
 		]
-    ];
-
-    /**
-     * @param int $playerProtocol
-     * @param int $eventId
-     * 
-     * @return string
-     */
-	public static function getLevelSoundEventName(int $playerProtocol, int $eventId) : string{
-		$group = self::getSoundTypesByProtocol($playerProtocol);
-		foreach($group as $key => $value){
-		    if($value === $eventId){
-		        return $key;
-		    }
-		}
-
-		return array_key_last($group);
-	}
-
-    /**
-     * @param int $playerProtocol
-     * @param string|array $eventName
-     * 
-     * @return int
-     */
-	public static function getLevelSoundEventId(int $playerProtocol, $eventName) : int{
-		$group = self::getSoundTypesByProtocol($playerProtocol);
-		if(isset($group[$eventName])){
-		    return $group[$eventName];
-		}
-
-		return count($group) - 1;
-	}
-
-    /**
-     * @param int $playerProtocol
-     * 
-     * @return array
-     */
-	private static function getSoundTypesByProtocol(int $playerProtocol) : array{
-		foreach(self::$levelSoundEvent as $protocol => $types){
-			if($playerProtocol >= $protocol){
-			    return $types;
-			}
-		}
-
-		return [];
-	}
+	];
 }

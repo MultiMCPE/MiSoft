@@ -31,6 +31,7 @@ use pocketmine\item\ItemFactory;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\level\Level;
 use pocketmine\level\particle\AngryVillagerParticle;
+use pocketmine\level\particle\BlockForceFieldParticle;
 use pocketmine\level\particle\BubbleParticle;
 use pocketmine\level\particle\CriticalParticle;
 use pocketmine\level\particle\DustParticle;
@@ -41,6 +42,7 @@ use pocketmine\level\particle\FlameParticle;
 use pocketmine\level\particle\HappyVillagerParticle;
 use pocketmine\level\particle\HeartParticle;
 use pocketmine\level\particle\HugeExplodeParticle;
+use pocketmine\level\particle\HugeExplodeSeedParticle;
 use pocketmine\level\particle\InkParticle;
 use pocketmine\level\particle\InstantEnchantParticle;
 use pocketmine\level\particle\ItemBreakParticle;
@@ -150,6 +152,8 @@ class ParticleCommand extends VanillaCommand{
 				return new ExplodeParticle($pos);
 			case "hugeexplosion":
 				return new HugeExplodeParticle($pos);
+			case "hugeexplosionseed":
+			    return new HugeExplodeSeedParticle($pos);
 			case "bubble":
 				return new BubbleParticle($pos);
 			case "splash":
@@ -206,6 +210,8 @@ class ParticleCommand extends VanillaCommand{
 				return new HappyVillagerParticle($pos);
 			case "angryvillager":
 				return new AngryVillagerParticle($pos);
+			case "forcefield":
+				return new BlockForceFieldParticle($pos, $data ?? 0);
 
 		}
 

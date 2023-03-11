@@ -1,0 +1,228 @@
+<?php
+
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
+declare(strict_types=1);
+
+namespace pocketmine\network\mcpe\multiversion\constants;
+
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
+final class ParticleIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const PARTICLE_IDS = [
+		ProtocolInfo::PROTOCOL_389 => [
+			"TYPE_BUBBLE" => 1,
+			"TYPE_BUBBLE_MANUAL" => 2,
+			"TYPE_CRITICAL" => 3,
+			"TYPE_BLOCK_FORCE_FIELD" => 4,
+			"TYPE_SMOKE" => 5,
+			"TYPE_EXPLODE" => 6,
+			"TYPE_EVAPORATION" => 7,
+			"TYPE_FLAME" => 8,
+			"TYPE_LAVA" => 9,
+			"TYPE_LARGE_SMOKE" => 10,
+			"TYPE_REDSTONE" => 11,
+			"TYPE_RISING_RED_DUST" => 12,
+			"TYPE_ITEM_BREAK" => 13,
+			"TYPE_SNOWBALL_POOF" => 14,
+			"TYPE_HUGE_EXPLODE" => 15,
+			"TYPE_HUGE_EXPLODE_SEED" => 16,
+			"TYPE_MOB_FLAME" => 17,
+			"TYPE_HEART" => 18,
+			"TYPE_TERRAIN" => 19,
+			"TYPE_SUSPENDED_TOWN" => 20, "TOWN_AURA" => 20,
+			"TYPE_PORTAL" => 21,
+
+			"TYPE_SPLASH" => 23, "WATER_SPLASH" => 23,
+			"TYPE_WATER_SPLASH_MANUAL" => 24,
+			"TYPE_WATER_WAKE" => 25,
+			"TYPE_DRIP_WATER" => 26,
+			"TYPE_DRIP_LAVA" => 27,
+			"TYPE_DRIP_HONEY" => 28,
+			"TYPE_FALLING_DUST" => 29, "DUST" => 29,
+			"TYPE_MOB_SPELL" => 30,
+			"TYPE_MOB_SPELL_AMBIENT" => 31,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 32,
+			"TYPE_INK" => 33,
+			"TYPE_SLIME" => 34,
+			"TYPE_RAIN_SPLASH" => 35,
+			"TYPE_VILLAGER_ANGRY" => 36,
+			"TYPE_VILLAGER_HAPPY" => 37,
+			"TYPE_ENCHANTMENT_TABLE" => 38,
+			"TYPE_TRACKING_EMITTER" => 39,
+			"TYPE_NOTE" => 40,
+			"TYPE_WITCH_SPELL" => 41,
+			"TYPE_CARROT" => 42,
+			"TYPE_MOB_APPEARANCE" => 43,
+			"TYPE_END_ROD" => 44,
+			"TYPE_DRAGONS_BREATH" => 45,
+			"TYPE_SPIT" => 46,
+			"TYPE_TOTEM" => 47,
+			"TYPE_FOOD" => 48,
+			"TYPE_FIREWORKS_STARTER" => 49,
+			"TYPE_FIREWORKS_SPARK" => 50,
+			"TYPE_FIREWORKS_OVERLAY" => 51,
+			"TYPE_BALLOON_GAS" => 52,
+			"TYPE_COLORED_FLAME" => 53,
+			"TYPE_SPARKLER" => 54,
+			"TYPE_CONDUIT" => 55,
+			"TYPE_BUBBLE_COLUMN_UP" => 56,
+			"TYPE_BUBBLE_COLUMN_DOWN" => 57,
+			"TYPE_SNEEZE" => 58,
+			/*"TYPE_SHULKER_BULLET" => 59,
+			"TYPE_BLEACH" => 60,
+			"TYPE_DRAGON_DESTROY_BLOCK" => 61,
+			"TYPE_MYCELIUM_DUST" => 62,
+			"TYPE_FALLING_RED_DUST" => 63,
+			"TYPE_CAMPFIRE_SMOKE" => 64,
+			"TYPE_TALL_CAMPFIRE_SMOKE" => 65,
+			"TYPE_DRAGON_BREATH_FIRE" => 66,
+			"TYPE_DRAGON_BREATH_TRAIL" => 67*/
+		],
+		ProtocolInfo::PROTOCOL_360 => [
+			"TYPE_BUBBLE" => 1,
+			"TYPE_BUBBLE_MANUAL" => 2,
+			"TYPE_CRITICAL" => 3,
+			"TYPE_BLOCK_FORCE_FIELD" => 4,
+			"TYPE_SMOKE" => 5,
+			"TYPE_EXPLODE" => 6,
+			"TYPE_EVAPORATION" => 7,
+			"TYPE_FLAME" => 8,
+			"TYPE_LAVA" => 9,
+			"TYPE_LARGE_SMOKE" => 10,
+			"TYPE_REDSTONE" => 11,
+			"TYPE_RISING_RED_DUST" => 12,
+			"TYPE_ITEM_BREAK" => 13,
+			"TYPE_SNOWBALL_POOF" => 14,
+			"TYPE_HUGE_EXPLODE" => 15,
+			"TYPE_HUGE_EXPLODE_SEED" => 16,
+			"TYPE_MOB_FLAME" => 17,
+			"TYPE_HEART" => 18,
+			"TYPE_TERRAIN" => 19,
+			"TYPE_SUSPENDED_TOWN" => 20, "TOWN_AURA" => 20,
+			"TYPE_PORTAL" => 21,
+
+			"TYPE_SPLASH" => 23, "WATER_SPLASH" => 23,
+			"TYPE_WATER_SPLASH_MANUAL" => 24,
+			"TYPE_WATER_WAKE" => 25,
+			"TYPE_DRIP_WATER" => 26,
+			"TYPE_DRIP_LAVA" => 27,
+			"TYPE_FALLING_DUST" => 28, "DUST" => 28,
+			"TYPE_MOB_SPELL" => 29,
+			"TYPE_MOB_SPELL_AMBIENT" => 30,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 31,
+			"TYPE_INK" => 32,
+			"TYPE_SLIME" => 33,
+			"TYPE_RAIN_SPLASH" => 34,
+			"TYPE_VILLAGER_ANGRY" => 35,
+			"TYPE_VILLAGER_HAPPY" => 36,
+			"TYPE_ENCHANTMENT_TABLE" => 37,
+			"TYPE_TRACKING_EMITTER" => 38,
+			"TYPE_NOTE" => 39,
+			"TYPE_WITCH_SPELL" => 40,
+			"TYPE_CARROT" => 41,
+			"TYPE_MOB_APPEARANCE" => 42,
+			"TYPE_END_ROD" => 43,
+			"TYPE_DRAGONS_BREATH" => 44,
+			"TYPE_SPIT" => 45,
+			"TYPE_TOTEM" => 46,
+			"TYPE_FOOD" => 47,
+			"TYPE_FIREWORKS_STARTER" => 48,
+			"TYPE_FIREWORKS_SPARK" => 49,
+			"TYPE_FIREWORKS_OVERLAY" => 50,
+			"TYPE_BALLOON_GAS" => 51,
+			"TYPE_COLORED_FLAME" => 52,
+			"TYPE_SPARKLER" => 53,
+			"TYPE_CONDUIT" => 54,
+			"TYPE_BUBBLE_COLUMN_UP" => 55,
+			"TYPE_BUBBLE_COLUMN_DOWN" => 56,
+			"TYPE_SNEEZE" => 57,
+
+			/*"TYPE_SHULKER_BULLET" => 58,
+			"TYPE_BLEACH" => 59,
+			"TYPE_DRAGON_DESTROY_BLOCK" => 60,
+			"TYPE_MYCELIUM_DUST" => 61,
+			"TYPE_FALLING_RED_DUST" => 62,
+			"TYPE_CAMPFIRE_SMOKE" => 63,
+			"TYPE_TALL_CAMPFIRE_SMOKE" => 64,
+			"TYPE_DRAGON_BREATH_FIRE" => 65,
+			"TYPE_DRAGON_BREATH_TRAIL" => 66*/
+		],
+		ProtocolInfo::PROTOCOL_110 => [
+			"TYPE_BUBBLE" => 1,
+			"TYPE_CRITICAL" => 2,
+			"TYPE_BLOCK_FORCE_FIELD" => 3,
+			"TYPE_SMOKE" => 4,
+			"TYPE_EXPLODE" => 5,
+			"TYPE_EVAPORATION" => 6,
+			"TYPE_FLAME" => 7,
+			"TYPE_LAVA" => 8,
+			"TYPE_LARGE_SMOKE" => 9,
+			"TYPE_REDSTONE" => 10,
+			"TYPE_RISING_RED_DUST" => 11,
+			"TYPE_ITEM_BREAK" => 12,
+			"TYPE_SNOWBALL_POOF" => 13,
+			"TYPE_HUGE_EXPLODE" => 14,
+			"TYPE_HUGE_EXPLODE_SEED" => 15,
+			"TYPE_MOB_FLAME" => 16,
+			"TYPE_HEART" => 17,
+			"TYPE_TERRAIN" => 18,
+			"TYPE_SUSPENDED_TOWN" => 19, "TOWN_AURA" => 19,
+			"TYPE_PORTAL" => 20,
+			"TYPE_SPLASH" => 21, "WATER_SPLASH" => 21,
+			"TYPE_WATER_WAKE" => 22,
+			"TYPE_DRIP_WATER" => 23,
+			"TYPE_DRIP_LAVA" => 24,
+			"TYPE_FALLING_DUST" => 25, "DUST" => 25,
+			"TYPE_MOB_SPELL" => 26,
+			"TYPE_MOB_SPELL_AMBIENT" => 27,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 28,
+			"TYPE_INK" => 29,
+			"TYPE_SLIME" => 30,
+			"TYPE_RAIN_SPLASH" => 31,
+			"TYPE_VILLAGER_ANGRY" => 32,
+			"TYPE_VILLAGER_HAPPY" => 33,
+			"TYPE_ENCHANTMENT_TABLE" => 34,
+			"TYPE_TRACKING_EMITTER" => 35,
+			"TYPE_NOTE" => 36,
+			"TYPE_WITCH_SPELL" => 37,
+			"TYPE_CARROT" => 38,
+			"TYPE_END_ROD" => 40,
+			"TYPE_DRAGONS_BREATH" => 41,
+			"TYPE_SPIT" => 42,
+			"TYPE_TOTEM" => 43,
+			"TYPE_FOOD" => 44,
+			"TYPE_FIREWORKS_STARTER" => 45,
+			"TYPE_FIREWORKS_SPARK" => 46,
+			"TYPE_FIREWORKS_OVERLAY" => 47,
+			"TYPE_BALLOON_GAS" => 48,
+			"TYPE_COLORED_FLAME" => 49,
+			"TYPE_SPARKLER" => 50,
+			"TYPE_CONDUIT" => 51,
+			"TYPE_BUBBLE_COLUMN_UP" => 52,
+			"TYPE_BUBBLE_COLUMN_DOWN" => 53,
+			"TYPE_SNEEZE" => 54
+		]
+	];
+}

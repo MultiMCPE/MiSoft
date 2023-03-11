@@ -21,14 +21,17 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\constants;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class ActionEnums{
-    private static $playerActionType = [
+final class PlayerActionIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const PLAYER_ACTION_IDS = [
         ProtocolInfo::PROTOCOL_567 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -62,7 +65,6 @@ abstract class ActionEnums{
 	        'ACTION_HANDLED_TELEPORT' => 30
         ],
         ProtocolInfo::PROTOCOL_526 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -95,7 +97,6 @@ abstract class ActionEnums{
 	        'ACTION_STOP_ITEM_USE_ON' => 29
         ],
         ProtocolInfo::PROTOCOL_428 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -126,7 +127,6 @@ abstract class ActionEnums{
 	        'ACTION_CONTINUE_DESTROY_BLOCK' => 27
         ],
         ProtocolInfo::PROTOCOL_419 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -155,7 +155,6 @@ abstract class ActionEnums{
             'ACTION_INTERACT_BLOCK' => 25
         ],
         ProtocolInfo::PROTOCOL_134 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -184,7 +183,6 @@ abstract class ActionEnums{
             'ACTION_INTERACT_BLOCK' => 25
         ],
         ProtocolInfo::PROTOCOL_130 => [
-            'UNKNOWN' => -1,
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,
@@ -227,52 +225,5 @@ abstract class ActionEnums{
             'ACTION_BUILD_DENIED' => 17,
             'ACTION_CONTINUE_BREAK' => 18
         ]
-    ];
-
-    /**
-     * @param int $playerProtocol
-     * @param int $actionId
-     * 
-     * @return string
-     */
-    public static function getPlayerAction(int $playerProtocol, int $actionId) : string{
-		$group = self::getActionTypesByProtocol($playerProtocol);
-		foreach ($group as $key => $value) {
-		    if ($value === $actionId) {
-		        return $key;
-		    }
-		}
-
-		return 'UNKNOWN';
-	}
-
-    /**
-     * @param int $playerProtocol
-     * @param string $actionName
-     * 
-     * @return int
-     */
-	public static function getPlayerActionId(int $playerProtocol, string $actionName) : int{
-		$group = self::getActionTypesByProtocol($playerProtocol);
-		if (isset($group[$actionName])) {
-		    return $group[$actionName];
-		}
-
-		return -1;
-	}
-
-    /**
-     * @param int $playerProtocol
-     * 
-     * @return array
-     */
-	private static function getActionTypesByProtocol(int $playerProtocol) : array{
-		foreach (self::$playerActionType as $protocol => $types) {
-			if ($playerProtocol >= $protocol) {
-			    return $types;
-			}
-		}
-
-		return [];
-	}
+	];
 }

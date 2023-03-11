@@ -61,11 +61,11 @@ class ShulkerBoxInventory extends ContainerInventory{
 		return $this->holder;
 	}
 
-	protected function getOpenSound() : string{
+	protected function getOpenSound() : int{
 		return LevelSoundEventPacket::SOUND_SHULKERBOX_OPEN;
 	}
 
-	protected function getCloseSound() : string{
+	protected function getCloseSound() : int{
 		return LevelSoundEventPacket::SOUND_SHULKERBOX_CLOSED;
 	}
 

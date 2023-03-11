@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\CommandListJson;
-use pocketmine\network\mcpe\multiversion\CommandEnums;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandEnumConstraint;
@@ -404,7 +404,7 @@ class AvailableCommandsPacket extends DataPacket{
                     if(($type & self::ARG_FLAG_VALID) !== 0x0){
                         $type &=~ self::ARG_FLAG_VALID;
                     }
-                    $type = CommandEnums::getCommandArgType($type, $this->getProtocol());
+                    $type = MultiversionEnums::getCommandArgType($type, $this->getProtocol());
                     $type |= self::ARG_FLAG_VALID;
 				}
 

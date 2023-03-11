@@ -21,13 +21,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\constants;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
-use ReflectionClass;
 
-abstract class CommandEnums{
-    private static $commandArgTypes = [
+final class CommandArgumentTypeIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const COMMAND_ARGUMENT_TYPE_IDS = [
 		ProtocolInfo::PROTOCOL_526 => [
 			"ARG_TYPE_INT" => 0x01,
 			"ARG_TYPE_FLOAT" => 0x03,
@@ -185,26 +188,5 @@ abstract class CommandEnums{
 			"ARG_TYPE_JSON" => 0x15,
 			"ARG_TYPE_COMMAND" => 0x1c
 		]
-    ];
-
-    /**
-     * @param int $argTypeInt
-     * @param int $playerProtocol
-     * 
-     * @return int
-     */
-	public static function getCommandArgType(int $argTypeInt, int $playerProtocol) : int{
-	    $commandsArgs = (new ReflectionClass('pocketmine\network\mcpe\protocol\AvailableCommandsPacket'))->getConstants();
-	    foreach(self::$commandArgTypes as $protocol => $types){
-	        if($playerProtocol >= $protocol){
-	            foreach($commandsArgs as $stringArg => $intArg){
-	                if($intArg === $argTypeInt){
-	                    return isset($types[$stringArg]) ? $types[$stringArg] : 0;
-	                }
-	            }
-	        }
-	    }
-
-	    return 0;
-	}
+	];
 }

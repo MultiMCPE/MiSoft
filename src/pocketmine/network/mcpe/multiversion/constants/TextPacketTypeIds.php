@@ -21,12 +21,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\constants;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class TextEnums{
-    private static $textPacketType = [
+final class TextPacketTypeIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const TEXT_PACKET_TYPE_IDS = [
         ProtocolInfo::PROTOCOL_553 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
@@ -76,52 +80,5 @@ abstract class TextEnums{
             "TYPE_WHISPER" => 6,
             "TYPE_ANNOUNCEMENT" => 7
         ]
-    ];
-
-    /**
-     * @param int $playerProtocol
-     * @param int $typeId
-     * 
-     * @return string
-     */
-	public static function getMessageType(int $playerProtocol, int $typeId) : string{
-		$group = self::getTextTypesByProtocol($playerProtocol);
-		foreach($group as $key => $value){
-		    if($value === $typeId){
-		        return $key;
-		    }
-		}
-
-		return 'TYPE_RAW';
-	}
-
-    /**
-     * @param int $playerProtocol
-     * @param string $typeName
-     * 
-     * @return int
-     */
-	public static function getMessageTypeId(int $playerProtocol, string $typeName) : int{
-		$group = self::getTextTypesByProtocol($playerProtocol);
-		if(isset($group[$typeName])){
-		    return $group[$typeName];
-		}
-
-		return 0;
-	}
-
-    /**
-     * @param int $playerProtocol
-     * 
-     * @return array
-     */
-    private static function getTextTypesByProtocol(int $playerProtocol) : array{
-		foreach(self::$textPacketType as $protocol => $types){
-			if($playerProtocol >= $protocol){
-			    return $types;
-			}
-		}
-
-		return [];
-	}
+	];
 }

@@ -596,7 +596,7 @@ final class MetadataConvertor{
     /** @var SplFixedArray<int>[] */
     protected static $protocolFlags;
 
-    protected static function init() : void{
+    public static function init() : void{
         $magicNetworkMetadataProperties = (new ReflectionClass(EntityMetadataProperties::class))->getConstants();
         $magicNetworkFlags = (new ReflectionClass(EntityMetadataFlags::class))->getConstants();
 
@@ -628,12 +628,6 @@ final class MetadataConvertor{
         krsort(self::$protocolFlags);
     }
 
-    protected static function lazyInit() : void{
-        if(self::$protocolMetadata === null || self::$protocolFlags === null){
-            self::init();
-        }
-    }
-
     /**
      * @param array $metadata
      * @param int $playerProtocol
@@ -641,8 +635,6 @@ final class MetadataConvertor{
      * @return array
      */
     public static function updateMeta(array $metadata, int $playerProtocol) : array{
-        self::lazyInit();
-
         $flags = $flags2 = null;
 
         if(isset($metadata[EntityMetadataProperties::DATA_FLAGS])){

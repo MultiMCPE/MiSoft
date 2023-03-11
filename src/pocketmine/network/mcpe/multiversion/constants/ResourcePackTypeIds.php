@@ -21,12 +21,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\multiversion;
+namespace pocketmine\network\mcpe\multiversion\constants;
 
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-abstract class ResourceEnums{
-	private static $packTypes = [
+final class ResourcePackTypeIds{
+	private function __construct(){
+		//NOOP
+	}
+
+	public const RESOURCE_PACK_TYPE_IDS = [
 		ProtocolInfo::PROTOCOL_370 => [
 			"TYPE_INVALID" => 0,
 			"TYPE_ADDON" => 1,
@@ -39,7 +43,7 @@ abstract class ResourceEnums{
 			"TYPE_WORLD_TEMPLATE" => 8,
 			"TYPE_COUNT" => 9
 		],
-		ProtocolInfo::PROTOCOL_110 => [
+		ProtocolInfo::PROTOCOL_360 => [
 			"TYPE_INVALID" => 0,
 			"TYPE_RESOURCE" => 1,
 			"TYPE_BEHAVIOR" => 2,
@@ -51,20 +55,4 @@ abstract class ResourceEnums{
 			"TYPE_COUNT" => 8
 		]
 	];
-
-    /**
-     * @param int $playerProtocol
-     * @param string $typeName
-     * 
-     * @return int
-     */
-	public static function getPackTypeId(int $playerProtocol, string $typeName) : int{
-		foreach(self::$packTypes as $protocol => $types){
-			if($playerProtocol >= $protocol){
-			    return $types[$typeName] ?? 0;
-			}
-		}
-
-		return 0;
-	}
 }

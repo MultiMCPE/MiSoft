@@ -26,7 +26,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\utils\Binary;
 
-use pocketmine\network\mcpe\multiversion\ResourceEnums;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
+use pocketmine\network\mcpe\protocol\types\ResourcePackType;
 use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function ord;
@@ -35,17 +36,6 @@ use function unpack;
 
 class ResourcePackDataInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_DATA_INFO_PACKET;
-
-	public const TYPE_INVALID = 'TYPE_INVALID';
-	public const TYPE_ADDON = 'TYPE_ADDON';
-	public const TYPE_CACHED = 'TYPE_CACHED';
-	public const TYPE_COPY_PROTECTED = 'TYPE_COPY_PROTECTED';
-	public const TYPE_BEHAVIOR = 'TYPE_BEHAVIOR';
-	public const TYPE_PERSONA_PIECE = 'TYPE_PERSONA_PIECE';
-	public const TYPE_RESOURCE = 'TYPE_RESOURCE';
-	public const TYPE_SKINS = 'TYPE_SKINS';
-	public const TYPE_WORLD_TEMPLATE = 'TYPE_WORLD_TEMPLATE';
-	public const TYPE_COUNT = 'TYPE_COUNT';
 
 	/** @var string */
 	public $packId;
@@ -59,8 +49,8 @@ class ResourcePackDataInfoPacket extends DataPacket{
 	public $sha256;
 	/** @var bool */
 	public $isPremium = false;
-	/** @var string|int */
-	public $packType = self::TYPE_RESOURCE; //TODO: check the values for this
+	/** @var int */
+	public $packType = ResourcePackType::RESOURCES; //TODO: check the values for this
 
 	protected function decodePayload(){
 		$this->packId = $this->getString();
@@ -68,9 +58,9 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		$this->chunkCount = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 		$this->compressedPackSize = (Binary::readLLong($this->get(8)));
 		$this->sha256 = $this->getString();
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	$this->isPremium = (($this->get(1) !== "\x00"));
-	    	$this->packType = (ord($this->get(1)));
+	    	$this->packType = MultiversionEnums::getPackType($this->getProtocol(), (ord($this->get(1))));
 		}
 	}
 
@@ -80,9 +70,9 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		($this->buffer .= (pack("V", $this->chunkCount)));
 		($this->buffer .= (pack("VV", $this->compressedPackSize & 0xFFFFFFFF, $this->compressedPackSize >> 32)));
 		$this->putString($this->sha256);
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	($this->buffer .= ($this->isPremium ? "\x01" : "\x00"));
-	    	($this->buffer .= chr(ResourceEnums::getPackTypeId($this->getProtocol(), $this->packType)));
+	    	($this->buffer .= chr(MultiversionEnums::getPackTypeId($this->getProtocol(), $this->packType)));
 		}
 	}
 

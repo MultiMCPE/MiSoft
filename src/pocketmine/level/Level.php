@@ -517,12 +517,18 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function addParticle(Particle $particle, array $players = null){
-		if ($players === null) {
-			$players = $this->getChunkPlayers($particle->x >> 4, $particle->z >> 4);
+		$pk = $particle->encode();
+		if(!is_array($pk)){
+		    $pk = [$pk];
 		}
-
-		if (!empty($players)) {
-			$particle->spawnFor($players);
+		if(!empty($pk)){
+			if($players === null){
+				foreach($pk as $e){
+					$this->broadcastPacketToViewers($particle, $e);
+				}
+			}else{
+				$this->server->batchPackets($players, $pk, false);
+			}
 		}
 	}
 
@@ -550,15 +556,15 @@ class Level implements ChunkManager, Metadatable{
 	 * Broadcasts a LevelSoundEvent to players in the area.
 	 *
 	 * @param Vector3 $pos
-	 * @param string     $soundName
+	 * @param int     $soundId
 	 * @param int     $extraData
 	 * @param int     $entityTypeId
 	 * @param bool    $isBabyMob
 	 * @param bool    $disableRelativeVolume If true, all players receiving this sound-event will hear the sound at full volume regardless of distance
 	 */
-	public function broadcastLevelSoundEvent(Vector3 $pos, string $soundName, int $extraData = -1, int $entityTypeId = 1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
+	public function broadcastLevelSoundEvent(Vector3 $pos, int $soundId, int $extraData = -1, int $entityTypeId = 1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
 		$pk = new LevelSoundEventPacket();
-		$pk->sound = $soundName;
+		$pk->sound = $soundId;
 		$pk->extraData = $extraData;
 		$pk->entityType = $entityTypeId;
 		$pk->isBabyMob = $isBabyMob;

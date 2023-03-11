@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\level\particle;
 
-use pocketmine\Server;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Skin;
 use pocketmine\item\Item;
@@ -52,32 +51,40 @@ class FloatingTextParticle extends Particle{
 
 	/**
 	 * @param Vector3 $pos
-	 * @param int $text
-	 * @param string $title
+	 * @param string  $text
+	 * @param string  $title
 	 */
-	public function __construct(Vector3 $pos, $text, $title = ""){
+	public function __construct(Vector3 $pos, string $text, string $title = ""){
 		parent::__construct($pos->x, $pos->y, $pos->z);
 		$this->text = $text;
 		$this->title = $title;
 	}
 
-	public function setText($text){
+	public function getText() : string{
+		return $this->text;
+	}
+
+	public function setText(string $text) : void{
 		$this->text = $text;
 	}
 
-	public function setTitle($title){
-		$this->title = $title;
-	}
-	
-	public function isInvisible(){
-		return $this->invisible;
-	}
-	
-	public function setInvisible($value = true){
-		$this->invisible = (bool) $value;
+	public function getTitle() : string{
+		return $this->title;
 	}
 
-	public function spawnFor($players){
+	public function setTitle(string $title) : void{
+		$this->title = $title;
+	}
+
+	public function isInvisible() : bool{
+		return $this->invisible;
+	}
+
+	public function setInvisible(bool $value = true) : void{
+		$this->invisible = $value;
+	}
+
+	public function encode(){
 		$p = [];
 
 		if($this->entityId === null){
@@ -130,8 +137,6 @@ class FloatingTextParticle extends Particle{
 			$p[] = $remove;
 		}
 
-		foreach ($p as $pk) {
-			Server::getInstance()->broadcastPacket($players, $pk);
-		}
+		return $p;
 	}
 }
