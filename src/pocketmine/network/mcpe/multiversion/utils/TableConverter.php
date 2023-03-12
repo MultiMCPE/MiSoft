@@ -22,6 +22,8 @@
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\utils;
+use function max;
+use SplFixedArray;
 
 final class TableConverter{
 	private function __construct(){
@@ -31,12 +33,12 @@ final class TableConverter{
 	/**
 	 * @param int[] $from
 	 * @param int[] $to
-	 * @param \SplFixedArray<int|null>|null $fromTo reference parameter
-	 * @param \SplFixedArray<int|null>|null $toFrom reference parameter
+	 * @param SplFixedArray<int|null>|null $fromTo reference parameter
+	 * @param SplFixedArray<int|null>|null $toFrom reference parameter
 	 */
-	public static function convert(array $from, array $to, ?\SplFixedArray &$fromTo, ?\SplFixedArray &$toFrom, int $defaultValue = -1) : void{
-		$fromTo = new \SplFixedArray(max($from) + 1);
-		$toFrom = new \SplFixedArray(max($to) + 1);
+	public static function convert(array $from, array $to, ?SplFixedArray &$fromTo, ?SplFixedArray &$toFrom, int $defaultValue = -1) : void{
+		$fromTo = new SplFixedArray(max($from) + 1);
+		$toFrom = new SplFixedArray(max($to) + 1);
 		foreach($from as $name => $value){
 			if(isset($to[$name])){
 				$fromTo[$value] = $to[$name];
@@ -54,9 +56,9 @@ final class TableConverter{
 	}
 
 	/**
-	 * @param \SplFixedArray<int|null> $array
+	 * @param SplFixedArray<int|null> $array
 	 */
-	private static function fillDefaultValue(\SplFixedArray $array, int $defaultValue) : void{
+	private static function fillDefaultValue(SplFixedArray $array, int $defaultValue) : void{
 		for($i = 0; $i < $array->getSize(); $i++){
 			if($array[$i] === null){
 				$array[$i] = $defaultValue;

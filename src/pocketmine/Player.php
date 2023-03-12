@@ -3591,6 +3591,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case PlayerActionPacket::ACTION_STOP_BREAK:
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_STOP_BREAK);
 				break;
+			case PlayerActionPacket::ACTION_START_SLEEPING:
+				//unused
+				break;
 			case PlayerActionPacket::ACTION_STOP_SLEEPING:
 				$this->stopSleep();
 				break;
@@ -3617,6 +3620,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case PlayerActionPacket::ACTION_STOP_SNEAK:
 				$this->toggleSneak(false);
 				return true;
+			case PlayerActionPacket::ACTION_START_GLIDE:
+			case PlayerActionPacket::ACTION_STOP_GLIDE:
+				break; //TODO
 			case PlayerActionPacket::ACTION_CONTINUE_BREAK:
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);

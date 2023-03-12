@@ -690,7 +690,7 @@ class NetworkBinaryStream extends BinaryStream{
 			}
 		}
 
-		return $data;
+		return MetadataConvertor::rollbackMeta($data, $playerProtocol);
 	}
 
 	/**
