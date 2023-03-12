@@ -111,7 +111,7 @@ use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\PlayerNetworkSessionAdapter;
 use pocketmine\network\mcpe\multiversion\ProtocolConvertor;
-use pocketmine\network\mcpe\multiversion\ActionEnums;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
@@ -2876,7 +2876,17 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 
 				$this->dataPacket($packet);
-				//$this->server->broadcastPacket($this->getViewers(), $packet);
+				foreach($this->getViewers() as $viewer){
+				    $pk = clone $packet;
+				    if($viewer->getProtocol() < ProtocolInfo::PROTOCOL_419){
+				        $pk->data = $this->inventory->getItemInHand()->getId();
+				    }else{
+				        $palette = ItemPalette::getPalette($viewer->getProtocol());
+				        [$netId, ] = $palette::getRuntimeFromLegacyId($this->inventory->getItemInHand()->getId(), 0);
+				        $pk->data = $netId << 16;
+				    }
+				    $viewer->sendDataPacket($pk);
+				}
 				break;
 			default:
 				return false;

@@ -357,31 +357,12 @@ class SerializedSkin{
 			);
 		}
 
-        $skinGeometryData = (new Comment())->decode($this->geometryData, true);
-        if(isset($skinGeometryData["format_version"])){
-            unset($skinGeometryData["format_version"]);
-            if(isset($skinGeometryData["minecraft:geometry"])){
-                foreach($skinGeometryData["minecraft:geometry"] as $geometry){
-                    $skinGeometryData[$geometry["description"]["identifier"]] = [
-                        "texturewidth" => $geometry["description"]["texture_width"],
-                        "textureheight" => $geometry["description"]["texture_height"],
-                        "bones" => $geometry["bones"]
-                    ];
-                }
-
-                unset($skinGeometryData["minecraft:geometry"]);
-            }
-            $skinGeometryData = json_encode($skinGeometryData);
-        }else{
-            unset($skinGeometryData);
-        }
-
         $skin = new Skin(
             $this->skinId,
             $this->skinImage->getData(),
             $this->capeImage->getData(),
             json_decode($this->resourcePatch)->geometry->default ?? self::GEOMETRY_CUSTOM,
-            $skinGeometryData ?? $this->geometryData
+            $this->geometryData
         );
         $skin->setSerializedSkin($this);
 
