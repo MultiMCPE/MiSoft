@@ -2876,7 +2876,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 
 				$this->dataPacket($packet);
-				$this->server->broadcastPacket($this->getViewers(), $packet);
+				//$this->server->broadcastPacket($this->getViewers(), $packet);
 				break;
 			default:
 				return false;

@@ -238,7 +238,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 				$info->getMaxPlayerCount(),
 				$this->rakLib->getServerId(),
 				$this->server->getName(),
-				Server::getGamemodeName($this->server->getGamemode())
+				Server::getGamemodeName(Player::getClientFriendlyGamemode($this->server->getGamemode()))
 			]) . ";"
 		);
 	}
@@ -271,13 +271,10 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		    	$buffer = self::MCPE_RAKNET_PACKET_ID . ($cipher !== null ? $cipher->encrypt($rawBuffer) : $rawBuffer);
 
 		    	$pk = new EncapsulatedPacket();
-		    	$pk->buffer = $buffer;
-		    	$pk->reliability = PacketReliability::RELIABLE_ORDERED;
-		    	$pk->orderChannel = 0;
-
-		    	if($needACK === true){
-			    	$pk->identifierACK = $this->identifiersACK[$identifier]++;
-		    	}
+				$pk->identifierACK = $needACK ? $this->identifiersACK[$identifier]++ : null;
+				$pk->buffer = $buffer;
+				$pk->reliability = PacketReliability::RELIABLE_ORDERED;
+				$pk->orderChannel = 0;
 
 				$this->interface->sendEncapsulated($identifier, $pk, ($needACK ? RakLib::FLAG_NEED_ACK : 0) | ($immediate ? RakLib::PRIORITY_IMMEDIATE : RakLib::PRIORITY_NORMAL));
 				return $pk->identifierACK;
