@@ -272,7 +272,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 		    	$pk = new EncapsulatedPacket();
 		    	$pk->buffer = $buffer;
-		    	$pk->reliability = $immediate ? PacketReliability::RELIABLE : PacketReliability::RELIABLE_ORDERED;
+		    	$pk->reliability = PacketReliability::RELIABLE_ORDERED;
 		    	$pk->orderChannel = 0;
 
 		    	if($needACK === true){

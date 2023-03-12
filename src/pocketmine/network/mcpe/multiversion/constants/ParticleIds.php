@@ -323,7 +323,6 @@ final class ParticleIds{
 			"TYPE_BUBBLE_COLUMN_UP" => 55,
 			"TYPE_BUBBLE_COLUMN_DOWN" => 56,
 			"TYPE_SNEEZE" => 57,
-
 			"TYPE_SHULKER_BULLET" => 58,
 			"TYPE_BLEACH" => 59,
 			"TYPE_DRAGON_DESTROY_BLOCK" => 60,
