@@ -79,12 +79,12 @@ class RCONInstance extends Thread{
 	/**
 	 * @param resource             $socket
 	 * @param string               $password
-	 * @param int                  $maxClients
-	 * @param ThreadedLogger      $logger
+	 * @param ThreadedLogger       $logger
 	 * @param resource             $ipcSocket
 	 * @param null|SleeperNotifier $notifier
+	 * @param int                  $maxClients
 	 */
-	public function __construct($socket, string $password, int $maxClients = 50, ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier){
+	public function __construct($socket, string $password, ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier, int $maxClients = 50){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
