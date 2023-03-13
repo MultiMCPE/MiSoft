@@ -495,8 +495,8 @@ class LevelSoundEventPacket extends DataPacket{
 	public $position;
 	/** @var int */
 	public $extraData = -1;
-	/** @var int */
-	public $entityType = 1; //???
+	/** @var string */
+	public $entityType = ":"; //???
 	/** @var bool */
 	public $isBabyMob = false; //...
 	/** @var bool */
@@ -523,12 +523,9 @@ class LevelSoundEventPacket extends DataPacket{
 		    $this->extraData = $this->getVarInt();
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
-	    	$this->entityType = array_search($t = $this->getString(), AddActorPacket::LEGACY_ID_MAP_BC, true);
-	    	if($this->entityType === false){
-	    	    $this->entityType = 1;
-	    	}
+	    	$this->entityType = $this->getString();
 		}else{
-		    $this->entityType = $this->getVarInt();
+		    $this->entityType = (AddActorPacket::LEGACY_ID_MAP_BC[$this->getVarInt()] ?? ":");
 		}
 		$this->isBabyMob = (($this->get(1) !== "\x00"));
 		$this->disableRelativeVolume = (($this->get(1) !== "\x00"));
@@ -554,9 +551,10 @@ class LevelSoundEventPacket extends DataPacket{
 		    $this->putVarInt($this->extraData);
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
-	    	$this->putString(AddActorPacket::LEGACY_ID_MAP_BC[$this->entityType] ?? ":");
+	    	$this->putString($this->entityType);
 		}else{
-		    $this->putVarInt($this->entityType);
+		    $entityType = array_search($this->entityType, AddActorPacket::LEGACY_ID_MAP_BC, true);
+		    $this->putVarInt($entityType === false ? 1 : $entityType);
 		}
 		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));
 		($this->buffer .= ($this->disableRelativeVolume ? "\x01" : "\x00"));

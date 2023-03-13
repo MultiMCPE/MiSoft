@@ -75,6 +75,7 @@ use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\SetDifficultyPacket;
@@ -562,11 +563,11 @@ class Level implements ChunkManager, Metadatable{
 	 * @param bool    $isBabyMob
 	 * @param bool    $disableRelativeVolume If true, all players receiving this sound-event will hear the sound at full volume regardless of distance
 	 */
-	public function broadcastLevelSoundEvent(Vector3 $pos, int $soundId, int $extraData = -1, int $entityTypeId = 1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
+	public function broadcastLevelSoundEvent(Vector3 $pos, int $soundId, int $extraData = -1, int $entityTypeId = -1, bool $isBabyMob = false, bool $disableRelativeVolume = false){
 		$pk = new LevelSoundEventPacket();
 		$pk->sound = $soundId;
 		$pk->extraData = $extraData;
-		$pk->entityType = $entityTypeId;
+		$pk->entityType = AddActorPacket::LEGACY_ID_MAP_BC[$entityTypeId] ?? ":";
 		$pk->isBabyMob = $isBabyMob;
 		$pk->disableRelativeVolume = $disableRelativeVolume;
 		$pk->position = $pos->asVector3();
