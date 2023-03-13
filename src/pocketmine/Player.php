@@ -2876,16 +2876,26 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 
 				$this->dataPacket($packet);
-				foreach($this->getViewers() as $viewer){
-				    $pk = clone $packet;
-				    if($viewer->getProtocol() < ProtocolInfo::PROTOCOL_419){
+				$targets = [];
+				foreach($this->getViewers() as $player){
+				    if($player->isConnected()){
+				        $targets[$player->getProtocol()][] = $player;
+				    }
+				}
+				foreach($targets as $protocol => $players){
+				    $pk = new ActorEventPacket();
+				    $pk->entityRuntimeId = $packet->entityRuntimeId;
+				    $pk->event = $packet->event;
+
+				    if($protocol < ProtocolInfo::PROTOCOL_419){
 				        $pk->data = $this->inventory->getItemInHand()->getId();
 				    }else{
-				        $palette = ItemPalette::getPalette($viewer->getProtocol());
-				        [$netId, ] = $palette::getRuntimeFromLegacyId($this->inventory->getItemInHand()->getId(), 0);
+				        $palette = ItemPalette::getPalette($protocol);
+				        [$netId, ] = $palette::getRuntimeFromLegacyId($this->inventory->getItemInHand()->getId(), $this->inventory->getItemInHand()->getDamage());
 				        $pk->data = $netId << 16;
 				    }
-				    $viewer->sendDataPacket($pk);
+
+				    $this->server->broadcastPacket($players, $pk);
 				}
 				break;
 			default:
@@ -3200,7 +3210,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$blockVector = new Vector3($packet->x, $packet->y, $packet->z);
 
 		if($packet->face >= 0 and $packet->face <= 5){ //Use Block, place
-			$this->setGenericFlag(self::DATA_FLAG_ACTION, false);
+			$this->setUsingItem(false);
 
 			if(!$this->canInteract($blockVector->add(0.5, 0.5, 0.5), 13) or $this->isSpectator()){
 			}elseif($this->isCreative()){
