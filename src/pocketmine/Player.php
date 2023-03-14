@@ -256,6 +256,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const SPECTATOR = 3;
 	public const VIEW = Player::SPECTATOR;
 
+	//TODO: HACK!
+	//these IDs are used for 1.16 to restore 1.14ish crafting & inventory behaviour; since they don't seem to have any
+	//effect on the behaviour of inventory transactions I don't currently plan to integrate these into the main system.
+	private const RESERVED_WINDOW_ID_RANGE_START = ContainerIds::LAST - 10;
+	private const RESERVED_WINDOW_ID_RANGE_END = ContainerIds::LAST;
+	public const HARDCODED_CRAFTING_GRID_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 1;
+	public const HARDCODED_INVENTORY_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 2;
+
 	/**
 	 * Validates the given username.
 	 *
@@ -3476,21 +3484,21 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		switch($packet->action){
 		    case InteractPacket::ACTION_OPEN_INVENTORY:
-		        if($target !== $this){
-		            return false;
-		        }
-
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-			        $pk = new ContainerOpenPacket();
-			    	$pk->windowId = ContainerIds::INVENTORY;
-			    	$pk->type = ContainerIds::NONE;
-			    	$pk->x = (int) $this->x;
-			    	$pk->y = (int) $this->y;
-			    	$pk->z = (int) $this->z;
-			    	$this->sendDataPacket($pk);
-		    	}
-
-		        break;
+		        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+			     	if($target === $this){
+				    	//TODO: HACK! this restores 1.14ish behaviour, but this should be able to be listened to and
+				    	//controlled by plugins. However, the player is always a subscriber to their own inventory so it
+				    	//doesn't integrate well with the regular container system right now.
+				    	$pk = new ContainerOpenPacket();
+				    	$pk->windowId = self::HARDCODED_INVENTORY_WINDOW_ID;
+				    	$pk->type = WindowTypes::INVENTORY;
+				    	$pk->x = $pk->y = $pk->z = 0;
+				    	$pk->entityUniqueId = $this->getId();
+				    	$this->sendDataPacket($pk);
+				    	break;
+			     	}
+				}
+				return false;
 		    case InteractPacket::ACTION_LEFT_CLICK:
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 		            return $this->attackEntity($target);
@@ -3770,7 +3778,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function getClosingWindowId() : ?int{ return $this->closingWindowId; }
 
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
-		if(!$this->spawned){
+		if(!$this->spawned or ($this->getProtocol() < ProtocolInfo::PROTOCOL_392 && $packet->windowId === 0)){
 			return true;
 		}
 
@@ -3780,21 +3788,21 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->doCloseInventory();
 
-		if($packet->windowId === ContainerIds::INVENTORY){
-		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+	    	if($packet->windowId >= self::RESERVED_WINDOW_ID_RANGE_START and $packet->windowId <= self::RESERVED_WINDOW_ID_RANGE_END){
 		        $pk = new ContainerClosePacket();
-		        $pk->windowId = ContainerIds::INVENTORY;
-		        $pk->server = false;
+		        $pk->windowId = $packet->windowId;
 		        $this->sendDataPacket($pk);
-		    }
-		    return true;
-		}elseif(isset($this->windowIndex[$packet->windowId])){
+		        return true;
+	    	}
+		}
+		if(isset($this->windowIndex[$packet->windowId])){
 		    $this->closingWindowId = $packet->windowId;
 			(new InventoryCloseEvent($this->windowIndex[$packet->windowId], $this))->call();
 			$this->removeWindow($this->windowIndex[$packet->windowId]);
 			$this->closingWindowId = null;
 			return true;
-		}elseif($packet->windowId === 255){
+		}elseif($this->getProtocol() < ProtocolInfo::PROTOCOL_392 && $packet->windowId === 255){
 			//Closed a fake window
 			return true;
 		}
@@ -4747,7 +4755,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->addWindow($this->cursorInventory, ContainerIds::UI, true);
 
 		$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
-
 		//TODO: more windows
 	}
 
@@ -4782,7 +4789,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		if($this->craftingGrid->getGridWidth() > CraftingGrid::SIZE_SMALL){
-			$this->craftingGrid = new CraftingGrid($this, 6/*CraftingGrid::SIZE_SMALL*/);
+			$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
 		}
 	}
 
@@ -4830,7 +4837,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($forceId === null){
 			$cnt = $this->windowCnt;
 			do{
-				$cnt = max(ContainerIds::FIRST, ($cnt + 1) % ContainerIds::LAST);
+				$cnt = max(ContainerIds::FIRST, ($cnt + 1) % self::RESERVED_WINDOW_ID_RANGE_START);
 				if($cnt === $this->windowCnt){ //wraparound, no free slots
 					throw new InvalidStateException("No free window IDs found");
 				}
@@ -4838,7 +4845,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->windowCnt = $cnt;
 		}else{
 			$cnt = $forceId;
-			if(isset($this->windowIndex[$cnt])){
+			if(isset($this->windowIndex[$cnt]) or ($cnt >= self::RESERVED_WINDOW_ID_RANGE_START && $cnt <= self::RESERVED_WINDOW_ID_RANGE_END)){
 				throw new InvalidArgumentException("Requested force ID $forceId already in use");
 			}
 		}

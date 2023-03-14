@@ -26,8 +26,10 @@ namespace pocketmine\inventory\transaction;
 use pocketmine\event\inventory\CraftItemEvent;
 use pocketmine\inventory\CraftingRecipe;
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
+use pocketmine\Player;
 use function array_pop;
 use function count;
 use function intdiv;
@@ -168,7 +170,11 @@ class CraftingTransaction extends InventoryTransaction{
 		 * transaction goes wrong.
 		 */
 		$pk = new ContainerClosePacket();
-		$pk->windowId = ContainerIds::NONE;
+		if($this->source->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		    $pk->windowId = Player::HARDCODED_CRAFTING_GRID_WINDOW_ID;
+		}else{
+	    	$pk->windowId = ContainerIds::NONE;
+		}
 		$pk->server = true;
 		$this->source->dataPacket($pk);
 	}
