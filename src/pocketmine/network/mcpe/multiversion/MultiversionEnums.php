@@ -64,8 +64,12 @@ abstract class MultiversionEnums{
     public static $particleIds = [];
 
     public static function init() : void{
-        static::initList(LevelSoundEventPacket::class, LevelSoundIds::LEVEL_SOUND_IDS, static::$soundList, function(array $soundTypes) : int{
+        static::initList(LevelSoundEventPacket::class, LevelSoundIds::LEVEL_SOUND_IDS, static::$soundList,
+        function(array $soundTypes) : int{
             return end($soundTypes);
+        },
+        function($value, string $name) : bool{
+            return is_int($value) && substr($name, 0, 6) === "SOUND_";
         });
         static::initList(AvailableCommandsPacket::class, CommandArgumentTypeIds::COMMAND_ARGUMENT_TYPE_IDS, static::$commandArgTypes, null, function($value, string $name) : bool{
             return is_int($value) && substr($name, 0, 8) === "ARG_TYPE";
