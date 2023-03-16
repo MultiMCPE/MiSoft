@@ -117,6 +117,13 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 			return;
 		}
 
+        if($this->player->getProtocol() < ProtocolInfo::PROTOCOL_130){
+            //HACK: InteractPacket spam fix
+            if($packet->buffer === "\x21\x04\x00"){
+                return;
+            }
+        }
+
 		$timings = Timings::getReceiveDataPacketTimings($packet);
 		$timings->startTiming();
 
