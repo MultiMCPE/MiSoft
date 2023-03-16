@@ -131,6 +131,7 @@ use pocketmine\network\mcpe\protocol\DropItemPacket;
 use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
+use pocketmine\network\mcpe\protocol\EmotePacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
@@ -3491,6 +3492,28 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				return false;
 		}
+
+		return true;
+	}
+
+	public function handleEmote(EmotePacket $packet) : bool{
+		if($packet->entityRuntimeId !== $this->id){
+			return false;
+		}
+
+		$pk = new EmotePacket();
+		$pk->entityRuntimeId = $this->id;
+		$pk->emoteId = $packet->emoteId;
+		$pk->flags |= EmotePacket::FLAG_SERVER;
+
+        $bedrockPlayers = [];
+        foreach($this->hasSpawned as $player){
+            if($player->getProtocol() >= ProtocolInfo::PROTOCOL_385){
+                $bedrockPlayers[] = $player;
+            }
+        }
+
+		$this->server->broadcastPacket($bedrockPlayers, $pk);
 
 		return true;
 	}

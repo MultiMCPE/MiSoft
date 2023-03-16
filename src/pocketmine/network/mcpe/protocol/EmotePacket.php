@@ -36,11 +36,11 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 	public const FLAG_MUTE_ANNOUNCEMENT = 1 << 1;
 
 	/** @var int */
-	private $entityRuntimeId;
+	public $entityRuntimeId;
 	/** @var string */
-	private $emoteId;
+	public $emoteId;
 	/** @var int */
-	private $flags;
+	public $flags;
 
 	public static function create(int $entityRuntimeId, string $emoteId, int $flags) : self{
 		$result = new self;

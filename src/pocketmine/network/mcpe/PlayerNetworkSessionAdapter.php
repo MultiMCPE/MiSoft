@@ -42,6 +42,7 @@ use pocketmine\network\mcpe\protocol\CommandRequestPacket;
 use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
 use pocketmine\network\mcpe\protocol\DropItemPacket;
+use pocketmine\network\mcpe\protocol\EmotePacket;
 use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\RemoveBlockPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
@@ -196,6 +197,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleEmoteList(EmoteListPacket $packet) : bool{
 		return true; // Not used
+	}
+
+	public function handleEmote(EmotePacket $packet) : bool{
+		return $this->player->handleEmote($packet);
 	}
 
 	public function handleInteract(InteractPacket $packet) : bool{
@@ -389,7 +394,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handleServerSettingsRequest(ServerSettingsRequestPacket $packet) : bool{
-		return false; //TODO: GUI stuff
+		return true; //TODO: GUI stuff
 	}
 
 	public function handleSetLocalPlayerAsInitialized(SetLocalPlayerAsInitializedPacket $packet) : bool{
