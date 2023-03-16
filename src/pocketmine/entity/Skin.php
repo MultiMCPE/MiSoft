@@ -130,7 +130,7 @@ class Skin{
      * @return SerializedSkin
      */
     public function getSerializedSkin() : SerializedSkin{
-        return /*$this->serializedSkin ?? ($this->serializedSkin = */SerializedSkin::fromSkin($this);//);
+        return $this->serializedSkin ?? ($this->serializedSkin = SerializedSkin::fromSkin($this));
     }
 
     /**
