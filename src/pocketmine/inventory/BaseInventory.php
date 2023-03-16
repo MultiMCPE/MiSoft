@@ -475,7 +475,7 @@ abstract class BaseInventory implements Inventory{
 	               	$pk->windowId = ContainerIds::INVENTORY;
 	               	$pk->selectedHotbarSlot = $this->getHeldItemIndex();
 	               	$pk->slots = range(0, $this->getHotbarSize() - 1, 1);
-	                $player->dataPacket($pk);
+	                $player->dataPacket(clone $pk);
 		    	}
 			}else{
 			    $pk = new ContainerSetContentPacket();

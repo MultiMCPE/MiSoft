@@ -64,6 +64,10 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 	private $tick;
 	/** @var Vector3 */
 	private $delta;
+    /** @var float */
+    private $analogMoveVecX;
+    /** @var float */
+    private $analogMoveVecZ;
 
 	/**
 	 * @param Vector3      $position
@@ -79,10 +83,28 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 	 * @param Vector3|null $vrGazeDirection only used when PlayMode::VR
 	 * @param int          $tick
 	 * @param Vector3      $delta
+	 * @param float        $analogMoveVecX
+	 * @param float        $analogMoveVecZ
 	 *
 	 * @return self
 	 */
-	public static function create(Vector3 $position, float $pitch, float $yaw, float $headYaw, float $moveVecX, float $moveVecZ, int $inputFlags, int $inputMode, int $playMode, int $interactionMode, ?Vector3 $vrGazeDirection = null, int $tick, Vector3 $delta) : self{
+	public static function create(
+	    Vector3 $position,
+	    float $pitch,
+	    float $yaw,
+	    float $headYaw,
+	    float $moveVecX,
+	    float $moveVecZ,
+	    int $inputFlags,
+	    int $inputMode,
+	    int $playMode,
+	    int $interactionMode,
+	    ?Vector3 $vrGazeDirection = null,
+	    int $tick,
+	    Vector3 $delta,
+	    float $analogMoveVecX,
+	    float $analogMoveVecZ
+	) : self{
 		if($playMode === PlayMode::VR and $vrGazeDirection === null){
 			//yuck, can we get a properly written packet just once? ...
 			throw new InvalidArgumentException("Gaze direction must be provided for VR play mode");
@@ -103,6 +125,8 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 		}
 		$result->tick = $tick;
 		$result->delta = $delta;
+		$result->analogMoveVecX = $analogMoveVecX;
+		$result->analogMoveVecZ = $analogMoveVecZ;
 		return $result;
 	}
 
@@ -165,6 +189,10 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 
 	public function getDelta() : Vector3{ return $this->delta; }
 
+	public function getAnalogMoveVecX() : float{ return $this->analogMoveVecX; }
+
+	public function getAnalogMoveVecZ() : float{ return $this->analogMoveVecZ; }
+
 	protected function decodePayload() : void{
 		$this->yaw = ((unpack("g", $this->get(4))[1]));
 		$this->pitch = ((unpack("g", $this->get(4))[1]));
@@ -184,6 +212,10 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	    	$this->tick = $this->getUnsignedVarLong();
     		$this->delta = $this->getVector3();
+    		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_575){
+	        	$this->analogMoveVecX = $this->getLFloat();
+	        	$this->analogMoveVecZ = $this->getLFloat();
+    		}
     	}
 	}
 
@@ -207,6 +239,10 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	    	$this->putUnsignedVarLong($this->tick);
 	    	$this->putVector3($this->delta);
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_575){
+	    	    $this->putLFloat($this->analogMoveVecX);
+	    	    $this->putLFloat($this->analogMoveVecZ);
+	    	}
     	}
 	}
 

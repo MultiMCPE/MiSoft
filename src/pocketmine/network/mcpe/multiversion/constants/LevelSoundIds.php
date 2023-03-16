@@ -460,7 +460,10 @@ final class LevelSoundIds{
             "SOUND_PICKUP" => 459,
         	"SOUND_INSERT_ENCHANTED" => 460,
         	"SOUND_PICKUP_ENCHANTED" => 461,
-            "SOUND_UNDEFINED" => 462,
+        	"SOUND_BRUSH" => 462,
+         	"SOUND_BRUSH_COMPLETED" => 463,
+        	"SOUND_SHATTER_POT" => 464,
+        	"SOUND_BREAK_POT" => 465,
 
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
@@ -483,7 +486,8 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSE" => 367,
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
-            "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370
+            "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
+            "SOUND_UNDEFINED" => 466
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,

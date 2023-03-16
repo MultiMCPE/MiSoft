@@ -122,7 +122,7 @@ class ArmorInventory extends BaseInventory{
                     $player->dataPacket(clone $pk2);
                 }
 			}else{
-				$player->dataPacket($pk);
+				$player->dataPacket(clone $pk);
 			}
 		}
 	}
@@ -154,7 +154,7 @@ class ArmorInventory extends BaseInventory{
 			        $player->dataPacket(clone $pk2);
 			    }
 			}else{
-				$player->dataPacket($pk);
+				$player->dataPacket(clone $pk);
 			}
 		}
 	}

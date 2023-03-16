@@ -220,18 +220,22 @@ interface PacketMagicNumbers{
 	public const GAME_TEST_RESULTS_PACKET = 0xc3;
 	public const UPDATE_CLIENT_INPUT_LOCKS_PACKET = 0xc4;
 	public const CLIENT_CHEAT_ABILITY_PACKET = 0xc5;
+	public const CAMERA_PRESETS_PACKET = 0xc6;
+	public const UNLOCKED_RECIPES_PACKET = 0xc7;
+
+	public const CAMERA_INSTRUCTION_PACKET = 0x12c;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
-	public const EXPLODE_PACKET = 0xc6;
+	public const EXPLODE_PACKET = 0x100;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0xc7;
-	public const CONTAINER_SET_CONTENT_PACKET = 0xc8;
-	public const DROP_ITEM_PACKET = 0xc9;
-	public const USE_ITEM_PACKET = 0xca;
-	public const REMOVE_BLOCK_PACKET = 0xcb;
-	public const COMMAND_STEP_PACKET = 0xcc;
-	public const ADD_HANGING_ACTOR_PACKET = 0xcd;
-	public const INVENTORY_ACTION_PACKET = 0xce;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0xcf;
-	public const ADD_ITEM_PACKET = 0xd0;
+	public const CONTAINER_SET_SLOT_PACKET = 0x101;
+	public const CONTAINER_SET_CONTENT_PACKET = 0x102;
+	public const DROP_ITEM_PACKET = 0x103;
+	public const USE_ITEM_PACKET = 0x104;
+	public const REMOVE_BLOCK_PACKET = 0x105;
+	public const COMMAND_STEP_PACKET = 0x106;
+	public const ADD_HANGING_ACTOR_PACKET = 0x107;
+	public const INVENTORY_ACTION_PACKET = 0x108;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x109;
+	public const ADD_ITEM_PACKET = 0x110;
 
 }

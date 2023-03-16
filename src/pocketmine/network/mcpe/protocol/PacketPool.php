@@ -49,6 +49,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds544;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds553;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds560;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds567;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds575;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -56,6 +57,7 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+        ProtocolInfo::PROTOCOL_575 => PacketsIds575::class,
         ProtocolInfo::PROTOCOL_567 => PacketsIds567::class,
         ProtocolInfo::PROTOCOL_560 => PacketsIds560::class,
         ProtocolInfo::PROTOCOL_553 => PacketsIds553::class,
@@ -95,13 +97,13 @@ class PacketPool {
 		$magicNumbers = (new ReflectionClass(PacketMagicNumbers::class))->getConstants();
 		self::$magicPoolTo = [];
 		self::$magicPoolFrom = [];
-	    self::$pool = new SplFixedArray(356);
+	    self::$pool = new SplFixedArray(512);
 		self::$protocolList = array_keys(self::PROTOCOL_POOL);
 		foreach(self::$protocolList as $protocol){
 			$protocolInfoClass = self::PROTOCOL_POOL[$protocol];
 			$protocolMagicNumbers = (new ReflectionClass($protocolInfoClass))->getConstants();
-			self::$magicPoolTo[$protocol] = new SplFixedArray(356);
-			self::$magicPoolFrom[$protocol] = new SplFixedArray(356);
+			self::$magicPoolTo[$protocol] = new SplFixedArray(512);
+			self::$magicPoolFrom[$protocol] = new SplFixedArray(512);
 			foreach($protocolMagicNumbers as $name => $magic){
 				if(isset($magicNumbers[$name])){
 					self::$magicPoolTo[$protocol][$magicNumbers[$name]] = $magic;
@@ -303,6 +305,9 @@ class PacketPool {
 		self::registerPacket(new GameTestResultsPacket());
 		self::registerPacket(new UpdateClientInputLocksPacket());
 		self::registerPacket(new ClientCheatAbilityPacket());
+		self::registerPacket(new CameraPresetsPacket());
+		self::registerPacket(new UnlockedRecipesPacket());
+		self::registerPacket(new CameraInstructionPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

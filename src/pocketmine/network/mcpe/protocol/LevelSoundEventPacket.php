@@ -464,7 +464,11 @@ class LevelSoundEventPacket extends DataPacket{
     public const SOUND_PICKUP = 459;
     public const SOUND_INSERT_ENCHANTED = 460;
     public const SOUND_PICKUP_ENCHANTED = 461;
-    public const SOUND_UNDEFINED = 462;
+	public const SOUND_BRUSH = 462;
+	public const SOUND_BRUSH_COMPLETED = 463;
+	public const SOUND_SHATTER_POT = 464;
+	public const SOUND_BREAK_POT = 465;
+    public const SOUND_UNDEFINED = 466;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;
