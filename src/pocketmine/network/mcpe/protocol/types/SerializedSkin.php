@@ -52,7 +52,7 @@ class SerializedSkin{
             "",
             $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
             json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
-            $skin->getGeometryData(),
+            self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
             "",
             "",
             [],
@@ -67,6 +67,20 @@ class SerializedSkin{
             true,
             true
         );
+    }
+
+    /**
+     * @param string $skinGeometryData
+     * @param string $skinGeometryName
+     * 
+     * @return string
+     */
+    public static function updateGeometry(string $skinGeometryData, string $skinGeometryName) : string{
+        if($skinGeometryData === "" || $skinGeometryName === "" || $skinGeometryName === self::GEOMETRY_CUSTOM || $skinGeometryName === self::GEOMETRY_CUSTOM_SLIM){
+            return "";
+        }
+
+        return $skinGeometryData;
     }
 
     /** @var string */
@@ -350,19 +364,31 @@ class SerializedSkin{
      * @return Skin
      */
     public function toSkin() : Skin{
-		if($this->isPersonaSkin()){
-			return new Skin(
-			    "Standard_Custom",
-			    str_repeat(random_bytes(3) . "\xff", 2048)
-			);
-		}
+        $skinGeometryData = (new Comment())->decode($this->geometryData, true);
+        if(isset($skinGeometryData["format_version"])){
+            unset($skinGeometryData["format_version"]);
+            if(isset($skinGeometryData["minecraft:geometry"])){
+                foreach($skinGeometryData["minecraft:geometry"] as $geometry){
+                    $skinGeometryData[$geometry["description"]["identifier"]] = [
+                        "texturewidth" => $geometry["description"]["texture_width"],
+                        "textureheight" => $geometry["description"]["texture_height"],
+                        "bones" => $geometry["bones"]
+                    ];
+                }
+
+                unset($skinGeometryData["minecraft:geometry"]);
+            }
+            $skinGeometryData = json_encode($skinGeometryData);
+        }else{
+            unset($skinGeometryData);
+        }
 
         $skin = new Skin(
             $this->skinId,
             $this->skinImage->getData(),
             $this->capeImage->getData(),
             json_decode($this->resourcePatch)->geometry->default ?? self::GEOMETRY_CUSTOM,
-            $this->geometryData
+            $skinGeometryData ?? $this->geometryData
         );
         $skin->setSerializedSkin($this);
 

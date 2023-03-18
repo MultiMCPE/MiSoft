@@ -2163,13 +2163,28 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 	    	$animations = [];
 	    	foreach($packet->clientData["AnimatedImageData"] as $animation){
-		    	$animations[] = new SkinAnimation(new SkinImage($animation["ImageHeight"], $animation["ImageWidth"], $animation["Image"]), $animation["Type"], $animation["Frames"], ($this->getProtocol() >= ProtocolInfo::PROTOCOL_419) ? $animation["AnimationExpression"] : 0);
+		    	$animations[] = new SkinAnimation(
+		    	    new SkinImage(
+		    	        $animation["ImageHeight"],
+		    	        $animation["ImageWidth"],
+		    	        base64_decode($animation["Image"], true
+		    	        )),
+		    	    $animation["Type"],
+		    	    $animation["Frames"],
+		    	    ($this->getProtocol() >= ProtocolInfo::PROTOCOL_419) ? $animation["AnimationExpression"] : 0
+		    	);
 	    	}
 
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
 	        	$personaPieces = [];
 	        	foreach($packet->clientData["PersonaPieces"] as $piece){
-		        	$personaPieces[] = new PersonaSkinPiece($piece["PieceId"], $piece["PieceType"], $piece["PackId"], $piece["IsDefault"], $piece["ProductId"]);
+		        	$personaPieces[] = new PersonaSkinPiece(
+		        	    $piece["PieceId"],
+		        	    $piece["PieceType"],
+		        	    $piece["PackId"],
+		        	    $piece["IsDefault"],
+		        	    $piece["ProductId"]
+		        	);
 	        	}
 
 	        	$pieceTintColors = [];
@@ -2191,18 +2206,26 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    	$serializedSkin = new SerializedSkin(
 		    	$packet->clientData["SkinId"],
 		    	$packet->clientData["PlayFabId"] ?? "",
-		    	new SkinImage($packet->clientData["SkinImageHeight"], $packet->clientData["SkinImageWidth"], base64_decode($packet->clientData["SkinData"])),
+		    	new SkinImage(
+		    	    $packet->clientData["SkinImageHeight"],
+		    	    $packet->clientData["SkinImageWidth"],
+		    	    base64_decode($packet->clientData["SkinData"], true)
+		    	),
 		    	$packet->clientData["CapeId"] ?? "",
-		    	new SkinImage($packet->clientData["CapeImageHeight"], $packet->clientData["CapeImageWidth"], base64_decode($packet->clientData["CapeData"] ?? "")),
-		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? ""),
-		    	base64_decode($packet->clientData["SkinGeometryData"] ?? ""),
-                base64_decode($packet->clientData["SkinGeometryDataEngineVersion"] ?? ""),
-		    	base64_decode($packet->clientData["AnimationData"] ?? ""),
+		    	new SkinImage(
+		    	    $packet->clientData["CapeImageHeight"],
+		    	    $packet->clientData["CapeImageWidth"],
+		    	    base64_decode($packet->clientData["CapeData"] ?? "", true)
+		    	),
+		    	base64_decode($packet->clientData["SkinResourcePatch"] ?? "", true),
+		    	base64_decode($packet->clientData["SkinGeometryData"] ?? "", true),
+                base64_decode($packet->clientData["SkinGeometryDataEngineVersion"] ?? "", true),
+		    	base64_decode($packet->clientData["AnimationData"] ?? "", true),
 		    	$animations,
 		    	$packet->clientData["PremiumSkin"] ?? false,
 		    	$packet->clientData["PersonaSkin"] ?? false,
 		    	$packet->clientData["CapeOnClassicSkin"] ?? false,
-		    	"",
+		    	null,
 		    	$armSize,
 		    	$skinColor,
 		    	$personaPieces,
@@ -2213,22 +2236,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	    	$skin = $serializedSkin->toSkin();
         }else{
-            $skinGeometry = "";
-	    	if(isset($packet->clientData["SkinGeometry"])){
-		    	$skinGeometry = base64_decode($packet->clientData["SkinGeometry"]);
-	    	}elseif(isset($packet->clientData["SkinGeometryData"])){
-		    	$skinGeometry = base64_decode($packet->clientData["SkinGeometryData"]);
-		    	if(strpos($skinGeometry, "null") === 0){
-			    	$skinGeometry = "";
-		    	}
-	    	}
-
 	    	$skin = new Skin(
 		    	$packet->clientData["SkinId"],
-		    	base64_decode($packet->clientData["SkinData"] ?? ""),
-		    	base64_decode($packet->clientData["CapeData"] ?? ""),
+		    	base64_decode($packet->clientData["SkinData"], true),
+		    	base64_decode($packet->clientData["CapeData"] ?? "", true),
 		    	$packet->clientData["SkinGeometryName"] ?? "",
-		    	$skinGeometry
+		    	base64_decode($packet->clientData["SkinGeometry"] ?? "", true)
 	    	);
         }
 
