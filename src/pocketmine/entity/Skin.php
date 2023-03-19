@@ -25,7 +25,6 @@ namespace pocketmine\entity;
 
 use Ahc\Json\Comment as CommentedJsonDecoder;
 use InvalidArgumentException;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use function implode;
 use function in_array;
