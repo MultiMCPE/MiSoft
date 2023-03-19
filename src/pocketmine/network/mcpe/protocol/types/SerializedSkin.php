@@ -34,10 +34,17 @@ use function json_encode;
 use function json_last_error_msg;
 use function microtime;
 use function random_int;
+use function substr;
+use function array_rand;
+use function file_get_contents;
+use const pocketmine\RESOURCE_PATH;
 
 class SerializedSkin{
     public const GEOMETRY_CUSTOM = "geometry.humanoid.custom";
     public const GEOMETRY_CUSTOM_SLIM = "geometry.humanoid.customSlim";
+
+    /** @var string[]|null */
+    public static $defaultSkins = null;
 
     /**
      * @param Skin $skin
@@ -364,6 +371,31 @@ class SerializedSkin{
      * @return Skin
      */
     public function toSkin() : Skin{
+        if(!(
+            ($this->skinImage->getWidth() === 64 and ($this->skinImage->getHeight() === 32 or $this->skinImage->getHeight() === 64))
+        or
+            ($this->skinImage->getWidth() === 128 and ($this->skinImage->getHeight() === 128))
+        )){
+			self::$defaultSkins = self::$defaultSkins ?? [
+				"steve" => new Skin("Standard_Steve", file_get_contents(RESOURCE_PATH . '/vanilla/skins/steve.skindata')),
+				"alex" => new Skin("Standard_Alex", file_get_contents(RESOURCE_PATH . '/vanilla/skins/alex.skindata')),
+			];
+
+			if($this->personaSkin and substr($this->skinId, -4, 3) === "_0_"){
+				$num = substr($this->skinId, -1);
+				if($num === "0"){
+					$skin = self::$defaultSkins["steve"];
+				}else{
+					$skin = self::$defaultSkins["alex"];
+				}
+			}
+
+			$skin = $skin ?? self::$defaultSkins[array_rand(self::$defaultSkins)];
+			$skin->setSerializedSkin($this);
+
+			return $skin;
+        }
+
         $skinGeometryData = (new Comment())->decode($this->geometryData, true);
         if(isset($skinGeometryData["format_version"])){
             unset($skinGeometryData["format_version"]);
