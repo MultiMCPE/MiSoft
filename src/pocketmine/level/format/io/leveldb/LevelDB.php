@@ -35,7 +35,6 @@ use pocketmine\level\LevelException;
 use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\{ByteTag, CompoundTag, FloatTag, IntTag, LongTag, StringTag};
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
-use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
 use function array_values;
 use function chr;

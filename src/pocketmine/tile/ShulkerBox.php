@@ -12,11 +12,6 @@ use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
-use pocketmine\tile\Container;
-use pocketmine\tile\ContainerTrait;
-use pocketmine\tile\Nameable;
-use pocketmine\tile\NameableTrait;
-use pocketmine\tile\Spawnable;
 
 class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameable{
     use NameableTrait, ContainerTrait;

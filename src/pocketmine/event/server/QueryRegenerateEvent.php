@@ -26,7 +26,6 @@ namespace pocketmine\event\server;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
-use pocketmine\utils\Binary;
 use function chr;
 use function count;
 use function pack;

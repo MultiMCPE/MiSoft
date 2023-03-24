@@ -29,7 +29,6 @@ namespace pocketmine\network\query;
 
 use pocketmine\network\AdvancedSourceInterface;
 use pocketmine\Server;
-use pocketmine\utils\Binary;
 use function base64_encode;
 use function chr;
 use function hash;

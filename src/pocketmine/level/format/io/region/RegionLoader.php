@@ -26,7 +26,6 @@ namespace pocketmine\level\format\io\region;
 use InvalidArgumentException;
 use pocketmine\level\format\ChunkException;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
-use pocketmine\utils\Binary;
 use pocketmine\utils\MainLogger;
 use function ceil;
 use function chr;

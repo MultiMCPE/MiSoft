@@ -32,8 +32,6 @@ use function implode;
 use function is_int;
 use function str_repeat;
 
-use pocketmine\utils\Binary;
-
 class IntArrayTag extends NamedTag{
 	/** @var int[] */
 	private $value;

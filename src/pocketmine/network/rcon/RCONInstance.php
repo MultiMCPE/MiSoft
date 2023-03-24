@@ -25,7 +25,6 @@ namespace pocketmine\network\rcon;
 
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\Thread;
-use pocketmine\utils\Binary;
 use ThreadedLogger;
 use function count;
 use function ltrim;

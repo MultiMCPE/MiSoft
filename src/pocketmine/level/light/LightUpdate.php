@@ -25,7 +25,6 @@ namespace pocketmine\level\light;
 
 use pocketmine\block\BlockFactory;
 use pocketmine\level\ChunkManager;
-use pocketmine\level\Level;
 use pocketmine\level\utils\SubChunkIteratorManager;
 use SplQueue;
 

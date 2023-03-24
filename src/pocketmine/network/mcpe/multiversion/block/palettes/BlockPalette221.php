@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\utils\MainLogger;
-use pocketmine\block\BlockIds;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use function file_get_contents;
 use function json_decode;

@@ -27,7 +27,6 @@ use pocketmine\entity\Entity;
 use pocketmine\event\block\BlockFormEvent;
 use pocketmine\event\block\BlockSpreadEvent;
 use pocketmine\item\Item;
-use pocketmine\level\Level;
 use pocketmine\level\sound\FizzSound;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;

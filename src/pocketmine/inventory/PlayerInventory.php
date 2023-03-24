@@ -26,7 +26,6 @@ namespace pocketmine\inventory;
 use InvalidArgumentException;
 use LogicException;
 use pocketmine\entity\Human;
-use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;

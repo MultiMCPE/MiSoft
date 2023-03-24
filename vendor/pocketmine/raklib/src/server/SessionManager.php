@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace raklib\server;
 
 use InvalidArgumentException;
-use pocketmine\utils\Binary;
 use raklib\protocol\ACK;
 use raklib\protocol\AdvertiseSystem;
 use raklib\protocol\Datagram;

@@ -29,8 +29,6 @@ use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
 use function strlen;
 
-use pocketmine\utils\Binary;
-
 class StringTag extends NamedTag{
 	/** @var string */
 	private $value;

@@ -39,7 +39,6 @@ use function ord;
 use function strlen;
 use function zlib_decode;
 use function zlib_encode;
-use function mb_strpos;
 use const ZLIB_ENCODING_RAW;
 
 class BatchPacket extends DataPacket{

@@ -27,8 +27,6 @@ use function substr;
 use function unpack;
 use const SORT_NUMERIC;
 
-use pocketmine\utils\Binary;
-
 abstract class AcknowledgePacket extends Packet{
 	private const RECORD_TYPE_RANGE = 0;
 	private const RECORD_TYPE_SINGLE = 1;

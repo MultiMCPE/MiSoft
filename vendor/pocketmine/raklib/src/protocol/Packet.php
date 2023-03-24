@@ -33,8 +33,6 @@ use function strlen;
 use function unpack;
 use const AF_INET6;
 
-use pocketmine\utils\Binary;
-
 abstract class Packet extends BinaryStream{
 	public static $ID = -1;
 

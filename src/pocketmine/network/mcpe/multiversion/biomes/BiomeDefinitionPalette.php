@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\biomes;
 
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function array_diff;
 use function scandir;
 use function file_get_contents;

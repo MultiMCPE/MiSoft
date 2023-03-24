@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
 use pocketmine\network\mcpe\NetworkSession;
 
 class MultiplayerSettingsPacket extends DataPacket/* implements ServerboundPacket*/{ //TODO: this might be clientbound too, but unsure

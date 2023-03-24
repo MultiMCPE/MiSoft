@@ -16,7 +16,6 @@ namespace pocketmine\network\mcpe\protocol\types;
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use RuntimeException;
-use function array_fill;
 
 final class AbilitiesLayer{
 

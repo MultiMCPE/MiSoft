@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\utils;
 
 use pocketmine\network\mcpe\multiversion\constants\ActorMetadataList;
-use function array_keys;
 use function array_search;
 use function decbin;
 use function max;

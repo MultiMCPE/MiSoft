@@ -48,8 +48,6 @@ use function zlib_decode;
 use function zlib_encode;
 use pocketmine\utils\BinaryDataException;
 
-use pocketmine\utils\Binary;
-
 /**
  * Base Named Binary Tag encoder/decoder
  */

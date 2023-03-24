@@ -24,10 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\tile\ShulkerBox as TileShulkerBox;
-use pocketmine\block\Air;
-use pocketmine\block\Block;
-use pocketmine\block\BlockToolType;
-use pocketmine\block\Transparent;
 use pocketmine\block\utils\ColorBlockMetaHelper;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;

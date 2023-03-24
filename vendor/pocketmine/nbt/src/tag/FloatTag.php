@@ -27,8 +27,6 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
 
-use pocketmine\utils\Binary;
-
 class FloatTag extends NamedTag{
 	/** @var float */
 	private $value;

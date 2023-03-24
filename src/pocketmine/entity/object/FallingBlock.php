@@ -40,7 +40,6 @@ use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use UnexpectedValueException;
 use function abs;
-use function floor;
 use function get_class;
 
 class FallingBlock extends Entity{

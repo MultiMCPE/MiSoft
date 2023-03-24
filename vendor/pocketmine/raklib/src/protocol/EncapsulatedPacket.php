@@ -24,7 +24,6 @@ use function pack;
 use function strlen;
 use function substr;
 
-use pocketmine\utils\Binary;
 use function unpack;
 
 class EncapsulatedPacket{

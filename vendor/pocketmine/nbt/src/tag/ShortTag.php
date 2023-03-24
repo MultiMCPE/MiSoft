@@ -28,8 +28,6 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
 
-use pocketmine\utils\Binary;
-
 class ShortTag extends NamedTag{
 	/** @var int */
 	private $value;

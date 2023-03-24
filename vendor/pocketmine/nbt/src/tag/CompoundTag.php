@@ -46,8 +46,6 @@ use function next;
 use function reset;
 use function str_repeat;
 
-use pocketmine\utils\Binary;
-
 class CompoundTag extends NamedTag implements ArrayAccess, Iterator, Countable{
 	use NoDynamicFieldsTrait;
 

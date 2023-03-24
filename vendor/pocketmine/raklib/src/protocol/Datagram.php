@@ -17,8 +17,6 @@ declare(strict_types=1);
 
 namespace raklib\protocol;
 
-use pocketmine\utils\Binary;
-
 use function chr;
 use function ord;
 use function pack;

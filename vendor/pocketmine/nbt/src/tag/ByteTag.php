@@ -28,7 +28,6 @@ use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
 
-use pocketmine\utils\Binary;
 use function chr;
 
 class ByteTag extends NamedTag{

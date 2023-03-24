@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use function unpack;
 
 /**
  * This is the first packet sent in a game session. It contains the client's protocol version.

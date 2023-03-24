@@ -33,8 +33,6 @@ use pocketmine\timings\Timings;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use function is_null;
-use function count;
 use function array_map;
 use function file_get_contents;
 use function json_decode;

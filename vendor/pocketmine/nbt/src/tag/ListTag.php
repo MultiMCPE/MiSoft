@@ -41,8 +41,6 @@ use function is_object;
 use function ord;
 use function str_repeat;
 
-use pocketmine\utils\Binary;
-
 class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	use NoDynamicFieldsTrait;
 
