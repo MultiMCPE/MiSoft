@@ -59,6 +59,13 @@ class TransactionQueue{
     }
 
     /**
+     * @return Player
+     */
+    public function getSource() : Player{
+        return $this->player;
+    }
+
+    /**
      * @return ?SplQueue
      */ 
     public function getTransactions() : ?SplQueue{
