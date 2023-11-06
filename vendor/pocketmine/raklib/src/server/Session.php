@@ -222,7 +222,6 @@ class Session{
 		}
 
 		if(count($this->ACKQueue) > 0){
-		    var_dump("Server ACK: " . \implode(",", $this->ACKQueue));
 			$pk = new ACK();
 			$pk->packets = $this->ACKQueue;
 			$this->sendPacket($pk);
@@ -230,7 +229,6 @@ class Session{
 		}
 
 		if(count($this->NACKQueue) > 0){
-		    var_dump("Server NACK: " . \implode(",", $this->NACKQueue));
 			$pk = new NACK();
 			$pk->packets = $this->NACKQueue;
 			$this->sendPacket($pk);
@@ -289,7 +287,6 @@ class Session{
 			unset($this->recoveryQueue[$datagram->seqNumber]);
 		}
 		$datagram->seqNumber = $this->sendSeqNumber++;
-		var_dump("Server: " . $datagram->seqNumber);
 		$datagram->sendTime = microtime(true);
 		$this->recoveryQueue[$datagram->seqNumber] = $datagram;
 		$this->sendPacket($datagram);
@@ -583,7 +580,7 @@ class Session{
 
 		if($packet instanceof Datagram){ //In reality, ALL of these packets are datagrams.
 			$packet->decode();
-var_dump("Client: " . $packet->seqNumber);
+
 			if($packet->seqNumber < $this->windowStart or $packet->seqNumber > $this->windowEnd or isset($this->ACKQueue[$packet->seqNumber])){
 				$this->sessionManager->getLogger()->debug("Received duplicate or out-of-window packet from " . $this->address . " (sequence number $packet->seqNumber, window " . $this->windowStart . "-" . $this->windowEnd . ")");
 				return;
@@ -621,7 +618,6 @@ var_dump("Client: " . $packet->seqNumber);
 		}else{
 			if($packet instanceof ACK){
 				$packet->decode();
-				var_dump("Client ACK: " . \implode(",", $packet->packets));
 				foreach($packet->packets as $seq){
 					if(isset($this->recoveryQueue[$seq])){
 						foreach($this->recoveryQueue[$seq]->packets as $pk){
@@ -634,7 +630,6 @@ var_dump("Client: " . $packet->seqNumber);
 				}
 			}elseif($packet instanceof NACK){
 				$packet->decode();
-				var_dump("Client NACK: " . \implode(",", $packet->packets));
 				foreach($packet->packets as $seq){
 					if(isset($this->recoveryQueue[$seq])){
 						$this->packetToSend[] = $this->recoveryQueue[$seq];

@@ -186,7 +186,7 @@ abstract class Projectile extends Entity{
 		Timings::$entityMoveTimer->startTiming();
 
 		$start = $this->asVector3();
-		$end = $start->add($this->motion);
+		$end = $start->add($dx, $dy, $dz);
 
 		$blockHit = null;
 		$entityHit = null;

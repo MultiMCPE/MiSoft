@@ -98,6 +98,10 @@ class StartGamePacket extends DataPacket{
 	public $hasAchievementsDisabled = true;
 	/** @var bool */
 	public $isEditorMode = false;
+	/** @var bool */
+	public $createdInEditorMode = false;
+	/** @var bool */
+	public $exportedFromEditorMode = false;
 	/** @var int */
 	public $time = -1;
 	/** @var int */
@@ -217,6 +221,8 @@ class StartGamePacket extends DataPacket{
     public $worldTemplateId;
     /** @var bool */
     public $enableClientSideChunkGeneration = false;
+	/** @var bool */
+	public $blockNetworkIdsAreHashes = false; //new in 1.19.80, possibly useful for multi version
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
@@ -254,6 +260,10 @@ class StartGamePacket extends DataPacket{
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
 		    $this->isEditorMode = (($this->get(1) !== "\x00"));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+				$this->createdInEditorMode = (($this->get(1) !== "\x00"));
+				$this->exportedFromEditorMode = (($this->get(1) !== "\x00"));
+			}
 		}
 		$this->time = $this->getVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
@@ -437,6 +447,9 @@ class StartGamePacket extends DataPacket{
 								    $this->worldTemplateId = $this->getUUID();
 								    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 								        $this->enableClientSideChunkGeneration = (($this->get(1) !== "\x00"));
+										if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+											$this->blockNetworkIdsAreHashes = (($this->get(1) !== "\x00"));
+										}
 								    }
 								}
 							}
@@ -476,6 +489,10 @@ class StartGamePacket extends DataPacket{
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
 		    ($this->buffer .= ($this->isEditorMode ? "\x01" : "\x00"));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+				($this->buffer .= ($this->createdInEditorMode ? "\x01" : "\x00"));
+				($this->buffer .= ($this->exportedFromEditorMode ? "\x01" : "\x00"));
+			}
 		}
 		$this->putVarInt($this->time);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
@@ -647,6 +664,9 @@ class StartGamePacket extends DataPacket{
 								    $this->putUUID($this->worldTemplateId);
 								    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 								        ($this->buffer .= ($this->enableClientSideChunkGeneration ? "\x01" : "\x00"));
+										if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+											($this->buffer .= ($this->blockNetworkIdsAreHashes ? "\x01" : "\x00"));
+										}
 								    }
 								}
 							}

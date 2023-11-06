@@ -132,7 +132,6 @@ class LoginPacket extends DataPacket{
 		$hasExtraData = false;
 		foreach($this->chainData["chain"] as $chain){
 			$webtoken = Utils::decodeJWT($chain);
-			var_dump($webtoken);
 			if(isset($webtoken["extraData"])){
 				if($hasExtraData){
 					throw new RuntimeException("Found 'extraData' multiple times in key chain");

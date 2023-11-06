@@ -29,6 +29,7 @@ use pocketmine\event\block\SignChangeEvent;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
+use pocketmine\utils\Binary;
 use pocketmine\utils\TextFormat;
 use UnexpectedValueException;
 use function array_map;
@@ -44,6 +45,19 @@ use function strlen;
 class Sign extends Spawnable{
 	public const TAG_TEXT_BLOB = "Text";
 	public const TAG_TEXT_LINE = "Text%d"; //sprintf()able
+	public const TAG_TEXT_COLOR = "SignTextColor";
+	public const TAG_GLOWING_TEXT = "IgnoreLighting";
+	public const TAG_PERSIST_FORMATTING = "PersistFormatting"; //TAG_Byte
+	/**
+	 * This tag is set to indicate that MCPE-117835 has been addressed in whatever version this sign was created.
+	 * @see https://bugs.mojang.com/browse/MCPE-117835
+	 */
+	public const TAG_LEGACY_BUG_RESOLVE = "TextIgnoreLegacyBugResolved";
+
+	public const TAG_FRONT_TEXT = "FrontText"; //TAG_Compound
+	public const TAG_BACK_TEXT = "BackText"; //TAG_Compound
+	public const TAG_WAXED = "IsWaxed"; //TAG_Byte
+	public const TAG_LOCKED_FOR_EDITING_BY = "LockedForEditingBy"; //TAG_Long
 
 	private static function fixTextBlob(string $blob) : array{
 		return array_slice(array_pad(explode("\n", $blob), 4, ""), 0, 4);
@@ -51,6 +65,9 @@ class Sign extends Spawnable{
 
 	/** @var string[] */
 	protected $text = ["", "", "", ""];
+
+	/** @var ?int */
+	protected $editorEntityRuntimeId = null;
 
 	protected function readSaveData(CompoundTag $nbt) : void{
 		if($nbt->hasTag(self::TAG_TEXT_BLOB, StringTag::class)){ //MCPE 1.2 save format
@@ -66,6 +83,8 @@ class Sign extends Spawnable{
 		$this->text = array_map(function(string $line) : string{
 			return mb_scrub($line, 'UTF-8');
 		}, $this->text);
+
+		$this->waxed = $nbt->getByte(self::TAG_WAXED, 0) !== 0;
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{
@@ -141,6 +160,22 @@ class Sign extends Spawnable{
 		return $this->text;
 	}
 
+	/**
+	 * Returns the entity runtime ID of the player who placed this sign. Only the player whose entity ID matches this
+	 * one may edit the sign text.
+	 * This is needed because as of 1.16.220, there is still no reliable way to detect when the MCPE client closed the
+	 * sign edit GUI, so we have no way to know when the text is finalized. This limits editing of the text to only the
+	 * player who placed it, and only while that player is online.
+	 * We can say for sure that the sign is finalized if either of the following occurs:
+	 * - The player quits (after rejoin, the player's entity runtimeID will be different).
+	 * - The chunk is unloaded (on next load, the entity runtimeID will be null, because it's not saved).
+	 */
+	public function getEditorEntityRuntimeId() : ?int{ return $this->editorEntityRuntimeId; }
+
+	public function setEditorEntityRuntimeId(?int $editorEntityRuntimeId) : void{
+		$this->editorEntityRuntimeId = $editorEntityRuntimeId;
+	}
+
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setString(self::TAG_TEXT_BLOB, implode("\n", $this->text));
 
@@ -148,11 +183,40 @@ class Sign extends Spawnable{
 			$textKey = sprintf(self::TAG_TEXT_LINE, $i);
 			$nbt->setString($textKey, $this->getLine($i - 1));
 		}
+
+		$textPolyfill = function(CompoundTag $textTag) : CompoundTag{
+			//the following are not yet used by the server, but needed to roll back any changes to glowing state or colour
+			//if the client uses dye on the sign
+			$textTag->setInt(self::TAG_TEXT_COLOR, Binary::signInt(0xff_00_00_00));
+			$textTag->setByte(self::TAG_GLOWING_TEXT, 0);
+			$textTag->setByte(self::TAG_PERSIST_FORMATTING, 1); //TODO: not sure what this is used for
+
+			return $textTag;
+		};
+		$front_text_tag = $textPolyfill(new CompoundTag(self::TAG_FRONT_TEXT));
+		$front_text_tag->setString(self::TAG_TEXT_BLOB, implode("\n", $this->text));
+		$nbt->setTag(
+			$front_text_tag
+		);
+		//TODO: this is not yet used by the server, but needed to rollback any client-side changes to the back text
+		$back_text_tag = $textPolyfill(new CompoundTag(self::TAG_BACK_TEXT));
+		$back_text_tag->setString(self::TAG_TEXT_BLOB, "");
+		$nbt->setTag(
+			$back_text_tag
+		);
+		$nbt->setByte(self::TAG_WAXED, 0);
+		$nbt->setLong(self::TAG_LOCKED_FOR_EDITING_BY, $this->editorEntityRuntimeId ?? -1);
 	}
 
 	public function updateCompoundTag(CompoundTag $nbt, Player $player) : bool{
 		if($nbt->getString("id") !== Tile::SIGN){
 			return false;
+		}
+
+		if($player->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+			if(!(($nbt = $nbt->getCompoundTag(self::TAG_FRONT_TEXT)) instanceof CompoundTag)){
+				throw new InvalidArgumentException("Expected " . CompoundTag::class . " in block entity NBT, got " . (is_object($compound) ? get_class($compound) : gettype($compound)));
+			}
 		}
 
         $lines = [];
@@ -178,10 +242,14 @@ class Sign extends Spawnable{
 		$removeFormat = $player->getRemoveFormat();
 
 		$ev = new SignChangeEvent($this->getBlock(), $player, array_map(function(string $line) use ($removeFormat){ return TextFormat::clean($line, $removeFormat); }, $lines));
+		if($this->editorEntityRuntimeId !== $player->getId()){
+			$ev->cancel();
+		}
 		$ev->call();
 
 		if(!$ev->isCancelled()){
 			$this->setText(...$ev->getLines());
+			$this->setEditorEntityRuntimeId(null);
 
 			return true;
 		}else{

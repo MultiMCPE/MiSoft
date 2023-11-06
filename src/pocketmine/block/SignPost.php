@@ -29,6 +29,7 @@ use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\tile\Sign as TileSign;
 use pocketmine\tile\Tile;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function floor;
 
 class SignPost extends Transparent{
@@ -69,7 +70,15 @@ class SignPost extends Transparent{
 				$this->getLevel()->setBlock($blockReplace, BlockFactory::get(Block::WALL_SIGN, $this->meta), true);
 			}
 
-			Tile::createTile(Tile::SIGN, $this->getLevel(), TileSign::createNBT($this, $face, $item, $player));
+			$tile = Tile::createTile(Tile::SIGN, $this->getLevel(), TileSign::createNBT($this, $face, $item, $player));
+
+			if($player !== null){
+				$tile->setEditorEntityRuntimeId($player->getId());
+
+				if($player->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+			    	$player->openSignEditor($this);
+				}
+			}
 
 			return true;
 		}
