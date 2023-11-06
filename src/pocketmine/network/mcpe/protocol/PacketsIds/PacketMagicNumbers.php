@@ -224,9 +224,6 @@ interface PacketMagicNumbers{
 	public const UNLOCKED_RECIPES_PACKET = 0xc7;
 
 	public const CAMERA_INSTRUCTION_PACKET = 0x12c;
-	public const COMPRESSED_BIOME_DEFINITION_LIST_PACKET = 0x12d;
-	public const TRIM_DATA_PACKET = 0x12e;
-	public const OPEN_SIGN_PACKET = 0x12f;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1

@@ -50,7 +50,6 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds553;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds560;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds567;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds575;
-use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds582;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -58,7 +57,6 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
-		ProtocolInfo::PROTOCOL_582 => PacketsIds582::class,
         ProtocolInfo::PROTOCOL_575 => PacketsIds575::class,
         ProtocolInfo::PROTOCOL_567 => PacketsIds567::class,
         ProtocolInfo::PROTOCOL_560 => PacketsIds560::class,
@@ -310,9 +308,6 @@ class PacketPool {
 		self::registerPacket(new CameraPresetsPacket());
 		self::registerPacket(new UnlockedRecipesPacket());
 		self::registerPacket(new CameraInstructionPacket());
-		self::registerPacket(new CompressedBiomeDefinitionListPacket());
-		self::registerPacket(new TrimDataPacket());
-		self::registerPacket(new OpenSignPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

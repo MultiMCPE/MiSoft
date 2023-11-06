@@ -27,7 +27,6 @@ use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\item\ItemFactory;
@@ -61,7 +60,7 @@ class CraftingDataBuildTask extends AsyncTask{
 
 	public function onRun(){
 	    ItemPalette::init();
-	    if($this->protocol >= ProtocolInfo::PROTOCOL_429){
+	    if($this->palette !== null){
 	        BlockPalette::addPalette($this->palette, $this->protocol);
 	    }
 	    PacketPool::init();

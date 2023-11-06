@@ -31,27 +31,6 @@ final class CommandArgumentTypeIds{
 	}
 
 	public const COMMAND_ARGUMENT_TYPE_IDS = [
-		ProtocolInfo::PROTOCOL_582 => [
-            "ARG_TYPE_INT" => 1,
-			"ARG_TYPE_FLOAT" => 3,
-            "ARG_TYPE_VALUE" => 4,
-            "ARG_TYPE_WILDCARD_INT" => 5,
-            "ARG_TYPE_OPERATOR" => 6,
-            "ARG_TYPE_COMPARE_OPERATOR" => 7,
-            "ARG_TYPE_TARGET" => 8,
-            "ARG_TYPE_WILDCARD_TARGET" => 10,
-            "ARG_TYPE_FILEPATH" => 17,
-            "ARG_TYPE_FULL_INTEGER_RANGE" => 23,
-            "ARG_TYPE_EQUIPMENT_SLOT" => 43,
-            "ARG_TYPE_STRING" => 44,
-            "ARG_TYPE_INT_POSITION" => 52,
-            "ARG_TYPE_POSITION" => 53,
-            "ARG_TYPE_MESSAGE" => 55,
-            "ARG_TYPE_RAWTEXT" => 58,
-            "ARG_TYPE_JSON" => 62,
-            "ARG_TYPE_BLOCK_STATES" => 71,
-            "ARG_TYPE_COMMAND" => 74
-		],
 		ProtocolInfo::PROTOCOL_526 => [
 			"ARG_TYPE_INT" => 0x01,
 			"ARG_TYPE_FLOAT" => 0x03,

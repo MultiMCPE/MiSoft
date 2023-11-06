@@ -219,9 +219,6 @@ use pocketmine\network\mcpe\protocol\GameTestResultsPacket;
 use pocketmine\network\mcpe\protocol\ServerStatsPacket;
 use pocketmine\network\mcpe\protocol\UpdateClientInputLocksPacket;
 use pocketmine\network\mcpe\protocol\ClientCheatAbilityPacket;
-use pocketmine\network\mcpe\protocol\CompressedBiomeDefinitionListPacket;
-use pocketmine\network\mcpe\protocol\TrimDataPacket;
-use pocketmine\network\mcpe\protocol\OpenSignPacket;
 
 abstract class NetworkSession{
 
@@ -1008,18 +1005,6 @@ abstract class NetworkSession{
 	}
 
 	public function handleClientCheatAbility(ClientCheatAbilityPacket $packet) : bool{
-		return false;
-	}
-
-	public function handleCompressedBiomeDefinitionList(CompressedBiomeDefinitionListPacket $packet) : bool{
-		return false;
-	}
-
-	public function handleTrimData(TrimDataPacket $packet) : bool{
-		return false;
-	}
-
-	public function handleOpenSign(OpenSignPacket $packet) : bool{
 		return false;
 	}
 }

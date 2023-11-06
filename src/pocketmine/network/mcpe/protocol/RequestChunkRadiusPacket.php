@@ -25,29 +25,19 @@ namespace pocketmine\network\mcpe\protocol;
 
 
 use pocketmine\network\mcpe\NetworkSession;
-use function ord;
-use function chr;
 
 class RequestChunkRadiusPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::REQUEST_CHUNK_RADIUS_PACKET;
 
 	/** @var int */
 	public $radius;
-	/** @var int */
-	public $maxRadius;
 
 	protected function decodePayload(){
 		$this->radius = $this->getVarInt();
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
-			$this->maxRadius = ord($this->get(1));
-		}
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->radius);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
-		    ($this->buffer .= (chr($this->maxRadius)));
-		}
 	}
 
 	public function handle(NetworkSession $session) : bool{
