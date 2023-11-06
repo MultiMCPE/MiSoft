@@ -173,7 +173,7 @@ use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SimpleEventPacket;
 use pocketmine\network\mcpe\protocol\SimulationTypePacket;
 use pocketmine\network\mcpe\protocol\SyncActorPropertyPacket;
-use pocketmine\network\mcpe\protocol\EventPacket;
+use pocketmine\network\mcpe\protocol\LegacyTelemetryEventPacket;
 use pocketmine\network\mcpe\protocol\FilterTextPacket;
 use pocketmine\network\mcpe\protocol\TakeItemActorPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
@@ -222,6 +222,7 @@ use pocketmine\network\mcpe\protocol\ClientCheatAbilityPacket;
 use pocketmine\network\mcpe\protocol\CompressedBiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\TrimDataPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
+use pocketmine\network\mcpe\protocol\AgentAnimationPacket;
 
 abstract class NetworkSession{
 
@@ -707,7 +708,7 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleEvent(EventPacket $packet) : bool{
+	public function handleLegacyTelemetryEvent(LegacyTelemetryEventPacket $packet) : bool{
 		return false;
 	}
 
@@ -1020,6 +1021,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleOpenSign(OpenSignPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleAgentAnimation(AgentAnimationPacket $packet) : bool{
 		return false;
 	}
 }

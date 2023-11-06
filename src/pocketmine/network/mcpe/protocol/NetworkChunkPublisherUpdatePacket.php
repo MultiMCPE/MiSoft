@@ -41,11 +41,17 @@ class NetworkChunkPublisherUpdatePacket extends DataPacket{
 	/** @var ChunkPosition[] */
 	public $savedChunks = [];
 
+	public const MAX_SAVED_CHUNKS = 9216;
+
 	protected function decodePayload(){
 		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
 		$this->radius = $this->getUnsignedVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
-	    	for($i = 0, $this->savedChunks = [], $count = $this->getLInt(); $i < $count; $i++){
+			$count = $this->getLInt();
+			if($count > self::MAX_SAVED_CHUNKS){
+				throw new PacketDecodeException("Expected at most " . self::MAX_SAVED_CHUNKS . " saved chunks, got " . $count);
+			}
+			for($i = 0, $this->savedChunks = []; $i < $count; $i++){
 		    	$this->savedChunks[] = ChunkPosition::read($this);
 	    	}
 		}

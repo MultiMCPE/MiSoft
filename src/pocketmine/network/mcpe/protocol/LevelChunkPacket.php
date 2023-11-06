@@ -44,6 +44,9 @@ class LevelChunkPacket extends DataPacket{
 	/** @var string */
 	private $extraPayload;
 
+    //this appears large enough for a world height of 1024 blocks - it may need to be increased in the future
+    private const MAX_BLOB_HASHES = 64;
+
 	public static function withoutCache(ChunkPosition $chunkPosition, int $subChunkCount, string $payload) : self{
 		$result = new self;
 		$result->chunkPosition = $chunkPosition;
@@ -109,7 +112,11 @@ class LevelChunkPacket extends DataPacket{
 	    	$this->subChunkCount = $this->getUnsignedVarInt();
 	    	$this->cacheEnabled = (($this->get(1) !== "\x00"));
 	    	if($this->cacheEnabled){
-			    for($i =  0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+				$count = $this->getUnsignedVarInt();
+				if($count > self::MAX_BLOB_HASHES){
+					throw new \InvalidArgumentException("Expected at most " . self::MAX_BLOB_HASHES . " blob hashes, got " . $count);
+				}
+				for($i = 0; $i < $count; ++$i){
 			    	$this->usedBlobHashes[] = (Binary::readLLong($this->get(8)));
 		    	}
 		    }

@@ -45,6 +45,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
 use pocketmine\network\mcpe\protocol\types\ChatRestrictionLevel;
+use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
 use UnexpectedValueException;
 use function ord;
 use function chr;
@@ -223,6 +224,8 @@ class StartGamePacket extends DataPacket{
     public $enableClientSideChunkGeneration = false;
 	/** @var bool */
 	public $blockNetworkIdsAreHashes = false; //new in 1.19.80, possibly useful for multi version
+	/** @var NetworkPermissions */
+	public $networkPermissions;
 
 	/** @var ListTag|array|null ["name" (string), "data" (int16), "legacy_id" (int16)] */
 	public $blockTable = null;
@@ -449,6 +452,9 @@ class StartGamePacket extends DataPacket{
 								        $this->enableClientSideChunkGeneration = (($this->get(1) !== "\x00"));
 										if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 											$this->blockNetworkIdsAreHashes = (($this->get(1) !== "\x00"));
+											if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+												$this->networkPermissions = NetworkPermissions::decode($this);
+											}
 										}
 								    }
 								}
@@ -666,6 +672,9 @@ class StartGamePacket extends DataPacket{
 								        ($this->buffer .= ($this->enableClientSideChunkGeneration ? "\x01" : "\x00"));
 										if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 											($this->buffer .= ($this->blockNetworkIdsAreHashes ? "\x01" : "\x00"));
+											if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+												$this->networkPermissions->encode($this);
+											}
 										}
 								    }
 								}

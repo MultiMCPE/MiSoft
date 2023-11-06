@@ -88,7 +88,7 @@ final class PacketsIds130{
 	public const SET_PLAYER_GAME_TYPE_PACKET = 0x3e;
 	public const PLAYER_LIST_PACKET = 0x3f;
 	public const SIMPLE_EVENT_PACKET = 0x40;
-	public const EVENT_PACKET = 0x41;
+	public const LEGACY_TELEMETRY_EVENT_PACKET = 0x41;
 	public const SPAWN_EXPERIENCE_ORB_PACKET = 0x42;
 	public const CLIENTBOUND_MAP_ITEM_DATA_PACKET = 0x43;
 	public const MAP_INFO_REQUEST_PACKET = 0x44;

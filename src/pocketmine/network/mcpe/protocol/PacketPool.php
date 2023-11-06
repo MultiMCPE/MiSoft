@@ -51,6 +51,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds560;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds567;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds575;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds582;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds594;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -58,6 +59,7 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_594 => PacketsIds594::class,
 		ProtocolInfo::PROTOCOL_582 => PacketsIds582::class,
         ProtocolInfo::PROTOCOL_575 => PacketsIds575::class,
         ProtocolInfo::PROTOCOL_567 => PacketsIds567::class,
@@ -179,7 +181,7 @@ class PacketPool {
 		self::registerPacket(new SetPlayerGameTypePacket());
 		self::registerPacket(new PlayerListPacket());
 		self::registerPacket(new SimpleEventPacket());
-		self::registerPacket(new EventPacket());
+		self::registerPacket(new LegacyTelemetryEventPacket());
 		self::registerPacket(new SpawnExperienceOrbPacket());
 		self::registerPacket(new ClientboundMapItemDataPacket());
 		self::registerPacket(new MapInfoRequestPacket());
@@ -313,6 +315,7 @@ class PacketPool {
 		self::registerPacket(new CompressedBiomeDefinitionListPacket());
 		self::registerPacket(new TrimDataPacket());
 		self::registerPacket(new OpenSignPacket());
+		self::registerPacket(new AgentAnimationPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

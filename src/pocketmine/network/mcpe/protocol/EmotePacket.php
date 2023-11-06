@@ -37,13 +37,19 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 	public $entityRuntimeId;
 	/** @var string */
 	public $emoteId;
+	/** @var string */
+	public $xboxUserId;
+	/** @var string */
+	public $platformChatId;
 	/** @var int */
 	public $flags;
 
-	public static function create(int $entityRuntimeId, string $emoteId, int $flags) : self{
+	public static function create(int $entityRuntimeId, string $emoteId, string $xboxUserId, string $platformChatId, int $flags) : self{
 		$result = new self;
 		$result->entityRuntimeId = $entityRuntimeId;
 		$result->emoteId = $emoteId;
+		$result->xboxUserId = $xboxUserId;
+		$result->platformChatId = $platformChatId;
 		$result->flags = $flags;
 		return $result;
 	}
@@ -60,6 +66,10 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 		return $this->emoteId;
 	}
 
+	public function getXboxUserId() : string{ return $this->xboxUserId; }
+
+	public function getPlatformChatId() : string{ return $this->platformChatId; }
+
 	public function getFlags() : int{
 		return $this->flags;
 	}
@@ -67,12 +77,20 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 	protected function decodePayload() : void{
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->emoteId = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+		    $this->xboxUserId = $this->getString();
+		    $this->platformChatId = $this->getString();
+		}
 		$this->flags = (ord($this->get(1)));
 	}
 
 	protected function encodePayload() : void{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putString($this->emoteId);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+		    $this->putString($this->xboxUserId);
+		    $this->putString($this->platformChatId);
+		}
 		($this->buffer .= chr($this->flags));
 	}
 

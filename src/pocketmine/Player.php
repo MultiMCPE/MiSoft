@@ -182,6 +182,7 @@ use pocketmine\network\mcpe\protocol\types\SkinImage;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData;
 use pocketmine\network\mcpe\protocol\types\AbilitiesLayer;
+use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
@@ -2567,6 +2568,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->playerActorProperties = new CompoundTag("");
 		$pk->blockPaletteChecksum = 0; //we don't bother with this (0 skips verification) - the preimage is some dumb stringified NBT, not even actual NBT
 		$pk->worldTemplateId = UUID::fromBinary(str_repeat("\x00", 16), 0);
+		$pk->networkPermissions = new NetworkPermissions(disableClientSounds: true);
 		$pk->vanillaVersion = $this->vanillaVersion;
 		$this->dataPacket($pk);
 
@@ -3518,6 +3520,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new EmotePacket();
 		$pk->entityRuntimeId = $this->id;
 		$pk->emoteId = $packet->emoteId;
+		$pk->xboxUserId = "";
+		$pk->platformChatId = "";
 		$pk->flags |= EmotePacket::FLAG_SERVER;
 
         $bedrockPlayers = [];
