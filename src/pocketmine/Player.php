@@ -186,6 +186,7 @@ use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
+use pocketmine\network\mcpe\protocol\OpenSignPacket;
 use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
@@ -197,6 +198,7 @@ use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\Plugin;
 use pocketmine\resourcepacks\ResourcePack;
 use pocketmine\tile\ItemFrame;
+use pocketmine\tile\Sign as TileSign;
 use pocketmine\tile\Spawnable;
 use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
@@ -4804,6 +4806,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->craftingGrid->getGridWidth() > CraftingGrid::SIZE_SMALL){
 			$this->craftingGrid = new CraftingGrid($this, CraftingGrid::SIZE_SMALL);
 		}
+	}
+
+	/**
+	 * Opens the player's sign editor GUI for the sign at the given position.
+	 * TODO: add support for editing the rear side of the sign (not currently supported due to technical limitations)
+	 */
+	public function openSignEditor(Vector3 $position) : void{
+		$tile = $this->getLevel()->getTile($position);
+		if($tile instanceof TileSign){
+			$tile->setEditorEntityRuntimeId($this->getId());
+			$this->onOpenSignEditor($position, true);
+		}else{
+			throw new \InvalidArgumentException("Tile at this position is not a sign");
+		}
+	}
+
+	public function onOpenSignEditor(Vector3 $signPosition, bool $frontSide) : void{
+		$this->sendDataPacket(OpenSignPacket::create($signPosition->x, $signPosition->y, $signPosition->z, $frontSide));
 	}
 
 	/**

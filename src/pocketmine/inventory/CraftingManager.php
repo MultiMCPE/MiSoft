@@ -220,7 +220,7 @@ class CraftingManager{
 	public function registerShapedRecipe(ShapedRecipe $recipe) : void{
 		$this->shapedRecipes[self::hashOutputs($recipe->getResults())][] = $recipe;
 
-		$this->craftingData = null;
+		$this->craftingDataCache = [];
 	}
 
 	/**
@@ -229,7 +229,7 @@ class CraftingManager{
 	public function registerShapelessRecipe(ShapelessRecipe $recipe) : void{
 		$this->shapelessRecipes[self::hashOutputs($recipe->getResults())][] = $recipe;
 
-		$this->craftingData = null;
+		$this->craftingDataCache = [];
 	}
 
 	/**
@@ -238,7 +238,7 @@ class CraftingManager{
 	public function registerFurnaceRecipe(FurnaceRecipe $recipe) : void{
 		$input = $recipe->getInput();
 		$this->furnaceRecipes[$input->getId() . ":" . ($input->hasAnyDamageValue() ? "?" : $input->getDamage())] = $recipe;
-		$this->craftingData = null;
+		$this->craftingDataCache = [];
 	}
 
 	/**
