@@ -227,6 +227,8 @@ interface PacketMagicNumbers{
 	public const COMPRESSED_BIOME_DEFINITION_LIST_PACKET = 0x12d;
 	public const TRIM_DATA_PACKET = 0x12e;
 	public const OPEN_SIGN_PACKET = 0x12f;
+	public const AGENT_ANIMATION_PACKET = 0x130;
+	public const REFRESH_ENTITLEMENTS_PACKET = 0x131;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1

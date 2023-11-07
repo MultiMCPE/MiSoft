@@ -466,7 +466,18 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_BRUSH_COMPLETED = 463;
 	public const SOUND_SHATTER_POT = 464;
 	public const SOUND_BREAK_POT = 465;
-    public const SOUND_UNDEFINED = 466;
+    public const SOUND_BLOCK_SNIFFER_EGG_CRACK = 466;
+    public const SOUND_BLOCK_SNIFFER_EGG_HATCH = 467;
+	public const SOUND_BLOCK_SIGN_WAXED_INTERACT_FAIL = 468;
+	public const SOUND_RECORD_RELIC = 469;
+	public const SOUND_NOTE_BASS = 470;
+	public const SOUND_PUMPKIN_CARVE = 471;
+	public const SOUND_MOB_HUSK_CONVERT_TO_ZOMBIE = 472;
+	public const SOUND_MOB_PIG_DEATH = 473;
+	public const SOUND_MOB_HOGLIN_CONVERTED_TO_ZOMBIFIED = 474;
+	public const SOUND_AMBIENT_UNDERWATER_ENTER = 475;
+	public const SOUND_AMBIENT_UNDERWATER_EXIT = 476;
+    public const SOUND_UNDEFINED = 477;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

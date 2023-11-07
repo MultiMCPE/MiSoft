@@ -38,6 +38,7 @@ final class CommandListJson implements JsonSerializable{
     public const PERMISSION_HOST = 2;
     public const PERMISSION_AUTOMATION = 3;
     public const PERMISSION_ADMIN = 4;
+
     public const MAGIC = "overload%d";
 
     /**
@@ -102,10 +103,10 @@ final class CommandListJson implements JsonSerializable{
                 ]
             ];
         }else{
-            foreach($commandData->overloads as $i => $overloads){
+            foreach($commandData->overloads as $i => $overload){
                 $overloadData = [
                     "input" => [
-                        "parameters" => self::overloadJson($overloads)
+                        "parameters" => self::overloadJson($overload->getParameters())
                     ],
                     "output" => [
                         "parameters" => []
@@ -113,10 +114,10 @@ final class CommandListJson implements JsonSerializable{
                 ];
 
                 $newData = null;
-                foreach($overloads as $overload){
-                    if($overload->postfix !== null){
+                foreach($overload->getParameters() as $parameter){
+                    if($parameter->postfix !== null){
                         $newData = [];
-                        foreach($overloads as $key => $value){
+                        foreach($overload->getParameters() as $key => $value){
                             $newData[] = "\{$key\}" . ($value->postfix === null ? "" : $value->postfix);
                         }
 

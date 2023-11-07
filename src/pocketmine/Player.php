@@ -164,6 +164,7 @@ use pocketmine\network\mcpe\protocol\CommandStepPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
+use pocketmine\network\mcpe\protocol\types\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
@@ -818,7 +819,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$parameter->paramName = "args";
 			$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
 			$parameter->isOptional = true;
-			$data->overloads[0][0] = $parameter;
+			$data->overloads[] = new CommandOverload(false, [$parameter]);
+
+			$data->chainedSubCommandData = [];
 
 			$aliases = $command->getAliases();
 			if(!empty($aliases)){
@@ -4442,6 +4445,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->isConnected() and !$this->closed){
 			if($notify and strlen($reason) > 0){
 				$pk = new DisconnectPacket();
+				$pk->reason = 0;
 				$pk->message = $reason;
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553 && !$this->isCompressionEnabled()){
 				    $pk->setProtocol($this->protocol);

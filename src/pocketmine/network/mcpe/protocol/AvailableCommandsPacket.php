@@ -28,9 +28,12 @@ use InvalidStateException;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\CommandListJson;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
+use pocketmine\network\mcpe\protocol\types\ChainedSubCommandData;
+use pocketmine\network\mcpe\protocol\types\ChainedSubCommandValue;
 use pocketmine\network\mcpe\protocol\types\CommandData;
 use pocketmine\network\mcpe\protocol\types\CommandEnum;
 use pocketmine\network\mcpe\protocol\types\CommandEnumConstraint;
+use pocketmine\network\mcpe\protocol\types\CommandOverload;
 use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\utils\BinaryDataException;
 use UnexpectedValueException;
@@ -138,6 +141,14 @@ class AvailableCommandsPacket extends DataPacket{
 		    	$enumValues[] = $this->getString();
 	    	}
 
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+	            /** @var string[] $chainedSubcommandValueNames */
+	            $chainedSubcommandValueNames = [];
+	            for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+		            $chainedSubcommandValueNames[] = $this->getString();
+	            }
+			}
+
 	    	/** @var string[] $postfixes */
 	    	$postfixes = [];
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
@@ -148,13 +159,32 @@ class AvailableCommandsPacket extends DataPacket{
 	    	$enums = [];
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		    	$enums[] = $enum = $this->getEnum($enumValues);
+		        //TODO: Bedrock may provide some enums which are not referenced by any command, and can't reasonably be
+			    //considered "hardcoded". This happens with various Edu command enums, and other enums which are probably
+			    //intended to be used by commands which aren't present in public releases.
+			    //We should probably store these somewhere, since we'll need them to be able to correctly re-encode the
+			    //packet for testing.
 		    	if(isset(self::HARDCODED_ENUM_NAMES[$enum->enumName])){
 			    	$this->hardcodedEnums[] = $enum;
 		    	}
 	    	}
 
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+			    $chainedSubCommandData = [];
+			    for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+					$name = $this->getString();
+			 	    $values = [];
+				    for($j = 0, $valueCount = $this->getUnsignedVarInt(); $j < $valueCount; ++$j){
+				    	$valueName = $chainedSubcommandValueNames[$this->getLShort()];
+					    $valueType = $this->getLShort();
+				        $values[] = new ChainedSubCommandValue($valueName, $valueType);
+				    }
+				    $chainedSubCommandData[] = new ChainedSubCommandData($name, $values);
+				}
+			}
+
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-		    	$this->commandData[] = $this->getCommandData($enums, $postfixes);
+		    	$this->commandData[] = $this->getCommandData($enums, $postfixes, $chainedSubCommandData ?? []);
 	    	}
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
@@ -311,12 +341,13 @@ class AvailableCommandsPacket extends DataPacket{
 	/**
 	 * @param CommandEnum[] $enums
 	 * @param string[]      $postfixes
+     * @param ChainedSubCommandData[] $allChainedSubCommandData
 	 *
 	 * @return CommandData
 	 * @throws UnexpectedValueException
 	 * @throws BinaryDataException
 	 */
-	protected function getCommandData(array $enums, array $postfixes) : CommandData{
+	protected function getCommandData(array $enums, array $postfixes, array $allChainedSubCommandData) : CommandData{
 		$retval = new CommandData();
 		$retval->commandName = $this->getString();
 		$retval->commandDescription = $this->getString();
@@ -328,8 +359,23 @@ class AvailableCommandsPacket extends DataPacket{
 		$retval->permission = (ord($this->get(1)));
 		$retval->aliases = $enums[((unpack("V", $this->get(4))[1] << 32 >> 32))] ?? null;
 
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+		    $chainedSubCommandData = [];
+		    for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+			    $index = $this->getLShort();
+			    $chainedSubCommandData[] = $allChainedSubCommandData[$index] ?? throw new UnexpectedValueException("Unknown chained subcommand data index $index");
+		    }
+		}
+
+		$pk->chainedSubCommandData = $chainedSubCommandData ?? [];
+
+		$retval->overloads = [];
+
 		for($overloadIndex = 0, $overloadCount = $this->getUnsignedVarInt(); $overloadIndex < $overloadCount; ++$overloadIndex){
-			$retval->overloads[$overloadIndex] = [];
+			$parameters = [];
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+			    $isChaining = $this->getBool();
+			}
 			for($paramIndex = 0, $paramCount = $this->getUnsignedVarInt(); $paramIndex < $paramCount; ++$paramIndex){
 				$parameter = new CommandParameter();
 				$parameter->paramName = $this->getString();
@@ -355,8 +401,9 @@ class AvailableCommandsPacket extends DataPacket{
 					throw new UnexpectedValueException("deserializing $retval->commandName parameter $parameter->paramName: Invalid parameter type 0x" . dechex($parameter->paramType));
 				}
 
-				$retval->overloads[$overloadIndex][$paramIndex] = $parameter;
+				$parameters[$paramIndex] = $parameter;
 			}
+			$overloads[$overloadIndex] = new CommandOverload($isChaining ?? false, $parameters);
 		}
 
 		return $retval;
@@ -366,8 +413,9 @@ class AvailableCommandsPacket extends DataPacket{
 	 * @param CommandData $data
 	 * @param int[]       $enumIndexes string enum name -> int index
 	 * @param int[]       $postfixIndexes
+     * @param int[]       $chainedSubCommandDataIndexes
 	 */
-	protected function putCommandData(CommandData $data, array $enumIndexes, array $postfixIndexes) : void{
+	protected function putCommandData(CommandData $data, array $enumIndexes, array $postfixIndexes, array $chainedSubCommandDataIndexes) : void{
 		$this->putString($data->commandName);
 		$this->putString($data->commandDescription);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
@@ -383,11 +431,22 @@ class AvailableCommandsPacket extends DataPacket{
 			($this->buffer .= (pack("V", -1)));
 		}
 
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+		    $this->putUnsignedVarInt(count($data->chainedSubCommandData));
+		    foreach($data->chainedSubCommandData as $chainedSubCommandData){
+			    $index = $chainedSubCommandDataIndexes[$chainedSubCommandData->getName()] ??
+			    	throw new \LogicException("Chained subcommand data {$chainedSubCommandData->getName()} does not have an index (this should be impossible)");
+		    	$this->putLShort($index);
+			}
+		}
+
 		$this->putUnsignedVarInt(count($data->overloads));
 		foreach($data->overloads as $overload){
-			/** @var CommandParameter[] $overload */
-			$this->putUnsignedVarInt(count($overload));
-			foreach($overload as $parameter){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+			    $this->putBool($overload->isChaining());
+			}
+			$this->putUnsignedVarInt(count($overload->getParameters()));
+			foreach($overload->getParameters() as $parameter){
 				$this->putString($parameter->paramName);
 
 				if($parameter->enum !== null){
@@ -474,6 +533,25 @@ class AvailableCommandsPacket extends DataPacket{
 			    	$enumValueIndexes[$str] = $enumValueIndexes[$str] ?? count($enumValueIndexes);
 		    	}
 	    	};
+
+
+		    /**
+		     * @var ChainedSubCommandData[] $allChainedSubCommandData
+		     * @phpstan-var array<string, ChainedSubCommandData> $allChainedSubCommandData
+		     */
+		    $allChainedSubCommandData = [];
+		    /**
+		     * @var int[] $chainedSubCommandDataIndexes
+		     * @phpstan-var array<string, int> $chainedSubCommandDataIndexes
+		     */
+		    $chainedSubCommandDataIndexes = [];
+
+		    /**
+		     * @var int[] $chainedSubCommandValueNameIndexes
+		     * @phpstan-var array<string, int> $chainedSubCommandValueNameIndexes
+		     */
+		    $chainedSubCommandValueNameIndexes = [];
+
 	    	foreach($this->hardcodedEnums as $enum){
 		    	$addEnumFn($enum);
 	    	}
@@ -481,10 +559,8 @@ class AvailableCommandsPacket extends DataPacket{
 		    	if($commandData->aliases !== null){
 		    	    $addEnumFn($commandData->aliases);
 		    	}
-		    	/** @var CommandParameter[] $overload */
 		    	foreach($commandData->overloads as $overload){
-			    	/** @var CommandParameter $parameter */
-			    	foreach($overload as $parameter){
+			    	foreach($overload->getParameters() as $parameter){
 				    	if($parameter->enum !== null){
 				    	    $addEnumFn($parameter->enum);
 				    	}
@@ -494,12 +570,29 @@ class AvailableCommandsPacket extends DataPacket{
 				    	}
 			    	}
 		    	}
+				foreach($commandData->chainedSubCommandData as $chainedSubCommandData){
+				    if(!isset($allChainedSubCommandData[$chainedSubCommandData->getName()])){
+					    $allChainedSubCommandData[$chainedSubCommandData->getName()] = $chainedSubCommandData;
+					    $chainedSubCommandDataIndexes[$chainedSubCommandData->getName()] = count($chainedSubCommandDataIndexes);
+	
+					    foreach($chainedSubCommandData->getValues() as $value){
+						    $chainedSubCommandValueNameIndexes[$value->getName()] ??= count($chainedSubCommandValueNameIndexes);
+					    }
+				    }
+			    }
 	    	}
 
 	    	$this->putUnsignedVarInt(count($enumValueIndexes));
 	    	foreach($enumValueIndexes as $enumValue => $index){
 		    	$this->putString((string) $enumValue); //stupid PHP key casting D:
 	    	}
+
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+		    	$this->putUnsignedVarInt(count($chainedSubCommandValueNameIndexes));
+		    	foreach($chainedSubCommandValueNameIndexes as $chainedSubCommandValueName => $index){
+		    		$this->putString((string) $chainedSubCommandValueName); //stupid PHP key casting D:
+				}
+			}
 
 	    	$this->putUnsignedVarInt(count($postfixIndexes));
 	    	foreach($postfixIndexes as $postfix => $index){
@@ -511,9 +604,23 @@ class AvailableCommandsPacket extends DataPacket{
 		    	$this->putEnum($enum, $enumValueIndexes);
 	    	}
 
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){
+		    	$this->putUnsignedVarInt(count($allChainedSubCommandData));
+			    foreach($allChainedSubCommandData as $chainedSubCommandData){
+			    	$this->putString($chainedSubCommandData->getName());
+			    	$this->putUnsignedVarInt(count($chainedSubCommandData->getValues()));
+			    	foreach($chainedSubCommandData->getValues() as $value){
+				    	$valueNameIndex = $chainedSubCommandValueNameIndexes[$value->getName()] ??
+					    	throw new \LogicException("Chained subcommand value name index for \"" . $value->getName() . "\" not found (this should never happen)");
+				    	$this->putLShort($valueNameIndex);
+				    	$this->putLShort($value->getType());
+					}
+				}
+			}
+
 	    	$this->putUnsignedVarInt(count($this->commandData));
 	    	foreach($this->commandData as $data){
-		    	$this->putCommandData($data, $enumIndexes, $postfixIndexes);
+		    	$this->putCommandData($data, $enumIndexes, $postfixIndexes, $chainedSubCommandDataIndexes);
 	    	}
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){

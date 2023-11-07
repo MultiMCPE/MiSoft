@@ -29,6 +29,8 @@ use pocketmine\network\mcpe\NetworkSession;
 class DisconnectPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::DISCONNECT_PACKET;
 
+	/** @var int */
+	public $reason; //TODO: add constants / enum
 	/** @var bool */
 	public $hideDisconnectionScreen = false;
 	/** @var string */
@@ -39,6 +41,9 @@ class DisconnectPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_622){
+			$this->reason = $this->getVarInt();
+		}
 		$this->hideDisconnectionScreen = (($this->get(1) !== "\x00"));
 		if(!$this->hideDisconnectionScreen){
 			$this->message = $this->getString();
@@ -46,6 +51,9 @@ class DisconnectPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_622){
+			$this->putVarInt($this->reason);
+		}
 		($this->buffer .= ($this->hideDisconnectionScreen ? "\x01" : "\x00"));
 		if(!$this->hideDisconnectionScreen){
 			$this->putString($this->message);

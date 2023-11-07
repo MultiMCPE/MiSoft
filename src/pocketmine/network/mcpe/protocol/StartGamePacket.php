@@ -46,6 +46,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
 use pocketmine\network\mcpe\protocol\types\ChatRestrictionLevel;
 use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
+use pocketmine\network\mcpe\protocol\types\EditorWorldType;
 use UnexpectedValueException;
 use function ord;
 use function chr;
@@ -99,6 +100,8 @@ class StartGamePacket extends DataPacket{
 	public $hasAchievementsDisabled = true;
 	/** @var bool */
 	public $isEditorMode = false;
+	/** @var int */
+	public $editorWorldType = EditorWorldType::NON_EDITOR;
 	/** @var bool */
 	public $createdInEditorMode = false;
 	/** @var bool */
@@ -262,7 +265,11 @@ class StartGamePacket extends DataPacket{
 		$this->getBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
-		    $this->isEditorMode = (($this->get(1) !== "\x00"));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+				$this->editorWorldType = $this->getVarInt();
+			}else{
+		        $this->isEditorMode = (($this->get(1) !== "\x00"));
+			}
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 				$this->createdInEditorMode = (($this->get(1) !== "\x00"));
 				$this->exportedFromEditorMode = (($this->get(1) !== "\x00"));
@@ -494,7 +501,11 @@ class StartGamePacket extends DataPacket{
 		$this->putBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
-		    ($this->buffer .= ($this->isEditorMode ? "\x01" : "\x00"));
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+				$this->putVarInt($this->editorWorldType);
+			}else{
+		        ($this->buffer .= ($this->isEditorMode ? "\x01" : "\x00"));
+			}
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 				($this->buffer .= ($this->createdInEditorMode ? "\x01" : "\x00"));
 				($this->buffer .= ($this->exportedFromEditorMode ? "\x01" : "\x00"));

@@ -45,6 +45,8 @@ class ResourcePacksInfoPacket extends DataPacket{
 	public $behaviorPackEntries = [];
 	/** @var ResourcePack[] */
 	public $resourcePackEntries = [];
+	/** @var string[] */
+	public $cdnUrls = [];
 
 	protected function decodePayload(){
 		$this->mustAccept = (($this->get(1) !== "\x00"));
@@ -90,6 +92,15 @@ class ResourcePacksInfoPacket extends DataPacket{
 		    	}
 			}
 		}
+
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+	    	$this->cdnUrls = [];
+	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; $i++){
+		    	$packId = $this->getString();
+		    	$cdnUrl = $this->getString();
+		    	$this->cdnUrls[$packId] = $cdnUrl;
+			}
+		}
 	}
 
 	protected function encodePayload(){
@@ -133,6 +144,14 @@ class ResourcePacksInfoPacket extends DataPacket{
 		            	}
 		        	}
 		    	}
+			}
+		}
+
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+		    $this->putUnsignedVarInt(count($this->cdnUrls));
+		    foreach($this->cdnUrls as $packId => $cdnUrl){
+		    	$this->putString($packId);
+		    	$this->putString($cdnUrl);
 			}
 		}
 	}

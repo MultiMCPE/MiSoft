@@ -223,6 +223,7 @@ use pocketmine\network\mcpe\protocol\CompressedBiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\TrimDataPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
 use pocketmine\network\mcpe\protocol\AgentAnimationPacket;
+use pocketmine\network\mcpe\protocol\RefreshEntitlementsPacket;
 
 abstract class NetworkSession{
 
@@ -1025,6 +1026,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleAgentAnimation(AgentAnimationPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleRefreshEntitlements(RefreshEntitlementsPacket $packet) : bool{
 		return false;
 	}
 }
