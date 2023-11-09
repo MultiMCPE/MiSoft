@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
+use Closure;
+
 interface SubChunkInterface{
 
 	/**
@@ -197,11 +199,4 @@ interface SubChunkInterface{
 	 * @param string $data
 	 */
 	public function setBlockLightArray(string $data);
-
-	/**
-	 * @param int $playerProtocol
-	 * 
-	 * @return string
-	 */
-	public function networkSerialize(int $playerProtocol) : string;
 }

@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function assert;
 use function chr;
 use function define;
@@ -209,10 +208,6 @@ class SubChunk implements SubChunkInterface{
 	public function setBlockLightArray(string $data){
 		assert(strlen($data) === 2048, "Wrong length of light array, expecting 2048 bytes, got " . strlen($data));
 		$this->blockLight = $data;
-	}
-
-	public function networkSerialize(int $playerProtocol) : string{
-		return "\x00" . ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? $this->ids . $this->data : $this->ids . $this->data . $this->skyLight . $this->blockLight);
 	}
 
 	public function __debugInfo(){

@@ -146,4 +146,30 @@ class BlockPalette{
         self::$palettes[$paletteProtocol] = $palette;
         krsort(self::$palettes);
     }
+
+
+	/**
+     * @param int $protocol
+	 * @param int $id
+	 * @param int $meta
+	 *
+	 * @return int
+	 */
+	public static function toStaticRuntimeId(int $protocol, int $id, int $meta = 0) : int{
+        $palette = self::getPalette($protocol);
+
+        return $palette::toStaticRuntimeId($id, $meta);
+	}
+
+	/**
+     * @param int $protocol
+	 * @param int $runtimeId
+	 *
+	 * @return int[] [id, meta]
+	 */
+	public static function fromStaticRuntimeId(int $protocol, int $runtimeId) : array{
+        $palette = self::getPalette($protocol);
+
+        return $palette::fromStaticRuntimeId($runtimeId);
+	}
 }

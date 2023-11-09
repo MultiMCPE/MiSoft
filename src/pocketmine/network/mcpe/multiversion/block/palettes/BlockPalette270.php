@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
-use pocketmine\utils\MainLogger;
 use pocketmine\block\BlockIds;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use function file_get_contents;
@@ -81,7 +80,6 @@ final class BlockPalette270 extends Palette{
 		$index = ($id << 4) | $meta;
 		if(!isset(self::$staticRuntimeIdMap[$index])){
 			self::registerMapping($rtId = ++self::$lastRuntimeId, $id, $meta);
-			MainLogger::getLogger()->error("ID $id meta $meta does not have a corresponding block static runtime ID, added a new unknown runtime ID ($rtId)");
 			return $rtId;
 		}
 
