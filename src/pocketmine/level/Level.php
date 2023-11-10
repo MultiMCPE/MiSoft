@@ -75,6 +75,7 @@ use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
@@ -157,7 +158,7 @@ class Level implements ChunkManager, Metadatable{
 	/** @var Block[][] */
 	private $blockCache = [];
 
-	/** @var BatchPacket[] */
+	/** @var BatchPacket[][] */
 	private $chunkCache = [];
 
 	/** @var int */
@@ -223,9 +224,9 @@ class Level implements ChunkManager, Metadatable{
 	/** @var SplQueue */
 	private $neighbourBlockUpdateQueue;
 
-	/** @var Player[][] */
+	/** @var Player[][][] */
 	private $chunkSendQueue = [];
-	/** @var ChunkRequestTask[] */
+	/** @var ChunkRequestTask[][] */
 	private $chunkSendTasks = [];
 
 	/** @var bool[] */
@@ -2551,7 +2552,9 @@ class Level implements ChunkManager, Metadatable{
 		unset($this->chunkCache[$chunkHash]);
 		unset($this->changedBlocks[$chunkHash]);
 		if(isset($this->chunkSendTasks[$chunkHash])){ //invalidate pending caches
-			$this->chunkSendTasks[$chunkHash]->cancelRun();
+		    foreach($this->chunkSendTasks[$chunkHash] as $protocol => $chunkTask){
+		    	$chunkTask->cancelRun();
+		    }
 			unset($this->chunkSendTasks[$chunkHash]);
 		}
 		$chunk->setChanged();
@@ -2646,18 +2649,18 @@ class Level implements ChunkManager, Metadatable{
 			$this->chunkSendQueue[$index] = [];
 		}
 
-		$this->chunkSendQueue[$index][$player->getLoaderId()] = $player;
+		$this->chunkSendQueue[$index][$player->getChunkProtocol()][$player->getLoaderId()] = $player;
 	}
 
-	private function sendChunkFromCache(int $x, int $z){
-		if(isset($this->chunkSendQueue[$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)])){
-			foreach($this->chunkSendQueue[$index] as $player){
+	private function sendChunkFromCache(int $x, int $z, int $protocol){
+		if(isset($this->chunkSendQueue[$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)][$protocol])){
+			foreach($this->chunkSendQueue[$index][$protocol] as $player){
 				/** @var Player $player */
-				if($player->isConnected() and isset($player->usedChunks[$index]) and isset($this->chunkCache[$index][$player->getChunkProtocol()])){
-				    $player->sendChunk($x, $z, $this->chunkCache[$index][$player->getChunkProtocol()]);
+				if($player->isConnected() and isset($player->usedChunks[$index]) and isset($this->chunkCache[$index][$protocol])){
+				    $player->sendChunk($x, $z, $this->chunkCache[$index][$protocol]);
 				}
 			}
-			unset($this->chunkSendQueue[$index]);
+			unset($this->chunkSendQueue[$index][$protocol]);
 		}
 	}
 
@@ -2665,50 +2668,52 @@ class Level implements ChunkManager, Metadatable{
 		if(count($this->chunkSendQueue) > 0){
 			$this->timings->syncChunkSendTimer->startTiming();
 
-			foreach($this->chunkSendQueue as $index => $players){
-				 $x = ($index >> 32);  $z = ($index & 0xFFFFFFFF) << 32 >> 32;
+			foreach($this->chunkSendQueue as $index => $protocolPlayers){
+			    foreach($protocolPlayers as $protocol => $players){
+				    $x = ($index >> 32);  $z = ($index & 0xFFFFFFFF) << 32 >> 32;
 
-				if(isset($this->chunkSendTasks[$index])){
-					if($this->chunkSendTasks[$index]->isCrashed()){
-						unset($this->chunkSendTasks[$index]);
-						$this->server->getLogger()->error("Failed to prepare chunk $x $z for sending, retrying");
-					}else{
-						//Not ready for sending yet
-						continue;
-					}
-				}
-				if(isset($this->chunkCache[$index])){
-					$this->sendChunkFromCache($x, $z);
-					continue;
-				}
-				$this->timings->syncChunkSendPrepareTimer->startTiming();
+			    	if(isset($this->chunkSendTasks[$index][$protocol])){
+				    	if($this->chunkSendTasks[$index][$protocol]->isCrashed()){
+					    	unset($this->chunkSendTasks[$index][$protocol]);
+					    	$this->server->getLogger()->error("Failed to prepare chunk $x $z for sending to players with protocol $protocol, retrying");
+				    	}else{
+					    	//Not ready for sending yet
+					    	continue;
+				    	}
+			    	}
+			    	if(isset($this->chunkCache[$index][$protocol])){
+				    	$this->sendChunkFromCache($x, $z, $protocol);
+				    	continue;
+			    	}
+			    	$this->timings->syncChunkSendPrepareTimer->startTiming();
 
-				$chunk = $this->chunks[$index] ?? null;
-				if(!($chunk instanceof Chunk)){
-					throw new ChunkException("Invalid Chunk sent");
-				}
-				assert($chunk->getX() === $x and $chunk->getZ() === $z, "Chunk coordinate mismatch: expected $x $z, but chunk has coordinates " . $chunk->getX() . " " . $chunk->getZ() . ", did you forget to clone a chunk before setting?");
+			    	$chunk = $this->chunks[$index] ?? null;
+			    	if(!($chunk instanceof Chunk)){
+				    	throw new ChunkException("Invalid Chunk sent");
+			    	}
+			    	assert($chunk->getX() === $x and $chunk->getZ() === $z, "Chunk coordinate mismatch: expected $x $z, but chunk has coordinates " . $chunk->getX() . " " . $chunk->getZ() . ", did you forget to clone a chunk before setting?");
 
-				$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $chunk));
-				$this->chunkSendTasks[$index] = $task;
+			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $chunk, $protocol));
+			    	$this->chunkSendTasks[$index][$protocol] = $task;
 
-				$this->timings->syncChunkSendPrepareTimer->stopTiming();
+			    	$this->timings->syncChunkSendPrepareTimer->stopTiming();
+			    }
 			}
 
 			$this->timings->syncChunkSendTimer->stopTiming();
 		}
 	}
 
-	public function chunkRequestCallback(int $x, int $z, array $buffers){
+	public function chunkRequestCallback(int $x, int $z, int $protocol, BatchPacket $batch){
 		$this->timings->syncChunkSendTimer->startTiming();
 
 		$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF);
-		unset($this->chunkSendTasks[$index]);
+		unset($this->chunkSendTasks[$index][$protocol]);
 
-		$this->chunkCache[$index] = $buffers;
-		$this->sendChunkFromCache($x, $z);
+		$this->chunkCache[$index][$protocol] = $batch;
+		$this->sendChunkFromCache($x, $z, $protocol);
 		if(!$this->server->getMemoryManager()->canUseChunkCache()){
-			unset($this->chunkCache[$index]);
+			unset($this->chunkCache[$index][$protocol]);
 		}
 
 		$this->timings->syncChunkSendTimer->stopTiming();

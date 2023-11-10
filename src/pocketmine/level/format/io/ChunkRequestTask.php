@@ -50,54 +50,14 @@ class ChunkRequestTask extends AsyncTask {
 	protected $chunkZ;
 	/** @var string */
     protected $tiles;
-	/** @var Palette[] */
-	protected $palettes = [];
+	/** @var Palette */
+	protected $palette;
     /** @var int */
 	protected $compressionLevel;
-	/** @var int[] */
-	protected $protocols = [
-	    /*ProtocolInfo::PROTOCOL_110,
-	    ProtocolInfo::PROTOCOL_130,
-		ProtocolInfo::PROTOCOL_220,
-		ProtocolInfo::PROTOCOL_221,
-		ProtocolInfo::PROTOCOL_240,
-		ProtocolInfo::PROTOCOL_260,
-	    ProtocolInfo::PROTOCOL_270,
-		ProtocolInfo::PROTOCOL_274,
-	    //ProtocolInfo::PROTOCOL_280,
-	    //ProtocolInfo::PROTOCOL_310,
-		//ProtocolInfo::PROTOCOL_330,
-		//ProtocolInfo::PROTOCOL_331,
-		//ProtocolInfo::PROTOCOL_340,
-		ProtocolInfo::PROTOCOL_354,
-		ProtocolInfo::PROTOCOL_360,
-		ProtocolInfo::PROTOCOL_370,
-		ProtocolInfo::PROTOCOL_406,
-		ProtocolInfo::PROTOCOL_407,
-		ProtocolInfo::PROTOCOL_408,
-		ProtocolInfo::PROTOCOL_419,
-		ProtocolInfo::PROTOCOL_428,
-		ProtocolInfo::PROTOCOL_440,
-		ProtocolInfo::PROTOCOL_448,
-		ProtocolInfo::PROTOCOL_465,
-		ProtocolInfo::PROTOCOL_471,
-		ProtocolInfo::PROTOCOL_475,
-		ProtocolInfo::PROTOCOL_486,
-		ProtocolInfo::PROTOCOL_503,
-		ProtocolInfo::PROTOCOL_526,
-	    ProtocolInfo::PROTOCOL_534,
-	    ProtocolInfo::PROTOCOL_544,
-	    ProtocolInfo::PROTOCOL_560,*/
-		ProtocolInfo::PROTOCOL_567,
-		ProtocolInfo::PROTOCOL_575,
-		/*ProtocolInfo::PROTOCOL_582,
-		ProtocolInfo::PROTOCOL_589,
-		ProtocolInfo::PROTOCOL_594,
-		ProtocolInfo::PROTOCOL_618,*/
-		ProtocolInfo::PROTOCOL_622,
-	];
+	/** @var int */
+	protected $protocol;
 
-	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk){
+	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk, int $protocol){
 		$this->levelId = $level->getId();
 		$this->compressionLevel = $level->getServer()->networkCompressionLevel;
 
@@ -113,11 +73,9 @@ class ChunkRequestTask extends AsyncTask {
 		}
         $this->tiles = $tiles;
 
-		foreach($this->protocols as $protocol){
-			if($protocol >= ProtocolInfo::PROTOCOL_220){
-				$this->palettes[$protocol] = BlockPalette::getPalette($protocol);
-			}
-		}
+		$this->palette = BlockPalette::getPalette($protocol);
+
+		$this->protocol = $protocol;
 	}
 
 	public function onRun(){
@@ -125,46 +83,41 @@ class ChunkRequestTask extends AsyncTask {
 
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 
-	    $buffers = [];
-	    foreach($this->protocols as $protocol){
-			if($protocol >= ProtocolInfo::PROTOCOL_220){
-				BlockPalette::addPalette($palette = $this->palettes[$protocol], $protocol);
-		    	$legacyToRuntime = function(int $blockId, int $meta) use ($palette) : int{
-			    	return $palette::toStaticRuntimeId($blockId, $meta);
-		    	};
-			}
+        $protocol = $this->protocol;
+		if($protocol >= ProtocolInfo::PROTOCOL_220){
+			BlockPalette::addPalette($palette = $this->palette, $protocol);
+		    $legacyToRuntime = function(int $blockId, int $meta) use ($palette) : int{
+			    return $palette::toStaticRuntimeId($blockId, $meta);
+		    };
+		}
 
-	    	$pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol, $legacyToRuntime ?? null) . $this->tiles);
-	    	$pk->setProtocol($protocol);
+	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol, $legacyToRuntime ?? null) . $this->tiles);
+	    $pk->setProtocol($protocol);
 
-	    	$batch = new BatchPacket();
-	    	$batch->addPacket($pk);
-	    	$batch->setCompressionLevel($this->compressionLevel);
-	    	$batch->setProtocol($protocol);
-	    	$batch->encode();
+	    $batch = new BatchPacket();
+	    $batch->addPacket($pk);
+	    $batch->setCompressionLevel($this->compressionLevel);
+	    $batch->setProtocol($protocol);
+	    $batch->encode();
 
-	    	$buffers[$protocol] = $batch->buffer;
-	    }
-        $this->setResult($buffers);
+        $this->setResult($batch->buffer);
 	}
 
 	public function onCompletion(Server $server){
 		$level = $server->getLevel($this->levelId);
 		if($level instanceof Level){
 			if($this->hasResult()){
-			    $buffers = [];
-			    foreach($this->getResult() as $protocol => $buffer){
-			    	$batch = new BatchPacket($buffer);
-			    	assert(strlen($batch->buffer) > 0);
-			    	$batch->setProtocol($protocol);
-			    	$batch->isEncoded = true;
+			    $buffer = $this->getResult();
+			    $protocol = $this->protocol;
 
-			    	$buffers[$protocol] = $batch;
-			    }
+			    $batch = new BatchPacket($buffer);
+			   	assert(strlen($batch->buffer) > 0);
+			    $batch->setProtocol($protocol);
+			    $batch->isEncoded = true;
 
-				$level->chunkRequestCallback($this->chunkX, $this->chunkZ, $buffers);
+				$level->chunkRequestCallback($this->chunkX, $this->chunkZ, $protocol, $batch);
 			}else{
-				$server->getLogger()->error("Chunk request for world #" . $this->levelId . ", x=" . $this->chunkX . ", z=" . $this->chunkZ . " doesn't have any result data");
+				$server->getLogger()->error("Chunk request (protocol: {$this->protocol}) for world #" . $this->levelId . ", x=" . $this->chunkX . ", z=" . $this->chunkZ . " doesn't have any result data");
 			}
 		}else{
 			$server->getLogger()->debug("Dropped chunk task due to world not loaded");
