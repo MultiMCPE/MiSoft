@@ -23,8 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
-use Closure;
-
 interface SubChunkInterface{
 
 	/**
