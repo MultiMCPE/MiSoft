@@ -31,15 +31,13 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use Closure;
 use function assert;
 use function strlen;
 
-class ChunkRequestTask extends AsyncTask {
+class ChunkRequestTask extends AsyncTask{
     /** @var int */
 	protected $levelId;
 	/** @var string */
@@ -50,8 +48,6 @@ class ChunkRequestTask extends AsyncTask {
 	protected $chunkZ;
 	/** @var string */
     protected $tiles;
-	/** @var Palette */
-	protected $palette;
     /** @var int */
 	protected $compressionLevel;
 	/** @var int */
@@ -73,8 +69,6 @@ class ChunkRequestTask extends AsyncTask {
 		}
         $this->tiles = $tiles;
 
-		$this->palette = BlockPalette::getPalette($protocol);
-
 		$this->protocol = $protocol;
 	}
 
@@ -84,14 +78,8 @@ class ChunkRequestTask extends AsyncTask {
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 
         $protocol = $this->protocol;
-		if($protocol >= ProtocolInfo::PROTOCOL_220){
-			BlockPalette::addPalette($palette = $this->palette, $protocol);
-		    $legacyToRuntime = function(int $blockId, int $meta) use ($palette) : int{
-			    return $palette::toStaticRuntimeId($blockId, $meta);
-		    };
-		}
 
-	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol, $legacyToRuntime ?? null) . $this->tiles);
+	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
 	    $pk->setProtocol($protocol);
 
 	    $batch = new BatchPacket();
