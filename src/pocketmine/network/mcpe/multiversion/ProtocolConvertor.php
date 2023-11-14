@@ -329,6 +329,7 @@ abstract class ProtocolConvertor{
 	public static function convertCraftingProtocol(int $playerProtocol) : int{
 		switch($playerProtocol){
 			case ProtocolInfo::PROTOCOL_622:
+			    return ProtocolInfo::PROTOCOL_622;
 			case ProtocolInfo::PROTOCOL_618:
 				return ProtocolInfo::PROTOCOL_618;
 			case ProtocolInfo::PROTOCOL_594:
@@ -348,6 +349,7 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_553:
 			    return ProtocolInfo::PROTOCOL_553;
 			case ProtocolInfo::PROTOCOL_544:
+			    return ProtocolInfo::PROTOCOL_544;
 			case ProtocolInfo::PROTOCOL_534:
 			    return ProtocolInfo::PROTOCOL_534;
 			case ProtocolInfo::PROTOCOL_526:
@@ -359,6 +361,7 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_475:
 			    return ProtocolInfo::PROTOCOL_475;
 			case ProtocolInfo::PROTOCOL_471:
+			    return ProtocolInfo::PROTOCOL_471;
 			case ProtocolInfo::PROTOCOL_465:
 			    return ProtocolInfo::PROTOCOL_465;
 			case ProtocolInfo::PROTOCOL_448:
@@ -368,6 +371,7 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_429:
 			    return ProtocolInfo::PROTOCOL_429;
 		    case ProtocolInfo::PROTOCOL_428:
+		        return ProtocolInfo::PROTOCOL_428;
 		    case ProtocolInfo::PROTOCOL_425:
 		    case ProtocolInfo::PROTOCOL_422:
 			case ProtocolInfo::PROTOCOL_419:

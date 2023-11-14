@@ -61,6 +61,26 @@ class ItemFrame extends Flowable{
 		return true;
 	}
 
+	public function onAttack(Item $item, int $face, Player $player = null) : bool{
+		$tile = $this->level->getTile($this);
+		if(!($tile instanceof TileItemFrame)){
+		    return false;
+		}
+
+		$tileItem = $tile->getItem();
+		if($tileItem->isNull()){
+		    return false;
+		}
+
+		if(lcg_value() <= $tile->getItemDropChance()){
+			$this->level->dropItem($this, $tile->getItem());
+		}
+		$tile->setItem(null);
+		$tile->setItemRotation(0);
+
+		return true;
+	}
+
 	public function onNearbyBlockChange() : void{
 		$sides = [
 			0 => Vector3::SIDE_WEST,

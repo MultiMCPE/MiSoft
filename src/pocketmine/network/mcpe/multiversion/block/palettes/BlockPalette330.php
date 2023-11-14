@@ -67,6 +67,12 @@ final class BlockPalette330 extends Palette{
 		self::$encodedPalette = $stream->getBuffer();
 	}
 
+	private static function lazyInit() : void{
+		if(self::$encodedPalette === null){
+			self::init();
+		}
+	}
+
 	/**
 	 * @param int $id
 	 * @param int $meta
@@ -74,6 +80,7 @@ final class BlockPalette330 extends Palette{
 	 * @return int
 	 */
 	public static function toStaticRuntimeId(int $id, int $meta = 0) : int{
+	    self::lazyInit();
 		/*
 		 * try id+meta first
 		 * if not found, try id+0 (strip meta)
@@ -88,6 +95,7 @@ final class BlockPalette330 extends Palette{
 	 * @return int[] [id, meta]
 	 */
 	public static function fromStaticRuntimeId(int $runtimeId) : array{
+	    self::lazyInit();
 	    if(isset(self::$legacyIdMap[$runtimeId])){
 	    	$v = self::$legacyIdMap[$runtimeId];
 	    	return [$v >> 4, $v & 0xf];
@@ -105,6 +113,7 @@ final class BlockPalette330 extends Palette{
 	 * @return string
 	 */
 	public static function getEncodedPalette() : string{
+	    self::lazyInit();
 		return self::$encodedPalette;
 	}
 }

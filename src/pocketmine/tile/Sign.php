@@ -243,13 +243,12 @@ class Sign extends Spawnable{
 
 		$ev = new SignChangeEvent($this->getBlock(), $player, array_map(function(string $line) use ($removeFormat){ return TextFormat::clean($line, $removeFormat); }, $lines));
 		if($this->editorEntityRuntimeId !== $player->getId()){
-			$ev->cancel();
+			$ev->setCancelled();
 		}
 		$ev->call();
 
 		if(!$ev->isCancelled()){
 			$this->setText(...$ev->getLines());
-			$this->setEditorEntityRuntimeId(null);
 
 			return true;
 		}else{

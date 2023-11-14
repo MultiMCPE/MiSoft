@@ -238,6 +238,7 @@ use function spl_object_hash;
 use function sprintf;
 use function sqrt;
 use function strlen;
+use function mb_strlen;
 use function strpos;
 use function strtolower;
 use function substr;
@@ -266,6 +267,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	private const RESERVED_WINDOW_ID_RANGE_END = ContainerIds::LAST;
 	public const HARDCODED_CRAFTING_GRID_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 1;
 	public const HARDCODED_INVENTORY_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 2;
+
+	/** Max length of a chat message (UTF-8 codepoints, not bytes) */
+	private const MAX_CHAT_CHAR_LENGTH = 512;
+	/**
+	 * Max length of a chat message in bytes. This is a theoretical maximum (if every character was 4 bytes).
+	 * Since mb_strlen() is O(n), it gets very slow with large messages. Checking byte length with strlen() is O(1) and
+	 * is a useful heuristic to filter out oversized messages.
+	 */
+	private const MAX_CHAT_BYTE_LENGTH = self::MAX_CHAT_CHAR_LENGTH * 4;
 
 	/**
 	 * Validates the given username.
@@ -2637,9 +2647,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->doCloseInventory();
 
+		//Fast length check, to make sure we don't get hung trying to explode MBs of string ...
+		$maxTotalLength = $this->messageCounter * (self::MAX_CHAT_BYTE_LENGTH + 1);
+		if(strlen($message) > $maxTotalLength){
+			return false;
+		}
+
 		$message = TextFormat::clean($message, $this->removeFormat);
-		foreach(explode("\n", $message) as $messagePart){
-			if(trim($messagePart) !== "" and strlen($messagePart) <= 255 and $this->messageCounter-- > 0){
+		foreach(explode("\n", $message, $this->messageCounter + 1) as $messagePart){
+		    if(trim($messagePart) !== "" && strlen($messagePart) <= self::MAX_CHAT_BYTE_LENGTH && mb_strlen($messagePart, 'UTF-8') <= self::MAX_CHAT_CHAR_LENGTH && $this->messageCounter-- > 0){
 				if(strpos($messagePart, './') === 0){
 					$messagePart = substr($messagePart, 1);
 				}
@@ -2705,6 +2721,50 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$tile = $this->level->getTile($b);
 			if($tile instanceof Spawnable){
 				$tile->spawnTo($this);
+			}
+		}
+
+		return true;
+    }
+
+	/**
+	 * Performs a left-click (attack) action on the block.
+	 *
+	 * @return bool if an action took place successfully
+	 */
+	public function attackBlock(Vector3 $pos, int $face) : bool{
+		if($pos->distanceSquared($this) > 10000){
+			return false;
+		}
+
+		$target = $this->level->getBlock($pos);
+
+		$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, null, $face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
+		if($this->level->checkSpawnProtection($this, $target)){
+			$ev->setCancelled();
+		}
+
+		$ev->call();
+		if($ev->isCancelled()){
+			$this->inventory->sendHeldItem($this);
+			return false;
+		}
+
+		if($target->onAttack($this->inventory->getItemInHand(), $face, $this)){
+			return true;
+		}
+
+		$block = $target->getSide($face);
+		if($block->getId() === Block::FIRE){
+			$this->level->setBlock($block, BlockFactory::get(Block::AIR));
+			return true;
+		}
+
+		if(!$this->isCreative()){
+			//TODO: improve this to take stuff like swimming, ladders, enchanted tools into account, fix wrong tool break time calculations for bad tools (pmmp/PocketMine-MP#211)
+			$breakTime = ceil($target->getBreakTime($this->inventory->getItemInHand()) * 20);
+			if($breakTime > 0){
+				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_START_BREAK, (int) (65535 / $breakTime));
 			}
 		}
 
@@ -3604,36 +3664,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		        break;
 			case PlayerActionPacket::ACTION_START_BREAK:
-				if($pos->distanceSquared($this) > 10000){
-					break;
-				}
-
-				$target = $this->level->getBlock($pos);
-
-				$ev = new PlayerInteractEvent($this, $this->inventory->getItemInHand(), $target, null, $packet->face, PlayerInteractEvent::LEFT_CLICK_BLOCK);
-				if($this->level->checkSpawnProtection($this, $target)){
-					$ev->setCancelled();
-				}
-
-				$ev->call();
-				if($ev->isCancelled()){
-					$this->inventory->sendHeldItem($this);
-					break;
-				}
-
-				$block = $target->getSide($packet->face);
-				if($block->getId() === Block::FIRE){
-					$this->level->setBlock($block, BlockFactory::get(Block::AIR));
-					break;
-				}
-
-				if(!$this->isCreative()){
-					//TODO: improve this to take stuff like swimming, ladders, enchanted tools into account, fix wrong tool break time calculations for bad tools (pmmp/PocketMine-MP#211)
-					$breakTime = ceil($target->getBreakTime($this->inventory->getItemInHand()) * 20);
-					if($breakTime > 0){
-						$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_START_BREAK, (int) (65535 / $breakTime));
-					}
-				}
+			    $this->attackBlock($pos, $packet->face);
 
 				break;
 
@@ -3695,6 +3726,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
 				break;
 			case PlayerActionPacket::ACTION_HANDLED_TELEPORT:
+        	case PlayerActionPacket::ACTION_MISSED_SWING:
+        	case PlayerActionPacket::ACTION_START_CRAWLING:
+        	case PlayerActionPacket::ACTION_STOP_CRAWLING:
+        	case PlayerActionPacket::ACTION_START_FLYING:
+        	case PlayerActionPacket::ACTION_STOP_FLYING:
+        	case PlayerActionPacket::ACTION_ACK_ACTOR_DATA:
 			    break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());

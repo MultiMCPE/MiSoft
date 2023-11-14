@@ -280,11 +280,7 @@ class CraftingDataPacket extends DataPacket{
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_350){
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
-				if($playerProtocol >= ProtocolInfo::PROTOCOL_618){
-	        	    $stream->putVarInt(0); //TODO: priority
-				}else{
-					$stream->putVarInt(50); //TODO: priority
-				}
+				$stream->putVarInt(50); //TODO: priority
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
 	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
@@ -322,11 +318,7 @@ class CraftingDataPacket extends DataPacket{
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_350){
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
-				if($playerProtocol >= ProtocolInfo::PROTOCOL_618){
-	        	    $stream->putVarInt(0); //TODO: priority
-				}else{
-					$stream->putVarInt(50); //TODO: priority
-				}
+				$stream->putVarInt(50); //TODO: priority
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
 	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
