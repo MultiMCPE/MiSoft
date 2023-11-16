@@ -1,24 +1,5 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
- *
-*/
-
 declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\inventory\palettes;
@@ -30,10 +11,10 @@ use UnexpectedValueException;
 use function count;
 use function file_get_contents;
 use function json_decode;
+use function array_key_exists;
 use const pocketmine\RESOURCE_PATH;
 
 final class ItemPalette448 extends Palette{
-
 	/** @var int[] */
 	private static $stringToRuntimeIdMap = [];
 	/** @var string[] */
@@ -61,10 +42,10 @@ final class ItemPalette448 extends Palette{
 
 		$simpleMappings = [];
 		foreach($itemMap["simple"] as $oldId => $newId){
-            if(!isset($stringToIntMap[$oldId])){
-                //new item without a fixed legacy ID - we can't handle this right now
-                continue;
-            }
+			if(!isset($stringToIntMap[$oldId])){
+				//new item without a fixed legacy ID - we can't handle this right now
+				continue;
+			}
 			$simpleMappings[$newId] = $stringToIntMap[$oldId];
 		}
 		foreach($stringToIntMap as $stringId => $intId){
@@ -77,7 +58,18 @@ final class ItemPalette448 extends Palette{
 		$complexMappings = [];
 		foreach($itemMap["complex"] as $oldId => $map){
 			foreach($map as $meta => $newId){
-				$complexMappings[$newId] = [$stringToIntMap[$oldId], (int) $meta];
+				if(!isset($stringToIntMap[$oldId])){
+					//new item without a fixed legacy ID - we can't handle this right now
+					continue;
+				}
+				$intId = $stringToIntMap[$oldId];
+				if(isset($complexMappings[$newId]) && $complexMappings[$newId][0] === $intId && $complexMappings[$newId][1] <= $meta){
+					//TODO: HACK! Multiple legacy ID/meta pairs can be mapped to the same new ID (see minecraft:log)
+					//Assume that the first one is the most relevant for now
+					//However, this could catch fire in the future if this assumption is broken
+					continue;
+				}
+				$complexMappings[$newId] = [$intId, (int) $meta];
 			}
 		}
 
@@ -96,9 +88,9 @@ final class ItemPalette448 extends Palette{
 				self::$simpleLegacyToRuntimeIdMap[$simpleMappings[$stringId]] = $runtimeId;
 				self::$simpleRuntimeToLegacyIdMap[$runtimeId] = $simpleMappings[$stringId];
 			}else{
-                //not all items have a legacy mapping - for now, we only support the ones that do
-                continue;
-            }
+				//not all items have a legacy mapping - for now, we only support the ones that do
+				continue;
+			}
 		}
 
 		$stream = new NetworkBinaryStream();
@@ -111,11 +103,11 @@ final class ItemPalette448 extends Palette{
 		self::$encodedPalette = $stream->buffer;
 	}
 
-    public static function lazyInit() : void{
-        if(self::$encodedPalette === null){
-            self::init();
-        }
-    }
+	public static function lazyInit() : void{
+		if(self::$encodedPalette === null){
+			self::init();
+		}
+	}
 
 	/**
 	 * @param int $runtimeId
@@ -145,7 +137,7 @@ final class ItemPalette448 extends Palette{
 		if(isset(self::$complexLegacyToRuntimeIdMap[$id][$meta])){
 			return [self::$complexLegacyToRuntimeIdMap[$id][$meta], 0];
 		}
-		if(isset(self::$simpleLegacyToRuntimeIdMap[$id])){
+		if(array_key_exists($id, self::$simpleLegacyToRuntimeIdMap)){
 			return [self::$simpleLegacyToRuntimeIdMap[$id], $meta];
 		}
 

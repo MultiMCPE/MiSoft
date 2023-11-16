@@ -86,9 +86,13 @@ class CraftingManager{
 					));
 					break;
 				case "smelting":
-					$result = $recipe["output"];
-					$resultItem = Item::jsonDeserialize($result);
-					$this->registerRecipe(new FurnaceRecipe($resultItem, Item::get($recipe["inputId"], $recipe["inputDamage"] ?? -1, 1)));
+					if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
+						break;
+					}
+					$this->registerRecipe(new FurnaceRecipe(
+						Item::jsonDeserialize($recipe["output"]),
+						Item::jsonDeserialize($recipe["input"]))
+					);
 					break;
 				default:
 					break;
