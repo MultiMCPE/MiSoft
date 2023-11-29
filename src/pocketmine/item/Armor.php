@@ -24,6 +24,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\Player;
+use pocketmine\math\Vector3;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\ProtectionEnchantment;
@@ -40,6 +42,8 @@ abstract class Armor extends Durable{
 	public function getMaxStackSize() : int{
 		return 1;
 	}
+
+	abstract public function getArmorSlot() : int;
 
 	/**
 	 * Returns the dyed colour of this armour piece. This generally only applies to leather armour.
@@ -98,5 +102,14 @@ abstract class Armor extends Durable{
 		}
 
 		return 0;
+	}
+
+	public function onClickAir(Player $player, Vector3 $directionVector) : bool{
+		$existing = $player->getArmorInventory()->getItem($this->getArmorSlot());
+		if(!$existing->isNull()){
+			return false;
+		}
+		$player->getArmorInventory()->setItem($this->getArmorSlot(), $this->pop());
+		return true;
 	}
 }

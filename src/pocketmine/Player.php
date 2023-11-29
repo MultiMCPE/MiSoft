@@ -3708,6 +3708,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_PARTICLE_PUNCH_BLOCK, $data | ($packet->face << 24));
+				$this->level->broadcastLevelSoundEvent($pos, LevelSoundEventPacket::SOUND_HIT, $block->getId());
+
 				
 				//TODO: destroy-progress level event
 				break;

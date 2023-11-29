@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\inventory\ArmorInventory;
 
 class GoldBoots extends Armor{
 	public function __construct(int $meta = 0){
@@ -35,5 +36,9 @@ class GoldBoots extends Armor{
 
 	public function getMaxDurability() : int{
 		return 92;
+	}
+
+	public function getArmorSlot() : int{
+		return ArmorInventory::SLOT_FEET;
 	}
 }
