@@ -932,10 +932,12 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		]);
 		$player->dataPacket($pk);
 
-        if ($player->getProtocol() >= ProtocolInfo::PROTOCOL_220) {
+        if($player->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	//TODO: Hack for MCPE 1.2.13: DATA_NAMETAG is useless in AddPlayerPacket, so it has to be sent separately
 	    	$this->sendData($player, [self::DATA_NAMETAG => [self::DATA_TYPE_STRING, $this->getNameTag()]]);
-        }
+        }else{
+			$this->sendData($player);
+		}
 
 		$this->armorInventory->sendContents($player);
         $this->offHandInventory->sendOffhand($player);
