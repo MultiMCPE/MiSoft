@@ -3146,12 +3146,9 @@ class Level implements ChunkManager, Metadatable{
 					$this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)] = true;
 				}
 			}
-			$task = new PopulationTask($this, $chunk);
-			$workerId = $this->server->getAsyncPool()->selectWorker();
-			if(!isset($this->generatorRegisteredWorkers[$workerId])){
-				$this->registerGeneratorToWorker($workerId);
-			}
-			$this->server->getAsyncPool()->submitTaskToWorker($task, $workerId);
+			$task = new GenerationTask($this, $chunk);
+			$this->server->getScheduler()->scheduleAsyncTask($task);
+			Timings::$populationTimer->stopTiming();
 			return false;
 		}
 		return true;
