@@ -3126,31 +3126,39 @@ class Level implements ChunkManager, Metadatable{
 	}
 
 	public function populateChunk(int $x, int $z, bool $force = false) : bool{
-		if(isset($this->chunkPopulationQueue[$index = Level::chunkHash($x, $z)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){
+		if(isset($this->chunkPopulationQueue[$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)]) or (count($this->chunkPopulationQueue) >= $this->chunkPopulationQueueSize and !$force)){
 			return false;
 		}
 		for($xx = -1; $xx <= 1; ++$xx){
 			for($zz = -1; $zz <= 1; ++$zz){
-				if(isset($this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)])){
+				if(isset($this->chunkPopulationLock[((($x + $xx) & 0xFFFFFFFF) << 32) | (( $z + $zz) & 0xFFFFFFFF)])){
 					return false;
 				}
 			}
 		}
 
 		$chunk = $this->getChunk($x, $z, true);
-		if (!$chunk->isPopulated()) {
+		if(!$chunk->isPopulated()){
 			Timings::$populationTimer->startTiming();
+
 			$this->chunkPopulationQueue[$index] = true;
-			for ($xx = -1; $xx <= 1; ++$xx) {
-				for ($zz = -1; $zz <= 1; ++$zz) {
-					$this->chunkPopulationLock[Level::chunkHash($x + $xx, $z + $zz)] = true;
+			for($xx = -1; $xx <= 1; ++$xx){
+				for($zz = -1; $zz <= 1; ++$zz){
+					$this->chunkPopulationLock[((($x + $xx) & 0xFFFFFFFF) << 32) | (( $z + $zz) & 0xFFFFFFFF)] = true;
 				}
 			}
-			$task = new GenerationTask($this, $chunk);
-			$this->server->getScheduler()->scheduleAsyncTask($task);
+
+			$task = new PopulationTask($this, $chunk);
+			$workerId = $this->server->getAsyncPool()->selectWorker();
+			if(!isset($this->generatorRegisteredWorkers[$workerId])){
+				$this->registerGeneratorToWorker($workerId);
+			}
+			$this->server->getAsyncPool()->submitTaskToWorker($task, $workerId);
+
 			Timings::$populationTimer->stopTiming();
 			return false;
 		}
+
 		return true;
 	}
 
