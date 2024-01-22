@@ -60,7 +60,7 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		$this->sha256 = $this->getString();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	$this->isPremium = (($this->get(1) !== "\x00"));
-	    	$this->packType = MultiversionEnums::getPackType($this->getProtocol(), (ord($this->get(1))));
+	    	$this->packType = $this->getByte();
 		}
 	}
 
@@ -72,7 +72,7 @@ class ResourcePackDataInfoPacket extends DataPacket{
 		$this->putString($this->sha256);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 	    	($this->buffer .= ($this->isPremium ? "\x01" : "\x00"));
-	    	($this->buffer .= chr(MultiversionEnums::getPackTypeId($this->getProtocol(), $this->packType)));
+	    	$this->putByte($this->packType);
 		}
 	}
 
