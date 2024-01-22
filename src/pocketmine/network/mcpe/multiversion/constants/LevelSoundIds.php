@@ -475,6 +475,16 @@ final class LevelSoundIds{
 		    "SOUND_MOB_HOGLIN_CONVERTED_TO_ZOMBIFIED" => 474,
 		    "SOUND_AMBIENT_UNDERWATER_ENTER" => 475,
 		    "SOUND_AMBIENT_UNDERWATER_EXIT" => 476,
+			"SOUND_BOTTLE_FILL" => 477,
+			"SOUND_BOTTLE_EMPTY" => 478,
+			"SOUND_CRAFTER_CRAFT" => 479,
+			"SOUND_CRAFTER_FAIL" => 480,
+			"SOUND_BLOCK_DECORATED_POT_INSERT" => 481,
+			"SOUND_BLOCK_DECORATED_POT_INSERT_FAIL" => 482,
+			"SOUND_CRAFTER_DISABLE_SLOT" => 483,
+		
+			"SOUND_BLOCK_COPPER_BULB_TURN_ON" => 490,
+			"SOUND_BLOCK_COPPER_BULB_TURN_OFF" => 491,
 
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
@@ -498,7 +508,7 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
             "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
-            "SOUND_UNDEFINED" => 477
+            "SOUND_UNDEFINED" => 492
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,

@@ -46,7 +46,7 @@ class PlayerHotbarPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->selectedHotbarSlot = $this->getUnsignedVarInt();
 		$this->windowId = (ord($this->get(1)));
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
+		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
             $slots = $this->getUnsignedVarInt();
             for ($slot = 0; $slot < $slots; ++$slot) {
                 $this->slots[$slot] = $this->getUnsignedVarInt();
@@ -60,7 +60,7 @@ class PlayerHotbarPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->selectedHotbarSlot);
 		($this->buffer .= chr($this->windowId));
-		if ($this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
+		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
 	    	$this->putUnsignedVarInt(count($this->slots));
 	    	foreach ($this->slots as $slot) {
 		    	$this->putUnsignedVarInt($slot);

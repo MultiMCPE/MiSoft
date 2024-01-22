@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\ShowStoreOfferRedirectType;
 
 class ShowStoreOfferPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SHOW_STORE_OFFER_PACKET;
@@ -32,15 +33,25 @@ class ShowStoreOfferPacket extends DataPacket{
 	public $offerId;
 	/** @var bool */
 	public $showAll;
+	/** @var ShowStoreOfferRedirectType */
+	public $redirectType;
 
 	protected function decodePayload(){
 		$this->offerId = $this->getString();
-		$this->showAll = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_630){
+	    	$this->redirectType = ShowStoreOfferRedirectType::fromPacket($this->getByte());
+		}else{
+	    	$this->showAll = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->offerId);
-		($this->buffer .= ($this->showAll ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_630){
+	    	$this->putByte($this->redirectType->value);
+		}else{
+	    	($this->buffer .= ($this->showAll ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

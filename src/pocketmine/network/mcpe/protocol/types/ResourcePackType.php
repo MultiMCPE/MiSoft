@@ -38,4 +38,5 @@ final class ResourcePackType{
 	public const RESOURCES = 6;
 	public const SKINS = 7;
 	public const WORLD_TEMPLATE = 8;
+	public const COUNT = 9;
 }

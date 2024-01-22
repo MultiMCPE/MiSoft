@@ -326,7 +326,7 @@ class StartGamePacket extends DataPacket{
 	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
 		        $this->xboxLiveBroadcastMode = $this->getVarInt();
 	    	}
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->serverChunkTickRadius = ((unpack("V", $this->get(4))[1] << 32 >> 32));
 	    	}
 	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
@@ -562,7 +562,7 @@ class StartGamePacket extends DataPacket{
 	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
 		        $this->putVarInt($this->xboxLiveBroadcastMode);
 	    	}
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	($this->buffer .= (pack("V", $this->serverChunkTickRadius)));
 	    	}
 	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){

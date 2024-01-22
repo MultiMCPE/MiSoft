@@ -52,7 +52,7 @@ class AddItemActorPacket extends DataPacket{
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
 		$this->metadata = $this->getEntityMetadata($this->getProtocol());
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+		if ($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 	    	$this->isFromFishing = (($this->get(1) !== "\x00"));
 		}
 	}
@@ -64,7 +64,7 @@ class AddItemActorPacket extends DataPacket{
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
+		if ($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
 	    	($this->buffer .= ($this->isFromFishing ? "\x01" : "\x00"));
 		}
 	}

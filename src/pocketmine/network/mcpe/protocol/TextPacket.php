@@ -75,7 +75,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->sourceName = $this->getString();
-				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
+				if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->sourceThirdPartyName = $this->getString();
 		        	$this->sourcePlatform = $this->getVarInt();
 				}
@@ -105,7 +105,7 @@ class TextPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_134){
 	    	$this->xboxUserId = $this->getString();
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->platformChatId = $this->getString();
 	    	}
 		}
@@ -122,7 +122,7 @@ class TextPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
 				$this->putString($this->sourceName);
-				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
+				if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->putString($this->sourceThirdPartyName);
 		        	$this->putVarInt($this->sourcePlatform);
 				}
@@ -152,7 +152,7 @@ class TextPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_134){
 	    	$this->putString($this->xboxUserId);
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->putString($this->platformChatId);
 	    	}
 		}

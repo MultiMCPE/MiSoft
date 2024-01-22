@@ -224,6 +224,8 @@ use pocketmine\network\mcpe\protocol\TrimDataPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
 use pocketmine\network\mcpe\protocol\AgentAnimationPacket;
 use pocketmine\network\mcpe\protocol\RefreshEntitlementsPacket;
+use pocketmine\network\mcpe\protocol\PlayerToggleCrafterSlotRequestPacket;
+use pocketmine\network\mcpe\protocol\SetPlayerInventoryOptionsPacket;
 
 abstract class NetworkSession{
 
@@ -1030,6 +1032,14 @@ abstract class NetworkSession{
 	}
 
 	public function handleRefreshEntitlements(RefreshEntitlementsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerToggleCrafterSlotRequest(PlayerToggleCrafterSlotRequestPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSetPlayerInventoryOptions(SetPlayerInventoryOptionsPacket $packet) : bool{
 		return false;
 	}
 }

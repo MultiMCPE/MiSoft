@@ -470,7 +470,7 @@ abstract class BaseInventory implements Inventory{
 		    	$pk->items = $items;
 		    	$pk->windowId = $id;
 		    	$player->dataPacket(clone $pk);
-		    	if($this instanceof PlayerInventory && $player->getProtocol() < ProtocolInfo::PROTOCOL_200){
+		    	if($this instanceof PlayerInventory && ($player->getProtocol() === ProtocolInfo::PROTOCOL_201 || $player->getProtocol() < ProtocolInfo::PROTOCOL_200)){
 	               	$pk = new PlayerHotbarPacket();
 	               	$pk->windowId = ContainerIds::INVENTORY;
 	               	$pk->selectedHotbarSlot = $this->getHeldItemIndex();

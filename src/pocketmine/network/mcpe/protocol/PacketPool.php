@@ -319,6 +319,8 @@ class PacketPool {
 		self::registerPacket(new OpenSignPacket());
 		self::registerPacket(new AgentAnimationPacket());
 		self::registerPacket(new RefreshEntitlementsPacket());
+	    self::registerPacket(new PlayerToggleCrafterSlotRequestPacket());
+		self::registerPacket(new SetPlayerInventoryOptionsPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

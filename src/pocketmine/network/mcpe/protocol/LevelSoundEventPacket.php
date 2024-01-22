@@ -477,7 +477,17 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_MOB_HOGLIN_CONVERTED_TO_ZOMBIFIED = 474;
 	public const SOUND_AMBIENT_UNDERWATER_ENTER = 475;
 	public const SOUND_AMBIENT_UNDERWATER_EXIT = 476;
-    public const SOUND_UNDEFINED = 477;
+	public const SOUND_BOTTLE_FILL = 477;
+	public const SOUND_BOTTLE_EMPTY = 478;
+	public const SOUND_CRAFTER_CRAFT = 479;
+	public const SOUND_CRAFTER_FAIL = 480;
+	public const SOUND_BLOCK_DECORATED_POT_INSERT = 481;
+	public const SOUND_BLOCK_DECORATED_POT_INSERT_FAIL = 482;
+	public const SOUND_CRAFTER_DISABLE_SLOT = 483;
+
+	public const SOUND_BLOCK_COPPER_BULB_TURN_ON = 490;
+	public const SOUND_BLOCK_COPPER_BULB_TURN_OFF = 491;
+    public const SOUND_UNDEFINED = 492;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

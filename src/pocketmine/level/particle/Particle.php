@@ -109,6 +109,13 @@ abstract class Particle extends Vector3{
 	public const TYPE_SPORE_BLOSSOM_AMBIENT = 79;
 	public const TYPE_WAX = 80;
 	public const TYPE_ELECTRIC_SPARK = 81;
+	public const TYPE_SHRIEK = 82;
+	public const TYPE_SCULK_SOUL = 83;
+	public const TYPE_SONIC_EXPLOSION = 84;
+	public const TYPE_BRUSH_DUST = 85;
+	public const TYPE_CHERRY_LEAVES = 86;
+	public const TYPE_DUST_PLUME = 87;
+	public const TYPE_WHITE_SMOKE = 88;
 
 	/**
 	 * @return DataPacket|DataPacket[]

@@ -41,6 +41,7 @@ use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette582;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette589;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette594;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette618;
+use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette630;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class ItemPalette{
@@ -52,6 +53,7 @@ class ItemPalette{
      */
     public static function init() : void{
         $pool = [
+            ProtocolInfo::PROTOCOL_630 => new ItemPalette630(),
             ProtocolInfo::PROTOCOL_618 => new ItemPalette618(),
             ProtocolInfo::PROTOCOL_594 => new ItemPalette594(),
             ProtocolInfo::PROTOCOL_589 => new ItemPalette589(),

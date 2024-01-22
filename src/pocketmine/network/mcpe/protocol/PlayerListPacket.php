@@ -94,7 +94,7 @@ class PlayerListPacket extends DataPacket{
 				$entry->entityUniqueId = $this->getEntityUniqueId();
 				$entry->username = $this->getString();
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-			    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
+			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		            	$entry->thirdPartyName = $this->getString();
 		            	$entry->platform = $this->getVarInt();
 			    	}
@@ -118,7 +118,7 @@ class PlayerListPacket extends DataPacket{
 			        	);
                     }
 			    	$entry->xboxUserId = $this->getString();
-			    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 			        	$entry->platformChatId = $this->getString();
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
@@ -164,14 +164,14 @@ class PlayerListPacket extends DataPacket{
 				$this->putEntityUniqueId($entry->entityUniqueId);
 				$this->putString($entry->username);
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-			    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
+			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		            	$this->putString($entry->thirdPartyName);
 		            	$this->putVarInt($entry->platform);
 			    	}
 			    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
 			        	$this->putString($entry->skin->getSkinId());
 
-			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220){
+			        	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220){
 				            $this->putLInt(1); // num skins, always 1
 			        	}
 
@@ -186,7 +186,7 @@ class PlayerListPacket extends DataPacket{
 
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_131){
 			            	$capeData = $entry->skin->getCapeData();
-			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220){
+			            	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220){
 				            	if(!empty($capeData)){
 					            	$this->putLInt(1); // isNotEmpty
 					            	$this->putString($capeData);
@@ -217,7 +217,7 @@ class PlayerListPacket extends DataPacket{
 			    	}
 
 			    	$this->putString($entry->xboxUserId);
-			    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 			        	$this->putString($entry->platformChatId);
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){

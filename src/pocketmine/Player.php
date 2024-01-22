@@ -3472,7 +3472,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             return true;
         }
 
-        if($this->getProtocol() < ProtocolInfo::PROTOCOL_200){
+        if($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200){
             if($packet->inventorySlot === 0 || $packet->inventorySlot === 255){
                 $packet->inventorySlot =- 1;
             }else{
@@ -4060,7 +4060,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleBookEdit(BookEditPacket $packet) : bool{
 		/** @var WritableBook $oldBook */
-		if($this->getProtocol() < ProtocolInfo::PROTOCOL_200){
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200){
 		    $packet->inventorySlot -= 9;
 		}
 

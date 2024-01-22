@@ -32,27 +32,27 @@ final class ResourcePackTypeIds{
 
 	public const RESOURCE_PACK_TYPE_IDS = [
 		ProtocolInfo::PROTOCOL_370 => [
-			"TYPE_INVALID" => 0,
-			"TYPE_ADDON" => 1,
-			"TYPE_CACHED" => 2,
-			"TYPE_COPY_PROTECTED" => 3,
-			"TYPE_BEHAVIOR" => 4,
-			"TYPE_PERSONA_PIECE" => 5,
-			"TYPE_RESOURCE" => 6,
-			"TYPE_SKINS" => 7,
-			"TYPE_WORLD_TEMPLATE" => 8,
-			"TYPE_COUNT" => 9
+			"INVALID" => 0,
+			"ADDON" => 1,
+			"CACHED" => 2,
+			"COPY_PROTECTED" => 3,
+			"BEHAVIORS" => 4,
+			"PERSONA_PIECE" => 5,
+			"RESOURCES" => 6,
+			"SKINS" => 7,
+			"WORLD_TEMPLATE" => 8,
+			"COUNT" => 9
 		],
 		ProtocolInfo::PROTOCOL_360 => [
-			"TYPE_INVALID" => 0,
-			"TYPE_RESOURCE" => 1,
-			"TYPE_BEHAVIOR" => 2,
-			"TYPE_WORLD_TEMPLATE" => 3,
-			"TYPE_ADDON" => 4,
-			"TYPE_SKINS" => 5,
-			"TYPE_CACHED" => 6,
-			"TYPE_COPY_PROTECTED" => 7,
-			"TYPE_COUNT" => 8
+			"INVALID" => 0,
+			"RESOURCES" => 1,
+			"BEHAVIORS" => 2,
+			"WORLD_TEMPLATE" => 3,
+			"ADDON" => 4,
+			"SKINS" => 5,
+			"CACHED" => 6,
+			"COPY_PROTECTED" => 7,
+			"COUNT" => 8
 		]
 	];
 }
