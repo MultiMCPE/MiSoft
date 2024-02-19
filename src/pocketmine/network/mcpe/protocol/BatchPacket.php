@@ -74,7 +74,11 @@ class BatchPacket extends DataPacket{
 
 	protected function encodePayload(){
 	    if($this->compressionEnabled){
-	    	$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+				$payload = chr(0x00) . zlib_encode($this->payload, ZLIB_ENCODING_RAW, $this->compressionLevel);
+			}else{
+	        	$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+			}
 	    }else{
 	        $payload = $this->payload;
 	    }
@@ -124,7 +128,17 @@ class BatchPacket extends DataPacket{
 	public function handle(NetworkSession $session) : bool{
 	    if($session->isCompressionEnabled()){
 	        try{
-	            $this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
+				if($this->getProtocol() < ProtocolInfo::PROTOCOL_649){
+					$this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
+				}else{
+			    	if((ord($this->payload[0])) == 0x00){
+	                    $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 2); //Max 2MB
+			    	}else{
+				    	if($this->payload[0] === "\xff"){
+					    	$this->payload = substr($this->payload, 1);
+						}
+					}
+				}
 	        }catch(ErrorException $e){ //zlib decode error
 	            $this->payload = Binary::writeUnsignedVarInt(strlen($this->payload)) . $this->payload; // for <= 1.0
 	        }

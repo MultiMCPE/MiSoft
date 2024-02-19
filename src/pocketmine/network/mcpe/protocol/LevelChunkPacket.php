@@ -27,6 +27,7 @@ use pocketmine\utils\Binary;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use function count;
 use function pack;
 
@@ -35,6 +36,8 @@ class LevelChunkPacket extends DataPacket{
 
     /** @var ChunkPosition */
     private $chunkPosition;
+	/** @phpstan-var DimensionIds::* */
+	private $dimensionId;
 	/** @var int */
 	private $subChunkCount;
 	/** @var bool */
@@ -47,9 +50,10 @@ class LevelChunkPacket extends DataPacket{
     //this appears large enough for a world height of 1024 blocks - it may need to be increased in the future
     private const MAX_BLOB_HASHES = 64;
 
-	public static function withoutCache(ChunkPosition $chunkPosition, int $subChunkCount, string $payload) : self{
+	public static function withoutCache(ChunkPosition $chunkPosition, int $dimensionId, int $subChunkCount, string $payload) : self{
 		$result = new self;
 		$result->chunkPosition = $chunkPosition;
+		$result->dimensionId = $dimensionId;
 		$result->subChunkCount = $subChunkCount;
 		$result->extraPayload = $payload;
 
@@ -58,10 +62,11 @@ class LevelChunkPacket extends DataPacket{
 		return $result;
 	}
 
-	public static function withCache(ChunkPosition $chunkPosition, int $subChunkCount, array $usedBlobHashes, string $extraPayload) : self{
+	public static function withCache(ChunkPosition $chunkPosition, int $dimensionId, int $subChunkCount, array $usedBlobHashes, string $extraPayload) : self{
 		(static function(int ...$hashes){})(...$usedBlobHashes);
 		$result = new self;
 		$result->chunkPosition = $chunkPosition;
+		$result->dimensionId = $dimensionId;
 		$result->subChunkCount = $subChunkCount;
 		$result->extraPayload = $extraPayload;
 
@@ -77,6 +82,13 @@ class LevelChunkPacket extends DataPacket{
     public function getChunkPosition() : ChunkPosition{
         return $this->chunkPosition;
     }
+
+	/**
+	 * @return int
+	 */
+	public function getDimensionId() : int{
+		return $this->dimensionId;
+	}
 
 	/**
 	 * @return int
@@ -109,6 +121,9 @@ class LevelChunkPacket extends DataPacket{
 	protected function decodePayload() : void{
 	    $this->chunkPosition = ChunkPosition::read($this);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+		    	$this->dimensionId = $this->getVarInt();
+			}
 	    	$this->subChunkCount = $this->getUnsignedVarInt();
 	    	$this->cacheEnabled = (($this->get(1) !== "\x00"));
 	    	if($this->cacheEnabled){
@@ -127,6 +142,9 @@ class LevelChunkPacket extends DataPacket{
 	protected function encodePayload() : void{
 	    $this->chunkPosition->write($this);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+				$this->putVarInt($this->dimensionId);
+			}
 	    	$this->putUnsignedVarInt($this->subChunkCount);
 	    	($this->buffer .= ($this->cacheEnabled ? "\x01" : "\x00"));
 	    	if($this->cacheEnabled){

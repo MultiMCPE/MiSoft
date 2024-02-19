@@ -185,13 +185,14 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	public const PROTOCOL_618 = 618; // 1.20.30
 	public const PROTOCOL_622 = 622; // 1.20.40
 	public const PROTOCOL_630 = 630; // 1.20.50
+	public const PROTOCOL_649 = 649; // 1.20.60
     /**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
-	public const MINECRAFT_VERSION = '1.1 - 1.20.50';
+	public const MINECRAFT_VERSION = '1.1 - 1.20.60';
 	/**
 	 * Version number sent to clients in ping responses.
 	 */
-	public const MINECRAFT_VERSION_NETWORK = '1.20.50';
+	public const MINECRAFT_VERSION_NETWORK = '1.20.60';
 
 }

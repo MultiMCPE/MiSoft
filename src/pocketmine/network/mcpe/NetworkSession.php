@@ -226,6 +226,8 @@ use pocketmine\network\mcpe\protocol\AgentAnimationPacket;
 use pocketmine\network\mcpe\protocol\RefreshEntitlementsPacket;
 use pocketmine\network\mcpe\protocol\PlayerToggleCrafterSlotRequestPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerInventoryOptionsPacket;
+use pocketmine\network\mcpe\protocol\ServerPlayerPostMovePositionPacket;
+use pocketmine\network\mcpe\protocol\SetHudPacket;
 
 abstract class NetworkSession{
 
@@ -1040,6 +1042,14 @@ abstract class NetworkSession{
 	}
 
 	public function handleSetPlayerInventoryOptions(SetPlayerInventoryOptionsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleServerPlayerPostMovePosition(ServerPlayerPostMovePositionPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSetHud(SetHudPacket $packet) : bool{
 		return false;
 	}
 }

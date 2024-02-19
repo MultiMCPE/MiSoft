@@ -82,6 +82,7 @@ use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\SetDifficultyPacket;
 use pocketmine\network\mcpe\protocol\SetTimePacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
@@ -2693,7 +2694,7 @@ class Level implements ChunkManager, Metadatable{
 			    	}
 			    	assert($chunk->getX() === $x and $chunk->getZ() === $z, "Chunk coordinate mismatch: expected $x $z, but chunk has coordinates " . $chunk->getX() . " " . $chunk->getZ() . ", did you forget to clone a chunk before setting?");
 
-			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $chunk, $protocol));
+			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, DimensionIds::OVERWORLD, $chunk, $protocol));
 			    	$this->chunkSendTasks[$index][$protocol] = $task;
 
 			    	$this->timings->syncChunkSendPrepareTimer->stopTiming();

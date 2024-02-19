@@ -46,6 +46,8 @@ class ChunkRequestTask extends AsyncTask{
 	protected $chunkX;
 	/** @var int */
 	protected $chunkZ;
+	/** @var int */
+	protected $dimensionId;
 	/** @var string */
     protected $tiles;
     /** @var int */
@@ -53,12 +55,13 @@ class ChunkRequestTask extends AsyncTask{
 	/** @var int */
 	protected $protocol;
 
-	public function __construct(Level $level, int $chunkX, int $chunkZ, Chunk $chunk, int $protocol){
+	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol){
 		$this->levelId = $level->getId();
 		$this->compressionLevel = $level->getServer()->networkCompressionLevel;
 
 		$this->chunkX = $chunkX;
 		$this->chunkZ = $chunkZ;
+		$this->dimensionId = $dimensionId;
 		$this->chunk = $chunk->fastSerialize();
 
         $tiles = "";
@@ -76,10 +79,11 @@ class ChunkRequestTask extends AsyncTask{
 	    PacketPool::init();
 
 	    $chunk = Chunk::fastDeserialize($this->chunk);
+		$dimensionId = $this->dimensionId;
 
         $protocol = $this->protocol;
 
-	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
+	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
 	    $pk->setProtocol($protocol);
 
 	    $batch = new BatchPacket();

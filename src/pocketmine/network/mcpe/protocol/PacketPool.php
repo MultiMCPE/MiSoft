@@ -53,6 +53,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds575;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds582;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds594;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds618;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds649;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -60,6 +61,7 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_649 => PacketsIds649::class,
 		ProtocolInfo::PROTOCOL_618 => PacketsIds618::class,
 		ProtocolInfo::PROTOCOL_594 => PacketsIds594::class,
 		ProtocolInfo::PROTOCOL_582 => PacketsIds582::class,
@@ -135,6 +137,7 @@ class PacketPool {
 		self::registerPacket(new AddActorPacket());
 		self::registerPacket(new RemoveActorPacket());
 		self::registerPacket(new AddItemActorPacket());
+		self::registerPacket(new ServerPlayerPostMovePositionPacket());
 		self::registerPacket(new TakeItemActorPacket());
 		self::registerPacket(new MoveActorAbsolutePacket());
 		self::registerPacket(new MovePlayerPacket());
@@ -321,6 +324,7 @@ class PacketPool {
 		self::registerPacket(new RefreshEntitlementsPacket());
 	    self::registerPacket(new PlayerToggleCrafterSlotRequestPacket());
 		self::registerPacket(new SetPlayerInventoryOptionsPacket());
+		self::registerPacket(new SetHudPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

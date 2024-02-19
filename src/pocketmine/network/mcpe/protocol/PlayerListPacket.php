@@ -128,6 +128,9 @@ class PlayerListPacket extends DataPacket{
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	$entry->isTeacher = (($this->get(1) !== "\x00"));
 			                	$entry->isHost = (($this->get(1) !== "\x00"));
+								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+							    	$entry->isSubClient = $this->getBool();
+								}
 			            	}
 			        	}
 			    	}
@@ -227,6 +230,9 @@ class PlayerListPacket extends DataPacket{
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	($this->buffer .= ($entry->isTeacher ? "\x01" : "\x00"));
 			                	($this->buffer .= ($entry->isHost ? "\x01" : "\x00"));
+								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
+									$this->putBool($entry->isSubClient);
+								}
 			            	}
 			        	}
 			    	}

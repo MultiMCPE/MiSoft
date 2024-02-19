@@ -40,6 +40,7 @@ interface PacketMagicNumbers{
 	public const ADD_ACTOR_PACKET = 0x0d;
 	public const REMOVE_ACTOR_PACKET = 0x0e;
 	public const ADD_ITEM_ACTOR_PACKET = 0x0f;
+	public const SERVER_PLAYER_POST_MOVE_POSITION_PACKET = 0x10;
 	public const TAKE_ITEM_ACTOR_PACKET = 0x11;
 	public const MOVE_ACTOR_ABSOLUTE_PACKET = 0x12;
 	public const MOVE_PLAYER_PACKET = 0x13;
@@ -231,6 +232,7 @@ interface PacketMagicNumbers{
 	public const REFRESH_ENTITLEMENTS_PACKET = 0x131;
 	public const PLAYER_TOGGLE_CRAFTER_SLOT_REQUEST_PACKET = 0x132;
 	public const SET_PLAYER_INVENTORY_OPTIONS_PACKET = 0x133;
+	public const SET_HUD_PACKET = 0x134;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1

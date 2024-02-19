@@ -76,15 +76,15 @@ class EncryptionContext{
 			throw new DecryptionException("Payload is too short");
 		}
 		$decrypted = $this->decryptCipher->decryptUpdate($encrypted);
-		//$payload = substr($decrypted, 0, -8);
+		$payload = substr($decrypted, 0, -8);
 
 		$packetCounter = $this->decryptCounter++;
 
-		/*if(($expected = $this->calculateChecksum($packetCounter, $decrypted)) !== ($actual = substr($decrypted, -8))){
+		if(($expected = $this->calculateChecksum($packetCounter, $decrypted)) !== ($actual = substr($decrypted, -8))){
 			throw new DecryptionException("Encrypted packet $packetCounter has invalid checksum (expected " . bin2hex($expected) . ", got " . bin2hex($actual) . ")");
-		}*/
+		}
 
-		return $decrypted;
+		return $payload;
 	}
 
 	public function encrypt(string $payload) : string{
