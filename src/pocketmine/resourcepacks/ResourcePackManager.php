@@ -77,8 +77,6 @@ class ResourcePackManager{
 
 		$this->serverForceResources = (bool) $resourcePacksConfig->get("force_resources", false);
 
-		$logger->info("Loading resource packs...");
-
 		$resourceStack = $resourcePacksConfig->get("resource_stack", []);
 		if(!is_array($resourceStack)){
 			throw new InvalidArgumentException("\"resource_stack\" key should contain a list of pack names");
@@ -121,8 +119,6 @@ class ResourcePackManager{
 				$logger->critical("Could not load resource pack \"$pack\": " . $e->getMessage());
 			}
 		}
-
-		$logger->debug("Successfully loaded " . count($this->resourcePacks) . " resource packs");
 	}
 
 	/**

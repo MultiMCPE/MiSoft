@@ -263,7 +263,12 @@ class Server{
 	private $craftingManager;
 
 	/** @var ResourcePackManager */
-	private $resourceManager;
+	private $pw10ResourcePackManager;
+	/** @var ResourcePackManager */
+	private $bedrockResourcePackManager;
+
+	/** @var int */
+	private $bedrockResourcePacksProtocol = ProtocolInfo::PROTOCOL_370;
 
 	/** @var int */
 	private $maxPlayers;
@@ -698,8 +703,31 @@ class Server{
 	/**
 	 * @return ResourcePackManager
 	 */
-	public function getResourcePackManager() : ResourcePackManager{
-		return $this->resourceManager;
+	public function getPw10ResourcePackManager() : ResourcePackManager{
+		return $this->pw10ResourcePackManager;
+	}
+
+	/**
+	 * @return ResourcePackManager
+	 */
+	public function getBedrockResourcePackManager() : ResourcePackManager{
+		return $this->bedrockResourcePackManager;
+	}
+
+	/**
+	 * @param int $playerProtocol
+	 * 
+	 * @return ResourcePackManager
+	 */
+	public function getResourcePackManager(int $playerProtocol) : ResourcePackManager{
+		return ($playerProtocol >= $this->bedrockResourcePacksProtocol) ? $this->bedrockResourcePackManager : $this->pw10ResourcePackManager;
+	}
+
+    /*
+	 * @return int
+	 */
+	public function getBedrockResourcePacksProtocol() : int{
+		return $this->bedrockResourcePacksProtocol;
 	}
 
 	public function getAsyncPool() : AsyncPool{
@@ -1712,7 +1740,15 @@ class Server{
 
 			$this->craftingManager = new CraftingManager();
 
-			$this->resourceManager = new ResourcePackManager($this->getDataPath() . "resource_packs" . DIRECTORY_SEPARATOR, $this->logger);
+			$this->logger->info("Loading PW10 resource packs...");
+			$this->pw10ResourcePackManager = new ResourcePackManager($this->getDataPath() . "pw10_packs" . DIRECTORY_SEPARATOR, $this->logger);
+			$this->logger->debug("Successfully loaded " . count($this->pw10ResourcePackManager->getResourceStack()) . " resource packs");
+
+			$this->logger->info("Loading bedrock resource packs...");
+			$this->bedrockResourcePackManager = new ResourcePackManager($this->getDataPath() . "bedrock_packs" . DIRECTORY_SEPARATOR, $this->logger);
+			$this->logger->debug("Successfully loaded " . count($this->bedrockResourcePackManager->getResourceStack()) . " resource packs");
+
+			$this->bedrockResourcePacksProtocol = (int) $this->getProperty("bedrock-resource-packs-protocol", ProtocolInfo::PROTOCOL_370);
 
 			$this->pluginManager = new PluginManager($this, $this->commandMap, ((bool) $this->getProperty("plugins.legacy-data-dir", true)) ? null : $this->getDataPath() . "plugin_data" . DIRECTORY_SEPARATOR);
 			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);

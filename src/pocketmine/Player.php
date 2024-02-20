@@ -2460,7 +2460,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->server->onPlayerLogin($this);
 
 		$pk = new ResourcePacksInfoPacket();
-		$manager = $this->server->getResourcePackManager();
+		$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 		$pk->resourcePackEntries = $manager->getResourceStack();
 		$pk->mustAccept = $manager->resourcePacksRequired();
 		$this->dataPacket($pk);
@@ -2476,7 +2476,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->close("", "You must accept resource packs to join this server.", true);
 				break;
 			case ResourcePackClientResponsePacket::STATUS_SEND_PACKS:
-				$manager = $this->server->getResourcePackManager();
+				$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 				foreach($packet->packIds as $uuid){
 					//dirty hack for mojang's dirty hack for versions
 					$splitPos = strpos($uuid, "_");
@@ -2505,7 +2505,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				break;
 			case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:
 				$pk = new ResourcePackStackPacket();
-				$manager = $this->server->getResourcePackManager();
+				$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 				$pk->resourcePackStack = $manager->getResourceStack();
 				//we don't force here, because it doesn't have user-facing effects
 				//but it does have an annoying side-effect when true: it makes
@@ -4039,7 +4039,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->resourcePacksDone){
 			return false;
 		}
-		$manager = $this->server->getResourcePackManager();
+		$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 		$pack = $manager->getPackById($packet->packId);
 		if(!($pack instanceof ResourcePack)){
 			$this->close("", "disconnectionScreen.resourcePack", true);
