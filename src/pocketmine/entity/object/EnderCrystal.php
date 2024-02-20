@@ -35,11 +35,11 @@ class EnderCrystal extends Entity implements Explosive{
 
 	public const TAG_SHOWBASE = "ShowBottom"; //TAG_Byte
 
-	protected $gravity = 0.5;
-	protected $drag = 0.1;
+	public $gravity = 0.0;
+	public $drag = 1.0;
 
-	public $height = 0.7;
-	public $width = 1.6;
+	public $height = 2.0;
+	public $width = 2.0;
 
 	public function showBase() : bool{
 		return $this->getGenericFlag(self::DATA_FLAG_SHOWBASE);
@@ -80,7 +80,7 @@ class EnderCrystal extends Entity implements Explosive{
 	}
 
 	public function canBeCollidedWith() : bool{
-		return false;
+		return true;
 	}
 
 	/**
@@ -111,6 +111,9 @@ class EnderCrystal extends Entity implements Explosive{
 
 	protected function initEntity() : void{
 		parent::initEntity();
+
+		$this->setMaxHealth(1);
+		$this->setHealth(1);
 
 		$this->setShowBase($this->namedtag->getByte(self::TAG_SHOWBASE, 0) === 1);
 	}
