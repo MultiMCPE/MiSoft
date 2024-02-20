@@ -31,7 +31,7 @@ use pocketmine\inventory\InventoryHolder;
 use pocketmine\math\Vector3;
 use pocketmine\math\AxisAlignedBB;
 
-class Hopper extends Spawnable implements Container, Nameable{
+class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
 
     use ContainerTrait;
     use NameableTrait;
