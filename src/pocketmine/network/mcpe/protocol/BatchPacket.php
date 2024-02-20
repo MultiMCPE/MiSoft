@@ -131,12 +131,10 @@ class BatchPacket extends DataPacket{
 				if($this->getProtocol() < ProtocolInfo::PROTOCOL_649){
 					$this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
 				}else{
-			    	if((ord($this->payload[0])) == 0x00){
+			    	if((ord($this->payload[0])) === 0x0){
 	                    $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 2); //Max 2MB
-			    	}else{
-				    	if($this->payload[0] === "\xff"){
-					    	$this->payload = substr($this->payload, 1);
-						}
+			    	}elseif($this->payload[0] === "\xff"){
+					    $this->payload = substr($this->payload, 1);
 					}
 				}
 	        }catch(ErrorException $e){ //zlib decode error
