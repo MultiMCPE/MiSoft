@@ -54,6 +54,8 @@ class ChunkRequestTask extends AsyncTask{
 	protected $compressionLevel;
 	/** @var int */
 	protected $protocol;
+	/** @var int */
+	protected $levelChunkPacketId;
 
 	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol){
 		$this->levelId = $level->getId();
@@ -73,17 +75,18 @@ class ChunkRequestTask extends AsyncTask{
         $this->tiles = $tiles;
 
 		$this->protocol = $protocol;
+
+		$this->levelChunkPacketId = PacketPool::getPacketMagicById(LevelChunkPacket::NETWORK_ID, $protocol);
 	}
 
 	public function onRun(){
-	    PacketPool::init();
-
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 		$dimensionId = $this->dimensionId;
 
         $protocol = $this->protocol;
 
 	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, ($protocol >= ProtocolInfo::PROTOCOL_475 ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $chunk->networkSerialize($protocol) . $this->tiles);
+		$pk->setPacketIdToSend($this->levelChunkPacketId);
 	    $pk->setProtocol($protocol);
 
 	    $batch = new BatchPacket();

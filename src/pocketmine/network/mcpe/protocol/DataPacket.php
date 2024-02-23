@@ -62,6 +62,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 	public $recipientSubId = 0x0;
 	/** @var int|null */
 	private $packetProtocol;
+	/** @var int|null */
+	private $packetIdToSend;
 
 	public function pid(){
 		return $this::NETWORK_ID;
@@ -84,6 +86,14 @@ abstract class DataPacket extends NetworkBinaryStream{
             throw new InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
         }
     }
+
+	public function setPacketIdToSend(int $packetId) : void{
+	    $this->packetIdToSend = $packetId;
+	}
+	
+	public function getPacketIdToSend() : ?int{
+	    return $this->packetIdToSend;
+	}
 
 	public function canBeBatched() : bool{
 		return true;
@@ -152,7 +162,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	protected function encodeHeader(){
-	    $pid = PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
+	    $pid = $this->packetIdToSend ?? PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
         if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
             ($this->buffer .= chr($pid));
             if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){

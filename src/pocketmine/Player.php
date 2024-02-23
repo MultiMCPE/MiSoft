@@ -1627,14 +1627,29 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	AbilitiesLayer::ABILITY_ATTACK_MOBS => !$this->isSpectator(),
 	    	];
 
+            $layers = [
+				//TODO: dynamic flying speed! FINALLY!!!!!!!!!!!!!!!!!
+				new AbilitiesLayer(AbilitiesLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
+			];
+
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
+				if($this->isSpectator()){
+					//TODO: HACK! In 1.19.80, the client starts falling in our faux spectator mode when it clips into a
+					//block. We can't seem to prevent this short of forcing the player to always fly when block collision is
+					//disabled. Also, for some reason the client always reads flight state from this layer if present, even
+					//though the player isn't in spectator mode.
+		
+					$layers[] = new AbilitiesLayer(AbilitiesLayer::LAYER_SPECTATOR, [
+						AbilitiesLayer::ABILITY_FLYING => true,
+					], null, null);
+				}
+			}
+
 	    	$this->sendDataPacket(UpdateAbilitiesPacket::create(new AbilitiesData(
 		    	($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL),
 		    	($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER),
 		    	$this->getId(),
-		    	[
-			    	//TODO: dynamic flying speed! FINALLY!!!!!!!!!!!!!!!!!
-			    	new AbilitiesLayer(AbilitiesLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
-		    	]
+				$layers
 	    	)));
         }else{
 	    	$pk = new AdventureSettingsPacket();

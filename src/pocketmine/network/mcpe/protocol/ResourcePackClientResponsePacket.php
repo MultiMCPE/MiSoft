@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-
+use UnexpectedValueException;
 use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function count;
@@ -47,6 +47,9 @@ class ResourcePackClientResponsePacket extends DataPacket{
 	protected function decodePayload(){
 		$this->status = (ord($this->get(1)));
 		$entryCount = ((unpack("v", $this->get(2))[1]));
+		if($entryCount > 128){
+			throw new UnexpectedValueException("Too many entry count in resource pack response: " . $entryCount);
+		}
 		while($entryCount-- > 0){
 			$this->packIds[] = $this->getString();
 		}

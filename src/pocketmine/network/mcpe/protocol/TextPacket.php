@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use UnexpectedValueException;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use function chr;
@@ -44,6 +45,8 @@ class TextPacket extends DataPacket{
 	public const TYPE_JSON_WHISPER = 9;
 	public const TYPE_JSON = 10;
 	public const TYPE_JSON_ANNOUNCEMENT = 11;
+
+	public const PARAMETERS_LIMIT = 5;
 
 	/** @var int */
 	public $type;
@@ -97,6 +100,9 @@ class TextPacket extends DataPacket{
 			case self::TYPE_JUKEBOX_POPUP:
 				$this->message = $this->getString();
 				$count = $this->getUnsignedVarInt();
+				if($count > self::PARAMETERS_LIMIT){
+					throw new UnexpectedValueException("Too many translation parameters count: $count");
+				}
 				for($i = 0; $i < $count; ++$i){
 					$this->parameters[] = $this->getString();
 				}

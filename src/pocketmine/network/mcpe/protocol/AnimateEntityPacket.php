@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use UnexpectedValueException;
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
 use function pack;
@@ -93,7 +94,11 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 		$this->controller = $this->getString();
 		$this->blendOutTime = ((unpack("g", $this->get(4))[1]));
 		$this->actorRuntimeIds = [];
-		for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
+		$len = $this->getUnsignedVarInt();
+		if($len > 128){
+			throw new UnexpectedValueException("Too many actor runtime ID in AnimateEntity: $len");
+		}
+		for($i = 0; $i < $len; ++$i){
 			$this->actorRuntimeIds[] = $this->getEntityRuntimeId();
 		}
 	}

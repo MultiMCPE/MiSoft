@@ -112,6 +112,9 @@ class NetworkBinaryStream extends BinaryStream{
 		$skinResourcePatch = $this->getString();
 		$skinData = $this->getSkinImage();
 		$animationCount = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+		if($animationCount > 128){
+			throw new UnexpectedValueException("Too many skin animations: $animationCount");
+		}
 		$animations = [];
 		for($i = 0; $i < $animationCount; ++$i){
 			$animations[] = new SkinAnimation(
@@ -139,6 +142,9 @@ class NetworkBinaryStream extends BinaryStream{
 	    	$armSize = $this->getString();
 	    	$skinColor = Color::fromHexString($this->getString());
 	    	$personaPieceCount = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+			if($personaPieceCount > 128){
+				throw new UnexpectedValueException("Too many persona pieces: $personaPieceCount");
+			}
     		$personaPieces = [];
 	    	for($i = 0; $i < $personaPieceCount; ++$i){
 		    	$personaPieces[] = new PersonaSkinPiece(
@@ -150,6 +156,9 @@ class NetworkBinaryStream extends BinaryStream{
 		    	);
 	    	}
 	    	$pieceTintColorCount = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+			if($pieceTintColorCount > 128){
+				throw new UnexpectedValueException("Too many piece tint colors: $pieceTintColorCount");
+			}
 	    	$pieceTintColors = [];
 	    	for($i = 0; $i < $pieceTintColorCount; ++$i){
 		    	$pieceType = $this->getString();
@@ -308,12 +317,20 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
 		//TODO
-		for($i = 0, $canPlaceOn = $this->getVarInt(); $i < $canPlaceOn; ++$i){
+		$canPlaceOn = $this->getVarInt();
+		if($canPlaceOn > 128){
+			throw new UnexpectedValueException("Too many canPlaceOn: $canPlaceOn");
+		}
+		for($i = 0; $i < $canPlaceOn; ++$i){
 			$this->getString();
 		}
 
 		//TODO
-		for($i = 0, $canDestroy = $this->getVarInt(); $i < $canDestroy; ++$i){
+		$canDestroy = $this->getVarInt();
+		if($canDestroy > 128){
+			throw new UnexpectedValueException("Too many canDestroy: $canDestroy");
+		}
+		for($i = 0; $i < $canDestroy; ++$i){
 			$this->getString();
 		}
 
@@ -451,12 +468,20 @@ class NetworkBinaryStream extends BinaryStream{
 			}
 
 			//TODO
-			for($i = 0, $canPlaceOn = $extraData->getLInt(); $i < $canPlaceOn; ++$i){
+			$canPlaceOn = $extraData->getLInt();
+			if($canPlaceOn > 128){
+				throw new UnexpectedValueException("Too many canPlaceOn: $canPlaceOn");
+			}
+			for($i = 0; $i < $canPlaceOn; ++$i){
 				$extraData->get($extraData->getLShort());
 			}
 
 			//TODO
-			for($i = 0, $canDestroy = $extraData->getLInt(); $i < $canDestroy; ++$i){
+			$canDestroy = $extraData->getLInt();
+			if($canDestroy > 128){
+				throw new UnexpectedValueException("Too many canDestroy: $canDestroy");
+			}
+			for($i = 0; $i < $canDestroy; ++$i){
 				$extraData->get($extraData->getLShort());
 			}
 
@@ -638,6 +663,9 @@ class NetworkBinaryStream extends BinaryStream{
 	 */
 	public function getEntityMetadata(int $playerProtocol, bool $types = true) : array{
 		$count = $this->getUnsignedVarInt();
+		if($count > 128){
+			throw new UnexpectedValueException("Too many actor metadata: $count");
+		}
 		$data = [];
 		for($i = 0; $i < $count; ++$i){
 			$key = $this->getUnsignedVarInt();
