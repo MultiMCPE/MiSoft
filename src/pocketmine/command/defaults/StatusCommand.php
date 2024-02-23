@@ -55,9 +55,9 @@ class StatusCommand extends VanillaCommand{
 		$server = $sender->getServer();
 		$sender->sendMessage(TextFormat::GREEN . "---- " . TextFormat::WHITE . "Server status" . TextFormat::GREEN . " ----");
 
-		$time = microtime(true) - START_TIME;
+		$time = (int) (microtime(true) - START_TIME);
 
-		$seconds = floor($time % 60);
+		$seconds = $time % 60;
 		$minutes = null;
 		$hours = null;
 		$days = null;

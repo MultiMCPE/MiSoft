@@ -79,11 +79,11 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 	 * @param int          $inputMode @see InputMode
 	 * @param int          $playMode @see PlayMode
 	 * @param int          $interactionMode @see InteractionMode
-	 * @param Vector3|null $vrGazeDirection only used when PlayMode::VR
 	 * @param int          $tick
 	 * @param Vector3      $delta
 	 * @param float        $analogMoveVecX
 	 * @param float        $analogMoveVecZ
+	 * @param Vector3|null $vrGazeDirection only used when PlayMode::VR
 	 *
 	 * @return self
 	 */
@@ -98,11 +98,11 @@ class PlayerAuthInputPacket extends DataPacket/* implements ServerboundPacket*/{
 	    int $inputMode,
 	    int $playMode,
 	    int $interactionMode,
-	    ?Vector3 $vrGazeDirection = null,
 	    int $tick,
 	    Vector3 $delta,
 	    float $analogMoveVecX,
-	    float $analogMoveVecZ
+	    float $analogMoveVecZ,
+		?Vector3 $vrGazeDirection = null,
 	) : self{
 		if($playMode === PlayMode::VR and $vrGazeDirection === null){
 			//yuck, can we get a properly written packet just once? ...

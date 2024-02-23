@@ -100,7 +100,7 @@ class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	 *
 	 * @return bool
 	 */
-	public function offsetExists($offset) : bool{
+	public function offsetExists(mixed $offset) : bool{
 		return isset($this->value[$offset]);
 	}
 
@@ -109,7 +109,7 @@ class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	 *
 	 * @return CompoundTag|ListTag|mixed
 	 */
-	public function offsetGet($offset){
+	public function offsetGet(mixed $offset) : mixed{
 		/** @var NamedTag|null $value */
 		$value = $this->value[$offset] ?? null;
 
@@ -129,7 +129,7 @@ class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	 * @throws TypeError if an incompatible tag type is given
 	 * @throws TypeError if $value is not a NamedTag object
 	 */
-	public function offsetSet($offset, $value) : void{
+	public function offsetSet(mixed $offset, mixed $value) : void{
 		if($value instanceof NamedTag){
 			$this->checkTagType($value);
 			$this->value[$offset] = $value;
@@ -141,7 +141,7 @@ class ListTag extends NamedTag implements ArrayAccess, Countable, Iterator{
 	/**
 	 * @param int $offset
 	 */
-	public function offsetUnset($offset) : void{
+	public function offsetUnset(mixed $offset) : void{
 		unset($this->value[$offset]);
 	}
 
