@@ -41,6 +41,7 @@ abstract class Biome{
 	public const RIVER = 7;
 
 	public const HELL = 8;
+	public const END = 9;
 
 	public const ICE_PLAINS = 12;
 
@@ -98,6 +99,7 @@ abstract class Biome{
 
 
 		self::register(self::SMALL_MOUNTAINS, new SmallMountainsBiome());
+		self::register(self::HELL, new HellBiome());
 
 		self::register(self::BIRCH_FOREST, new ForestBiome(ForestBiome::TYPE_BIRCH));
 	}

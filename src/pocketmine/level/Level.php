@@ -292,6 +292,9 @@ class Level implements ChunkManager, Metadatable{
 	/** @var SkyLightUpdate|null */
 	private $skyLightUpdate = null;
 
+	/** @var int */
+	private $dimensionId = DimensionIds::OVERWORLD;
+
 	public static function chunkHash(int $x, int $z) : int{
 		return (($x & 0xFFFFFFFF) << 32) | ($z & 0xFFFFFFFF);
 	}
@@ -421,7 +424,26 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings = new LevelTimings($this);
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
+
+        if ($this->server->netherEnabled and $this->server->netherName == $this->folderName)
+            $this->setDimensionId(DimensionIds::NETHER);
+        elseif ($this->server->enderEnabled and $this->server->enderName == $this->folderName)
+            $this->setDimensionId(DimensionIds::THE_END);
 	}
+
+	/**
+	 * @param int $dimensionId
+	 */
+    public function setDimensionId(int $dimensionId) : void{
+        $this->dimensionId = $dimensionId;
+    }
+
+	/**
+	 * @return int
+	 */
+    public function getDimensionId() : int{
+        return $this->dimensionId;
+    }
 
 	/**
 	 * @deprecated
@@ -2694,7 +2716,7 @@ class Level implements ChunkManager, Metadatable{
 			    	}
 			    	assert($chunk->getX() === $x and $chunk->getZ() === $z, "Chunk coordinate mismatch: expected $x $z, but chunk has coordinates " . $chunk->getX() . " " . $chunk->getZ() . ", did you forget to clone a chunk before setting?");
 
-			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, DimensionIds::OVERWORLD, $chunk, $protocol));
+			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $this->getDimensionId(), $chunk, $protocol));
 			    	$this->chunkSendTasks[$index][$protocol] = $task;
 
 			    	$this->timings->syncChunkSendPrepareTimer->stopTiming();

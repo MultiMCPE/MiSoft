@@ -32,6 +32,7 @@ use InvalidStateException;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Water;
+use pocketmine\block\Portal;
 use pocketmine\entity\object\EnderCrystal;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\FallingBlock;
@@ -132,6 +133,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		//TODO: index them by version to allow proper multi-save compatibility
 
 		Entity::registerEntity(Arrow::class, false, ['Arrow', 'minecraft:arrow']);
+		Entity::registerEntity(Cow::class, false, ['Cow', 'minecraft:cow']);
 		Entity::registerEntity(Egg::class, false, ['Egg', 'minecraft:egg']);
 		Entity::registerEntity(EnderCrystal::class, false, ['EnderCrystal', 'minecraft:ender_crystal']);
 		Entity::registerEntity(EnderPearl::class, false, ['ThrownEnderpearl', 'minecraft:ender_pearl']);
@@ -372,6 +374,9 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 	/** @var bool */
 	private $closeInFlight = false;
+
+	/** @var bool */
+	public $isMorph = false;
 
 	public function __construct(Level $level, CompoundTag $nbt){
 		$this->constructed = true;
@@ -1368,6 +1373,21 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 	public function onCollideWithPlayer(Player $player) : void{
 
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isInsideOfPortal() : bool{
+		$blocks = $this->getBlocksAround();
+
+		foreach($blocks as $block){
+			if($block instanceof Portal){
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public function isUnderwater() : bool{

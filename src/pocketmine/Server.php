@@ -350,6 +350,23 @@ class Server{
 	/** @var Level */
 	private $levelDefault = null;
 
+	/** @var Config */
+	private $advancedConfig = null;
+
+	/** @var bool */
+	public $netherEnabled = false;
+	/** @var string */
+	public $netherName = "nether";
+	/** @var Level */
+	public $netherLevel = null;
+
+	/** @var bool */
+	public $enderEnabled = true;
+	/** @var string */
+	public $enderName = "ender";
+	/** @var Level */
+	public $enderLevel = null;
+
 	/**
 	 * @return string
 	 */
@@ -1268,6 +1285,33 @@ class Server{
 	}
 
 	/**
+	 * @param string      $variable
+	 * @param mixed        $defaultValue
+	 * @return mixed
+	 */
+	public function getAdvancedProperty(string $variable, $defaultValue = null){
+		$vars = explode(".", $variable);
+		$base = array_shift($vars);
+		$cfg = $this->advancedConfig;
+		if($cfg->exists($base)){
+			$base = $cfg->get($base);
+		}else{
+			return $defaultValue;
+		}
+
+		while(count($vars) > 0){
+			$baseKey = array_shift($vars);
+			if(is_array($base) and isset($base[$baseKey])){
+				$base = $base[$baseKey];
+			}else{
+				return $defaultValue;
+			}
+		}
+
+		return $base;
+	}
+
+	/**
 	 * @param string $variable
 	 * @param mixed  $defaultValue
 	 *
@@ -1583,6 +1627,20 @@ class Server{
 			$this->baseLang = new BaseLang($this->getConfigString("language", $this->getProperty("settings.language", BaseLang::FALLBACK_LANGUAGE)));
 			$this->logger->info($this->getLanguage()->translateString("language.selected", [$this->getLanguage()->getName(), $this->getLanguage()->getLang()]));
 
+			$lang = $this->getProperty("settings.language", BaseLang::FALLBACK_LANGUAGE);
+			if(file_exists(\pocketmine\RESOURCE_PATH . "misoft_$lang.yml")){
+				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "misoft_$lang.yml");
+			}else{
+				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "misoft_rus.yml");
+			}
+
+			if(!file_exists($this->dataPath . "misoft.yml")){
+				@file_put_contents($this->dataPath . "misoft.yml", $content);
+			}
+			$this->advancedConfig = new Config($this->dataPath . "misoft.yml", Config::YAML, []);
+
+			$this->loadAdvancedConfig();
+
 			if(\pocketmine\IS_DEVELOPMENT_BUILD and !((bool) $this->getProperty("settings.enable-dev-builds", false))){
 				$this->logger->emergency($this->baseLang->translateString("pocketmine.server.devBuild.error1", [\pocketmine\NAME]));
 				$this->logger->emergency($this->baseLang->translateString("pocketmine.server.devBuild.error2"));
@@ -1813,6 +1871,20 @@ class Server{
 				return;
 			}
 
+			if($this->netherEnabled){
+				if(!$this->loadLevel($this->netherName)){
+					$this->generateLevel($this->netherName, time(), GeneratorManager::getGenerator("nether"));
+				}
+				$this->netherLevel = $this->getLevelByName($this->netherName);
+			}
+
+			if($this->enderEnabled){
+				if(!$this->loadLevel($this->enderName)){
+					$this->generateLevel($this->enderName, time(), GeneratorManager::getGenerator("ender"));
+				}
+				$this->enderLevel = $this->getLevelByName($this->enderName);
+			}
+
 			if($this->getProperty("ticks-per.autosave", 6000) > 0){
 				$this->autoSaveTicks = (int) $this->getProperty("ticks-per.autosave", 6000);
 			}
@@ -1823,6 +1895,13 @@ class Server{
 		}catch(\Throwable $e){
 			$this->exceptionHandler($e);
 		}
+	}
+
+	public function loadAdvancedConfig() : void{
+		$this->netherEnabled = $this->getAdvancedProperty("nether.allow-nether", false);
+		$this->netherName = $this->getAdvancedProperty("nether.level-name", "nether");
+		$this->enderEnabled = $this->getAdvancedProperty("ender.allow-ender", false);
+		$this->enderName = $this->getAdvancedProperty("ender.level-name", "ender");
 	}
 
 	/**
@@ -2090,6 +2169,8 @@ class Server{
 
 		$this->logger->info("Reloading properties...");
 		$this->properties->reload();
+		$this->advancedConfig->reload();
+		$this->loadAdvancedConfig();
 		$this->maxPlayers = $this->getConfigInt("max-players", 20);
 
 		if($this->getConfigBool("hardcore", false) and $this->getDifficulty() < Level::DIFFICULTY_HARD){

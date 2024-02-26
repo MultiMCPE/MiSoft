@@ -398,6 +398,21 @@ class Vector3{
 		return $this;
 	}
 
+	/**
+	 * @param Vector3 $pos
+	 * @param float     $x
+	 * @param float     $y
+	 * @param float     $z
+	 *
+	 * @return $this
+	 */
+	public function fromObjectAdd(Vector3 $pos, $x, $y, $z){
+		$this->x = $pos->x + $x;
+		$this->y = $pos->y + $y;
+		$this->z = $pos->z + $z;
+		return $this;
+	}
+
 	public function __toString(){
 		return "Vector3(x=" . $this->x . ",y=" . $this->y . ",z=" . $this->z . ")";
 	}

@@ -121,6 +121,7 @@ use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
+use pocketmine\network\mcpe\protocol\ChangeDimensionPacket;
 use pocketmine\network\mcpe\protocol\ChunkRadiusUpdatedPacket;
 use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\ContainerClosePacket;
@@ -169,7 +170,6 @@ use pocketmine\network\mcpe\protocol\types\CommandParameter;
 use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
-use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\Experiments;
 use pocketmine\network\mcpe\protocol\types\GameMode;
 use pocketmine\network\mcpe\protocol\types\PersonaPieceTintColor;
@@ -439,6 +439,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/** @var PermissibleBase */
 	private $perm = null;
+
+	
+	/** @var Vector3 */
+	public $fromPos = null;
+	/** @var int */
+	private $portalTime = 0;
+	/** @var  Position */
+	private $shouldResPos;
 
 	/** @var int|null */
 	protected $lineHeight = null;
@@ -1117,6 +1125,18 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->level->sendTime($this);
 			$this->level->sendDifficulty($this);
 
+			if($targetLevel->getDimensionId() !== $oldLevel->getDimensionId()){
+				$pk = new ChangeDimensionPacket();
+				$pk->dimension = $targetLevel->getDimensionId();
+				$pk->position = $this->asVector3();
+				$this->dataPacket($pk);
+				if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+			    	$pk1 = new PlayStatusPacket();
+			    	$pk1->status = PlayStatusPacket::PLAYER_SPAWN;
+			    	$this->dataPacket($pk1);
+				}
+			}
+
 			return true;
 		}
 
@@ -1395,7 +1415,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->x = $pk->x2 = $this->spawnPosition->getFloorX();
 		$pk->y = $pk->y2 = $this->spawnPosition->getFloorY();
 		$pk->z = $pk->z2 = $this->spawnPosition->getFloorZ();
-		$pk->dimension = DimensionIds::OVERWORLD;
+		$pk->dimension = $this->spawnPosition->getLevel()->getDimensionId();
 		$pk->spawnType = SetSpawnPositionPacket::TYPE_PLAYER_SPAWN;
 		$pk->spawnForced = false;
 		$this->dataPacket($pk);
@@ -1875,6 +1895,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$ev->call();
 
 			if(!($revert = $ev->isCancelled())){ //Yes, this is intended
+				if($this->server->netherEnabled){
+					if($this->isInsideOfPortal()){
+						if($this->portalTime == 0){
+							$this->portalTime = $this->server->getTick();
+						}
+					}else{
+						$this->portalTime = 0;
+					}
+				}
 				if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
 					$this->teleport($ev->getTo());
 				}else{
@@ -1977,6 +2006,52 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->timings->startTiming();
 
 		if($this->spawned){
+			if($this->server->netherEnabled){
+				if(($this->isCreative() or $this->isSurvival() and $this->server->getTick() - $this->portalTime >= 80) and $this->portalTime > 0){
+					$netherLevel = null;
+					if($this->server->isLevelLoaded($this->server->netherName) or $this->server->loadLevel($this->server->netherName)){
+						$netherLevel = $this->server->getLevelByName($this->server->netherName);
+					}
+
+					if($netherLevel instanceof Level){
+						if($this->getLevel() !== $netherLevel){
+							$this->fromPos = $this->getPosition();
+							$this->fromPos->x = ((int) $this->fromPos->x) + 0.5;
+							$this->fromPos->z = ((int) $this->fromPos->z) + 0.5;
+							$this->teleport($this->shouldResPos = $netherLevel->getSafeSpawn());
+						}elseif($this->fromPos instanceof Position){
+							if(!($this->getLevel()->isChunkLoaded((int) $this->fromPos->x, (int) $this->fromPos->z))){
+								$this->getLevel()->loadChunk((int) $this->fromPos->x, (int) $this->fromPos->z);
+							}
+							$add = [1, 0, -1, 0, 0, 1, 0, -1];
+							$tempos = null;
+							for($j = 2; $j < 5; $j++){
+								for($i = 0; $i < 4; $i++){
+									if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 0, $add[$i + 4] * $j))->getId() === Block::AIR){
+										if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 1, $add[$i + 4] * $j))->getId() === Block::AIR){
+											$tempos = $this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j);
+											break;
+										}
+									}
+								}
+								if($tempos != null){
+									break;
+								}
+							}
+							if($tempos === null){
+								$tempos = $this->fromPos->add(mt_rand(-2, 2), 0, mt_rand(-2, 2));
+							}
+							$this->teleport($this->shouldResPos = $tempos);
+							$add = null;
+							$tempos = null;
+							$this->fromPos = null;
+						}else{
+							$this->teleport($this->shouldResPos = $this->server->getDefaultLevel()->getSafeSpawn());
+						}
+						$this->portalTime = 0;
+					}
+				}
+			}
 			$this->processMovement($tickDiff);
 			$this->motion->x = $this->motion->y = $this->motion->z = 0; //TODO: HACK! (Fixes player knockback being messed up)
 			if($this->onGround){
@@ -2575,7 +2650,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->pitch = $this->pitch;
 		$pk->yaw = $this->yaw;
 		$pk->seed = -1;
-		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", DimensionIds::OVERWORLD); //TODO: implement this properly
+		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", $this->level->getDimensionId()); //TODO: implement this properly
 		$pk->worldGamemode = Player::getClientFriendlyGamemode($this->server->getGamemode());
 		$pk->difficulty = $this->level->getDifficulty();
 		$pk->spawnX = $spawnPosition->getFloorX();

@@ -25,6 +25,7 @@ namespace pocketmine\level\generator;
 
 use InvalidArgumentException;
 use pocketmine\level\generator\hell\Nether;
+use pocketmine\level\generator\ender\Ender;
 use pocketmine\level\generator\normal\Normal;
 use function array_keys;
 use function is_subclass_of;
@@ -43,6 +44,7 @@ final class GeneratorManager{
 		self::addGenerator(Normal::class, "default");
 		self::addGenerator(Nether::class, "hell");
 		self::addGenerator(Nether::class, "nether");
+		self::addGenerator(Ender::class, "ender");
 	}
 
 	/**

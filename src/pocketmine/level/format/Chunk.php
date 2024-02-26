@@ -41,6 +41,7 @@ use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\PalettedBlockArray;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use SplFixedArray;
 use Throwable;
 use function array_fill;
@@ -871,14 +872,37 @@ class Chunk{
 		}
 	}
 
+    /**
+	 * Returns the max subchunk index expected in the protocol.
+	 * This has no relation to the world height supported by PM.
+	 *
+	 * @param int $playerProtocol
+	 * @phpstan-param DimensionIds::* $dimensionId
+	 * @return int
+	 * @phpstan-return int
+	 */
+	public function getDimensionBiomeMaxSubChunkIndex(int $playerProtocol, int $dimensionId) : int{
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_503){
+	    	return match($dimensionId){
+		    	DimensionIds::OVERWORLD => 24,
+		    	DimensionIds::NETHER => 8,
+		    	DimensionIds::THE_END => 16,
+		    	default => throw new InvalidArgumentException("Unknown dimension ID $dimensionId"),
+	    	};
+		}else{
+			return 25;
+		}
+	}
+
 	/**
 	 * Serializes the chunk for sending to players
 	 * 
 	 * @param int $playerProtocol
+	 * @param int $dimensionId
 	 * 
 	 * @return string
 	 */
-	public function networkSerialize(int $playerProtocol) : string{
+	public function networkSerialize(int $playerProtocol, int $dimensionId) : string{
 		$result = "";
 		$subChunkCount = $this->getSubChunkSendCount();
 		if($playerProtocol < ProtocolInfo::PROTOCOL_360){
@@ -897,7 +921,7 @@ class Chunk{
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
 	        	//TODO: right now we don't support 3D natively, so we just 3Dify our 2D biomes so they fill the column
 	        	$encodedBiomePalette = $this->networkSerializeBiomesAsPalette();
-	        	$result .= str_repeat($encodedBiomePalette, ($playerProtocol >= ProtocolInfo::PROTOCOL_503 ? 24 : 25));
+	        	$result .= str_repeat($encodedBiomePalette, $this->getDimensionBiomeMaxSubChunkIndex($playerProtocol, $dimensionId));
 		    }else{
 	        	$result .= $this->biomeIds;
 		    }

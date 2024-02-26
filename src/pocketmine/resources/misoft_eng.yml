@@ -1,0 +1,11 @@
+#MiSoft Advanced Configuration File
+
+nether:
+ #Choose if the nether is allowed. The level of nether will generate automatically
+ allow-nether: true
+ #The name of nether's level
+ level-name: "nether"
+
+ender:
+ allow-ender: true
+ level-name: "ender"

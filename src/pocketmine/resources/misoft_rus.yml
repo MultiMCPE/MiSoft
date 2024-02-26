@@ -1,0 +1,16 @@
+#Расширенный файл конфигурации MiSoft
+
+#true (прада) - включено
+#false (ложь) - выключено
+
+nether:
+ #Нижний мир (ад)
+ allow-nether: true
+ #Имя мира
+ level-name: "nether"
+
+ender:
+ #Край
+ allow-ender: true
+ #Имя мира
+ level-name: "ender"
