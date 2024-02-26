@@ -27,13 +27,20 @@ use pocketmine\Player;
 use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
+use pocketmine\math\Vector3;
 
 class Obsidian extends Solid{
 
 	protected $id = self::OBSIDIAN;
 
+	/** @var Vector3 */
+	private $temporalVector = null;
+
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
+		if($this->temporalVector === null){
+			$this->temporalVector = new Vector3(0, 0, 0);
+		}
 	}
 
 	public function getName() : string{
