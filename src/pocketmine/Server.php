@@ -353,6 +353,20 @@ class Server{
 	/** @var Config */
 	private $advancedConfig = null;
 
+	/** @@var bool */
+	public $weatherEnabled = true;
+	/** @@var int */
+	public $weatherRandomDurationMin = 6000;
+	/** @@var int */
+	public $weatherRandomDurationMax = 12000;
+	/** @@var int */
+	public $lightningTime = 200;
+	/** @@var bool */
+	public $lightningFire = false;
+
+	/** @@var bool */
+	public $fireSpread = false;
+
 	/** @var bool */
 	public $netherEnabled = false;
 	/** @var string */
@@ -1898,8 +1912,17 @@ class Server{
 	}
 
 	public function loadAdvancedConfig() : void{
+		$this->weatherEnabled = $this->getAdvancedProperty("level.weather", true);
+		$this->weatherRandomDurationMin = $this->getAdvancedProperty("level.weather-random-duration-min", 6000);
+		$this->weatherRandomDurationMax = $this->getAdvancedProperty("level.weather-random-duration-max", 12000);
+		$this->lightningTime = $this->getAdvancedProperty("level.lightning-time", 200);
+		$this->lightningFire = $this->getAdvancedProperty("level.lightning-fire", false);
+
+		$this->fireSpread = $this->getAdvancedProperty("level.fire-spread", false);
+
 		$this->netherEnabled = $this->getAdvancedProperty("nether.allow-nether", false);
 		$this->netherName = $this->getAdvancedProperty("nether.level-name", "nether");
+
 		$this->enderEnabled = $this->getAdvancedProperty("ender.allow-ender", false);
 		$this->enderName = $this->getAdvancedProperty("ender.level-name", "ender");
 	}

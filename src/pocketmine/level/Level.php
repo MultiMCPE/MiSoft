@@ -66,6 +66,7 @@ use pocketmine\level\light\SkyLightUpdate;
 use pocketmine\level\particle\DestroyBlockParticle;
 use pocketmine\level\particle\Particle;
 use pocketmine\level\sound\Sound;
+use pocketmine\level\weather\Weather;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
@@ -292,6 +293,9 @@ class Level implements ChunkManager, Metadatable{
 	/** @var SkyLightUpdate|null */
 	private $skyLightUpdate = null;
 
+    /** @var Weather */
+    private $weather;
+
 	/** @var int */
 	private $dimensionId = DimensionIds::OVERWORLD;
 
@@ -425,10 +429,16 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 
-        if ($this->server->netherEnabled and $this->server->netherName == $this->folderName)
+		$this->weather = new Weather($this, 0);
+
+        if($this->server->netherEnabled and $this->server->netherName == $this->folderName)
             $this->setDimensionId(DimensionIds::NETHER);
-        elseif ($this->server->enderEnabled and $this->server->enderName == $this->folderName)
+        elseif($this->server->enderEnabled and $this->server->enderName == $this->folderName)
             $this->setDimensionId(DimensionIds::THE_END);
+
+		if($this->server->weatherEnabled and $this->getDimensionId() === DimensionIds::OVERWORLD){
+			$this->weather->setCanCalculate(true);
+		}else $this->weather->setCanCalculate(false);
 	}
 
 	/**
@@ -443,6 +453,13 @@ class Level implements ChunkManager, Metadatable{
 	 */
     public function getDimensionId() : int{
         return $this->dimensionId;
+    }
+
+    /**
+     * @return Weather
+     */
+    public function getWeather() : Weather{
+        return $this->weather;
     }
 
 	/**
@@ -840,6 +857,8 @@ class Level implements ChunkManager, Metadatable{
 			$this->sendTime();
 			$this->sendTimeTicker = 0;
 		}
+
+		$this->weather->calcWeather($currentTick);
 
 		$this->unloadChunks();
 		if(++$this->providerGarbageCollectionTicker >= 6000){
@@ -2602,6 +2621,15 @@ class Level implements ChunkManager, Metadatable{
 	public function getHighestBlockAt(int $x, int $z) : int{
 		return $this->getChunk($x >> 4, $z >> 4, true)->getHighestBlockAt($x & 0x0f, $z & 0x0f);
 	}
+
+	/**
+	 * @param Vector3 $pos
+	 * 
+	 * @return bool
+	 */
+    public function canBlockSeeSky(Vector3 $pos) : bool{
+        return $this->getHighestBlockAt($pos->getFloorX(), $pos->getFloorZ()) < $pos->getY();
+    }
 
 	/**
 	 * Returns whether the given position is in a loaded area of terrain.

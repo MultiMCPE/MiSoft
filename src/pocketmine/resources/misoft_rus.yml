@@ -3,6 +3,19 @@
 #true (прада) - включено
 #false (ложь) - выключено
 
+level:
+ #Выберите, включена ли погода (дождь может вызвать лаги на старых устройствах)
+ weather: true
+ #Случаная продолжительность погоды
+ weather-random-duration-min: 6000
+ weather-random-duration-max: 12000
+ #Случайный интервал молнии, по умолчанию как 10 сек, 0 = отключить
+ lightning-time: 200
+ #Пожег при ударе молнии
+ lightning-fire: false
+ #Распространение огня
+ fire-spread: false
+
 nether:
  #Нижний мир (ад)
  allow-nether: true

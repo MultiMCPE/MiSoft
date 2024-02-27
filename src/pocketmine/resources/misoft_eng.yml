@@ -1,5 +1,18 @@
 #MiSoft Advanced Configuration File
 
+level:
+ #Set if weather is enabled (rain may cause lag to older devices)
+ weather: true
+ #Weather random duration
+ weather-random-duration-min: 6000
+ weather-random-duration-max: 12000
+ #Random lightning interval，default as 10s, 0 = disable
+ lightning-time: 200
+ #Set if lightning strikes have fire afterwards
+ lightning-fire: false
+ #Set if fire should spread (trees, etc.)
+ fire-spread: false
+
 nether:
  #Choose if the nether is allowed. The level of nether will generate automatically
  allow-nether: true

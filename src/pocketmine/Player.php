@@ -1137,6 +1137,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 			}
 
+			$targetLevel->getWeather()->sendWeather($this);
+
 			return true;
 		}
 
@@ -1262,6 +1264,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$this->spawnToAll();
+
+		$this->level->getWeather()->sendWeather($this);
 
 		if($this->server->getUpdater()->hasUpdate() and $this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE) and $this->server->getProperty("auto-updater.on-update.warn-ops", true)){
 			$this->server->getUpdater()->showPlayerUpdate($this);
@@ -2070,6 +2074,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				Timings::$playerCheckNearEntitiesTimer->stopTiming();
 			}
 
+			if($this->isOnFire() or $this->lastUpdate % 10 == 0){
+				if($this->isCreative() and !$this->isInsideOfFire()){
+					$this->extinguish();
+				}elseif($this->getLevel()->getWeather()->isRainy()){
+					if($this->getLevel()->canBlockSeeSky($this)){
+						$this->extinguish();
+					}
+				}
+			}
+
             if($this->getTransactionQueue() !== null){
                 $this->getTransactionQueue()->execute();
             }
@@ -2717,6 +2731,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->inventory->sendCreativeContents();
 		$this->inventory->sendHeldItem($this);
         $this->server->getCraftingManager()->requestCraftingDataPacket($this);
+
+		$this->level->getWeather()->sendWeather($this);
 
 		$this->server->addOnlinePlayer($this);
 		$this->server->sendFullPlayerListData($this);

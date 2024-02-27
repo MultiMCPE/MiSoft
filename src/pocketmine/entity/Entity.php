@@ -33,6 +33,7 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Water;
 use pocketmine\block\Portal;
+use pocketmine\block\Fire;
 use pocketmine\entity\object\EnderCrystal;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\FallingBlock;
@@ -1383,6 +1384,19 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 		foreach($blocks as $block){
 			if($block instanceof Portal){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isInsideOfFire() : bool{
+		foreach($this->getBlocksAround() as $block){
+			if($block instanceof Fire){
 				return true;
 			}
 		}

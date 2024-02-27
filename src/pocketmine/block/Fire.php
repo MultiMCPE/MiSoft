@@ -103,8 +103,17 @@ class Fire extends Flowable{
 		$canSpread = true;
 
 		if(!$down->burnsForever()){
-			//TODO: check rain
-			if($this->meta === 15){
+			if($this->level->getWeather()->isRainy() and
+		    	($this->level->canBlockSeeSky($this) or
+			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_EAST)) or
+			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_WEST)) or
+			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_SOUTH)) or
+			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_NORTH))
+		    	)
+	        ){
+				$canSpread = false;
+				$result = BlockFactory::get(Block::AIR);
+			}elseif($this->meta === 15){
 				if(!$down->isFlammable() and mt_rand(0, 3) === 3){ //1/4 chance to extinguish
 					$canSpread = false;
 					$result = BlockFactory::get(Block::AIR);
@@ -122,6 +131,10 @@ class Fire extends Flowable{
 		}
 
 		$this->level->scheduleDelayedBlockUpdate($this, mt_rand(30, 40));
+
+        if(!$this->getLevel()->getServer()->fireSpread){
+			$canSpread = false;
+		}
 
 		if($canSpread){
 			//TODO: raise upper bound for chance in humid biomes
