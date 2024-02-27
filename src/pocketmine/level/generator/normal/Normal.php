@@ -32,6 +32,7 @@ use pocketmine\level\generator\Generator;
 use pocketmine\level\generator\InvalidGeneratorOptionsException;
 use pocketmine\level\generator\noise\Simplex;
 use pocketmine\level\generator\object\OreType;
+use pocketmine\level\generator\populator\Cave;
 use pocketmine\level\generator\populator\GroundCover;
 use pocketmine\level\generator\populator\Ore;
 use pocketmine\level\generator\populator\Populator;
@@ -159,6 +160,9 @@ class Normal extends Generator{
 
 		$cover = new GroundCover();
 		$this->generationPopulators[] = $cover;
+
+		$cave = new Cave();
+		$this->populators[] = $cave;
 
 		$ores = new Ore();
 		$ores->setOreTypes([

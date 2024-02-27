@@ -824,6 +824,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\level\\generator\\object\\SpruceTree' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/object/SpruceTree.php',
         'pocketmine\\level\\generator\\object\\TallGrass' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/object/TallGrass.php',
         'pocketmine\\level\\generator\\object\\Tree' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/object/Tree.php',
+        'pocketmine\\level\\generator\\populator\\Cave' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/populator/Cave.php',
         'pocketmine\\level\\generator\\populator\\EnderPilar' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/populator/EnderPilar.php',
         'pocketmine\\level\\generator\\populator\\GroundCover' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/populator/GroundCover.php',
         'pocketmine\\level\\generator\\populator\\Ore' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/populator/Ore.php',

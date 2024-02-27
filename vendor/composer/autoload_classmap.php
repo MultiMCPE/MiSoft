@@ -753,6 +753,7 @@ return array(
     'pocketmine\\level\\generator\\object\\SpruceTree' => $baseDir . '/src/pocketmine/level/generator/object/SpruceTree.php',
     'pocketmine\\level\\generator\\object\\TallGrass' => $baseDir . '/src/pocketmine/level/generator/object/TallGrass.php',
     'pocketmine\\level\\generator\\object\\Tree' => $baseDir . '/src/pocketmine/level/generator/object/Tree.php',
+    'pocketmine\\level\\generator\\populator\\Cave' => $baseDir . '/src/pocketmine/level/generator/populator/Cave.php',
     'pocketmine\\level\\generator\\populator\\EnderPilar' => $baseDir . '/src/pocketmine/level/generator/populator/EnderPilar.php',
     'pocketmine\\level\\generator\\populator\\GroundCover' => $baseDir . '/src/pocketmine/level/generator/populator/GroundCover.php',
     'pocketmine\\level\\generator\\populator\\Ore' => $baseDir . '/src/pocketmine/level/generator/populator/Ore.php',
