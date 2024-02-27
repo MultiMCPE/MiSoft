@@ -120,8 +120,8 @@ class Weather{
 					$p = $players[array_rand($players)];
 					$x = $p->x + mt_rand(-64, 64);
 					$z = $p->z + mt_rand(-64, 64);
-					$y = $this->level->getHighestBlockAt($x, $z);
-					$this->level->spawnLightning($this->temporalVector->setComponents($x, $y, $z));
+					$y = $this->level->getHighestBlockAt((int) $x, (int) $z);
+					//$this->level->spawnLightning($this->temporalVector->setComponents($x, $y, $z)); // TODO: coming soon...
 				}
 			}
 		}
