@@ -267,7 +267,7 @@ class Explosion{
 		$pk->radius = $this->size;
 		$pk->records = $send;
 
-		$viewers = $this->level->getChunkPlayers($this->source->x >> 4, $this->source->z >> 4);
+		$viewers = $this->level->getChunkPlayers($this->source->getFloorX() >> 4, $this->source->getFloorZ() >> 4);
 		if(count($viewers) > 0){
 		    foreach($viewers as $player){
 		        if($player->getProtocol() < ProtocolInfo::PROTOCOL_387){

@@ -39,6 +39,8 @@ use pocketmine\level\generator\populator\Populator;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 use function exp;
+use function max;
+use function min;
 
 class Normal extends Generator{
 
@@ -221,16 +223,28 @@ class Normal extends Generator{
 
 				$smoothHeight = ($maxSum - $minSum) / 2;
 
-				for($y = 0; $y < 128; ++$y){
+				$solidLand = false;
+				for($y = 127; $y >= 0; --$y){
 					if($y === 0){
 						$chunk->setBlockId($x, $y, $z, Block::BEDROCK);
 						continue;
 					}
-					$noiseValue = $noise[$x][$z][$y] - 1 / $smoothHeight * ($y - $smoothHeight - $minSum);
+
+					// A noiseAdjustment of 1 will guarantee ground, a noiseAdjustment of -1 will guarantee air.
+					//$effHeight = min($y - $smoothHeight - $minSum,
+					$noiseAdjustment = 2 * (($maxSum - $y) / ($maxSum - $minSum)) - 1;
+
+					// To generate caves, we bring the noiseAdjustment down away from 1.
+					$caveLevel = $minSum - 10;
+					$distAboveCaveLevel = max(0, $y - $caveLevel); // must be positive
+
+					$noiseAdjustment = min($noiseAdjustment, 0.4 + ($distAboveCaveLevel / 10));
+					$noiseValue = $noise[$x][$z][$y] + $noiseAdjustment;
 
 					if($noiseValue > 0){
 						$chunk->setBlockId($x, $y, $z, Block::STONE);
-					}elseif($y <= $this->waterHeight){
+						$solidLand = true;
+					}elseif($y <= $this->waterHeight && $solidLand === false){
 						$chunk->setBlockId($x, $y, $z, Block::STILL_WATER);
 					}
 				}
