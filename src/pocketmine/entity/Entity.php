@@ -671,10 +671,10 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 		$this->boundingBox->setBounds(
 			$this->x - $halfWidth,
-			$this->y,
+			$this->y + $this->ySize,
 			$this->z - $halfWidth,
 			$this->x + $halfWidth,
-			$this->y + $this->height,
+			$this->y + $this->height + $this->ySize,
 			$this->z + $halfWidth
 		);
 	}
@@ -2565,6 +2565,24 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 */
 	public function onFirstInteract(Player $player, Item $item, Vector3 $clickPos) : bool{
 		return false;
+	}
+
+	/**
+	 * @param Vector3 $pos
+	 * @param float   $yaw
+	 * @param float   $pitch
+	 * @param int     $clientMoveTicks
+	 * @param bool    $immediate
+	 */
+	public function setClientPositionAndRotation(Vector3 $pos, float $yaw, float $pitch, int $clientMoveTicks, bool $immediate) : void{
+		$this->clientPos = $pos;
+		$this->clientYaw = $yaw;
+		$this->clientPitch = $pitch;
+		$this->clientMoveTicks = $clientMoveTicks;
+	}
+
+	public function setClientMotion(Vector3 $motion) : void{
+		$this->motion = $motion;
 	}
 
 	public function setMetadata(string $metadataKey, MetadataValue $newMetadataValue){

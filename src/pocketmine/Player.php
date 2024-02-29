@@ -3710,6 +3710,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				}
 				return false;
 			case InteractPacket::ACTION_RIGHT_CLICK:
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+					return true;
+				}
 				if(!$target->isAlive()){
 					return true;
 				}
