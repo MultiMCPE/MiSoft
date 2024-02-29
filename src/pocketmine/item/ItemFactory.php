@@ -125,7 +125,7 @@ class ItemFactory{
 		self::registerItem(new Bucket());
 
 		self::registerItem(new Minecart());
-		//TODO: SADDLE
+		self::registerItem(new Saddle());
 		self::registerItem(new ItemBlock(Block::IRON_DOOR_BLOCK, 0, Item::IRON_DOOR));
 		self::registerItem(new Redstone());
 		self::registerItem(new Snowball());
@@ -216,7 +216,7 @@ class ItemFactory{
 		//TODO: HORSEARMORIRON
 		//TODO: GOLD_HORSE_ARMOR
 		//TODO: DIAMOND_HORSE_ARMOR
-		//TODO: LEAD
+		self::registerItem(new Item(Item::LEAD, 0, "Lead"));
 		//TODO: NAMETAG
 		self::registerItem(new Item(Item::PRISMARINE_CRYSTALS, 0, "Prismarine Crystals"));
 		self::registerItem(new RawMutton());

@@ -56,7 +56,7 @@ class InteractPacket extends DataPacket{
 		$this->target = $this->getEntityRuntimeId();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	if($this->action === self::ACTION_MOUSEOVER){
+	    	if($this->action === self::ACTION_MOUSEOVER || $this->action === self::ACTION_LEAVE_VEHICLE){
 		    	//TODO: should this be a vector3?
 		    	$this->x = ((unpack("g", $this->get(4))[1]));
 		    	$this->y = ((unpack("g", $this->get(4))[1]));
@@ -70,7 +70,7 @@ class InteractPacket extends DataPacket{
 		$this->putEntityRuntimeId($this->target);
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	if($this->action === self::ACTION_MOUSEOVER){
+	    	if($this->action === self::ACTION_MOUSEOVER || $this->action === self::ACTION_LEAVE_VEHICLE){
 		    	($this->buffer .= (pack("g", $this->x)));
 		    	($this->buffer .= (pack("g", $this->y)));
 		    	($this->buffer .= (pack("g", $this->z)));

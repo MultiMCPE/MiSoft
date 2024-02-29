@@ -25,6 +25,7 @@ namespace pocketmine\item;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Mob;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use function lcg_value;
@@ -44,6 +45,9 @@ class SpawnEgg extends Item{
 		$entity = Entity::createEntity($this->meta, $player->getLevel(), $nbt);
 
 		if($entity instanceof Entity){
+			if($entity instanceof Mob){
+				$entity->setImmobile(false);
+			}
 			--$this->count;
 			$entity->spawnToAll();
 			return true;

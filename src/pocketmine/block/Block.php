@@ -422,6 +422,14 @@ class Block extends Position implements BlockIds, Metadatable{
 		return false;
 	}
 
+	/**
+	 * Returns whether entity can pass this block
+	 *
+	 * @return bool
+	 */
+	public function isPassable() : bool{
+		return !$this->isSolid();
+	}
 
 	public function addVelocityToEntity(Entity $entity, Vector3 $vector) : void{
 
@@ -662,6 +670,21 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @param Entity $entity
 	 */
 	public function onEntityCollide(Entity $entity) : void{
+
+	}
+
+	/**
+	 * @param Entity $entity
+	 * @param float  $fallDistance
+	 */
+	public function onEntityFallenUpon(Entity $entity, float $fallDistance) : void{
+
+	}
+
+	/**
+	 * @param Entity $entity
+	 */
+	public function onEntityCollideUpon(Entity $entity) : void{
 
 	}
 

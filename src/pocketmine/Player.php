@@ -36,9 +36,12 @@ use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Human;
+use pocketmine\entity\Living;
 use pocketmine\entity\object\ItemEntity;
+use pocketmine\entity\passive\AbstractHorse;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\entity\Skin;
+use pocketmine\entity\vehicle\Boat;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -55,6 +58,7 @@ use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerEditBookEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
+use pocketmine\event\player\PlayerInteractEntityEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
 use pocketmine\event\player\PlayerItemHeldEvent;
@@ -75,6 +79,7 @@ use pocketmine\form\Form;
 use pocketmine\form\FormValidationException;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\Inventory;
+use pocketmine\inventory\InventoryHolder;
 use pocketmine\inventory\BaseInventory;
 use pocketmine\inventory\PETransaction\DropItemTransaction;
 use pocketmine\inventory\PETransaction\Transaction;
@@ -379,6 +384,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $craftingGrid = null;
 	/** @var CraftingTransaction|null */
 	protected $craftingTransaction = null;
+
+	/**
+	 * TODO: HACK! This tracks GUIs for inventories that the server considers "always open" so that the client can't
+	 * open them twice. (1.16 hack)
+	 * @var true[]
+	 * @phpstan-var array<int, true>
+	 * @internal
+	 */
+	public $openHardcodedWindows = [];
 
 	/** @var int */
 	protected $messageCounter = 2;
@@ -3299,7 +3313,31 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				switch($type){
 					case InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_INTERACT:
-						break; //TODO
+						if(!$target->isAlive()){
+							return true;
+						}
+						$ev = new PlayerInteractEntityEvent($this, $target, $item = $this->inventory->getItemInHand(), $packet->trData->clickPos);
+						$ev->call();
+		
+						if(!$ev->isCancelled()){
+							$oldItem = clone $item;
+							if(!$target->onFirstInteract($this, $ev->getItem(), $ev->getClickPosition())){
+								if($target instanceof Living){
+									if($this->isCreative()){
+										$item = $oldItem;
+									}
+		
+									if($item->onInteractWithEntity($this, $target)){
+										if(!$item->equalsExact($oldItem) and !$this->isCreative()){
+											$this->inventory->setItemInHand($item);
+										}
+									}
+								}
+							}elseif(!$item->equalsExact($oldItem)){
+								$this->inventory->setItemInHand($ev->getItem());
+							}
+						}
+						return true;
 					case InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_ATTACK:
 					    return $this->attackEntity($target);
 					default:
@@ -3647,29 +3685,62 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		switch($packet->action){
+			case InteractPacket::ACTION_LEAVE_VEHICLE:
+				if($this->ridingEid === $packet->target){
+					$this->dismountEntity();
+				}
+				break;
 		    case InteractPacket::ACTION_OPEN_INVENTORY:
-		        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-			     	if($target === $this){
-				    	//TODO: HACK! this restores 1.14ish behaviour, but this should be able to be listened to and
-				    	//controlled by plugins. However, the player is always a subscriber to their own inventory so it
-				    	//doesn't integrate well with the regular container system right now.
-				    	$pk = new ContainerOpenPacket();
-				    	$pk->windowId = self::HARDCODED_INVENTORY_WINDOW_ID;
-				    	$pk->type = WindowTypes::INVENTORY;
-				    	$pk->x = $pk->y = $pk->z = 0;
-				    	$pk->entityUniqueId = $this->getId();
-				    	$this->sendDataPacket($pk);
-				    	break;
-			     	}
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $target === $this && !array_key_exists($windowId = self::HARDCODED_INVENTORY_WINDOW_ID, $this->openHardcodedWindows)){
+					//TODO: HACK! this restores 1.14ish behaviour, but this should be able to be listened to and
+					//controlled by plugins. However, the player is always a subscriber to their own inventory so it
+					//doesn't integrate well with the regular container system right now.
+				    $pk = new ContainerOpenPacket();
+				    $pk->windowId = self::HARDCODED_INVENTORY_WINDOW_ID;
+				    $pk->type = WindowTypes::INVENTORY;
+				    $pk->x = $pk->y = $pk->z = 0;
+				    $pk->entityUniqueId = $this->getId();
+				    $this->sendDataPacket($pk);
+				    break;
+				}elseif($target instanceof InventoryHolder){
+					if(!($target instanceof AbstractHorse and !$target->isTamed())){
+						$this->addWindow($target->getInventory());
+						return true;
+					}
 				}
 				return false;
+			case InteractPacket::ACTION_RIGHT_CLICK:
+				if(!$target->isAlive()){
+					return true;
+				}
+				$ev = new PlayerInteractEntityEvent($this, $target, $item = $this->inventory->getItemInHand(), $target->asVector3());
+				$ev->call();
+
+				if(!$ev->isCancelled()){
+					$oldItem = clone $item;
+					if(!$target->onFirstInteract($this, $ev->getItem(), $ev->getClickPosition())){
+						if($target instanceof Living){
+							if($this->isCreative()){
+								$item = $oldItem;
+							}
+
+							if($item->onInteractWithEntity($this, $target)){
+								if(!$item->equalsExact($oldItem) and !$this->isCreative()){
+									$this->inventory->setItemInHand($item);
+								}
+							}
+						}
+					}elseif(!$item->equalsExact($oldItem)){
+						$this->inventory->setItemInHand($ev->getItem());
+					}
+				}
+				break;
 		    case InteractPacket::ACTION_LEFT_CLICK:
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 		            return $this->attackEntity($target);
 		        }
 
 		        break;
-			case InteractPacket::ACTION_LEAVE_VEHICLE:
 			case InteractPacket::ACTION_MOUSEOVER:
 				break; //TODO: handle these
 			default:
@@ -3881,6 +3952,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
+		$riding = $this->getRidingEntity();
+		if($riding instanceof Boat){
+			if($packet->action === AnimatePacket::ACTION_ROW_RIGHT){
+				$riding->setPaddleTimeRight($packet->rowingTime);
+			}elseif($packet->action === AnimatePacket::ACTION_ROW_LEFT){
+				$riding->setPaddleTimeLeft($packet->rowingTime);
+			}
+		}
+
 		$pk = new AnimatePacket();
 		$pk->entityRuntimeId = $this->getId();
 		$pk->action = $ev->getAnimationType();
@@ -3955,11 +4035,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->doCloseInventory();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-	    	if($packet->windowId >= self::RESERVED_WINDOW_ID_RANGE_START and $packet->windowId <= self::RESERVED_WINDOW_ID_RANGE_END){
-		        $pk = new ContainerClosePacket();
-		        $pk->windowId = $packet->windowId;
-		        $this->sendDataPacket($pk);
-		        return true;
+			if(array_key_exists($packet->windowId, $this->openHardcodedWindows)){
+				unset($this->openHardcodedWindows[$packet->windowId]);
+	        	if($packet->windowId >= self::RESERVED_WINDOW_ID_RANGE_START and $packet->windowId <= self::RESERVED_WINDOW_ID_RANGE_END){
+		            $pk = new ContainerClosePacket();
+		            $pk->windowId = $packet->windowId;
+		            $this->sendDataPacket($pk);
+		            return true;
+				}
 	    	}
 		}
 		if(isset($this->windowIndex[$packet->windowId])){
@@ -3968,9 +4051,26 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->removeWindow($this->windowIndex[$packet->windowId]);
 			$this->closingWindowId = null;
 			return true;
-		}elseif($this->getProtocol() < ProtocolInfo::PROTOCOL_392 && $packet->windowId === 255){
-			//Closed a fake window
-			return true;
+		}else{
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+		    	/*
+		    	 * TODO: HACK!
+		    	 * If we told the client to remove a window on our own (e.g. a plugin called removeWindow()), our
+		    	 * first ContainerClose tricks the client into behaving as if it itself asked for the window to be closed.
+		    	 * This means that it will send us a ContainerClose of its own, which we must respond to the same way as if
+		    	 * the client closed the window by itself.
+		    	 * If we don't, the client will not be able to open any new windows.
+		    	 */
+		    	$pk = new ContainerClosePacket();
+		    	$pk->windowId = $packet->windowId;
+		    	$pk->server = false;
+		    	$this->sendDataPacket($pk);
+			}else{
+				if($packet->windowId === 255){
+		        	//Closed a fake window
+		        	return true;
+				}
+			}
 		}
 
 		return false;
@@ -4871,6 +4971,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->headYaw = $yaw;
 		$pk->yaw = $yaw;
 		$pk->mode = $mode;
+		$pk->ridingEid = intval($this->ridingEid);
 
 		if($targets !== null){
 			$this->server->broadcastPacket($targets, $pk);

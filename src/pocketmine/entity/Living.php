@@ -85,6 +85,85 @@ abstract class Living extends Entity implements Damageable{
 	/** @var ArmorInventory */
 	protected $armorInventory;
 
+	/** @var int|null */
+	protected $revengeTargetId = null;
+	protected $revengeTimer = 0;
+
+	/** @var int|null */
+	protected $lastAttackedEntityId = null;
+
+	/** @var bool */
+	protected $leashed = false;
+	/** @var CompoundTag */
+	protected $leashNbt;
+	/** @var int|null */
+	protected $leashedToEntityId = null;
+
+	/** @var float */
+	protected $moveForward = 0.0;
+	/** @var float */
+	protected $moveStrafing = 0.0;
+
+	public function getRevengeTarget() : ?Entity{
+		if($this->revengeTargetId !== null){
+			return $this->server->findEntity($this->revengeTargetId);
+		}
+
+		return null;
+	}
+
+	public function setRevengeTarget(?Entity $revengeTarget) : void{
+		if($revengeTarget === null){
+			$this->revengeTargetId = null;
+		}else{
+			$this->revengeTargetId = $revengeTarget->getId();
+		}
+
+		$this->revengeTimer = $this->ticksLived;
+	}
+
+	public function getLastAttackedEntity() : ?Entity{
+		if($this->lastAttackedEntityId !== null){
+			return $this->server->findEntity($this->lastAttackedEntityId);
+		}
+
+		return null;
+	}
+
+	public function setLastAttackedEntity(?Entity $attackedEntity) : void{
+		if($attackedEntity === null){
+			$this->lastAttackedEntityId = null;
+		}else{
+			$this->lastAttackedEntityId = $attackedEntity->getId();
+		}
+	}
+
+	public function getRevengeTimer() : int{
+		return $this->revengeTimer;
+	}
+
+	public function getLeashedToEntity() : ?Entity{
+		if($this->leashedToEntityId !== null){
+			return $this->server->findEntity($this->leashedToEntityId);
+		}
+
+		return null;
+	}
+
+	public function setLeashedToEntity(Entity $leashedToEntity, bool $send = true) : void{
+		$this->leashed = true;
+		$this->leashedToEntityId = $leashedToEntity->getId();
+
+		if($send){
+			$this->setGenericFlag(self::DATA_FLAG_LEASHED, true);
+			$this->propertyManager->setLong(self::DATA_LEAD_HOLDER_EID, $leashedToEntity->getId());
+		}
+	}
+
+	public function isLeashed() : bool{
+		return $this->leashed;
+	}
+
 	abstract public function getName() : string;
 
 	protected function initEntity() : void{
@@ -127,6 +206,14 @@ abstract class Living extends Entity implements Damageable{
 				));
 			}
 		}
+
+		$this->leashed = boolval($this->namedtag->getByte("Leashed", 0));
+
+		if($this->isLeashed() and $this->namedtag->hasTag("Leash", CompoundTag::class)){
+			$this->leashNbt = $this->namedtag->getCompoundTag("Leash");
+		}
+
+		$this->setGenericFlag(self::DATA_FLAG_LEASHED, $this->leashed);
 	}
 
 	protected function addAttributes() : void{
@@ -136,6 +223,30 @@ abstract class Living extends Entity implements Damageable{
 		$this->attributeMap->addAttribute(Attribute::getAttribute(Attribute::MOVEMENT_SPEED));
 		$this->attributeMap->addAttribute(Attribute::getAttribute(Attribute::ATTACK_DAMAGE));
 		$this->attributeMap->addAttribute(Attribute::getAttribute(Attribute::ABSORPTION));
+	}
+
+	public function setMovementSpeed(float $speed) : void{
+		$this->attributeMap->getAttribute(Attribute::MOVEMENT_SPEED)->setValue($speed, true);
+	}
+
+	public function getMovementSpeed() : float{
+		return $this->attributeMap->getAttribute(Attribute::MOVEMENT_SPEED)->getValue();
+	}
+
+	public function setAttackDamage(float $damage) : void{
+		$this->attributeMap->getAttribute(Attribute::ATTACK_DAMAGE)->setValue($damage, true);
+	}
+
+	public function getAttackDamage() : float{
+		return $this->attributeMap->getAttribute(Attribute::ATTACK_DAMAGE)->getValue();
+	}
+
+	public function setFollowRange(float $range) : void{
+		$this->attributeMap->getAttribute(Attribute::FOLLOW_RANGE)->setValue($range, true);
+	}
+
+	public function getFollowRange() : float{
+		return $this->attributeMap->getAttribute(Attribute::FOLLOW_RANGE)->getValue();
 	}
 
 	public function setHealth(float $amount) : void{
@@ -182,6 +293,22 @@ abstract class Living extends Entity implements Damageable{
 			$this->namedtag->setTag(new ListTag("ActiveEffects", $effects));
 		}else{
 			$this->namedtag->removeTag("ActiveEffects");
+		}
+
+		$this->namedtag->setByte("Leashed", intval($this->leashed));
+		if(($leashedToEntity = $this->getLeashedToEntity())){
+			$leashNbt = new CompoundTag("Leash");
+
+			if($leashedToEntity instanceof Living){
+				$leashNbt->setString("UUID", $leashedToEntity->getUniqueId()->toString());
+			}elseif($leashedToEntity instanceof LeashKnot){
+				$pos = $leashedToEntity->getHangingPosition();
+				$leashNbt->setInt("X", $pos->x);
+				$leashNbt->setInt("Y", $pos->y);
+				$leashNbt->setInt("Z", $pos->z);
+			}
+
+			$this->namedtag->setTag($leashNbt);
 		}
 	}
 
@@ -596,6 +723,12 @@ abstract class Living extends Entity implements Damageable{
 				$deltaX = $this->x - $e->x;
 				$deltaZ = $this->z - $e->z;
 				$this->knockBack($e, $source->getBaseDamage(), $deltaX, $deltaZ, $source->getKnockBack());
+
+				$attacker = $source->getDamager();
+				if($attacker instanceof Living){
+					$this->setRevengeTarget($attacker);
+					$attacker->setLastAttackedEntity($this);
+				}
 			}
 		}
 
@@ -671,8 +804,22 @@ abstract class Living extends Entity implements Damageable{
 		$this->despawnFromAll();
 	}
 
+	public function onUpdate(int $currentTick) : bool{
+		if($this->closed) return false;
+
+		$this->updateLeashedState();
+
+		return parent::onUpdate($currentTick);
+	}
+
 	public function entityBaseTick(int $tickDiff = 1) : bool{
 		Timings::$timerLivingEntityBaseTick->startTiming();
+
+		if($revengeTarget = $this->getRevengeTarget()){
+			if(!$revengeTarget->isAlive() or ($this->ticksLived - $this->revengeTimer) > 100){
+				$this->setRevengeTarget(null);
+			}
+		}
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
@@ -933,5 +1080,135 @@ abstract class Living extends Entity implements Damageable{
 			}
 			parent::close();
 		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function allowLeashing() : bool{
+		return false;
+	}
+
+	/**
+	 * @param bool $send
+	 * @param bool $dropLead
+	 */
+	public function clearLeashed(bool $send, bool $dropLead) : void{
+		if($this->isLeashed()){
+			$this->leashed = false;
+			$this->leashedToEntityId = null;
+
+			if($dropLead){
+				$this->level->dropItem($this, Item::get(Item::LEAD));
+			}
+
+			if($send){
+				$this->setGenericFlag(self::DATA_FLAG_LEASHED, false);
+				$this->propertyManager->setLong(self::DATA_LEAD_HOLDER_EID, -1);
+
+				$this->broadcastEntityEvent(ActorEventPacket::REMOVE_LEASH);
+			}
+		}
+	}
+
+	public function recreateLeash() : void{
+		if($this->isLeashed() and $this->leashNbt !== null){
+			if($this->leashNbt->hasTag("UUID", StringTag::class)){
+				$uuid = UUID::fromString($this->leashNbt->getString("UUID"));
+
+				foreach($this->level->getCollidingEntities($this->getBoundingBox()->expandedCopy(10, 10, 10)) as $entity){
+					if($entity instanceof Living){
+						if($entity->getUniqueId()->equals($uuid)){
+							$this->setLeashedToEntity($entity);
+							break;
+						}
+					}
+				}
+			}elseif($this->leashNbt->hasTag("X", IntTag::class) and $this->leashNbt->hasTag("Y", IntTag::class) and $this->leashNbt->hasTag("Z", IntTag::class)){
+				$pos = new Vector3($this->leashNbt->getInt("X"), $this->leashNbt->getInt("Y"), $this->leashNbt->getInt("Z"));
+				$knot = LeashKnot::getKnotFromPosition($this->level, $pos);
+
+				if($knot === null){
+					$knot = new LeashKnot($this->level, Entity::createBaseNBT($pos));
+					$knot->spawnToAll();
+				}
+
+				$this->setLeashedToEntity($knot);
+			}else{
+				$this->clearLeashed(false, true);
+			}
+		}
+
+		$this->leashNbt = null;
+	}
+
+	public function updateLeashedState() : void{
+		if($this->leashNbt !== null){
+			$this->recreateLeash();
+		}
+
+		if($this->isLeashed()){
+			if(!$this->isAlive()){
+				$this->clearLeashed(true, true);
+			}
+
+			$leashedToEntity = $this->getLeashedToEntity();
+			if($leashedToEntity === null){
+				$this->clearLeashed(true, true);
+			}
+		}
+	}
+
+	public function onFirstInteract(Player $player, Item $item, Vector3 $clickPos) : bool{
+		if($this->isLeashed() and $this->getLeashedToEntity() === $player){
+			$this->clearLeashed(true, !$player->isCreative());
+			return true;
+		}else{
+			if($item->getId() === Item::LEAD and $this->allowLeashing()){
+				$this->setLeashedToEntity($player);
+				$item->pop();
+				return true;
+			}
+		}
+		return $this->onInteract($player, $item, $clickPos) ?: parent::onFirstInteract($player, $item, $clickPos);
+	}
+
+	public function onInteract(Player $player, Item $item, Vector3 $clickPos) : bool{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function canSpawnHere() : bool{
+		return true;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getMoveForward() : float{
+		return $this->moveForward;
+	}
+
+	/**
+	 * @param float $moveForward
+	 */
+	public function setMoveForward(float $moveForward) : void{
+		$this->moveForward = $moveForward;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function getMoveStrafing() : float{
+		return $this->moveStrafing;
+	}
+
+	/**
+	 * @param float $moveStrafing
+	 */
+	public function setMoveStrafing(float $moveStrafing) : void{
+		$this->moveStrafing = $moveStrafing;
 	}
 }

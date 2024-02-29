@@ -59,11 +59,13 @@ use pocketmine\network\mcpe\protocol\MapInfoRequestPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ModalFormResponsePacket;
+use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
+use pocketmine\network\mcpe\protocol\PassengerJumpPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
@@ -72,6 +74,7 @@ use pocketmine\network\mcpe\protocol\ResourcePackClientResponsePacket;
 use pocketmine\network\mcpe\protocol\RespawnPacket;
 use pocketmine\network\mcpe\protocol\RequestNetworkSettingsPacket;
 use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
+use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
 use pocketmine\network\mcpe\protocol\SetLocalPlayerAsInitializedPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
 use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
@@ -260,7 +263,22 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handlePlayerInput(PlayerInputPacket $packet) : bool{
-		return false; //TODO
+		$this->player->setMoveForward($packet->motionY);
+		$this->player->setMoveStrafing($packet->motionX);
+
+		return true;
+	}
+
+	public function handlePassengerJump(PassengerJumpPacket $packet) : bool{
+		if($this->player->isRiding()){
+			$horse = $this->player->getRidingEntity();
+			if($horse instanceof AbstractHorse){
+				$horse->setJumpPower($packet->jumpStrength);
+
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
@@ -404,6 +422,29 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
 		return $this->player->handleLevelSoundEvent($packet);
+	}
+
+	public function handleMoveActorAbsolute(MoveActorAbsolutePacket $packet) : bool{
+		$target = $this->player->getServer()->findEntity($packet->entityRuntimeId);
+		if($target !== null){
+			$target->setClientPositionAndRotation($packet->position, $packet->yRot, $packet->xRot, 3, ($packet->flags & MoveActorAbsolutePacket::FLAG_TELEPORT) !== 0);
+			//$target->onGround = ($packet->flags & MoveActorAbsolutePacket::FLAG_GROUND) !== 0;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public function handleSetActorMotion(SetActorMotionPacket $packet) : bool{
+		$target = $this->player->getServer()->findEntity($packet->entityRuntimeId);
+		if($target !== null){
+			$target->setClientMotion($packet->motion);
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet) : bool{

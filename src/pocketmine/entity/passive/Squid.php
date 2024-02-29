@@ -21,8 +21,9 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\entity;
+namespace pocketmine\entity\passive;
 
+use pocketmine\entity\WaterAnimal;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
@@ -42,8 +43,10 @@ class Squid extends WaterAnimal{
 
 	/** @var Vector3|null */
 	public $swimDirection = null;
+	/** @var float */
 	public $swimSpeed = 0.1;
 
+	/** @var int */
 	private $switchDirectionTicker = 0;
 
 	public function initEntity() : void{
@@ -75,7 +78,6 @@ class Squid extends WaterAnimal{
 	private function generateRandomDirection() : Vector3{
 		return new Vector3(mt_rand(-1000, 1000) / 1000, mt_rand(-500, 500) / 1000, mt_rand(-1000, 1000) / 1000);
 	}
-
 
 	public function entityBaseTick(int $tickDiff = 1) : bool{
 		if($this->closed){
@@ -117,15 +119,19 @@ class Squid extends WaterAnimal{
 		return $hasUpdate;
 	}
 
-	protected function applyGravity() : void{
-		if(!$this->isUnderwater()){
-			parent::applyGravity();
-		}
-	}
-
 	public function getDrops() : array{
 		return [
 			ItemFactory::get(Item::DYE, 0, mt_rand(1, 3))
 		];
+	}
+
+	public function canSpawnHere() : bool{
+		return parent::canSpawnHere() and $this->y > 45 and $this->y < 63;
+	}
+
+	protected function applyGravity() : void{
+		if(!$this->isUnderwater()){
+			parent::applyGravity();
+		}
 	}
 }

@@ -25,7 +25,9 @@ namespace pocketmine\entity;
 
 use pocketmine\event\entity\EntityDamageEvent;
 
-abstract class WaterAnimal extends Creature implements Ageable{
+abstract class WaterAnimal extends Mob implements Ageable{
+
+	public const SPAWN_PLACEMENT_TYPE = SpawnPlacementTypes::PLACEMENT_TYPE_IN_WATER;
 
 	public function isBaby() : bool{
 		return $this->getGenericFlag(self::DATA_FLAG_BABY);
@@ -33,6 +35,10 @@ abstract class WaterAnimal extends Creature implements Ageable{
 
 	public function canBreathe() : bool{
 		return $this->isUnderwater();
+	}
+
+	public function canSpawnHere() : bool{
+		return true;
 	}
 
 	public function onAirExpired() : void{

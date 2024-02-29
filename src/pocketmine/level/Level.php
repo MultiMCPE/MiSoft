@@ -31,6 +31,7 @@ use InvalidStateException;
 use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
+use pocketmine\block\Liquid;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\ItemEntity;
@@ -91,6 +92,7 @@ use pocketmine\tile\Chest;
 use pocketmine\tile\Container;
 use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
+use pocketmine\utils\Random;
 use pocketmine\utils\ReversePriorityQueue;
 use SplFixedArray;
 use SplPriorityQueue;
@@ -293,11 +295,17 @@ class Level implements ChunkManager, Metadatable{
 	/** @var SkyLightUpdate|null */
 	private $skyLightUpdate = null;
 
+	/** @var Random */
+	public $random;
+
     /** @var Weather */
     private $weather;
 
 	/** @var int */
 	private $dimensionId = DimensionIds::OVERWORLD;
+
+	private $spawnPeacefulMobs = true;
+	private $spawnHostileMobs = true;
 
 	public static function chunkHash(int $x, int $z) : int{
 		return (($x & 0xFFFFFFFF) << 32) | ($z & 0xFFFFFFFF);
@@ -426,6 +434,7 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		$this->timings = new LevelTimings($this);
+		$this->random = new Random();
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 
@@ -1307,6 +1316,44 @@ class Level implements ChunkManager, Metadatable{
 
 
 		return $collides;
+	}
+
+	/**
+	 * @param AxisAlignedBB $bb
+	 * @param Liquid        $material
+	 *
+	 * @return bool
+	 */
+	public function isLiquidInBoundingBox(AxisAlignedBB $bb, Liquid $material) : bool{
+		$minX = (int) floor($bb->minX);
+		$minY = (int) floor($bb->minY);
+		$minZ = (int) floor($bb->minZ);
+		$maxX = (int) floor($bb->maxX + 1);
+		$maxY = (int) floor($bb->maxY + 1);
+		$maxZ = (int) floor($bb->maxZ + 1);
+
+		for($x = $minX; $x < $maxX; ++$x){
+			for($y = $minY; $y < $maxY; ++$y){
+				for($z = $minZ; $z < $maxZ; ++$z){
+					$block = $this->getBlockAt($x, $y, $z);
+
+					if($block instanceof $material){
+						$j2 = $block->getDamage();
+						$d0 = $y + 1;
+
+						if($j2 < 8){
+							$d0 -= $j2 / 8;
+						}
+
+						if($d0 >= $bb->minY){
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -3253,6 +3300,27 @@ class Level implements ChunkManager, Metadatable{
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param Vector3 $pos
+	 *
+	 * @return bool
+	 */
+	public function canSeeSky(Vector3 $pos) : bool{
+		if($this->isChunkLoaded($pos->getFloorX() >> 4, $pos->getFloorZ() >> 4)){
+			$chunk = $this->getChunk($pos->getFloorX() >> 4, $pos->getFloorZ() >> 4);
+			return $pos->y >= $chunk->getHeightMap($pos->getFloorX() & 15, $pos->getFloorZ() & 15);
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isDayTime() : bool{
+		return $this->getSunAngleDegrees() < 90 or $this->getSunAngleDegrees() > 270;
 	}
 
 	public function setMetadata(string $metadataKey, MetadataValue $newMetadataValue){

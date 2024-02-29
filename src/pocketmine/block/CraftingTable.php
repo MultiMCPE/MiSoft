@@ -29,6 +29,7 @@ use pocketmine\Player;
 use pocketmine\network\mcpe\protocol\ContainerOpenPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
+use function array_key_exists;
 
 class CraftingTable extends Solid{
 
@@ -54,7 +55,7 @@ class CraftingTable extends Solid{
 		if($player instanceof Player){
 			$player->setCraftingGrid(new CraftingGrid($player, CraftingGrid::SIZE_BIG));
 
-			if($player->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+			if($player->getProtocol() >= ProtocolInfo::PROTOCOL_392 && !array_key_exists($windowId = Player::HARDCODED_CRAFTING_GRID_WINDOW_ID, $player->openHardcodedWindows)){
 		    	//TODO: HACK! crafting grid doesn't fit very well into the current PM container system, so this hack allows
 		    	//it to carry on working approximately the same way as it did in 1.14
 		    	$pk = new ContainerOpenPacket();
@@ -64,6 +65,7 @@ class CraftingTable extends Solid{
 		    	$pk->y = $this->getFloorY();
 		    	$pk->z = $this->getFloorZ();
 		    	$player->sendDataPacket($pk);
+				$player->openHardcodedWindows[$windowId] = true;
 			}
 		}
 
