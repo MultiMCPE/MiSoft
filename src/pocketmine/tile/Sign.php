@@ -66,6 +66,9 @@ class Sign extends Spawnable{
 	/** @var string[] */
 	protected $text = ["", "", "", ""];
 
+	/** @var bool */
+	protected $waxed = false;
+
 	/** @var ?int */
 	protected $editorEntityRuntimeId = null;
 

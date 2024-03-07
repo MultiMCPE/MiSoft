@@ -1915,7 +1915,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if(!($revert = $ev->isCancelled())){ //Yes, this is intended
 				if($this->server->netherEnabled){
 					if($this->isInsideOfPortal()){
-						if($this->portalTime == 0){
+						if($this->portalTime === 0){
 							$this->portalTime = $this->server->getTick();
 						}
 					}else{
@@ -2025,7 +2025,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($this->spawned){
 			if($this->server->netherEnabled){
-				if(($this->isCreative() or $this->isSurvival() and $this->server->getTick() - $this->portalTime >= 80) and $this->portalTime > 0){
+				if((($this->isSurvival() or $this->isCreative()) and $this->server->getTick() - $this->portalTime >= 80) and $this->portalTime > 0){
 					$netherLevel = null;
 					if($this->server->isLevelLoaded($this->server->netherName) or $this->server->loadLevel($this->server->netherName)){
 						$netherLevel = $this->server->getLevelByName($this->server->netherName);
@@ -2036,7 +2036,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							$this->fromPos = $this->getPosition();
 							$this->fromPos->x = ((int) $this->fromPos->x) + 0.5;
 							$this->fromPos->z = ((int) $this->fromPos->z) + 0.5;
-							$this->teleport($this->shouldResPos = $netherLevel->getSafeSpawn());
+							$this->teleport($this->shouldResPos = $netherLevel->getSpawnLocation());
 						}elseif($this->fromPos instanceof Position){
 							if(!($this->getLevel()->isChunkLoaded((int) $this->fromPos->x, (int) $this->fromPos->z))){
 								$this->getLevel()->loadChunk((int) $this->fromPos->x, (int) $this->fromPos->z);
@@ -2048,7 +2048,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 									if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 0, $add[$i + 4] * $j))->getId() === Block::AIR){
 										if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 1, $add[$i + 4] * $j))->getId() === Block::AIR){
 											$tempos = $this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j);
-											break;
+										    break;
 										}
 									}
 								}
@@ -2064,7 +2064,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							$tempos = null;
 							$this->fromPos = null;
 						}else{
-							$this->teleport($this->shouldResPos = $this->server->getDefaultLevel()->getSafeSpawn());
+							$this->teleport($this->shouldResPos = $this->server->getDefaultLevel()->getSpawnLocation());
 						}
 						$this->portalTime = 0;
 					}
