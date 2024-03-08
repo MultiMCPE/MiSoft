@@ -27,9 +27,14 @@ use pocketmine\item\Item;
 use pocketmine\item\Saddle;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 
-abstract class AbstractHorseInventory extends ContainerInventory{
+abstract class AbstractHorseInventory extends BaseInventory{
 	/** @var AbstractHorse */
 	protected $holder;
+
+	public function __construct(AbstractHorse $holder, array $items = [], int $size = null, string $title = null){
+		$this->holder = $holder;
+		parent::__construct($items, $size, $title);
+	}
 
 	/**
 	 * @param Item $saddle

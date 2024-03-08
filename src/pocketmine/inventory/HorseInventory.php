@@ -119,6 +119,7 @@ class HorseInventory extends AbstractHorseInventory{
 		$who->sendDataPacket($pk);
 
 	    $this->sendArmor($who);
+		$this->sendContents($who);
 	}
 
 	public function getNamedtag(int $playerProtocol) : CompoundTag{

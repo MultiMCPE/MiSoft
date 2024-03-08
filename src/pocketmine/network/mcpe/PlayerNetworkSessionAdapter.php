@@ -430,21 +430,14 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 			$target->setClientPositionAndRotation($packet->position, $packet->yRot, $packet->xRot, 3, ($packet->flags & MoveActorAbsolutePacket::FLAG_TELEPORT) !== 0);
 			//$target->onGround = ($packet->flags & MoveActorAbsolutePacket::FLAG_GROUND) !== 0;
 
-			return true;
+		    return true;
 		}
 
 		return false;
 	}
 
 	public function handleSetActorMotion(SetActorMotionPacket $packet) : bool{
-		$target = $this->player->getServer()->findEntity($packet->entityRuntimeId);
-		if($target !== null){
-			$target->setClientMotion($packet->motion);
-
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
 	public function handleNetworkStackLatency(NetworkStackLatencyPacket $packet) : bool{
