@@ -2035,7 +2035,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							$this->fromPos = $this->getPosition();
 							$this->fromPos->x = ((int) $this->fromPos->x) + 0.5;
 							$this->fromPos->z = ((int) $this->fromPos->z) + 0.5;
-							$this->teleport($this->shouldResPos = $netherLevel->getSpawnLocation());
+							$this->teleport($this->shouldResPos = $netherLevel->getSafeSpawn());
 						}elseif($this->fromPos instanceof Position){
 							if(!($this->getLevel()->isChunkLoaded((int) $this->fromPos->x, (int) $this->fromPos->z))){
 								$this->getLevel()->loadChunk((int) $this->fromPos->x, (int) $this->fromPos->z);
@@ -2046,7 +2046,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 								for($i = 0; $i < 4; $i++){
 									if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 0, $add[$i + 4] * $j))->getId() === Block::AIR){
 										if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 1, $add[$i + 4] * $j))->getId() === Block::AIR){
-											$tempos = $this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j);
+											$tempos = Position::fromObject($this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j), $this->fromPos->getLevel());
 										    break;
 										}
 									}
@@ -2056,14 +2056,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 								}
 							}
 							if($tempos === null){
-								$tempos = $this->fromPos->add(mt_rand(-2, 2), 0, mt_rand(-2, 2));
+								$tempos = Position::fromObject($this->fromPos->add(mt_rand(-2, 2), 0, mt_rand(-2, 2)), $this->fromPos->getLevel());
 							}
 							$this->teleport($this->shouldResPos = $tempos);
 							$add = null;
 							$tempos = null;
 							$this->fromPos = null;
 						}else{
-							$this->teleport($this->shouldResPos = $this->server->getDefaultLevel()->getSpawnLocation());
+							$this->teleport($this->shouldResPos = $this->server->getDefaultLevel()->getSafeSpawn());
 						}
 						$this->portalTime = 0;
 					}
