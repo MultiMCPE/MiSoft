@@ -36,6 +36,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\SetActorLinkPacket;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\Player;
+use function abs;
 
 class Boat extends Vehicle{
 	public const NETWORK_ID = self::BOAT;
@@ -62,6 +63,10 @@ class Boat extends Vehicle{
 		$this->setBoatType($this->namedtag->getInt(self::TAG_VARIANT, 0));
 		$this->setHurtDirection(1);
 		$this->setHurtTime(0);
+
+		$this->getDataPropertyManager()->setByte(self::DATA_CONTROLLING_RIDER_SEAT_NUMBER, 0);
+		$this->getDataPropertyManager()->setByte(self::DATA_IS_BUOYANT, 1);
+		$this->getDataPropertyManager()->setString(self::DATA_BUOYANCY, "{\"apply_gravity\":true,\"base_buoyancy\":1.0,\"big_wave_probability\":0.02999999932944775,\"big_wave_speed\":10.0,\"drag_down_on_buoyancy_removed\":0.0,\"liquid_blocks\":[\"minecraft:water\",\"minecraft:flowing_water\"],\"simulate_waves\":true}");
 
 		$this->velocity = new Vector3();
 
@@ -114,13 +119,15 @@ class Boat extends Vehicle{
 	public function onRiderMount(Entity $entity) : void{
 		$entity->getDataPropertyManager()->setByte(self::DATA_RIDER_ROTATION_LOCKED, 1);
 		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_MAX_ROTATION, 90.0);
-		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_MIN_ROTATION, 0.0);
+		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_MIN_ROTATION, -90.0);
+		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_SEAT_ROTATION_OFFSET, -90.0);
 	}
 
 	public function onRiderLeave(Entity $entity) : void{
 		$entity->getDataPropertyManager()->setByte(self::DATA_RIDER_ROTATION_LOCKED, 0);
 		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_MAX_ROTATION, 360.0);
 		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_MIN_ROTATION, 0.0);
+		$entity->getDataPropertyManager()->setFloat(self::DATA_RIDER_SEAT_ROTATION_OFFSET, 0.0);
 	}
 
 	public function setClientMotion(Vector3 $motion) : void{
@@ -155,6 +162,11 @@ class Boat extends Vehicle{
 
 	public function onUpdate(int $currentTick) : bool{
 		if($this->closed) return false;
+
+		$tickDiff = $currentTick - $this->lastUpdate;
+		if($tickDiff <= 0 and !$this->justCreated){
+			return true;
+		}
 
 		if($this->getHurtTime() > 0){
 			$this->setHurtTime($this->getHurtTime() - 1);
@@ -193,8 +205,6 @@ class Boat extends Vehicle{
 				if($this->ticksLived % 100 === 0){
 					$this->broadcastLink($this->getRiddenByEntity());
 				}
-
-
 			}else{
 				if($this->onGround){
 					$this->motion = $this->motion->multiply(0.5);

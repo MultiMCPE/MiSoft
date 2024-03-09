@@ -56,7 +56,6 @@ use pocketmine\entity\object\LeashKnot;
 use pocketmine\entity\passive\Cat;
 use pocketmine\entity\passive\Chicken;
 use pocketmine\entity\passive\Cow;
-use pocketmine\entity\passive\Horse;
 use pocketmine\entity\passive\Mooshroom;
 use pocketmine\entity\passive\Pig;
 use pocketmine\entity\passive\Sheep;
@@ -179,7 +178,6 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(MagmaCube::class, false, ['MagmaCube', 'minecraft:magma_cube']);
 		Entity::registerEntity(Boat::class, false, ['Boat', 'minecraft:boat']);
 		Entity::registerEntity(Minecart::class, false, ['Minecart', 'minecraft:minecart']);
-		Entity::registerEntity(Horse::class, false, ['Horse', 'minecraft:horse']);
 		Entity::registerEntity(Blaze::class, false, ['Blaze', 'minecraft:blaze']);
 		Entity::registerEntity(Squid::class, false, ['Squid', 'minecraft:squid']);
 		Entity::registerEntity(Villager::class, false, ['Villager', 'minecraft:villager']);
@@ -459,7 +457,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->temporalVector = new Vector3();
 
 		if($this->eyeHeight === null){
-			$this->eyeHeight = $this->height / 2 + 0.1;
+			$this->eyeHeight = $this->height * 0.85;
 		}
 
 		$this->id = Entity::$entityCount++;

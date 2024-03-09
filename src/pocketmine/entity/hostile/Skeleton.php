@@ -43,6 +43,7 @@ use pocketmine\inventory\EntityEquipment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\Player;
 use function rand;
 
@@ -127,5 +128,12 @@ class Skeleton extends Monster implements RangedAttackerMob, Smite{
 		parent::sendSpawnPacket($player);
 
 		$this->equipment->sendContents([$player]);
+
+		// stupid hack for 1.1
+		$pk = new MobEquipmentPacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->inventorySlot = $pk->hotbarSlot = 10;
+		$pk->item = $this->equipment->getItemInHand();
+		$player->sendDataPacket($pk);
 	}
 }

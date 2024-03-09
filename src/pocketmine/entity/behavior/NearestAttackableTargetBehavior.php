@@ -87,6 +87,11 @@ class NearestAttackableTargetBehavior extends TargetBehavior{
 			$filters = [
 				$this->targetEntitySelector,
 				function(Entity $entity) : bool{
+					if($entity instanceof Player){
+						if($entity->isCreative()){
+							return false;
+						}
+					}
 					return get_class($entity) === $this->targetClass;
 				}
 			];

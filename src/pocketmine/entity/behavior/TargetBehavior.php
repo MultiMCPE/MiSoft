@@ -57,6 +57,10 @@ abstract class TargetBehavior extends Behavior{
 				return false;
 			}
 
+			if($target instanceof Player and $target->isCreative()){
+				return false;
+			}
+
 			return true;
 		}
 	}

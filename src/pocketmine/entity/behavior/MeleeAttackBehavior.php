@@ -72,6 +72,10 @@ class MeleeAttackBehavior extends Behavior{
 	}
 
 	public function onTick() : void{
+		if(!$this->mob->isAlive()){
+			return;
+		}
+
 		$target = $this->mob->getTargetEntity();
 
 		if($target === null){

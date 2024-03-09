@@ -270,15 +270,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	}
 
 	public function handlePassengerJump(PassengerJumpPacket $packet) : bool{
-		if($this->player->isRiding()){
-			$horse = $this->player->getRidingEntity();
-			if($horse instanceof AbstractHorse){
-				$horse->setJumpPower($packet->jumpStrength);
-
-				return true;
-			}
-		}
-		return false;
+		return true;
 	}
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
