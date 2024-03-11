@@ -2557,8 +2557,6 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			$p->dataPacket(clone $pk);
 		}
 
-		$this->server->broadcastPacket($targets, $pk);
-
 		if($this instanceof Player){
 			$this->dataPacket($pk);
 		}
