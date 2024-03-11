@@ -45,6 +45,7 @@ use pocketmine\entity\hostile\Slime;
 use pocketmine\entity\hostile\Spider;
 use pocketmine\entity\hostile\Stray;
 use pocketmine\entity\hostile\Zombie;
+use pocketmine\entity\object\Lightning;
 use pocketmine\entity\object\EnderCrystal;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\FallingBlock;
@@ -164,6 +165,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 		Entity::registerEntity(Arrow::class, false, ['Arrow', 'minecraft:arrow']);
 		Entity::registerEntity(Egg::class, false, ['Egg', 'minecraft:egg']);
+		Entity::registerEntity(Lightning::class, false, ['Lightning', 'minecraft:lightning']);
 		Entity::registerEntity(EnderCrystal::class, false, ['EnderCrystal', 'minecraft:ender_crystal']);
 		Entity::registerEntity(EnderPearl::class, false, ['ThrownEnderpearl', 'minecraft:ender_pearl']);
 		Entity::registerEntity(ExperienceBottle::class, false, ['ThrownExpBottle', 'minecraft:xp_bottle']);
@@ -990,6 +992,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 	public function kill() : void{
 		$this->health = 0;
+		$this->dismountEntity(true);
 		$this->scheduleUpdate();
 	}
 
@@ -1102,6 +1105,10 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			$ev = new EntityDamageEvent($this, EntityDamageEvent::CAUSE_VOID, 10);
 			$this->attack($ev);
 			$hasUpdate = true;
+		}
+
+		if($this->isOnFire() and $this->level->getWeather()->isRainy()){
+			$this->extinguish();
 		}
 
 		if($this->isOnFire() and $this->doOnFireTick($tickDiff)){
@@ -2289,6 +2296,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$pos = $ev->getTo();
 
 		$this->setMotion($this->temporalVector->setComponents(0, 0, 0));
+		$this->dismountEntity(true);
 		if($this->setPositionAndRotation($pos, $yaw ?? $this->yaw, $pitch ?? $this->pitch)){
 			$this->resetFallDistance();
 			$this->onGround = true;
@@ -2312,6 +2320,8 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			if($ev->isCancelled()){
 				return false;
 			}
+
+			$this->dismountEntity(true);
 
 			$this->level->removeEntity($this);
 			if($this->chunk !== null){
@@ -2546,6 +2556,8 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			}
 			$p->dataPacket(clone $pk);
 		}
+
+		$this->server->broadcastPacket($targets, $pk);
 
 		if($this instanceof Player){
 			$this->dataPacket($pk);

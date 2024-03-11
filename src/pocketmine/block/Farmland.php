@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\entity\Entity;
+use pocketmine\entity\Living;
+use pocketmine\event\block\BlockFormEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\AxisAlignedBB;
@@ -114,5 +117,18 @@ class Farmland extends Transparent{
 
 	public function getPickedItem() : Item{
 		return ItemFactory::get(Item::DIRT);
+	}
+
+	public function onEntityFallenUpon(Entity $entity, float $fallDistance) : void{
+		if($entity instanceof Living){
+			if($this->level->random->nextFloat() < ($fallDistance - 0.5)){
+				$ev = new BlockFormEvent($this, BlockFactory::get(Block::DIRT));
+				$ev->call();
+
+				if(!$ev->isCancelled()){
+					$this->level->setBlock($this, $ev->getNewState(), true);
+				}
+			}
+		}
 	}
 }

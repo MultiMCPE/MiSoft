@@ -1,24 +1,23 @@
 <?php
 
 /*
- *               _ _
- *         /\   | | |
- *        /  \  | | |_ __ _ _   _
- *       / /\ \ | | __/ _` | | | |
- *      / ____ \| | || (_| | |_| |
- *     /_/    \_|_|\__\__,_|\__, |
- *                           __/ |
- *                          |___/
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author TuranicTeam
- * @link https://github.com/TuranicTeam/Altay
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
- */
+ *
+*/
 
 declare(strict_types=1);
 
@@ -68,11 +67,12 @@ class Creeper extends Monster implements Ageable{
 		$this->setFollowRange(35);
 		$this->setAttackDamage(1.0);
 
-		$this->setIgnited(boolval($this->namedtag->getByte("ignited", 0)));
-		$this->setPowered(boolval($this->namedtag->getByte("powered", 0)));
-
 		$this->explosionRadius = $this->namedtag->getByte("ExplosionRadius", $this->explosionRadius);
 		$this->fuseTime = $this->namedtag->getShort("Fuse", $this->fuseTime);
+
+		$this->setIgnited(boolval($this->namedtag->getByte("ignited", 0)));
+		$this->setPowered(boolval($this->namedtag->getByte("powered", 0)));
+		$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuseTime);
 
 		parent::initEntity();
 	}

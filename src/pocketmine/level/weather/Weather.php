@@ -27,6 +27,7 @@ use pocketmine\event\level\WeatherChangeEvent;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
+use pocketmine\entity\Entity;
 use pocketmine\Player;
 use function min;
 use function max;
@@ -121,7 +122,9 @@ class Weather{
 					$x = $p->x + mt_rand(-64, 64);
 					$z = $p->z + mt_rand(-64, 64);
 					$y = $this->level->getHighestBlockAt((int) $x, (int) $z);
-					//$this->level->spawnLightning($this->temporalVector->setComponents($x, $y, $z)); // TODO: coming soon...
+					$nbt = Entity::createBaseNBT(new Vector3($x, $y, $z));
+					$lightning = Entity::createEntity("Lightning", $this->level, $nbt);
+					$lightning->spawnToAll();
 				}
 			}
 		}

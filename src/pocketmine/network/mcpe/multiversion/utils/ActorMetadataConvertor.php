@@ -168,7 +168,6 @@ final class ActorMetadataConvertor{
 				$newFlags = null;
 				$newFlags2 = null;
 				if($flags !== null){
-					$newFlags = 0;
 					$flagsBinary = strrev(decbin($flags));
 
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
@@ -187,7 +186,6 @@ final class ActorMetadataConvertor{
 				}
 
 				if($flags2 !== null){
-					$newFlags2 = 0;
 					$flagsBinary = strrev(decbin($flags2));
 
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
@@ -213,7 +211,6 @@ final class ActorMetadataConvertor{
 				$newFlags = null;
 				$newFlags2 = null;
 				if($flags !== null){
-					$newFlags = 0;
 					$flagsBinary = strrev(decbin($flags));
 
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
@@ -229,7 +226,6 @@ final class ActorMetadataConvertor{
 				}
 
 				if($flags2 !== null){
-					$newFlags2 = 0;
 					$flagsBinary = strrev(decbin($flags2));
 
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){

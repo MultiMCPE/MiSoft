@@ -134,7 +134,7 @@ class Portal extends Transparent{
 		if($player instanceof Player){
 			$this->meta = $player->getDirection() & 0x01;
 		}
-		$this->getLevel()->setBlock($block, $this, true, true);
+		$this->getLevel()->setBlock($blockReplace, $this, true, true);
 
 		return true;
 	}
