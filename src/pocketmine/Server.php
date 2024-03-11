@@ -86,6 +86,7 @@ use pocketmine\permission\BanList;
 use pocketmine\permission\DefaultPermissions;
 use pocketmine\permission\PermissionManager;
 use pocketmine\plugin\PharPluginLoader;
+use pocketmine\plugin\FolderPluginLoader;
 use pocketmine\plugin\Plugin;
 use pocketmine\plugin\PluginLoadOrder;
 use pocketmine\plugin\PluginManager;
@@ -380,6 +381,14 @@ class Server{
 	public $enderName = "ender";
 	/** @var Level */
 	public $enderLevel = null;
+
+	/** @var bool */
+	public $folderpluginloader = false;
+	/** @var bool */
+	public $loadIncompatibleAPI = false;
+
+	/** @var bool */
+	public $mobAiEnabled = false;
 
 	/**
 	 * @return string
@@ -1825,6 +1834,9 @@ class Server{
 			$this->pluginManager = new PluginManager($this, $this->commandMap, ((bool) $this->getProperty("plugins.legacy-data-dir", true)) ? null : $this->getDataPath() . "plugin_data" . DIRECTORY_SEPARATOR);
 			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);
 			$this->pluginManager->registerInterface(new PharPluginLoader($this->autoloader));
+			if($this->folderpluginloader === true){
+				$this->pluginManager->registerInterface(new FolderPluginLoader($this->autoloader));
+			}
 			$this->pluginManager->registerInterface(new ScriptPluginLoader());
 
 			register_shutdown_function([$this, "crashDump"]);
@@ -1925,6 +1937,11 @@ class Server{
 
 		$this->enderEnabled = $this->getAdvancedProperty("ender.allow-ender", false);
 		$this->enderName = $this->getAdvancedProperty("ender.level-name", "ender");
+
+		$this->loadIncompatibleAPI = $this->getAdvancedProperty("developer.load-incompatible-api", false);
+		$this->folderpluginloader = $this->getAdvancedProperty("developer.folder-plugin-loader", false);
+
+		$this->mobAiEnabled = $this->getAdvancedProperty("mobs.enable-mob-ai", false);
 	}
 
 	/**
@@ -2210,6 +2227,9 @@ class Server{
 		}
 
 		$this->pluginManager->registerInterface(new PharPluginLoader($this->autoloader));
+		if($this->folderpluginloader === true){
+			$this->pluginManager->registerInterface(new FolderPluginLoader($this->autoloader));
+		}
 		$this->pluginManager->registerInterface(new ScriptPluginLoader());
 		$this->pluginManager->loadPlugins($this->pluginPath);
 		$this->enablePlugins(PluginLoadOrder::STARTUP);

@@ -305,8 +305,8 @@ class Effect{
 				break;
 			case Effect::SATURATION:
 				if($entity instanceof Human){
-					$entity->addFood($instance->getEffectLevel());
-					$entity->addSaturation($instance->getEffectLevel() * 2);
+				    $entity->addFood($instance->getEffectLevel());
+				    $entity->addSaturation($instance->getEffectLevel() * 2);
 				}
 				break;
 		}

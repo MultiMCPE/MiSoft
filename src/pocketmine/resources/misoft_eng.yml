@@ -13,6 +13,14 @@ level:
  #Set if fire should spread (trees, etc.)
  fire-spread: false
 
+developer:
+  #This setting allows the server to load plugins through the source directory over a .phar file
+  #Recommended that it stays "false"
+  folder-plugin-loader: false
+  #This setting allows the server to load plugins with Incompatible API
+  #Recommanded that it stays "false"
+  load-incompatible-api: false
+
 nether:
  #Choose if the nether is allowed. The level of nether will generate automatically
  allow-nether: true
@@ -22,3 +30,8 @@ nether:
 ender:
  allow-ender: true
  level-name: "ender"
+
+mobs:
+ # If enabled, mobs can move around
+ # Note: this feature can cause lag in your server when lots of mob are spawned
+ enable-mob-ai: false

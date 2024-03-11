@@ -1365,6 +1365,7 @@ return array(
     'pocketmine\\plugin\\EventExecutor' => $baseDir . '/src/pocketmine/plugin/EventExecutor.php',
     'pocketmine\\plugin\\MethodEventExecutor' => $baseDir . '/src/pocketmine/plugin/MethodEventExecutor.php',
     'pocketmine\\plugin\\PharPluginLoader' => $baseDir . '/src/pocketmine/plugin/PharPluginLoader.php',
+    'pocketmine\\plugin\\FolderPluginLoader' => $baseDir . '/src/pocketmine/plugin/FolderPluginLoader.php',
     'pocketmine\\plugin\\Plugin' => $baseDir . '/src/pocketmine/plugin/Plugin.php',
     'pocketmine\\plugin\\PluginBase' => $baseDir . '/src/pocketmine/plugin/PluginBase.php',
     'pocketmine\\plugin\\PluginDescription' => $baseDir . '/src/pocketmine/plugin/PluginDescription.php',

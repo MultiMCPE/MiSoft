@@ -28,6 +28,7 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\Mob;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\Server;
 use function lcg_value;
 
 class SpawnEgg extends Item{
@@ -46,7 +47,7 @@ class SpawnEgg extends Item{
 
 		if($entity instanceof Entity){
 			if($entity instanceof Mob){
-				$entity->setImmobile(false);
+				$entity->setImmobile(!Server::getInstance()->mobAiEnabled);
 			}
 			--$this->count;
 			$entity->spawnToAll();
