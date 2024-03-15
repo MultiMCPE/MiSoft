@@ -167,8 +167,6 @@ class LevelDB extends BaseLevelProvider{
 		if(!$this->levelData->hasTag("generatorOptions", StringTag::class)){
 			$this->levelData->setString("generatorOptions", "");
 		}
-
-		$db->close();
 	}
 
 	public static function getProviderName() : string{
@@ -254,9 +252,6 @@ class LevelDB extends BaseLevelProvider{
 				$db->put(self::ENTRY_FLAT_WORLD_LAYERS, $out); //Add vanilla flatworld layers to allow terrain generation by MCPE to continue seamlessly
 			}
 		}
-
-		$db->close();
-
 	}
 
 	public function saveLevelData(){
@@ -509,6 +504,12 @@ class LevelDB extends BaseLevelProvider{
 	 * @param string        $index
 	 */
 	private function writeTags(array $targets, string $index){
+		foreach($targets as $pos => $target){
+			if($target->closed){
+				unset($targets[$pos]);
+			}
+		}
+
 		if(!empty($targets)){
 			$nbt = new LittleEndianNBTStream();
 			$this->db->put($index, $nbt->write($targets));
@@ -533,6 +534,6 @@ class LevelDB extends BaseLevelProvider{
 	}
 
 	public function close(){
-		$this->db->close();
+		unset($this->db);
 	}
 }

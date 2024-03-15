@@ -44,3 +44,7 @@ Desktop.ini
 /docs/build/
 !/docs/requirements.txt
 .project
+misoft.yml
+start.sh
+bedrock_packs/resource_packs.yml
+pw10_packs/resource_packs.yml
