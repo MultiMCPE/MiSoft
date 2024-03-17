@@ -26,6 +26,7 @@ namespace pocketmine\tile;
 use InvalidArgumentException;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\event\block\SignChangeEvent;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
@@ -87,7 +88,9 @@ class Sign extends Spawnable{
 			return mb_scrub($line, 'UTF-8');
 		}, $this->text);
 
-		$this->waxed = $nbt->getByte(self::TAG_WAXED, 0) !== 0;
+		if($nbt->hasTag(self::TAG_WAXED, ByteTag::class)){
+	    	$this->waxed = $nbt->getByte(self::TAG_WAXED, 0) !== 0;
+		}
 	}
 
 	protected function writeSaveData(CompoundTag $nbt) : void{

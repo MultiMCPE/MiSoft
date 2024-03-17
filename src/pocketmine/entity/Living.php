@@ -667,6 +667,10 @@ abstract class Living extends Entity implements Damageable{
 		}
 	}
 
+	public function onAttack(EntityDamageEvent $source) : void{
+
+	}
+
 	public function attack(EntityDamageEvent $source) : void{
 		if($this->noDamageTicks > 0){
 			$source->setCancelled();

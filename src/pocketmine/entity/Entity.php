@@ -1107,7 +1107,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			$hasUpdate = true;
 		}
 
-		if($this->isOnFire() and $this->level->getWeather()->isRainy()){
+		if($this->isOnFire() and ($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder())){
 			$this->extinguish();
 		}
 
@@ -2299,7 +2299,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->dismountEntity(true);
 		if($this->setPositionAndRotation($pos, $yaw ?? $this->yaw, $pitch ?? $this->pitch)){
 			$this->resetFallDistance();
-			$this->onGround = true;
+			$this->setForceMovementUpdate();
 
 			$this->updateMovement(true);
 

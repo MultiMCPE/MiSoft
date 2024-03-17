@@ -29,6 +29,11 @@ use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Mob;
 use pocketmine\entity\NPC;
+use pocketmine\entity\behavior\FloatBehavior;
+use pocketmine\entity\behavior\LookAtPlayerBehavior;
+use pocketmine\entity\behavior\PanicBehavior;
+use pocketmine\entity\behavior\RandomLookAroundBehavior;
+use pocketmine\entity\behavior\RandomStrollBehavior;
 use pocketmine\inventory\TradeInventory;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
@@ -87,6 +92,14 @@ class Villager extends Mob implements NPC, Ageable{
 
 	public function getName() : string{
 		return "Villager";
+	}
+
+	protected function addBehaviors() : void{
+		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
+		$this->behaviorPool->setBehavior(1, new PanicBehavior($this, 4.0));
+		$this->behaviorPool->setBehavior(2, new RandomStrollBehavior($this, 2.0));
+		$this->behaviorPool->setBehavior(3, new LookAtPlayerBehavior($this, 6.0));
+		$this->behaviorPool->setBehavior(4, new RandomLookAroundBehavior($this));
 	}
 
 	protected function initEntity() : void{

@@ -41,7 +41,7 @@ class SlimeAttackBehavior extends Behavior{
 	public function canStart() : bool{
 		$target = $this->mob->getTargetEntity();
 
-		return $target === null ? false : (!$target->isAlive() ? false : !($target instanceof Player) or !$target->isCreative());
+		return $target === null ? false : (!$target->isAlive() ? false : !($target instanceof Player) or ($target instanceof Player && !$target->isCreative()));
 	}
 
 	public function onStart() : void{

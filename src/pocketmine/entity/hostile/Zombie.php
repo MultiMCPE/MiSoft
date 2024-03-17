@@ -33,6 +33,8 @@ use pocketmine\entity\behavior\RandomStrollBehavior;
 use pocketmine\entity\Monster;
 use pocketmine\entity\passive\Villager;
 use pocketmine\entity\Smite;
+use pocketmine\event\entity\EntityDamageEvent;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\Player;
@@ -83,6 +85,13 @@ class Zombie extends Monster implements Ageable, Smite{
 		return $this->isBaby() ? 12 : 5;
 	}
 
+	public function onAttack(EntityDamageEvent $source) : void{
+		$pk = new ActorEventPacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->event = ActorEventPacket::ARM_SWING;
+		$this->server->broadcastPacket($this->getViewers(), $pk);
+	}
+
 	protected function addBehaviors() : void{
 		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
 		$this->behaviorPool->setBehavior(1, new MeleeAttackBehavior($this, 1.0));
@@ -96,7 +105,7 @@ class Zombie extends Monster implements Ageable, Smite{
 
 	public function entityBaseTick(int $diff = 1) : bool{
 		if(!$this->isOnFire() and $this->level->isDayTime() and !$this->isImmobile()){
-			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !$this->level->getWeather()->isRainy()){
+			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder())){
 				$this->setOnFire(5);
 			}
 		}

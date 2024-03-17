@@ -103,7 +103,7 @@ class Fire extends Flowable{
 		$canSpread = true;
 
 		if(!$down->burnsForever()){
-			if($this->level->getWeather()->isRainy() and
+			if(($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder()) and
 		    	($this->level->canBlockSeeSky($this) or
 			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_EAST)) or
 			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_WEST)) or

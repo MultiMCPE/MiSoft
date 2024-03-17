@@ -24,6 +24,8 @@ declare(strict_types=1);
 namespace pocketmine\entity\behavior;
 
 use pocketmine\entity\Mob;
+use pocketmine\entity\hostile\Zombie;
+use pocketmine\entity\hostile\Husk;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\math\Vector3;
@@ -108,7 +110,8 @@ class MeleeAttackBehavior extends Behavior{
 		$this->attackCooldown = max($this->attackCooldown - 1, 0);
 		if($this->attackCooldown <= 0 && $distanceToPlayer < $this->getAttackReach()){
 			$damage = $this->mob->getAttackDamage();
-			$target->attack(new EntityDamageByEntityEvent($this->mob, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage));
+			$target->attack($event = new EntityDamageByEntityEvent($this->mob, $target, EntityDamageEvent::CAUSE_ENTITY_ATTACK, $damage));
+			$this->mob->onAttack($event);
 			$this->attackCooldown = 20;
 		}
 	}

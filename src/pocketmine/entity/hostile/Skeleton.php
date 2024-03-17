@@ -116,7 +116,7 @@ class Skeleton extends Monster implements RangedAttackerMob, Smite{
 
 	public function entityBaseTick(int $diff = 1) : bool{
 		if(!$this->isOnFire() and $this->level->isDayTime() and !$this->isImmobile()){
-			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !$this->level->getWeather()->isRainy()){
+			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder())){
 				$this->setOnFire(5);
 			}
 		}

@@ -131,6 +131,23 @@ class Slime extends Monster{
 		return Particle::TYPE_SLIME;
 	}
 
+	public function fall(float $fallDistance) : void{
+		$i = $this->getSlimeSize();
+
+		for($j = 0; $j < $i * 8; ++$j){
+			$f = $this->random->nextFloat() * pi() * 2;
+			$f1 = $this->random->nextFloat() * 0.5 + 0.5;
+			$f2 = sin($f) * $i * 0.5 * $f1;
+			$f3 = cos($f) * $i * 0.5 * $f1;
+
+			$this->level->addParticle(new GenericParticle($this->add($f2, 0, $f3), $this->getParticleType()));
+		}
+
+		if($this->makesSoundOnLand()){
+			$this->level->broadcastLevelSoundEvent($this, $this->getSlimeSize() > 1 ? LevelSoundEventPacket::SOUND_SQUISH_BIG : LevelSoundEventPacket::SOUND_SQUISH_SMALL, -1, self::NETWORK_ID);
+		}
+	}
+
 	public function onUpdate(int $currentTick) : bool{
 		$this->squishFactor += ($this->squishAmount - $this->squishFactor) * 0.5;
 		$this->prevSquishFactor = $this->squishFactor;
@@ -141,21 +158,6 @@ class Slime extends Monster{
 
 		if(!$this->isImmobile()){
 			if($this->onGround and !$this->wasOnGround){
-				$i = $this->getSlimeSize();
-
-				for($j = 0; $j < $i * 8; ++$j){
-					$f = $this->random->nextFloat() * pi() * 2;
-					$f1 = $this->random->nextFloat() * 0.5 + 0.5;
-					$f2 = sin($f) * $i * 0.5 * $f1;
-					$f3 = cos($f) * $i * 0.5 * $f1;
-
-					$this->level->addParticle(new GenericParticle($this->add($f2, 0, $f3), $this->getParticleType()));
-				}
-
-				if($this->makesSoundOnLand()){
-					$this->level->broadcastLevelSoundEvent($this, $this->getSlimeSize() > 1 ? LevelSoundEventPacket::SOUND_SQUISH_BIG : LevelSoundEventPacket::SOUND_SQUISH_SMALL, -1, self::NETWORK_ID);
-				}
-
 				$this->squishAmount = -0.5;
 			}elseif(!$this->onGround and $this->wasOnGround){
 				$this->squishAmount = 1.0;

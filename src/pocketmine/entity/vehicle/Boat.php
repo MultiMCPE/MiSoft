@@ -225,7 +225,11 @@ class Boat extends Vehicle{
 			$this->motion->y += 0.007;
 		}
 
-		// TODO: implement riding part
+		$this->move($this->motion->x, $this->motion->y, $this->motion->z); // Move the entity
+
+    	$this->motion->x *= 0.99;
+    	$this->motion->y *= 0.95;
+    	$this->motion->z *= 0.99;
 
 		return parent::onUpdate($currentTick);
 	}
