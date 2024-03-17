@@ -2804,7 +2804,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * 
      * @return bool
      */
-    public function removeBlock(Vector3 $blockVector) : bool{
+  public function removeBlock(Vector3 $blockVector) : bool{
 		$this->doCloseInventory();
 
 		$item = $this->inventory->getItemInHand();
@@ -2840,7 +2840,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		return true;
-    }
+  }
 
 	/**
 	 * Performs a left-click (attack) action on the block.
@@ -3186,16 +3186,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				switch($type){
 					case InventoryTransactionPacket::USE_ITEM_ACTION_CLICK_BLOCK:
 						//TODO: start hack for client spam bug
-						$spamBug = ($this->lastRightClickPos !== null and
-							microtime(true) - $this->lastRightClickTime < 0.1 and //100ms
+						/*$spamBug = ($this->lastRightClickPos !== null and
+							microtime(true) - $this->lastRightClickTime < 0.01 and //10ms
 							$this->lastRightClickPos->distanceSquared($packet->trData->clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
 						);
 						//get rid of continued spam if the player clicks and holds right-click
 						$this->lastRightClickPos = clone $packet->trData->clickPos;
 						$this->lastRightClickTime = microtime(true);
 						if($spamBug){
-							return true;
-						}
+						  return true;
+						}*/
 						//TODO: end hack for client spam bug
 
 						$this->setUsingItem(false);
