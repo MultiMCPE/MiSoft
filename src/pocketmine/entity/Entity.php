@@ -64,6 +64,7 @@ use pocketmine\entity\passive\Squid;
 use pocketmine\entity\passive\Villager;
 use pocketmine\entity\passive\Wolf;
 use pocketmine\entity\projectile\Arrow;
+use pocketmine\entity\projectile\FishingHook;
 use pocketmine\entity\projectile\Egg;
 use pocketmine\entity\projectile\EnderPearl;
 use pocketmine\entity\projectile\ExperienceBottle;
@@ -197,6 +198,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(Spider::class, false, ['Spider', 'minecraft:spider']);
 		Entity::registerEntity(CaveSpider::class, false, ['CaveSpider', 'minecraft:cave_spider']);
 		Entity::registerEntity(Creeper::class, false, ['Creeper', 'minecraft:creeper']);
+		Entity::registerEntity(FishingHook::class, false, ['FishingHook', 'minecraft:fishing_hook']);
 		Entity::registerEntity(LeashKnot::class, false, ['LeashKnot', 'minecraft:leash_knot']);
 		Entity::registerEntity(Human::class, true);
 
