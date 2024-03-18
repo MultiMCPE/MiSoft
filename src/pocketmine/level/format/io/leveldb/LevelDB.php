@@ -504,12 +504,6 @@ class LevelDB extends BaseLevelProvider{
 	 * @param string        $index
 	 */
 	private function writeTags(array $targets, string $index){
-		foreach($targets as $pos => $target){
-			if($target->closed){
-				unset($targets[$pos]);
-			}
-		}
-
 		if(!empty($targets)){
 			$nbt = new LittleEndianNBTStream();
 			$this->db->put($index, $nbt->write($targets));
