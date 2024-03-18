@@ -47,6 +47,8 @@ class MobEffectPacket extends DataPacket{
 	public $particles = true;
 	/** @var int */
 	public $duration = 0;
+	/** @var int */
+	public $tick = 0;
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
@@ -55,6 +57,9 @@ class MobEffectPacket extends DataPacket{
 		$this->amplifier = $this->getVarInt();
 		$this->particles = (($this->get(1) !== "\x00"));
 		$this->duration = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->tick = $this->getLLong();
+		}
 	}
 
 	protected function encodePayload(){
@@ -64,6 +69,9 @@ class MobEffectPacket extends DataPacket{
 		$this->putVarInt($this->amplifier);
 		($this->buffer .= ($this->particles ? "\x01" : "\x00"));
 		$this->putVarInt($this->duration);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->putLLong($this->tick);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

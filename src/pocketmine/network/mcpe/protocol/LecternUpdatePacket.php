@@ -49,7 +49,9 @@ class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
 	    	$this->totalPages = (ord($this->get(1)));
     	}
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->dropBook = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+	    	$this->dropBook = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload() : void{
@@ -58,7 +60,9 @@ class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
 	    	($this->buffer .= chr($this->totalPages));
 		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		($this->buffer .= ($this->dropBook ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+	    	($this->buffer .= ($this->dropBook ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

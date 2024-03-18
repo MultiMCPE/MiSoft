@@ -38,6 +38,8 @@ class ResourcePacksInfoPacket extends DataPacket{
 	/** @var bool */
 	public $mustAccept = false; //if true, forces client to use selected resource packs
 	/** @var bool */
+	public $hasAddons = false;
+	/** @var bool */
 	public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
 	/** @var bool */
 	public $forceServerPacks = false;
@@ -51,6 +53,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->mustAccept = (($this->get(1) !== "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+				$this->hasAddons = (($this->get(1) !== "\x00"));
+			}
 	    	$this->hasScripts = (($this->get(1) !== "\x00"));
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	    $this->forceServerPacks = $this->getBool();
@@ -106,6 +111,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 	protected function encodePayload(){
 		($this->buffer .= ($this->mustAccept ? "\x01" : "\x00"));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+				($this->buffer .= ($this->hasAddons ? "\x01" : "\x00"));
+			}
 	    	($this->buffer .= ($this->hasScripts ? "\x01" : "\x00"));
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	    $this->putBool($this->forceServerPacks);

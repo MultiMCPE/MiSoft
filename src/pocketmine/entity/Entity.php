@@ -1280,6 +1280,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$pk = new SetActorMotionPacket();
 		$pk->entityRuntimeId = $this->id;
 		$pk->motion = $this->getMotion();
+		$pk->tick = 0;
 
 		$this->level->broadcastPacketToViewers($this, $pk);
 	}

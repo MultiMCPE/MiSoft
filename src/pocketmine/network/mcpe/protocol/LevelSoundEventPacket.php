@@ -484,10 +484,33 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_BLOCK_DECORATED_POT_INSERT = 481;
 	public const SOUND_BLOCK_DECORATED_POT_INSERT_FAIL = 482;
 	public const SOUND_CRAFTER_DISABLE_SLOT = 483;
-
+    public const SOUND_TRIAL_SPAWNER_OPEN_SHUTTER = 484;
+	public const SOUND_TRIAL_SPAWNER_EJECT_ITEM = 485;
+	public const SOUND_TRIAL_SPAWNER_DETECT_PLAYER = 486;
+	public const SOUND_TRIAL_SPAWNER_SPAWN_MOB = 487;
+	public const SOUND_TRIAL_SPAWNER_CLOSE_SHUTTER = 488;
+	public const SOUND_TRIAL_SPAWNER_AMBIENT = 489;
 	public const SOUND_BLOCK_COPPER_BULB_TURN_ON = 490;
 	public const SOUND_BLOCK_COPPER_BULB_TURN_OFF = 491;
-    public const SOUND_UNDEFINED = 492;
+    public const SOUND_AMBIENT_IN_AIR = 492;
+	public const SOUND_BREEZE_WIND_CHARGE_BURST = 493;
+	public const SOUND_IMITATE_BREEZE = 494;
+	public const SOUND_MOB_ARMADILLO_BRUSH = 495;
+	public const SOUND_MOB_ARMADILLO_SCUTE_DROP = 496;
+	public const SOUND_ARMOR_EQUIP_WOLF = 497;
+	public const SOUND_ARMOR_UNEQUIP_WOLF = 498;
+	public const SOUND_REFLECT = 499;
+	public const SOUND_VAULT_OPEN_SHUTTER = 500;
+	public const SOUND_VAULT_CLOSE_SHUTTER = 501;
+	public const SOUND_VAULT_EJECT_ITEM = 502;
+	public const SOUND_VAULT_INSERT_ITEM = 503;
+	public const SOUND_VAULT_INSERT_ITEM_FAIL = 504;
+	public const SOUND_VAULT_AMBIENT = 505;
+	public const SOUND_VAULT_ACTIVATE = 506;
+	public const SOUND_VAULT_DEACTIVATE = 507;
+	public const SOUND_HURT_REDUCED = 508;
+	public const SOUND_WIND_CHARGE_BURST = 509;
+    public const SOUND_UNDEFINED = 510;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

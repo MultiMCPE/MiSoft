@@ -34,15 +34,23 @@ class SetActorMotionPacket extends DataPacket{
 	public $entityRuntimeId;
 	/** @var Vector3 */
 	public $motion;
+	/** @var int */
+	public $tick;
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->motion = $this->getVector3();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->tick = $this->getUnsignedVarLong();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putVector3($this->motion);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
+			$this->putUnsignedVarLong($this->tick);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{
