@@ -40,7 +40,6 @@ final class GeneratorManager{
 	 */
 	public static function registerDefaultGenerators() : void{
 		self::addGenerator(Flat::class, "flat");
-		self::addGenerator(VoidGenerator::class, "void");
 		self::addGenerator(Normal::class, "normal");
 		self::addGenerator(Normal::class, "default");
 		self::addGenerator(Nether::class, "hell");

@@ -2227,7 +2227,7 @@ class Server{
 		}
 
 		$this->pluginManager->registerInterface(new PharPluginLoader($this->autoloader));
-		if($this->folderpluginloader){
+		if($this->folderpluginloader === true){
 			$this->pluginManager->registerInterface(new FolderPluginLoader($this->autoloader));
 		}
 		$this->pluginManager->registerInterface(new ScriptPluginLoader());
