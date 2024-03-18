@@ -316,26 +316,28 @@ class NetworkBinaryStream extends BinaryStream{
 		    $nbt = $decodedNBT;
 		}
 
-		//TODO
-		$canPlaceOn = $this->getVarInt();
-		if($canPlaceOn > 128){
-			throw new UnexpectedValueException("Too many canPlaceOn: $canPlaceOn");
-		}
-		for($i = 0; $i < $canPlaceOn; ++$i){
-			$this->getString();
-		}
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_110){
+	    	//TODO
+	    	$canPlaceOn = $this->getVarInt();
+	     	if($canPlaceOn > 128){
+	    		throw new UnexpectedValueException("Too many canPlaceOn: $canPlaceOn");
+	    	}
+	    	for($i = 0; $i < $canPlaceOn; ++$i){
+		    	$this->getString();
+	    	}
 
-		//TODO
-		$canDestroy = $this->getVarInt();
-		if($canDestroy > 128){
-			throw new UnexpectedValueException("Too many canDestroy: $canDestroy");
-		}
-		for($i = 0; $i < $canDestroy; ++$i){
-			$this->getString();
-		}
+	    	//TODO
+		    $canDestroy = $this->getVarInt();
+	    	if($canDestroy > 128){
+		    	throw new UnexpectedValueException("Too many canDestroy: $canDestroy");
+	    	}
+		    for($i = 0; $i < $canDestroy; ++$i){
+		    	$this->getString();
+	    	}
 
-		if($id === ItemIds::SHIELD){
-			$this->getVarLong(); //"blocking tick" (ffs mojang)
+	    	if($id === ItemIds::SHIELD){
+		    	$this->getVarLong(); //"blocking tick" (ffs mojang)
+	    	}
 		}
 
 		if($nbt !== null){
@@ -418,11 +420,13 @@ class NetworkBinaryStream extends BinaryStream{
 			($this->buffer .= (pack("v", 0)));
 		}
 
-		$this->putVarInt(0); //CanPlaceOn entry count (TODO)
-		$this->putVarInt(0); //CanDestroy entry count (TODO)
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_110){
+	    	$this->putVarInt(0); //CanPlaceOn entry count (TODO)
+	    	$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-		if($id === ItemIds::SHIELD){
-			$this->putVarLong(0); //"blocking tick" (ffs mojang)
+	    	if($id === ItemIds::SHIELD){
+		    	$this->putVarLong(0); //"blocking tick" (ffs mojang)
+			}
 		}
 	}
 

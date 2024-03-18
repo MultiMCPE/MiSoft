@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
 use pocketmine\utils\Binary;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds100;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds105;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds110;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds130;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds280;
@@ -91,7 +93,9 @@ class PacketPool {
         ProtocolInfo::PROTOCOL_310 => PacketsIds310::class,
         ProtocolInfo::PROTOCOL_280 => PacketsIds280::class,
         ProtocolInfo::PROTOCOL_130 => PacketsIds130::class,
-        ProtocolInfo::PROTOCOL_110 => PacketsIds110::class
+        ProtocolInfo::PROTOCOL_110 => PacketsIds110::class,
+		ProtocolInfo::PROTOCOL_105 => PacketsIds105::class,
+		ProtocolInfo::PROTOCOL_100 => PacketsIds100::class
     ];
 
 	/** @var SplFixedArray<int>[] */
@@ -336,6 +340,8 @@ class PacketPool {
 		self::registerPacket(new ContainerSetContentPacket());
 		self::registerPacket(new ContainerSetSlotPacket());
 		self::registerPacket(new CommandStepPacket());
+		// 1.0
+		self::registerPacket(new OldBatchPacket());
 	}
 
 	/**

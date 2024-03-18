@@ -51,9 +51,11 @@ class AddItemActorPacket extends DataPacket{
 		$this->item = $this->getSlot($this->getProtocol());
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->metadata = $this->getEntityMetadata($this->getProtocol());
-		if ($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	$this->isFromFishing = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->metadata = $this->getEntityMetadata($this->getProtocol());
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	        	$this->isFromFishing = (($this->get(1) !== "\x00"));
+			}
 		}
 	}
 
@@ -63,9 +65,11 @@ class AddItemActorPacket extends DataPacket{
 		$this->putSlot($this->item, $this->getProtocol());
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-		$this->putEntityMetadata($this->metadata, $this->getProtocol());
-		if ($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200) {
-	    	($this->buffer .= ($this->isFromFishing ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->putEntityMetadata($this->metadata, $this->getProtocol());
+	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	        	($this->buffer .= ($this->isFromFishing ? "\x01" : "\x00"));
+			}
 		}
 	}
 

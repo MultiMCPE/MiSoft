@@ -240,7 +240,9 @@ class StartGamePacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->playerGamemode = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->playerGamemode = $this->getVarInt();
+		}
 
 		$this->playerPosition = $this->getVector3();
 
@@ -476,7 +478,9 @@ class StartGamePacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityUniqueId($this->entityUniqueId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putVarInt($this->playerGamemode);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    $this->putVarInt($this->playerGamemode);
+		}
 
 		$this->putVector3($this->playerPosition);
 

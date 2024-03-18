@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
 
 class ItemFrameDropItemPacket extends DataPacket{
@@ -35,13 +36,21 @@ class ItemFrameDropItemPacket extends DataPacket{
 	public $y;
 	/** @var int */
 	public $z;
+	/** @var Item */
+	public $item;
 
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_101){
+			$this->item = $this->getSlot($this->getProtocol());
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_101){
+			$this->putSlot($this->item, $this->getProtocol());
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -39,15 +39,23 @@ class ActorFallPacket extends DataPacket{
 	public $isInVoid;
 
 	protected function decodePayload(){
-		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->fallDistance = ((unpack("g", $this->get(4))[1]));
-		$this->isInVoid = (($this->get(1) !== "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
+	    	$this->fallDistance = ((unpack("g", $this->get(4))[1]));
+	    	$this->isInVoid = (($this->get(1) !== "\x00"));
+		}else{
+			$this->fallDistance = ((unpack("g", $this->get(4))[1]));
+		}
 	}
 
 	protected function encodePayload(){
-		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= (pack("g", $this->fallDistance)));
-		($this->buffer .= ($this->isInVoid ? "\x01" : "\x00"));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    $this->putEntityRuntimeId($this->entityRuntimeId);
+		    ($this->buffer .= (pack("g", $this->fallDistance)));
+		    ($this->buffer .= ($this->isInVoid ? "\x01" : "\x00"));
+		}else{
+			($this->buffer .= (pack("g", $this->fallDistance)));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

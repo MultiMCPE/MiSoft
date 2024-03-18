@@ -70,13 +70,15 @@ class MovePlayerPacket extends DataPacket{
 		$this->headYaw = ((unpack("g", $this->get(4))[1]));
 		$this->mode = (ord($this->get(1)));
 		$this->onGround = (($this->get(1) !== "\x00"));
-		$this->ridingEid = $this->getEntityRuntimeId();
-		if($this->mode === MovePlayerPacket::MODE_TELEPORT){
-			$this->teleportCause = ((unpack("V", $this->get(4))[1] << 32 >> 32));
-			$this->teleportItem = ((unpack("V", $this->get(4))[1] << 32 >> 32));
-		}
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		    $this->tick = $this->getUnsignedVarLong();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->ridingEid = $this->getEntityRuntimeId();
+		    if($this->mode === MovePlayerPacket::MODE_TELEPORT){
+		    	$this->teleportCause = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+		    	$this->teleportItem = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+	    	}
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		        $this->tick = $this->getUnsignedVarLong();
+			}
 		}
 	}
 
@@ -88,13 +90,15 @@ class MovePlayerPacket extends DataPacket{
 		($this->buffer .= (pack("g", $this->headYaw))); //TODO
 		($this->buffer .= chr($this->mode));
 		($this->buffer .= ($this->onGround ? "\x01" : "\x00"));
-		$this->putEntityRuntimeId($this->ridingEid);
-		if($this->mode === MovePlayerPacket::MODE_TELEPORT){
-			($this->buffer .= (pack("V", $this->teleportCause)));
-			($this->buffer .= (pack("V", $this->teleportItem)));
-		}
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		    $this->putUnsignedVarLong($this->tick);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->putEntityRuntimeId($this->ridingEid);
+	    	if($this->mode === MovePlayerPacket::MODE_TELEPORT){
+		    	($this->buffer .= (pack("V", $this->teleportCause)));
+		    	($this->buffer .= (pack("V", $this->teleportItem)));
+	    	}
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		        $this->putUnsignedVarLong($this->tick);
+			}
 		}
 	}
 

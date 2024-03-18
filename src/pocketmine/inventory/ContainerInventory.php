@@ -43,6 +43,7 @@ abstract class ContainerInventory extends BaseInventory{
 		$pk = new ContainerOpenPacket();
 		$pk->windowId = $who->getWindowId($this);
 		$pk->type = $this->getNetworkType();
+		$pk->slots = $this->getSize();
 		$holder = $this->getHolder();
 
 		$pk->x = $pk->y = $pk->z = 0;

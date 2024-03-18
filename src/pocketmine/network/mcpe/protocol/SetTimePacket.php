@@ -30,13 +30,21 @@ class SetTimePacket extends DataPacket{
 
 	/** @var int */
 	public $time;
+	/** @var bool */
+	public $started = true;
 
 	protected function decodePayload(){
 		$this->time = $this->getVarInt();
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
+			$this->started = (($this->get(1) !== "\x00"));
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->time);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
+			($this->buffer .= ($this->started ? "\x01" : "\x00"));
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -70,7 +70,7 @@ final class TextPacketTypeIds{
             "TYPE_ANNOUNCEMENT" => 8,
             "TYPE_JSON" => 9
         ],
-        ProtocolInfo::PROTOCOL_110 => [
+        ProtocolInfo::PROTOCOL_100 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,

@@ -45,7 +45,7 @@ class DisconnectPacket extends DataPacket{
 			$this->reason = $this->getVarInt();
 		}
 		$this->hideDisconnectionScreen = (($this->get(1) !== "\x00"));
-		if(!$this->hideDisconnectionScreen){
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110 || !$this->hideDisconnectionScreen){
 			$this->message = $this->getString();
 		}
 	}
@@ -55,7 +55,7 @@ class DisconnectPacket extends DataPacket{
 			$this->putVarInt($this->reason);
 		}
 		($this->buffer .= ($this->hideDisconnectionScreen ? "\x01" : "\x00"));
-		if(!$this->hideDisconnectionScreen){
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110 || !$this->hideDisconnectionScreen){
 			$this->putString($this->message);
 		}
 	}
