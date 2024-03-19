@@ -2830,7 +2830,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * 
      * @return bool
      */
-    public function removeBlock(Vector3 $blockVector) : bool{
+  public function removeBlock(Vector3 $blockVector) : bool{
+    if($this->isSpectator()){
+      return true;
+    }
 		$this->doCloseInventory();
 
 		$item = $this->inventory->getItemInHand();
@@ -4002,7 +4005,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleDropItem(DropItemPacket $packet) : bool{
-		if($this->spawned === false or !$this->isAlive()){
+		if($this->spawned === false or !$this->isAlive() or $this->isSpectator()){
 			return true;
 		}
 
