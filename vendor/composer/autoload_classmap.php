@@ -805,6 +805,7 @@ return array(
     'pocketmine\\level\\format\\io\\region\\RegionLoader' => $baseDir . '/src/pocketmine/level/format/io/region/RegionLoader.php',
     'pocketmine\\level\\format\\io\\region\\RegionLocationTableEntry' => $baseDir . '/src/pocketmine/level/format/io/region/RegionLocationTableEntry.php',
     'pocketmine\\level\\generator\\Flat' => $baseDir . '/src/pocketmine/level/generator/Flat.php',
+    'pocketmine\\level\\generator\\VoidGenerator' => $baseDir . '/src/pocketmine/level/generator/VoidGenerator.php',
     'pocketmine\\level\\generator\\Generator' => $baseDir . '/src/pocketmine/level/generator/Generator.php',
     'pocketmine\\level\\generator\\GeneratorManager' => $baseDir . '/src/pocketmine/level/generator/GeneratorManager.php',
     'pocketmine\\level\\generator\\GeneratorRegisterTask' => $baseDir . '/src/pocketmine/level/generator/GeneratorRegisterTask.php',
