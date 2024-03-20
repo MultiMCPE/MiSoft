@@ -1,20 +1,23 @@
 <?php
 
-/**
+/*
  *
- *      ___                                          _
- *    /   | ____ ___  ______ _____ ___  ____ ______(_)___  ___
- *   / /| |/ __ `/ / / / __ `/ __ `__ \/ __ `/ ___/ / __ \/ _ \
- *  / ___ / /_/ / /_/ / /_/ / / / / / / /_/ / /  / / / / /  __/
- * /_/  |_\__, /\__,_/\__,_/_/ /_/ /_/\__,_/_/  /_/_/ /_/\___/
- *          /_/
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
  *
- * @author - MaruselPlay
- * @link https://vk.com/maruselplay
- * @link https://github.com/MaruselPlay
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
  *
  *
- */
+*/
 
 namespace pocketmine\level\generator;
 
@@ -23,21 +26,29 @@ use pocketmine\level\format\Chunk;
 use pocketmine\math\Vector3;
 
 class VoidGenerator extends Generator{
+	/** @var Chunk */
+	private $chunk;
+	/** @var ?Chunk */
+	private $emptyChunk = null;
 
-	private Chunk $chunk;
-	private ?Chunk $emptyChunk = null;
-
-	public function getSettings(): array{
+	public function getSettings() : array{
 		return [];
 	}
 
-	public function getName(): string{
+	public function getName() : string{
 		return "void";
 	}
 
-	public function __construct(array $settings = []){}
+	/**
+	 * @param array $options
+	 *
+	 * @throws InvalidGeneratorOptionsException
+	 */
+	public function __construct(array $settings = []){
 
-	public function generateChunk(int $chunkX, int $chunkZ): void{
+	}
+
+	public function generateChunk(int $chunkX, int $chunkZ) : void{
 		if($this->emptyChunk === null){
 			$this->chunk = clone $this->level->getChunk($chunkX, $chunkZ);
 			$this->chunk->setGenerated();
@@ -67,9 +78,11 @@ class VoidGenerator extends Generator{
 		$this->level->setChunk($chunkX, $chunkZ, $chunk);
 	}
 
-	public function populateChunk(int $chunkX, int $chunkZ) : void{}
+	public function populateChunk(int $chunkX, int $chunkZ) : void{
 
-	public function getSpawn(): Vector3{
+	}
+
+	public function getSpawn() : Vector3{
 		return new Vector3(128, 72, 128);
 	}
 }
