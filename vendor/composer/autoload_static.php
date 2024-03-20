@@ -879,6 +879,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\level\\format\\io\\region\\RegionLoader' => __DIR__ . '/../..' . '/src/pocketmine/level/format/io/region/RegionLoader.php',
         'pocketmine\\level\\format\\io\\region\\RegionLocationTableEntry' => __DIR__ . '/../..' . '/src/pocketmine/level/format/io/region/RegionLocationTableEntry.php',
         'pocketmine\\level\\generator\\Flat' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/Flat.php',
+        'pocketmine\\level\\generator\\VoidGenerator' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/VoidGenerator.php',
         'pocketmine\\level\\generator\\Generator' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/Generator.php',
         'pocketmine\\level\\generator\\GeneratorManager' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/GeneratorManager.php',
         'pocketmine\\level\\generator\\GeneratorRegisterTask' => __DIR__ . '/../..' . '/src/pocketmine/level/generator/GeneratorRegisterTask.php',
