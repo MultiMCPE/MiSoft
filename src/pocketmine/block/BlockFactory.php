@@ -185,8 +185,7 @@ class BlockFactory{
 		self::registerBlock(new NetherWartPlant());
 		self::registerBlock(new EnchantingTable());
 		self::registerBlock(new BrewingStand());
-		//TODO: CAULDRON_BLOCK
-		//TODO: END_PORTAL
+		self::registerBlock(new Cauldron());
 		self::registerBlock(new EndPortalFrame());
 		self::registerBlock(new EndStone());
 		//TODO: DRAGON_EGG
@@ -205,7 +204,7 @@ class BlockFactory{
 		self::registerBlock(new WoodenStairs(Block::BIRCH_STAIRS, 0, "Birch Stairs"));
 		self::registerBlock(new WoodenStairs(Block::JUNGLE_STAIRS, 0, "Jungle Stairs"));
 		//TODO: COMMAND_BLOCK
-		//TODO: BEACON
+		self::registerBlock(new Beacon());
 		self::registerBlock(new CobblestoneWall());
 		self::registerBlock(new FlowerPot());
 		self::registerBlock(new Carrot());

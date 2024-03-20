@@ -100,6 +100,7 @@ use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
 use pocketmine\timings\TimingsHandler;
 use pocketmine\updater\AutoUpdater;
+use pocketmine\utils\Color;
 use pocketmine\utils\Config;
 use pocketmine\utils\Internet;
 use pocketmine\utils\MainLogger;
@@ -1812,6 +1813,7 @@ class Server{
 			ItemFactory::init();
 			Item::initCreativeItems();
 			Biome::init();
+			Color::initDyeColors();
 
 			LevelProviderManager::init();
 			if(extension_loaded("leveldb")){
