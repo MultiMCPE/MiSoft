@@ -77,6 +77,9 @@ class OldPlayerInventory extends PlayerInventory{
 		$pk->windowid = ContainerIds::CREATIVE;
 		if($this->getHolder()->getGamemode() === Player::CREATIVE){
 			foreach(Item::getCreativeItems() as $i => $item){
+				if($item->getId() === Item::FIREWORKS){
+					continue;
+				}
 				$pk->slots[$i] = clone $item;
 			}
 		}

@@ -49,6 +49,7 @@ use pocketmine\entity\object\Lightning;
 use pocketmine\entity\object\EnderCrystal;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\FallingBlock;
+use pocketmine\entity\object\FireworksRocket;
 use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\object\Painting;
 use pocketmine\entity\object\PaintingMotive;
@@ -181,6 +182,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(MagmaCube::class, false, ['MagmaCube', 'minecraft:magma_cube']);
 		Entity::registerEntity(Boat::class, false, ['Boat', 'minecraft:boat']);
 		Entity::registerEntity(Minecart::class, false, ['Minecart', 'minecraft:minecart']);
+		Entity::registerEntity(FireworksRocket::class, false, ['FireworksRocket', 'minecraft:fireworks_rocket']);
 		Entity::registerEntity(Blaze::class, false, ['Blaze', 'minecraft:blaze']);
 		Entity::registerEntity(Squid::class, false, ['Squid', 'minecraft:squid']);
 		Entity::registerEntity(Villager::class, false, ['Villager', 'minecraft:villager']);
