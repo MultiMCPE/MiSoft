@@ -96,6 +96,7 @@ abstract class Tile extends Position{
 	public static function init(){
 		self::registerTile(Banner::class, [self::BANNER, "minecraft:banner"]);
 		self::registerTile(Bed::class, [self::BED, "minecraft:bed"]);
+		self::registerTile(BrewingStand::class, [self::BREWING_STAND, "minecraft:brewing_stand"]);
 		self::registerTile(Chest::class, [self::CHEST, "minecraft:chest"]);
 		self::registerTile(Cauldron::class, [self::CAULDRON, "minecraft:cauldron"]);
 		self::registerTile(EnchantTable::class, [self::ENCHANT_TABLE, "minecraft:enchanting_table"]);

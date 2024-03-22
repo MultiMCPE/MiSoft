@@ -25,6 +25,10 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
+use pocketmine\block\Block;
+use pocketmine\math\Vector3;
+use pocketmine\Player;
+use pocketmine\tile\BrewingStand as BrewingStandTile;
 
 class BrewingStand extends Transparent{
 
@@ -56,5 +60,45 @@ class BrewingStand extends Transparent{
 		return 0;
 	}
 
-	//TODO
+	public function getLightLevel() : int{
+		return 1;
+	}
+
+	public function getBlastResistance() : float{
+		return 2.5;
+	}
+
+	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
+		$parent = parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+		if(!$blockReplace->getSide(Vector3::SIDE_DOWN)->isTransparent()){
+			$nbt = BrewingStandTile::createNBT($this, $face, $item, $player);
+			$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
+
+			if($item->hasCustomName()){
+				$nbt->setString("CustomName", $item->getCustomName());
+			}
+			new BrewingStandTile($this->getLevel(), $nbt);
+		}
+
+		return $parent;
+	}
+
+	public function onActivate(Item $item, Player $player = null): bool{
+		$parent = parent::onActivate($item, $player);
+		$tile = $player->getLevel()->getTile($this);
+		if($tile instanceof BrewingStandTile){
+			$player->addWindow($tile->getInventory());
+		}else{
+			$nbt = BrewingStandTile::createNBT($this, $face, $item, $player);
+			$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
+
+			if($item->hasCustomName()){
+				$nbt->setString("CustomName", $item->getCustomName());
+			}
+			$tile = new BrewingStandTile($this->getLevel(), $nbt);
+			$player->addWindow($tile->getInventory());
+		}
+
+		return $parent;
+	}
 }
