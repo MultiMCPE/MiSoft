@@ -196,6 +196,7 @@ use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
+use pocketmine\network\mcpe\PacketRateLimiter;
 use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
@@ -231,6 +232,7 @@ use function implode;
 use function in_array;
 use function is_int;
 use function is_bool;
+use function is_countable;
 use function is_object;
 use function is_string;
 use function json_encode;
@@ -283,6 +285,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * is a useful heuristic to filter out oversized messages.
 	 */
 	private const MAX_CHAT_BYTE_LENGTH = self::MAX_CHAT_CHAR_LENGTH * 4;
+
+	private const INCOMING_PACKET_BATCH_PER_TICK = 2; //usually max 1 per tick, but transactions arrive separately
+	private const INCOMING_PACKET_BATCH_BUFFER_TICKS = 100; //enough to account for a 5-second lag spike
+
+	private const INCOMING_GAME_PACKETS_PER_TICK = 5;
+	private const INCOMING_GAME_PACKETS_BUFFER_TICKS = 200;
+
+    private const MAX_INPUT_JSON = 15;
 
 	/**
 	 * Validates the given username.
@@ -345,6 +355,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/** @var bool */
 	private $resourcePacksDone = false;
+
+	/** @var bool */
+	private $haveAllPacks = false;
 
 	/** @var bool */
 	public $spawned = false;
@@ -497,6 +510,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/** @var bool */
 	protected $awaitingEncryptionHandshake = false;
+
+	/** @var PacketRateLimiter */
+	protected $packetBatchLimiter;
+	/** @var PacketRateLimiter */
+	protected $gamePacketLimiter;
 
 	/**
 	 * @return TranslationContainer|string
@@ -925,6 +943,23 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->allowMovementCheats = (bool) $this->server->getProperty("player.anti-cheat.allow-movement-cheats", false);
 
 		$this->sessionAdapter = new PlayerNetworkSessionAdapter($this->server, $this);
+
+		$this->packetBatchLimiter = new PacketRateLimiter("Packet Batches", self::INCOMING_PACKET_BATCH_PER_TICK, self::INCOMING_PACKET_BATCH_BUFFER_TICKS);
+		$this->gamePacketLimiter = new PacketRateLimiter("Game Packets", self::INCOMING_GAME_PACKETS_PER_TICK, self::INCOMING_GAME_PACKETS_BUFFER_TICKS);
+	}
+
+    /**
+     * @return PacketRateLimiter
+     */
+    public function getPacketBatchLimiter() : PacketRateLimiter{
+		return $this->packetBatchLimiter;
+	}
+
+    /**
+     * @return PacketRateLimiter
+     */
+    public function getGamePacketLimiter() : PacketRateLimiter{
+		return $this->gamePacketLimiter;
 	}
 
     /**
@@ -2320,6 +2355,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
+        if((isset($packet->clientData["DeviceModel"]) ? $packet->clientData["DeviceModel"] : "") === "Asus xyefon 4"){
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.invalidSession", ["%pocketmine.disconnect.invalidSession.badSignature"]));
+			
+            return true;
+        }
+        
+        if((isset($packet->clientData["ServerAddress"]) ? $packet->clientData["ServerAddress"] : "") === "okda.net:19132"){
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.invalidSession", ["%pocketmine.disconnect.invalidSession.badSignature"]));
+
+            return true;
+        }
+        
+        if((UUID::fromString($packet->clientUUID)->getVersion()) !== 3){
+			$this->close("", $this->server->getLanguage()->translateString("pocketmine.disconnect.invalidSession", ["%pocketmine.disconnect.invalidSession.badSignature"]));
+
+            return true;
+        }
+
         $this->protocol = ProtocolConvertor::convertProtocol($packet->protocol);
         $this->originalProtocol = $packet->protocol;
         $this->chunkProtocol = ProtocolConvertor::convertChunkProtocol($this->protocol);
@@ -2676,6 +2729,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				break;
 			case ResourcePackClientResponsePacket::STATUS_HAVE_ALL_PACKS:
+				$this->haveAllPacks = true;
 				$pk = new ResourcePackStackPacket();
 				$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 				$pk->resourcePackStack = $manager->getResourceStack();
@@ -2687,8 +2741,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->dataPacket($pk);
 				break;
 			case ResourcePackClientResponsePacket::STATUS_COMPLETED:
-				$this->resourcePacksDone = true;
-				$this->completeLoginSequence();
+				if($this->haveAllPacks){
+			    	$this->resourcePacksDone = true;
+			    	$this->completeLoginSequence();
+				}
 				break;
 			default:
 				return false;
@@ -2961,6 +3017,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!$target->isAlive()){
 			return true;
 		}
+
 		if($target instanceof ItemEntity or $target instanceof Arrow){
 			$this->kick("Attempting to attack an invalid entity");
 			$this->server->getLogger()->warning($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidEntity", [$this->getName()]));
@@ -3046,6 +3103,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$commandText = $packet->command;
 		if($packet->inputJson !== null){
+			if(is_countable($packet->inputJson)){
+				if(count($packet->inputJson) > self::MAX_INPUT_JSON){
+					throw new InvalidArgumentException("Too many inputJson in CommandStepPacket");
+				}
+			}
 			foreach($packet->inputJson as $arg){ //command ordering will be an issue
 				if(!is_object($arg)) //anti bot
 			    	$commandText .= " " . $arg;
@@ -4169,20 +4231,20 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
         if($packet->slot < 0){
-            throw new InvalidArgumentException("Slot " . $packet->slot . " is invalid");
+            return false;
         }
 
         switch($packet->windowid){
             case ContainerIds::INVENTORY:
                 if($packet->slot >= $this->inventory->getSize()){
-                    throw new InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                    return false;
                 }
 
                 $transaction = new Transaction($this->inventory, $packet->slot, $packet->item);
                 break;
             case ContainerIds::ARMOR:
                 if($packet->slot >= 4){
-                    throw new InvalidArgumentException("Slot " . $packet->slot . " out of range");
+                    return false;
                 }
 
                 $transaction = new Transaction($this->armorInventory, $packet->slot, $packet->item);
@@ -4193,7 +4255,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             default:
                 $inventory = $this->getWindow($packet->windowid);
                 if(!($inventory instanceof Inventory)){
-                    throw new InvalidArgumentException("Inventory " . $packet->windowid . " not founded");
+                    return false;
                 }
 
                 $transaction = new Transaction($inventory, $packet->slot, $packet->item);

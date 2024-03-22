@@ -356,6 +356,15 @@ class Server{
 	private $advancedConfig = null;
 
 	/** @@var bool */
+	private $autoKillThreadEnabled = true;
+	/** @@var int */
+	private $autoKillTimeout = 10;
+    /** @var AutoKillThread */
+	private $autoKillThread;
+    /** @var AutoKillNotifier */
+	private $autoKillNotifier;
+
+	/** @@var bool */
 	public $weatherEnabled = true;
 	/** @@var int */
 	public $weatherRandomDurationMin = 6000;
@@ -1833,6 +1842,15 @@ class Server{
 
 			$this->bedrockResourcePacksProtocol = (int) $this->getProperty("bedrock-resource-packs-protocol", ProtocolInfo::PROTOCOL_370);
 
+			if($this->autoKillThreadEnabled){
+				$this->logger->info("Loading AutoKillThread...");
+	        	$this->autoKillNotifier = new SleeperNotifier();
+	        	$this->tickSleeper->addNotifier($this->autoKillNotifier, function() : void{
+		        	$this->handleNotifications();
+	        	});
+	        	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(PTHREADS_INHERIT_NONE);
+			}
+
 			$this->pluginManager = new PluginManager($this, $this->commandMap, ((bool) $this->getProperty("plugins.legacy-data-dir", true)) ? null : $this->getDataPath() . "plugin_data" . DIRECTORY_SEPARATOR);
 			$this->profilingTickRate = (float) $this->getProperty("settings.profile-report-trigger", 20);
 			$this->pluginManager->registerInterface(new PharPluginLoader($this->autoloader));
@@ -1926,6 +1944,9 @@ class Server{
 	}
 
 	public function loadAdvancedConfig() : void{
+		$this->autoKillThreadEnabled = $this->getAdvancedProperty("kill-thread.enabled", true);
+		$this->autoKillTimeout = $this->getAdvancedProperty("kill-thread.timeout", 10);
+
 		$this->weatherEnabled = $this->getAdvancedProperty("level.weather", true);
 		$this->weatherRandomDurationMin = $this->getAdvancedProperty("level.weather-random-duration-min", 6000);
 		$this->weatherRandomDurationMax = $this->getAdvancedProperty("level.weather-random-duration-max", 12000);
@@ -1944,6 +1965,10 @@ class Server{
 		$this->folderpluginloader = $this->getAdvancedProperty("developer.folder-plugin-loader", false);
 
 		$this->mobAiEnabled = $this->getAdvancedProperty("mobs.enable-mob-ai", false);
+	}
+
+	public function handleNotifications() : void{
+		$this->autoKillThread->isResponded = true;
 	}
 
 	/**
@@ -2234,6 +2259,21 @@ class Server{
 		}
 		$this->pluginManager->registerInterface(new ScriptPluginLoader());
 		$this->pluginManager->loadPlugins($this->pluginPath);
+		$this->logger->info("Reloading AutoKillThread...");
+		if($this->autoKillThreadEnabled){
+			if($this->autoKillThread === null){
+		    	$this->autoKillNotifier = new SleeperNotifier();
+		    	$this->tickSleeper->addNotifier($this->autoKillNotifier, function() : void{
+			    	$this->handleNotifications();
+		    	});
+		    	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(PTHREADS_INHERIT_NONE);
+			}
+		}elseif($this->autoKillThread !== null){
+			$this->tickSleeper->removeNotifier($this->autoKillNotifier);
+			$this->autoKillNotifier = null;
+			$this->autoKillThread->quit();
+			$this->autoKillThread = null;
+		}
 		$this->enablePlugins(PluginLoadOrder::STARTUP);
 		$this->enablePlugins(PluginLoadOrder::POSTWORLD);
 		TimingsHandler::reload();
@@ -2312,6 +2352,16 @@ class Server{
 					$interface->shutdown();
 					$this->network->unregisterInterface($interface);
 				}
+			}
+
+			$this->getLogger()->debug("Stopping auto kill notifier");
+			if($this->autoKillNotifier !== null){
+			    $this->tickSleeper->removeNotifier($this->autoKillNotifier);
+			}
+
+			$this->getLogger()->debug("Stopping auto kill thread");
+			if($this->autoKillThread !== null){
+		    	$this->autoKillThread->quit();
 			}
 		}catch(\Throwable $e){
 			$this->logger->logException($e);

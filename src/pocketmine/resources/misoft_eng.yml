@@ -1,5 +1,11 @@
 #MiSoft Advanced Configuration File
 
+kill-thread:
+ #Set if automatic shutdown of the server is enabled when it freezes (may be useful when attacking the server)
+ enabled: true
+ #Select how many seconds after the server freezes will be disabled
+ timeout: 10
+
 level:
  #Set if weather is enabled (rain may cause lag to older devices)
  weather: true

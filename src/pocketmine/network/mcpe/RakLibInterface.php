@@ -179,6 +179,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			$address = $player->getAddress();
 			try{
 				if($packet->buffer !== ""){
+					$player->getPacketBatchLimiter()->decrement();
+
 					$cipher = $player->getCipher();
 					$buffer = substr($packet->buffer, 1);
 					if($cipher !== null) {
