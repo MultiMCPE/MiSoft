@@ -66,6 +66,7 @@ abstract class Tile extends Position{
 	public const FLOWER_POT = "FlowerPot";
 	public const FURNACE = "Furnace";
 	public const HOPPER = "Hopper";
+	public const NOTE_BLOCK = "NoteBlock";
 	public const ITEM_FRAME = "ItemFrame";
 	public const MOB_SPAWNER = "MobSpawner";
 	public const SIGN = "Sign";
@@ -105,6 +106,7 @@ abstract class Tile extends Position{
 		self::registerTile(ItemFrame::class, [self::ITEM_FRAME]); //this is an entity in PC
 		self::registerTile(Sign::class, [self::SIGN, "minecraft:sign"]);
 		self::registerTile(Skull::class, [self::SKULL, "minecraft:skull"]);
+		self::registerTile(NoteBlock::class, [self::NOTE_BLOCK, "minecraft:noteblock"]);
 		self::registerTile(MobSpawner::class, [self::MOB_SPAWNER, "minecraft:mob_spawner"]);
 		self::registerTile(Beacon::class, [self::BEACON, "minecraft:beacon"]);
 		self::registerTile(ShulkerBox::class, [self::SHULKER_BOX, "minecraft:shulker_box"]);
