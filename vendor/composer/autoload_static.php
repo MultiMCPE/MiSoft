@@ -428,6 +428,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\command\\defaults\\VanillaCommand' => __DIR__ . '/../..' . '/src/pocketmine/command/defaults/VanillaCommand.php',
         'pocketmine\\command\\defaults\\VersionCommand' => __DIR__ . '/../..' . '/src/pocketmine/command/defaults/VersionCommand.php',
         'pocketmine\\command\\defaults\\WhitelistCommand' => __DIR__ . '/../..' . '/src/pocketmine/command/defaults/WhitelistCommand.php',
+        'pocketmine\\command\\defaults\\WeatherCommand' => __DIR__ . '/../..' . '/src/pocketmine/command/defaults/WeatherCommand.php',
         'pocketmine\\command\\utils\\CommandException' => __DIR__ . '/../..' . '/src/pocketmine/command/utils/CommandException.php',
         'pocketmine\\command\\utils\\InvalidCommandSyntaxException' => __DIR__ . '/../..' . '/src/pocketmine/command/utils/InvalidCommandSyntaxException.php',
         'pocketmine\\entity\\Ageable' => __DIR__ . '/../..' . '/src/pocketmine/entity/Ageable.php',

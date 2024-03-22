@@ -357,6 +357,7 @@ return array(
     'pocketmine\\command\\defaults\\VanillaCommand' => $baseDir . '/src/pocketmine/command/defaults/VanillaCommand.php',
     'pocketmine\\command\\defaults\\VersionCommand' => $baseDir . '/src/pocketmine/command/defaults/VersionCommand.php',
     'pocketmine\\command\\defaults\\WhitelistCommand' => $baseDir . '/src/pocketmine/command/defaults/WhitelistCommand.php',
+    'pocketmine\\command\\defaults\\WeatherCommand' => $baseDir . '/src/pocketmine/command/defaults/WeatherCommand.php',
     'pocketmine\\command\\utils\\CommandException' => $baseDir . '/src/pocketmine/command/utils/CommandException.php',
     'pocketmine\\command\\utils\\InvalidCommandSyntaxException' => $baseDir . '/src/pocketmine/command/utils/InvalidCommandSyntaxException.php',
     'pocketmine\\entity\\Ageable' => $baseDir . '/src/pocketmine/entity/Ageable.php',
