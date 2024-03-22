@@ -71,6 +71,8 @@ use pocketmine\event\player\PlayerPreLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\event\player\PlayerToggleFlightEvent;
+use pocketmine\event\player\PlayerToggleGlideEvent;
+use pocketmine\event\player\PlayerToggleSwimEvent;
 use pocketmine\event\player\PlayerToggleSneakEvent;
 use pocketmine\event\player\PlayerToggleSprintEvent;
 use pocketmine\event\player\PlayerTransferEvent;
@@ -1523,6 +1525,36 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 	}
 
+	public function setSneaking(bool $value = true) : void{
+		parent::setSneaking($value);
+
+		if($value){
+			$this->updateBoundingBox(1.65, 0.6);
+		}else{
+			$this->updateBoundingBox(1.8, 0.6);
+		}
+	}
+
+	public function setGliding(bool $value = true) : void{
+		parent::setGliding($value);
+
+		if($value){
+			$this->updateBoundingBox(0.6, 0.6);
+		}else{
+			$this->updateBoundingBox(1.8, 0.6);
+		}
+	}
+
+	public function setSwimming(bool $value = true) : void{
+		parent::setSwimming($value);
+
+		if($value){
+			$this->updateBoundingBox(0.6, 0.6);
+		}else{
+			$this->updateBoundingBox(1.8, 0.6);
+		}
+	}
+
 	/**
 	 * @param string $achievementId
 	 *
@@ -1949,11 +1981,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$this->broadcastMovement();
 
 					$distance = sqrt((($from->x - $to->x) ** 2) + (($from->z - $to->z) ** 2));
-					//TODO: check swimming (adds 0.015 exhaustion in MCPE)
 					if($this->isSprinting()){
 						$this->exhaust(0.1 * $distance, PlayerExhaustEvent::CAUSE_SPRINTING);
+					}elseif($this->isSwimming()){
+						$this->exhaust(0.015 * $distance, PlayerExhaustEvent::CAUSE_SWIMMING);
 					}else{
 						$this->exhaust(0.01 * $distance, PlayerExhaustEvent::CAUSE_WALKING);
+					}
+
+					if($this->isOnGround() && $this->isGliding()){
+						$this->toggleGlide(false);
 					}
 				}
 			}
@@ -3905,8 +3942,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->toggleSneak(false);
 				return true;
 			case PlayerActionPacket::ACTION_START_GLIDE:
+				$this->toggleGlide(true);
+				break;
 			case PlayerActionPacket::ACTION_STOP_GLIDE:
-				break; //TODO
+				$this->toggleGlide(false);
+				break;
 			case PlayerActionPacket::ACTION_CONTINUE_BREAK:
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);
@@ -3916,9 +3956,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				//TODO: destroy-progress level event
 				break;
 			case PlayerActionPacket::ACTION_START_SWIMMING:
-				break; //TODO
+				if(!$this->isSwimming()){
+					$this->toggleSwim(true);
+				}
+				break;
 			case PlayerActionPacket::ACTION_STOP_SWIMMING:
-				//TODO: handle this when it doesn't spam every damn tick (yet another spam bug!!)
+				if($this->isSwimming()){ // for spam issue
+					$this->toggleSwim(false);
+				}
 				break;
 			case PlayerActionPacket::ACTION_INTERACT_BLOCK: //TODO: ignored (for now)
 				break;
@@ -3964,6 +4009,26 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->sendData($this);
 		}else{
 			$this->setSneaking($sneak);
+		}
+	}
+
+	public function toggleGlide(bool $glide) : void{
+		$ev = new PlayerToggleGlideEvent($this, $glide);
+		$ev->call();
+		if($ev->isCancelled()){
+			$this->sendData($this);
+		}else{
+			$this->setGliding($glide);
+		}
+	}
+
+	public function toggleSwim(bool $swimming) : void{
+		$ev = new PlayerToggleSwimEvent($this, $swimming);
+		$ev->call();
+		if($ev->isCancelled()){
+			$this->sendData($this);
+		}else{
+			$this->setSwimming($swimming);
 		}
 	}
 

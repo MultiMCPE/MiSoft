@@ -751,6 +751,14 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->setGenericFlag(self::DATA_FLAG_INVISIBLE, $value);
 	}
 
+	public function isGliding() : bool{
+		return $this->getGenericFlag(self::DATA_FLAG_GLIDING);
+	}
+
+	public function setGliding(bool $value = true) : void{
+		$this->setGenericFlag(self::DATA_FLAG_GLIDING, $value);
+	}
+
 	/**
 	 * Returns whether the entity is able to climb blocks such as ladders or vines.
 	 * @return bool
@@ -1124,6 +1132,10 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			if($this->noDamageTicks < 0){
 				$this->noDamageTicks = 0;
 			}
+		}
+
+		if($this->isGliding()){
+			$this->resetFallDistance();
 		}
 
 		$this->ticksLived += $tickDiff;
