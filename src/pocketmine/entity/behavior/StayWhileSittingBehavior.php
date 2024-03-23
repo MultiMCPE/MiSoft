@@ -37,10 +37,10 @@ class StayWhileSittingBehavior extends Behavior{
 	}
 
 	public function canStart() : bool{
-		if($this->mob->isTamed() and !$this->mob->isInsideOfWater() and $this->mob->onGround){
+		if($this->mob->isTamed() and !$this->mob->isInsideOfWater()){
 			$owner = $this->mob->getOwningEntity();
 
-			return $owner === null ? true : ($this->mob->distanceSquared($owner) < 144 and $this->mob->getTargetEntity() !== null ? false : $this->isSitting);
+			return $owner === null ? true : ((($this->mob->distanceSquared($owner) < 144 and ($this->mob->getTargetEntity() !== null and $this->mob->getTargetEntity()->isAlive())) ? false : $this->isSitting));
 		}
 
 		return false;
@@ -48,11 +48,11 @@ class StayWhileSittingBehavior extends Behavior{
 
 	public function onStart() : void{
 		$this->mob->getNavigator()->clearPath(true);
-		$this->mob->setSitting(true);
+	    $this->mob->setSitting(true);
 	}
 
 	public function onEnd() : void{
-		$this->mob->setSitting(false);
+	    $this->mob->setSitting(false);
 	}
 
 	public function setSitting(bool $value) : void{
