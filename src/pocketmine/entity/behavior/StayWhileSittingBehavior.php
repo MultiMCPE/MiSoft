@@ -37,7 +37,7 @@ class StayWhileSittingBehavior extends Behavior{
 	}
 
 	public function canStart() : bool{
-		if($this->mob->isTamed() and !$this->mob->isInsideOfWater()){
+		if($this->mob->isTamed() and !$this->mob->isInsideOfWater() and !($this->mob->fallDistance > 0)){
 			$owner = $this->mob->getOwningEntity();
 
 			return $owner === null ? true : ((($this->mob->distanceSquared($owner) < 144 and ($this->mob->getTargetEntity() !== null and $this->mob->getTargetEntity()->isAlive())) ? false : $this->isSitting));
