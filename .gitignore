@@ -26,9 +26,10 @@ resource_packs/
 scripts/*/out
 server.lock
 
-# Common IDEs
 .idea/*
-nbproject/*
+plugin_data/*
+bedrock_packs/*
+pw10_packs/*
 
 # Windows image file caches
 Thumbs.db
@@ -46,5 +47,4 @@ Desktop.ini
 .project
 misoft.yml
 start.sh
-bedrock_packs/resource_packs.yml
-pw10_packs/resource_packs.yml
+aquamine.yml
