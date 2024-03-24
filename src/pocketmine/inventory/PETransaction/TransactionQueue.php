@@ -97,47 +97,46 @@ class TransactionQueue{
         }
     }
 
-    public function execute() : void{
-		/** @var Transaction[] */
-		$failed = [];
+  public function execute() : void{
+    /** @var Transaction[] */
+    $failed = [];
 
-        if($this->transactionQueue->isEmpty()){
-            return;
-        }
-
-        $this->player->getServer()->getPluginManager()->callEvent($ev = new InventoryTransactionEvent($this));
-
-        while(!$this->transactionQueue->isEmpty()){
-            $transaction = $this->transactionQueue->dequeue();
-
-            if(!$transaction instanceof DropItemTransaction){
-		    	if($transaction->getInventory() instanceof ContainerInventory || $transaction->getInventory() instanceof PlayerInventory){
-			    	$this->player->getServer()->getPluginManager()->callEvent($event = new InventoryClickEvent($transaction->getInventory(), $this->player, $transaction->getSlot(), $transaction->getInventory()->getItem($transaction->getSlot())));
-
-			    	if($event->isCancelled()){
-					    $ev->setCancelled(true);
-			    	}
-				}
-			}
-
-			if($ev->isCancelled()){
-				$transaction->revert($this->player); //Send update back to client for cancelled transaction
-				continue;
-            }elseif(!$transaction->execute($this)){
-                $this->player->getServer()->getLogger()->debug("Can't execute " . get_class($transaction) . ": " . $transaction->getLastError());
-                if($transaction->addFailure() >= self::DEFAULT_ALLOWED_RETRIES){
-                    /* Transaction failed completely after several retries, hold onto it to send a slot update */
-                    $failed[] = $transaction;
-                }else{
-                    /* Add the transaction to the back of the queue to be retried on the next tick */
-                    $this->addTransaction($transaction);
-                }
-                continue;
-            }
-        }
-
-		foreach($failed as $f){
-			$f->revert($this->player);
-		}
+    if($this->transactionQueue->isEmpty()){
+      return;
     }
+
+    ($ev = new InventoryTransactionEvent($this))->call();
+
+    while(!$this->transactionQueue->isEmpty()){
+      $transaction = $this->transactionQueue->dequeue();
+
+      if(!$transaction instanceof DropItemTransaction){
+        if($transaction->getInventory() instanceof ContainerInventory || $transaction->getInventory() instanceof PlayerInventory){
+          ($event = new InventoryClickEvent($transaction->getInventory(), $this->player, $transaction->getSlot(), $transaction->getInventory()->getItem($transaction->getSlot())))->call();
+          if($event->isCancelled()){
+            $ev->setCancelled();
+          }
+        }
+      }
+
+      if($ev->isCancelled()){
+        $transaction->revert($this->player); //Send update back to client for cancelled transaction
+        continue;
+      }elseif(!$transaction->execute($this)){
+        $this->player->getServer()->getLogger()->debug("Can't execute " . get_class($transaction) . ": " . $transaction->getLastError());
+        if($transaction->addFailure() >= self::DEFAULT_ALLOWED_RETRIES){
+          /* Transaction failed completely after several retries, hold onto it to send a slot update */
+          $failed[] = $transaction;
+        }else{
+          /* Add the transaction to the back of the queue to be retried on the next tick */
+          $this->addTransaction($transaction);
+        }
+        continue;
+      }
+    }
+
+    foreach($failed as $f){
+      $f->revert($this->player);
+    }
+  }
 }
