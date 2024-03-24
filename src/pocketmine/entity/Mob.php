@@ -25,6 +25,7 @@ namespace pocketmine\entity;
 
 
 use pocketmine\block\Liquid;
+use pocketmine\block\Water;
 use pocketmine\entity\behavior\BehaviorPool;
 use pocketmine\entity\helper\EntityBodyHelper;
 use pocketmine\entity\helper\EntityJumpHelper;
@@ -224,6 +225,12 @@ abstract class Mob extends Living{
 		$this->tryToDespawn();
 
 		return (bool) $hasUpdate;
+	}
+
+  public function isInsideOfWater() : bool{
+		$block = $this->level->getBlockAt((int) floor($this->x), (int) floor($this->y + 0.7), (int) floor($this->z));
+
+		return $block instanceof Water;
 	}
 
 	/**
