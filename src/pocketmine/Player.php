@@ -505,6 +505,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var Vector3|null */
 	protected $lastRightClickPos = null;
 
+    /** @var string */
+    protected $lastRequestedFullSkinId = null;
+
 	/** @var FishingHook|null */
 	protected $fishingHook = null;
 
@@ -1045,6 +1048,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * @return bool
 	 */
 	public function changeSkin(Skin $skin, string $newSkinName, string $oldSkinName) : bool{
+		if($skin->getSerializedSkin()->getFullSkinId() === $this->lastRequestedFullSkinId){
+			//TODO: HACK! In 1.19.60, the client sends its skin back to us if we sent it a skin different from the one
+			//it's using. We need to prevent this from causing a feedback loop.
+			$this->server->getLogger()->debug("Refused duplicate skin change request");
+			return true;
+		}
+		$this->lastRequestedFullSkinId = $skin->getSerializedSkin()->getFullSkinId();
+
 		if(!$skin->isValid()){
 			return false;
 		}
@@ -2415,7 +2426,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	);
 	    	}
 
-	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390){
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	        	$personaPieces = [];
 	        	foreach($packet->clientData["PersonaPieces"] as $piece){
 		        	$personaPieces[] = new PersonaSkinPiece(
