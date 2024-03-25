@@ -877,6 +877,7 @@ return array(
     'pocketmine\\level\\particle\\LavaDripParticle' => $baseDir . '/src/pocketmine/level/particle/LavaDripParticle.php',
     'pocketmine\\level\\particle\\LavaParticle' => $baseDir . '/src/pocketmine/level/particle/LavaParticle.php',
     'pocketmine\\level\\particle\\MobSpawnParticle' => $baseDir . '/src/pocketmine/level/particle/MobSpawnParticle.php',
+    'pocketmine\\level\\particle\\MobSpellParticle' => $baseDir . '/src/pocketmine/level/particle/MobSpellParticle.php',
     'pocketmine\\level\\particle\\Particle' => $baseDir . '/src/pocketmine/level/particle/Particle.php',
     'pocketmine\\level\\particle\\PortalParticle' => $baseDir . '/src/pocketmine/level/particle/PortalParticle.php',
     'pocketmine\\level\\particle\\RainSplashParticle' => $baseDir . '/src/pocketmine/level/particle/RainSplashParticle.php',

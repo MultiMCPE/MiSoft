@@ -29,10 +29,13 @@ use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\item\Potion;
 use pocketmine\level\Level;
+use pocketmine\level\particle\MobSpellParticle;
 use pocketmine\math\Vector3;
 use pocketmine\math\RayTraceResult;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\TakeItemActorPacket;
@@ -48,6 +51,7 @@ class Arrow extends Projectile{
 	public const PICKUP_CREATIVE = 2;
 
 	private const TAG_PICKUP = "pickup"; //TAG_Byte
+	private const TAG_POTION = "Potion"; //TAG_Short
 
 	public $width = 0.25;
 	public $height = 0.25;
@@ -67,6 +71,9 @@ class Arrow extends Projectile{
 	/** @var int */
 	protected $collideTicks = 0;
 
+	/** @var int */
+	protected $potionId = 0;
+
 	public function __construct(Level $level, CompoundTag $nbt, ?Entity $shootingEntity = null, bool $critical = false){
 		parent::__construct($level, $nbt, $shootingEntity);
 		$this->setCritical($critical);
@@ -77,6 +84,10 @@ class Arrow extends Projectile{
 
 		$this->pickupMode = $this->namedtag->getByte(self::TAG_PICKUP, self::PICKUP_ANY, true);
 		$this->collideTicks = $this->namedtag->getShort("life", $this->collideTicks);
+		if(!$this->namedtag->hasTag(self::TAG_POTION, ShortTag::class)){
+			$this->namedtag->setShort(self::TAG_POTION, $this->potionId);
+		}
+		$this->potionId = $this->namedtag->getShort(self::TAG_POTION, 0);
 	}
 
 	public function setThrowableMotion(Vector3 $motion, float $velocity, float $inaccuracy) : bool{
@@ -91,6 +102,7 @@ class Arrow extends Projectile{
 		parent::saveNBT();
 
 		$this->namedtag->setByte(self::TAG_PICKUP, $this->pickupMode, true);
+		$this->namedtag->setShort(self::TAG_POTION, $this->potionId);
 		$this->namedtag->setShort("life", $this->collideTicks);
 	}
 
@@ -132,6 +144,17 @@ class Arrow extends Projectile{
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
+		if($this->potionId !== 0){
+			if(!$this->onGround or ($this->onGround and ($tickDiff % 4) === 0)){
+				$color = Potion::getColor($this->potionId - 1);
+				$this->level->addParticle(new MobSpellParticle($this->add(
+					$this->width / 2 + mt_rand(-100, 100) / 500,
+					$this->height / 2 + mt_rand(-100, 100) / 500,
+					$this->width / 2 + mt_rand(-100, 100) / 500), $color[0], $color[1], $color[2]));
+			}
+			$hasUpdate = true;
+		}
+
 		if($this->blockHit !== null){
 			$this->collideTicks += $tickDiff;
 			if($this->collideTicks > 1200){
@@ -157,6 +180,11 @@ class Arrow extends Projectile{
 
 	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : void{
 		parent::onHitEntity($entityHit, $hitResult);
+		if($this->potionId !== 0){
+			foreach(Potion::getPotionEffectsById($this->potionId - 1) as $effect){
+				$entityHit->addEffect($effect->setDuration((int) ($effect->getDuration() / 8)));
+			}
+		}
 		if($this->punchKnockback > 0){
 			$horizontalSpeed = sqrt($this->motion->x ** 2 + $this->motion->z ** 2);
 			if($horizontalSpeed > 0){
@@ -180,12 +208,26 @@ class Arrow extends Projectile{
 		$this->pickupMode = $pickupMode;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getPotionId() : int{
+		return $this->potionId;
+	}
+
+	/**
+	 * @param int $potionId
+	 */
+	public function setPotionId(int $potionId) : void{
+		$this->potionId = $potionId;
+	}
+
 	public function onCollideWithPlayer(Player $player) : void{
 		if($this->blockHit === null){
 			return;
 		}
 
-		$item = ItemFactory::get(Item::ARROW, 0, 1);
+		$item = ItemFactory::get(Item::ARROW, $this->potionId, 1);
 
         if($player->isSurvival()){
             if($player->getOffHandInventory()->getItem(0)->canStackWith($item)){

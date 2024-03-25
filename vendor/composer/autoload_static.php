@@ -948,6 +948,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\level\\particle\\LavaDripParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/LavaDripParticle.php',
         'pocketmine\\level\\particle\\LavaParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/LavaParticle.php',
         'pocketmine\\level\\particle\\MobSpawnParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/MobSpawnParticle.php',
+        'pocketmine\\level\\particle\\MobSpellParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/MobSpellParticle.php',
         'pocketmine\\level\\particle\\Particle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/Particle.php',
         'pocketmine\\level\\particle\\PortalParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/PortalParticle.php',
         'pocketmine\\level\\particle\\RainSplashParticle' => __DIR__ . '/../..' . '/src/pocketmine/level/particle/RainSplashParticle.php',

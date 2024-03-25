@@ -219,6 +219,69 @@ class Potion extends Item implements Consumable{
 		parent::__construct(self::POTION, $meta, "Potion");
 	}
 
+	/**
+	 * @param int $meta
+	 *
+	 * @return array
+	 */
+	public static function getColor(int $meta) : array{
+		$effect = Effect::getEffect(self::getEffectId($meta));
+		if($effect !== null){
+			$color = $effect->getColor();
+			return [$color->getR(), $color->getG(), $color->getB()];
+		}
+		return [0, 0, 0];
+	}
+
+	/**
+	 * @param int $meta
+	 *
+	 * @return int
+	 */
+	public static function getEffectId(int $meta) : int{
+		switch($meta){
+			case self::INVISIBILITY:
+			case self::LONG_INVISIBILITY:
+				return Effect::INVISIBILITY;
+			case self::LEAPING:
+			case self::LONG_LEAPING:
+			case self::STRONG_LEAPING:
+				return Effect::JUMP;
+			case self::FIRE_RESISTANCE:
+			case self::LONG_FIRE_RESISTANCE:
+				return Effect::FIRE_RESISTANCE;
+			case self::SWIFTNESS:
+			case self::LONG_SWIFTNESS:
+			case self::STRONG_SWIFTNESS:
+				return Effect::SPEED;
+			case self::SLOWNESS:
+			case self::LONG_SLOWNESS:
+				return Effect::SLOWNESS;
+			case self::WATER_BREATHING:
+			case self::LONG_WATER_BREATHING:
+				return Effect::WATER_BREATHING;
+			case self::HARMING:
+			case self::STRONG_HARMING:
+				return Effect::HARMING;
+			case self::POISON:
+			case self::LONG_POISON:
+			case self::STRONG_POISON:
+				return Effect::POISON;
+			case self::HEALING:
+			case self::STRONG_HEALING:
+				return Effect::HEALING;
+			case self::NIGHT_VISION:
+			case self::LONG_NIGHT_VISION:
+				return Effect::NIGHT_VISION;
+			case self::REGENERATION:
+			case self::LONG_REGENERATION:
+			case self::STRONG_REGENERATION:
+				return Effect::REGENERATION;
+			default:
+				return 0;
+		}
+	}
+
 	public function getMaxStackSize() : int{
 		return 1;
 	}

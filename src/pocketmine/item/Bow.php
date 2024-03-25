@@ -49,15 +49,28 @@ class Bow extends Tool{
 
 	public function onReleaseUsing(Player $player) : bool{
 	    $inventory = null;
-        if($player->getOffHandInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))){
+        if($player->getOffHandInventory()->contains(ItemFactory::get(Item::ARROW, -1))){
             $inventory = $player->getOffHandInventory();
-	    }elseif($player->getInventory()->contains(ItemFactory::get(Item::ARROW, 0, 1))){
+	    }elseif($player->getInventory()->contains(ItemFactory::get(Item::ARROW, -1))){
 		    $inventory = $player->getInventory();
 		}
 
 		if($player->isSurvival() and $inventory === null){
 			$player->getInventory()->sendContents($player);
 			return false;
+		}
+
+		if($inventory !== null){
+	    	$index = $inventory->first(ItemFactory::get(Item::ARROW, -1));
+	    	if($index !== -1){
+		    	$arrow = $inventory->getItem($index);
+		    	$arrow->setCount(1);
+	    	}else{
+		    	$inventory->sendContents($player);
+			    return false;
+			}
+		}else{
+			$arrow = ItemFactory::get(Item::ARROW, 0, 1);
 		}
 
 		$nbt = Entity::createBaseNBT(
@@ -67,6 +80,7 @@ class Bow extends Tool{
 			-$player->pitch
 		);
 		$nbt->setShort("Fire", $player->isOnFire() ? 45 * 60 : 0);
+		$nbt->setShort("Potion", $arrow->getDamage());
 
 		$diff = $player->getItemUseDuration();
 		$p = $diff / 20;
@@ -106,9 +120,9 @@ class Bow extends Tool{
 			}else{
 				$entity->setMotion($entity->getMotion()->multiply($ev->getForce()));
 				if($player->isSurvival()){
-					if(!$infinity){ //TODO: tipped arrows are still consumed when Infinity is applied
+					if(!$infinity){
 					    if($inventory !== null){
-					    	$inventory->removeItem(ItemFactory::get(Item::ARROW, 0, 1));
+					    	$inventory->removeItem($arrow);
 					    }
 					}
 					$this->applyDamage(1);
