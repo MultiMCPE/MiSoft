@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory\transaction\action;
 
+use pocketmine\event\inventory\InventoryClickEvent;
 use pocketmine\inventory\Inventory;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\item\Item;
@@ -80,6 +81,12 @@ class SlotChangeAction extends InventoryAction{
 			$this->inventory->slotExists($this->inventorySlot) and
 			$this->inventory->getItem($this->inventorySlot)->equalsExact($this->sourceItem)
 		);
+	}
+
+  public function onPreExecute(Player $source) : bool{
+    $ev = new InventoryClickEvent($this->inventory, $source, $this->inventorySlot, $this->sourceItem);
+		$ev->call();
+    return !$ev->isCancelled();
 	}
 
 	/**
