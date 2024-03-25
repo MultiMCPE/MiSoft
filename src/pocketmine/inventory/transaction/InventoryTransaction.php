@@ -151,6 +151,7 @@ class InventoryTransaction{
 			}
 
 			if(!$action->isValid($this->source)){
+        $this->sendInventories();
 				throw new TransactionValidationException("Action " . get_class($action) . " is not valid in the current transaction");
 			}
 
