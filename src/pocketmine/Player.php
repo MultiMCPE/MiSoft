@@ -1670,13 +1670,29 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * @return int
 	 */
 	public static function getClientFriendlyGamemode(int $gamemode) : int{
-		static $map = [
+	    static $map = [
 			self::SURVIVAL => GameMode::SURVIVAL,
 			self::CREATIVE => GameMode::CREATIVE,
 			self::ADVENTURE => GameMode::ADVENTURE,
 			self::SPECTATOR => GameMode::CREATIVE
 		];
 		return $map[$gamemode & 0x3];
+	}
+
+    public static function gamemodeToNetworkId(int $gamemode, int $playerProtocol) : int{
+		return (($playerProtocol >= ProtocolInfo::PROTOCOL_560 && ($gamemode & 0x3) === self::SPECTATOR) ? GameMode::SPECTATOR : self::getClientFriendlyGamemode($gamemode));
+	}
+
+	public static function protocolGameModeToCore(int $gameMode) : ?int{
+		static $map = [
+			GameMode::SURVIVAL => self::SURVIVAL,
+			GameMode::CREATIVE => self::CREATIVE,
+			GameMode::ADVENTURE => self::ADVENTURE,
+			GameMode::SURVIVAL_VIEWER => self::SPECTATOR,
+			GameMode::CREATIVE_VIEWER => self::SPECTATOR,
+			GameMode::SPECTATOR => self::SPECTATOR,
+		];
+		return $map[$gameMode] ?? null;
 	}
 
 	/**
@@ -1705,10 +1721,17 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->allowFlight = $this->isCreative();
 		if($this->isSpectator()){
+			$this->setGenericFlag(self::DATA_FLAG_HAS_COLLISION, false);
 			$this->setFlying(true);
 			$this->keepMovement = true;
+
+			//TODO: HACK! this syncs the onground flag with the client so that flying works properly
+			//this is a yucky hack but we don't have any other options :(
+			$this->sendPosition($this, null, null, MovePlayerPacket::MODE_TELEPORT);
+
 			$this->despawnFromAll();
 		}else{
+			$this->setGenericFlag(self::DATA_FLAG_HAS_COLLISION, true);
 			$this->keepMovement = $this->allowMovementCheats;
 			if($this->isSurvival()){
 				$this->setFlying(false);
@@ -1738,7 +1761,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function sendGamemode(){
 		$pk = new SetPlayerGameTypePacket();
-		$pk->gamemode = Player::getClientFriendlyGamemode($this->gamemode);
+		$pk->gamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
 		$this->dataPacket($pk);
 	}
 
@@ -1749,7 +1772,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	AbilitiesLayer::ABILITY_ALLOW_FLIGHT => $this->getAllowFlight(),
 		    	AbilitiesLayer::ABILITY_FLYING => $this->isFlying(),
 		    	AbilitiesLayer::ABILITY_NO_CLIP => $this->isSpectator(),
-		    	AbilitiesLayer::ABILITY_OPERATOR => $this->isOp(),
+		    	AbilitiesLayer::ABILITY_OPERATOR => ($this->isOp() && !$this->isSpectator()),
 		    	AbilitiesLayer::ABILITY_TELEPORT => $this->hasPermission("pocketmine.command.teleport"),
 		    	AbilitiesLayer::ABILITY_INVULNERABLE => $this->isCreative(),
 		    	AbilitiesLayer::ABILITY_MUTED => false,
@@ -1783,14 +1806,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 
 	    	$this->sendDataPacket(UpdateAbilitiesPacket::create(new AbilitiesData(
-		    	($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL),
-		    	($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER),
+		    	(($this->isOp() && !$this->isSpectator()) ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL),
+		    	(($this->isOp() && !$this->isSpectator()) ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER),
 		    	$this->getId(),
 				$layers
 	    	)));
         }else{
 	    	$pk = new AdventureSettingsPacket();
 
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	$pk->setFlag(AdventureSettingsPacket::BUILD, !$this->isSpectator());
+		    	$pk->setFlag(AdventureSettingsPacket::MINE, !$this->isSpectator());
+		    	$pk->setFlag(AdventureSettingsPacket::DOORS_AND_SWITCHES, !$this->isSpectator());
+				$pk->setFlag(AdventureSettingsPacket::OPEN_CONTAINERS, !$this->isSpectator());
+				$pk->setFlag(AdventureSettingsPacket::ATTACK_PLAYERS, !$this->isSpectator());
+				$pk->setFlag(AdventureSettingsPacket::ATTACK_MOBS, !$this->isSpectator());
+				$pk->setFlag(AdventureSettingsPacket::OPERATOR, ($this->isOp() && !$this->isSpectator()));
+				$pk->setFlag(AdventureSettingsPacket::TELEPORT, $this->hasPermission("pocketmine.command.teleport"));
+			}
 	    	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
 	    	$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
 	    	$pk->setFlag(AdventureSettingsPacket::AUTO_JUMP, $this->autoJump);
@@ -1798,8 +1831,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    	$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
 	    	$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
 
-	    	$pk->commandPermission = ($this->isOp() ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
-	    	$pk->playerPermission = ($this->isOp() ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
+	    	$pk->commandPermission = (($this->isOp() && !$this->isSpectator()) ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
+	    	$pk->playerPermission = (($this->isOp() && !$this->isSpectator()) ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
 	    	$pk->entityUniqueId = $this->getId();
 
 	    	$this->dataPacket($pk);
@@ -2792,7 +2825,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new StartGamePacket();
 		$pk->entityUniqueId = $this->id;
 		$pk->entityRuntimeId = $this->id;
-		$pk->playerGamemode = Player::getClientFriendlyGamemode($this->gamemode);
+		$pk->playerGamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
 
 		$pk->playerPosition = $this->getOffsetPosition($this);
 
@@ -2800,7 +2833,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->yaw = $this->yaw;
 		$pk->seed = -1;
 		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", $this->level->getDimensionId()); //TODO: implement this properly
-		$pk->worldGamemode = Player::getClientFriendlyGamemode($this->server->getGamemode());
+		$pk->worldGamemode = Player::gamemodeToNetworkId($this->server->getGamemode(), $this->getProtocol());
 		$pk->difficulty = $this->level->getDifficulty();
 		$pk->spawnX = $spawnPosition->getFloorX();
 		$pk->spawnY = $spawnPosition->getFloorY();
@@ -4369,7 +4402,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
-		if($packet->gamemode !== $this->gamemode){
+		$gamemode = self::protocolGameModeToCore($packet->gamemode);
+		if($gamemode !== $this->gamemode){
 			//Set this back to default. TODO: handle this properly
 			$this->sendGamemode();
 			$this->syncAbilitiesAndAdventureSettings(); //TODO: we might be able to do this with the abilities packet alone
