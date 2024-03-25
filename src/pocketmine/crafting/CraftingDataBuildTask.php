@@ -29,6 +29,7 @@ use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
+use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
 use pocketmine\item\ItemFactory;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
@@ -42,6 +43,8 @@ class CraftingDataBuildTask extends AsyncTask{
     protected $shapedRecipes;
     /** @var array */
     protected $furnaceRecipes;
+    /** @var array */
+	protected $brewingRecipes;
     /** @var int */
     protected $protocol;
     /** @var ?Palette */
@@ -49,10 +52,11 @@ class CraftingDataBuildTask extends AsyncTask{
     /** @var int */
     protected $compressionLevel;
 
-	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, int $protocol, ?Palette $palette, int $networkCompressionLevel){
+	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, array $brewingRecipes, int $protocol, ?Palette $palette, int $networkCompressionLevel){
 	    $this->shapelessRecipes = $shapelessRecipes;
 	    $this->shapedRecipes = $shapedRecipes;
 	    $this->furnaceRecipes = $furnaceRecipes;
+		$this->brewingRecipes = $brewingRecipes;
 	    $this->protocol = $protocol;
 	    $this->palette = $palette;
 		$this->compressionLevel = $networkCompressionLevel;
@@ -81,6 +85,19 @@ class CraftingDataBuildTask extends AsyncTask{
 	    foreach($this->furnaceRecipes as $recipe){
 		    $pk->addFurnaceRecipe($recipe);
 	    }
+		foreach($this->brewingRecipes as $recipe){
+			$input = $recipe->getPotion();
+			$ingredient = $recipe->getInput();
+			$output = $recipe->getResult();
+			$pk->potionTypeRecipes[] = new PotionTypeRecipe(
+				$input->getId(),
+				$input->getDamage(),
+				$ingredient->getId(),
+				$ingredient->getDamage(),
+				$output->getId(),
+				$output->getDamage()
+			);
+		}
         $pk->setProtocol($this->protocol);
 	    $pk->encode();
 

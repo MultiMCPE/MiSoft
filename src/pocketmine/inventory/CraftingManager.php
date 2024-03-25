@@ -138,6 +138,7 @@ class CraftingManager{
                     $this->shapelessRecipes,
                     $this->shapedRecipes,
                     $this->furnaceRecipes,
+					$this->brewingRecipes,
                     $player->getCraftingProtocol(),
                     ($player->getCraftingProtocol() >= ProtocolInfo::PROTOCOL_429 ? BlockPalette::getPalette($player->getCraftingProtocol()) : null),
                     Server::getInstance()->networkCompressionLevel
