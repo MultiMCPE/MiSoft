@@ -74,7 +74,7 @@ class PlayerSkinPacket extends DataPacket{
 	    	$this->newSkinName = $this->getString();
 	    	$this->oldSkinName = $this->getString();
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-	    	    $this->skin->getSerializedSkin()->setIsTrustedSkin((($this->get(1) !== "\x00")));
+	    	    $trustedSkin = (($this->get(1) !== "\x00"));
 	    	}
         }
 	}

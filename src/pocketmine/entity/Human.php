@@ -202,8 +202,23 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 	    $targets = $targets ?? $this->hasSpawned;
 	    foreach($targets as $target){
 	        if($target->getProtocol() < ProtocolInfo::PROTOCOL_130){
-	            $this->despawnFrom($target);
-	            $this->spawnTo($target);
+				if($target !== $this){
+	                $this->despawnFrom($target);
+				}
+
+				$remove = new PlayerListPacket();
+				$remove->type = PlayerListPacket::TYPE_REMOVE;
+				$remove->entries[] = PlayerListEntry::createRemovalEntry($this->getUniqueId());
+				$target->dataPacket($remove);
+
+				$add = new PlayerListPacket();
+				$add->type = PlayerListPacket::TYPE_ADD;
+				$add->entries[] = PlayerListEntry::createAdditionEntry($this->getUniqueId(), $this->getId(), $this->getName(), $this->skin);
+				$target->dataPacket($add);
+
+				if($target !== $this){
+	                $this->spawnTo($target);
+				}
 	        }else{
 	        	$pk = new PlayerSkinPacket();
 	        	$pk->uuid = $this->getUniqueId();

@@ -1408,6 +1408,7 @@ return array(
     'pocketmine\\scheduler\\AsyncTask' => $baseDir . '/src/pocketmine/scheduler/AsyncTask.php',
     'pocketmine\\scheduler\\AsyncWorker' => $baseDir . '/src/pocketmine/scheduler/AsyncWorker.php',
     'pocketmine\\scheduler\\BulkCurlTask' => $baseDir . '/src/pocketmine/scheduler/BulkCurlTask.php',
+    'pocketmine\\scheduler\\CallbackTask' => $baseDir . '/src/pocketmine/scheduler/CallbackTask.php',
     'pocketmine\\scheduler\\ClosureTask' => $baseDir . '/src/pocketmine/scheduler/ClosureTask.php',
     'pocketmine\\scheduler\\DumpWorkerMemoryTask' => $baseDir . '/src/pocketmine/scheduler/DumpWorkerMemoryTask.php',
     'pocketmine\\scheduler\\FileWriteTask' => $baseDir . '/src/pocketmine/scheduler/FileWriteTask.php',
