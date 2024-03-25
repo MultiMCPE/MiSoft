@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\scheduler;
 
-use callable;
 use function call_user_func_array;
 
 /**

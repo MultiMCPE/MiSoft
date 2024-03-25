@@ -1484,6 +1484,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\scheduler\\DumpWorkerMemoryTask' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/DumpWorkerMemoryTask.php',
         'pocketmine\\scheduler\\FileWriteTask' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/FileWriteTask.php',
         'pocketmine\\scheduler\\GarbageCollectionTask' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/GarbageCollectionTask.php',
+        'pocketmine\\scheduler\\PluginTask' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/PluginTask.php',
         'pocketmine\\scheduler\\SendUsageTask' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/SendUsageTask.php',
         'pocketmine\\scheduler\\Task' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/Task.php',
         'pocketmine\\scheduler\\TaskHandler' => __DIR__ . '/../..' . '/src/pocketmine/scheduler/TaskHandler.php',

@@ -1413,6 +1413,7 @@ return array(
     'pocketmine\\scheduler\\DumpWorkerMemoryTask' => $baseDir . '/src/pocketmine/scheduler/DumpWorkerMemoryTask.php',
     'pocketmine\\scheduler\\FileWriteTask' => $baseDir . '/src/pocketmine/scheduler/FileWriteTask.php',
     'pocketmine\\scheduler\\GarbageCollectionTask' => $baseDir . '/src/pocketmine/scheduler/GarbageCollectionTask.php',
+    'pocketmine\\scheduler\\PluginTask' => $baseDir . '/src/pocketmine/scheduler/PluginTask.php',
     'pocketmine\\scheduler\\SendUsageTask' => $baseDir . '/src/pocketmine/scheduler/SendUsageTask.php',
     'pocketmine\\scheduler\\Task' => $baseDir . '/src/pocketmine/scheduler/Task.php',
     'pocketmine\\scheduler\\TaskHandler' => $baseDir . '/src/pocketmine/scheduler/TaskHandler.php',
