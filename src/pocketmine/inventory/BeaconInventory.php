@@ -22,6 +22,8 @@
 namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\Player;
 use pocketmine\tile\Beacon;
@@ -37,7 +39,7 @@ class BeaconInventory extends ContainerInventory{
 	}
 
 	public function getDefaultSize() : int{
-		return 0;
+		return 1;
 	}
 
 	public function getResultSlot() : int{
@@ -46,5 +48,53 @@ class BeaconInventory extends ContainerInventory{
 
 	public function getNetworkType() : int{
 		return WindowTypes::BEACON;
+	}
+
+	public function onClose(Player $who) : void{
+		parent::onClose($who);
+
+		$this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($this->getResultSlot()));
+		$this->clear($this->getResultSlot());
+	}
+
+	/**
+	 * @param Player|Player[] $target
+	 */
+	public function sendContents($target) : void{
+		if($target instanceof Player){
+			$target = [$target];
+		}
+
+		foreach($target as $player){
+			if(($id = $player->getWindowId($this)) === ContainerIds::NONE){
+				$this->close($player);
+				continue;
+			}
+	    	if($player->getProtocol() < ProtocolInfo::PROTOCOL_130){
+		    	continue;
+			}
+			parent::sendContents($player);
+		}
+	}
+
+	/**
+	 * @param int             $index
+	 * @param Player|Player[] $target
+	 */
+	public function sendSlot(int $index, $target) : void{
+		if($target instanceof Player){
+			$target = [$target];
+		}
+
+		foreach($target as $player){
+			if(($id = $player->getWindowId($this)) === ContainerIds::NONE){
+				$this->close($player);
+				continue;
+			}
+	    	if($player->getProtocol() < ProtocolInfo::PROTOCOL_130){
+		    	continue;
+			}
+			parent::sendSlot($index, $player);
+		}
 	}
 }

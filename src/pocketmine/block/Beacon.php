@@ -70,7 +70,7 @@ class Beacon extends Transparent{
 					return true;
 				}
 
-				$player->addWindow($tile->getInventory());
+				$player->addWindow($tile->getInventory(), Player::BEACON_WINDOW_ID);
 			}
 		}
 

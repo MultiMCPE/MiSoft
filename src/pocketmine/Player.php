@@ -277,6 +277,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const HARDCODED_CRAFTING_GRID_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 1;
 	public const HARDCODED_INVENTORY_WINDOW_ID = self::RESERVED_WINDOW_ID_RANGE_START + 2;
 
+	public const BEACON_WINDOW_ID = 4;
+
 	/** Max length of a chat message (UTF-8 codepoints, not bytes) */
 	private const MAX_CHAT_CHAR_LENGTH = 512;
 	/**

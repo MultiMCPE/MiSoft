@@ -25,6 +25,7 @@ namespace pocketmine\network\mcpe\protocol\types;
 
 use InvalidArgumentException;
 use InvalidStateException;
+use pocketmine\inventory\BeaconInventory;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -187,7 +188,10 @@ class NetworkInventoryAction{
 		}
 		switch($this->sourceType){
 			case self::SOURCE_CONTAINER:
-				if($this->windowId === ContainerIds::UI and $this->inventorySlot > 0){
+				if($this->inventorySlot === 27 && ($player->getWindow(Player::BEACON_WINDOW_ID) instanceof BeaconInventory)){
+					$window = $player->getWindow(Player::BEACON_WINDOW_ID);
+					$slot = 0;
+		    	}elseif($this->windowId === ContainerIds::UI and $this->inventorySlot > 0){
 					if($this->inventorySlot === 50){
 						return null; //useless noise
 					}
@@ -239,6 +243,26 @@ class NetworkInventoryAction{
 			case self::SOURCE_TODO:
 				//These types need special handling.
 				switch($this->windowId){
+					case self::SOURCE_TYPE_BEACON:
+						$window = $player->getWindow(Player::BEACON_WINDOW_ID);
+						if(!($window instanceof BeaconInventory)){
+							return null;
+						}
+
+						$this->inventorySlot = 0;
+
+					    return new SlotChangeAction($window, $this->inventorySlot, $this->oldItem, $this->newItem);
+					case self::SOURCE_TYPE_ANVIL_INPUT: // на новых версиях это удаление предмета из маяка...
+						$window = $player->getWindow(Player::BEACON_WINDOW_ID);
+						if(!($window instanceof BeaconInventory)){
+							return null;
+						}
+						
+                        return new class($this->oldItem, $this->newItem, CreativeInventoryAction::TYPE_DELETE_ITEM) extends CreativeInventoryAction{
+							public function isValid(Player $source) : bool{
+								return true;
+							}
+						};
 					case self::SOURCE_TYPE_CRAFTING_ADD_INGREDIENT:
 					case self::SOURCE_TYPE_CRAFTING_REMOVE_INGREDIENT:
 					case self::SOURCE_TYPE_CONTAINER_DROP_CONTENTS: //TODO: this type applies to all fake windows, not just crafting
