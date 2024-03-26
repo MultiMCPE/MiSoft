@@ -83,7 +83,7 @@ class OldBatchPacket extends DataPacket{
 		$stream = new NetworkBinaryStream($this->payload);
 		$count = 0;
 		while(!$stream->feof()){
-			if($count++ > 100){
+			if($count++ > 500){
 				throw new UnexpectedValueException("Too many packets in a single batch");
 			}
 			yield $stream->getString();
