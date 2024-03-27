@@ -121,14 +121,14 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 			return;
 		}
 
-		$this->player->getGamePacketLimiter()->decrement();
-
         if($this->player->getProtocol() < ProtocolInfo::PROTOCOL_130){
             //HACK: InteractPacket spam fix
             if($packet->buffer === "\x21\x04\x00"){
                 return;
             }
         }
+
+		$this->player->getGamePacketLimiter()->decrement();
 
 		$timings = Timings::getReceiveDataPacketTimings($packet);
 		$timings->startTiming();
