@@ -127,6 +127,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
                 return;
             }
         }
+		$this->player->getGamePacketLimiter()->decrement();
 
 		$this->player->getGamePacketLimiter()->decrement();
 
