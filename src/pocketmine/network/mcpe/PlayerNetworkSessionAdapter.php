@@ -129,6 +129,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
                 return;
             }
         }
+		$this->player->getGamePacketLimiter()->decrement();
 
 		$timings = Timings::getReceiveDataPacketTimings($packet);
 		$timings->startTiming();
