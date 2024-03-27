@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion;
 
+use pocketmine\entity\Entity;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
@@ -54,10 +55,9 @@ final class MetadataConvertor{
             $flags2 = $metadata[EntityMetadataProperties::DATA_FLAGS2][1];
             unset($metadata[EntityMetadataProperties::DATA_FLAGS2][1]);
         }
-        if(((isset($metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG])) ? $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG][1] === 1 : true) === true){
-            if($flags !== null){
-                $flags ^= 1 << (EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG % 64);
-            }
+
+        if($flags !== null){
+            $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
         }
 
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol))($flags, $flags2);

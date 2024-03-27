@@ -554,7 +554,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 * @return bool
 	 */
 	public function isNameTagAlwaysVisible() : bool{
-		return $this->propertyManager->getByte(self::DATA_ALWAYS_SHOW_NAMETAG) === 1;
+		return $this->getGenericFlag(self::DATA_FLAG_ALWAYS_SHOW_NAMETAG);
 	}
 
 
@@ -576,7 +576,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 * @param bool $value
 	 */
 	public function setNameTagAlwaysVisible(bool $value = true) : void{
-	    $this->propertyManager->setByte(self::DATA_ALWAYS_SHOW_NAMETAG, $value ? 1 : 0);
+	    $this->setGenericFlag(self::DATA_FLAG_ALWAYS_SHOW_NAMETAG, $value);
 	}
 
 	/**
