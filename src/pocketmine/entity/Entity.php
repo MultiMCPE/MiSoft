@@ -95,6 +95,7 @@ use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\FloatTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\nbt\tag\NamedTag;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
@@ -508,7 +509,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->propertyManager->setFloat(self::DATA_BOUNDING_BOX_WIDTH, $this->width);
 		$this->propertyManager->setFloat(self::DATA_BOUNDING_BOX_HEIGHT, $this->height);
 
-		$this->fireTicks = $this->namedtag->getShort("Fire", 0);
+	    $this->fireTicks = $this->namedtag->getTagValue("Fire", NamedTag::class, 0);
 		if($this->isOnFire()){
 			$this->setGenericFlag(self::DATA_FLAG_ONFIRE);
 		}
