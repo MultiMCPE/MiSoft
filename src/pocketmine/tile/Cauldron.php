@@ -24,7 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
+use pocketmine\nbt\tag\ShortTag;
 use pocketmine\utils\Binary;
 use pocketmine\utils\Color;
 
@@ -40,8 +42,12 @@ class Cauldron extends Spawnable{
 	}
 
 	protected function readSaveData(CompoundTag $nbt) : void{
-		$this->potionId = $nbt->getShort("PotionId", -1);
-		$this->splashPotion = boolval($nbt->getByte("SplashPotion", 0));
+		if($nbt->hasTag("PotionId", ShortTag::class)){
+	    	$this->potionId = $nbt->getShort("PotionId", -1);
+		}
+		if($nbt->hasTag("SplashPotion", ByteTag::class)){
+	    	$this->splashPotion = boolval($nbt->getByte("SplashPotion", 0));
+		}
 
 		if($nbt->hasTag("CustomColor", IntTag::class)){
 			$this->customColor = Color::fromARGB(Binary::unsignInt($nbt->getInt("CustomColor")));
