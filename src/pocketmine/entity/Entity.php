@@ -928,8 +928,9 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			if($this->getNameTag() !== ""){
 				$this->namedtag->setString("CustomName", $this->getNameTag());
 				$this->namedtag->setByte("CustomNameVisible", $this->isNameTagVisible() ? 1 : 0);
+				$this->namedtag->setByte("CustomNameAlwaysVisible", $this->isNameTagAlwaysVisible() ? 1 : 0);
 			}else{
-				$this->namedtag->removeTag("CustomName", "CustomNameVisible");
+				$this->namedtag->removeTag("CustomName", "CustomNameVisible", "CustomNameAlwaysVisible");
 			}
 		}
 
@@ -969,6 +970,14 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 				$this->namedtag->removeTag("CustomNameVisible");
 			}else{
 				$this->setNameTagVisible($this->namedtag->getByte("CustomNameVisible", 1) !== 0);
+			}
+
+			if($this->namedtag->hasTag("CustomNameAlwaysVisible", StringTag::class)){
+				//Older versions incorrectly saved this as a string (see 890f72dbf23a77f294169b79590770470041adc4)
+				$this->setNameTagAlwaysVisible($this->namedtag->getString("CustomNameAlwaysVisible") !== "");
+				$this->namedtag->removeTag("CustomNameAlwaysVisible");
+			}else{
+				$this->setNameTagAlwaysVisible($this->namedtag->getByte("CustomNameAlwaysVisible", 1) !== 0);
 			}
 		}
 	}
