@@ -47,6 +47,11 @@ class PlayerListPacket extends DataPacket{
 
     public static function getPESkinId(Skin $skin) : string{
 		$skinId = $skin->getSkinId();
+
+		if($skinId === "Standard_Steve" || $skinId === "Standard_Alex"){
+			return $skinId;
+		}
+
 		if($skinId !== "Custom"){
 			$id = explode(" ", $skinId);
 			if(count($id) < 2){

@@ -159,6 +159,10 @@ class ArmorInventory extends BaseInventory{
 		}
 	}
 
+	public function onSlotChange(int $index, Item $before, bool $send) : void{
+		$this->sendSlot($index, $this->getViewers());
+	}
+
 	/**
 	 * @return Player[]
 	 */
