@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\entity;
 
-
+use pocketmine\block\Lava;
 use pocketmine\block\Liquid;
 use pocketmine\block\Water;
 use pocketmine\entity\behavior\BehaviorPool;
@@ -204,9 +204,9 @@ abstract class Mob extends Living{
 		$this->clearSightCache();
 
 		if($this->isJumping){
-			if($this->isInsideOfWater()){
-				$this->handleWaterJump();
-			}elseif($this->isInsideOfLava()){
+			if($this->level->getBlock($this->add(0, 1, 0)) instanceof Water){
+        $this->handleWaterJump();
+			}elseif($this->level->getBlock($this->add(0, 1, 0)) instanceof Lava){
 				$this->handleLavaJump();
 			}elseif($this->onGround and $this->jumpTicks === 0){
 				$this->jump();
@@ -225,12 +225,6 @@ abstract class Mob extends Living{
 		$this->tryToDespawn();
 
 		return (bool) $hasUpdate;
-	}
-
-  public function isInsideOfWater() : bool{
-		$block = $this->level->getBlockAt((int) floor($this->x), (int) floor($this->y + 0.7), (int) floor($this->z));
-
-		return $block instanceof Water;
 	}
 
 	/**
@@ -281,11 +275,11 @@ abstract class Mob extends Living{
 	}
 
 	public function handleWaterJump() : void{
-		$this->motion->y += 0.04;
+		$this->motion->y = 0.2;
 	}
 
 	public function handleLavaJump() : void{
-		$this->motion->y += 0.04;
+		$this->motion->y = 0.2;
 	}
 
 	/**
