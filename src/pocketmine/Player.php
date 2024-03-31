@@ -1763,7 +1763,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function sendGamemode(){
 		$pk = new SetPlayerGameTypePacket();
-		$pk->gamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
+		//$pk->gamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
+    $pk->gamemode = Player::getClientFriendlyGamemode($this->gamemode);
 		$this->dataPacket($pk);
 	}
 
@@ -3270,11 +3271,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function handleInventoryTransaction(InventoryTransactionPacket $packet) : bool{
 		if(!$this->spawned or !$this->isAlive()){
 			return false;
-		}
-
-		if($this->isSpectator()){
-			$this->sendAllInventories();
-			return true;
 		}
 
 		if(count($packet->actions) > 100){
