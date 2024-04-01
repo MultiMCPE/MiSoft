@@ -27,6 +27,8 @@ use pocketmine\entity\Mob;
 
 class FloatBehavior extends Behavior{
 
+  private int $tick = 0;
+
 	public function __construct(Mob $mob){
 		parent::__construct($mob);
 		$this->mutexBits = 4;
@@ -45,7 +47,7 @@ class FloatBehavior extends Behavior{
 	}
 
 	public function onTick() : void{
-		if($this->random->nextFloat() < 0.8){
+		if($this->tick++ % 10 === 0){
 			$this->mob->getJumpHelper()->setJumping(true);
 		}
 	}
