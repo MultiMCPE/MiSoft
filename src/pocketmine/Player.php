@@ -267,6 +267,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const CREATIVE = 1;
 	public const ADVENTURE = 2;
 	public const SPECTATOR = 3;
+	public const NEW_SPECTATOR = 4;
 	public const VIEW = Player::SPECTATOR;
 
 	//TODO: HACK!
@@ -1671,18 +1672,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 *
 	 * @return int
 	 */
-	public static function getClientFriendlyGamemode(int $gamemode) : int{
-	    static $map = [
+	public static function getClientFriendlyGamemode(int $gamemode, int $playerProtocol = ProtocolInfo::PROTOCOL_110) : int{
+	  static $map = [
 			self::SURVIVAL => GameMode::SURVIVAL,
 			self::CREATIVE => GameMode::CREATIVE,
 			self::ADVENTURE => GameMode::ADVENTURE,
-			self::SPECTATOR => GameMode::CREATIVE
+			self::SPECTATOR => GameMode::CREATIVE,
 		];
-		return $map[$gamemode & 0x3];
-	}
-
-    public static function gamemodeToNetworkId(int $gamemode, int $playerProtocol) : int{
-		return (($playerProtocol >= ProtocolInfo::PROTOCOL_560 && ($gamemode & 0x3) === self::SPECTATOR) ? GameMode::SPECTATOR : self::getClientFriendlyGamemode($gamemode));
+    if($playerProtocol >= ProtocolInfo::PROTOCOL_560){
+      $map[self::NEW_SPECTATOR] = GameMode::SPECTATOR;
+    }else{
+      $map[self::NEW_SPECTATOR] = GameMode::CREATIVE;
+    }
+		return $map[$gamemode & 0x4];
 	}
 
 	public static function protocolGameModeToCore(int $gameMode) : ?int{
@@ -1763,8 +1765,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	public function sendGamemode(){
 		$pk = new SetPlayerGameTypePacket();
-		//$pk->gamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
-    $pk->gamemode = Player::getClientFriendlyGamemode($this->gamemode);
+    $pk->gamemode = Player::getClientFriendlyGamemode($this->gamemode, $this->protocol);
 		$this->dataPacket($pk);
 	}
 
@@ -2828,7 +2829,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new StartGamePacket();
 		$pk->entityUniqueId = $this->id;
 		$pk->entityRuntimeId = $this->id;
-		$pk->playerGamemode = Player::gamemodeToNetworkId($this->gamemode, $this->getProtocol());
+		$pk->playerGamemode = Player::getClientFriendlyGamemode($this->gamemode, $this->protocol);
 
 		$pk->playerPosition = $this->getOffsetPosition($this);
 
@@ -2836,7 +2837,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->yaw = $this->yaw;
 		$pk->seed = -1;
 		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", $this->level->getDimensionId()); //TODO: implement this properly
-		$pk->worldGamemode = Player::gamemodeToNetworkId($this->server->getGamemode(), $this->getProtocol());
+		$pk->worldGamemode = Player::getClientFriendlyGamemode($this->server->getGamemode(), $this->protocol);
 		$pk->difficulty = $this->level->getDifficulty();
 		$pk->spawnX = $spawnPosition->getFloorX();
 		$pk->spawnY = $spawnPosition->getFloorY();
