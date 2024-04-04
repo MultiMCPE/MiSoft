@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol\types;
 use InvalidArgumentException;
 use Ahc\Json\Comment;
 use pocketmine\entity\Skin;
-use pocketmine\utils\Binary;
+use pocketmine\utils\UUID;
 use pocketmine\utils\Color;
 use SplFixedArray;
 use function json_decode;
@@ -46,34 +46,90 @@ class SerializedSkin{
     /** @var string[]|null */
     public static $defaultSkins = null;
 
+	/** @var array[]|null */
+	public static $skinIdToBedrockMap = null;
+
+	public static function init() : void{
+		$skinIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/skins/pw10_skins/skin_id_map.json"), true);
+		foreach($skinIdMap as $skinId => $item){
+			$geometryData = file_get_contents(RESOURCE_PATH . "/vanilla/skins/pw10_skins/geometry/" . $item["geometry"] . ".json");
+
+			$data = [
+				"geometry" => $item["geometry"],
+				"geometryData" => $geometryData,
+			];
+			if(isset($item["cape"])){
+				$capeData = file_get_contents(RESOURCE_PATH . "/vanilla/skins/pw10_skins/capes/" . $item["cape"] . ".skindata");
+
+				$data["cape"] = $item["cape"];
+				$data["capeData"] = $capeData;
+			}
+			self::$skinIdToBedrockMap[$skinId] = $data;
+		}
+	}
+
+    public static function lazyInit() : void{
+        if(self::$skinIdToBedrockMap === null){
+            self::init();
+        }
+    }
+
     /**
      * @param Skin $skin
      * 
      * @return SerializedSkin
      */
     public static function fromSkin(Skin $skin) : SerializedSkin{
-        return new self(
-            $skin->getSkinId(),
-            "",
-            SkinImage::fromLegacy($skin->getSkinData()),
-            "",
-            $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
-            json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
-            self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
-            "",
-            "",
-            [],
-            false,
-            false,
-            false,
-            null,
-            "",
-            new Color(0, 0, 0),
-            SplFixedArray::fromArray([]),
-            SplFixedArray::fromArray([]),
-            true,
-            true
-        );
+        self::lazyInit();
+
+        $mapping = self::$skinIdToBedrockMap[$skin->getSkinId()] ?? null;
+		if($mapping === null){
+            return new self(
+                $skin->getSkinId(),
+                "",
+                SkinImage::fromLegacy($skin->getSkinData()),
+                "",
+                $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
+                json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
+                self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
+                "",
+                "",
+                [],
+                false,
+                false,
+                false,
+                null,
+                "",
+                new Color(0, 0, 0),
+                SplFixedArray::fromArray([]),
+                SplFixedArray::fromArray([]),
+                true,
+                true
+            );
+        }else{
+            return new self(
+                $skin->getSkinId(),
+                "",
+                SkinImage::fromLegacy($skin->getSkinData()),
+                $mapping["cape"] ?? "",
+                ($mapping["capeData"] ?? $skin->getCapeData()) === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($mapping["capeData"] ?? $skin->getCapeData()),
+                json_encode(["geometry" => ["default" => $mapping["geometry"]]]),
+                $mapping["geometryData"],
+                "",
+                "",
+                [],
+                false,
+                false,
+                false,
+                null,
+                "",
+                new Color(0, 0, 0),
+                SplFixedArray::fromArray([]),
+                SplFixedArray::fromArray([]),
+                true,
+                true
+            );
+        }
     }
 
     /**
@@ -204,7 +260,7 @@ class SerializedSkin{
         $this->premiumSkin = $premiumSkin;
         $this->personaSkin = $personaSkin;
         $this->capeOnClassicSkin = $capeOnClassicSkin;
-        $this->fullSkinId = $fullSkinId ?? (Binary::writeDouble(microtime(true)) . Binary::writeLInt(random_int(-0xffffffff, 0xffffffff)));
+        $this->fullSkinId = $fullSkinId ?? $this->generateFullSkinId();
         $this->armSize = $armSize;
         $this->skinColor = $skinColor;
         $this->personaPieces = $personaPieces;
@@ -426,5 +482,23 @@ class SerializedSkin{
 
         return $skin;
     }
+
+	/**
+	 * Hack to fix skins conflict.
+	 * Full skin ID must be unique for any set of data.
+	 */
+	public function generateFullSkinId() : string{
+		return UUID::fromData(
+			$this->skinId,
+			$this->resourcePatch,
+			$this->skinImage->getData(),
+			$this->capeImage->getData(),
+			$this->geometryData,
+			(string) $this->premiumSkin,
+			(string) $this->personaSkin,
+			(string) $this->capeOnClassicSkin,
+			$this->capeId
+		)->toString();
+	}
 
 }

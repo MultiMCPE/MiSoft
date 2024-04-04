@@ -35,6 +35,7 @@ use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\multiversion\actor\AvailableActorIdentifiersPalette;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\Server;
 use function spl_object_hash;
 
@@ -65,6 +66,7 @@ class Network{
         BlockPalette::init();
         BiomeDefinitionPalette::init();
         AvailableActorIdentifiersPalette::init();
+		SerializedSkin::init();
 
 		$this->server = $server;
 
