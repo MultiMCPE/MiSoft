@@ -564,6 +564,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\event\\entity\\EntityCombustByBlockEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityCombustByBlockEvent.php',
         'pocketmine\\event\\entity\\EntityCombustByEntityEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityCombustByEntityEvent.php',
         'pocketmine\\event\\entity\\EntityCombustEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityCombustEvent.php',
+        'pocketmine\\event\\entity\\EntityConsumeTotemEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityConsumeTotemEvent.php',
         'pocketmine\\event\\entity\\EntityDamageByBlockEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDamageByBlockEvent.php',
         'pocketmine\\event\\entity\\EntityDamageByChildEntityEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDamageByChildEntityEvent.php',
         'pocketmine\\event\\entity\\EntityDamageByEntityEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDamageByEntityEvent.php',

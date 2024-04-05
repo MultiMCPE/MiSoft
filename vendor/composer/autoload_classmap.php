@@ -493,6 +493,7 @@ return array(
     'pocketmine\\event\\entity\\EntityCombustByBlockEvent' => $baseDir . '/src/pocketmine/event/entity/EntityCombustByBlockEvent.php',
     'pocketmine\\event\\entity\\EntityCombustByEntityEvent' => $baseDir . '/src/pocketmine/event/entity/EntityCombustByEntityEvent.php',
     'pocketmine\\event\\entity\\EntityCombustEvent' => $baseDir . '/src/pocketmine/event/entity/EntityCombustEvent.php',
+    'pocketmine\\event\\entity\\EntityConsumeTotemEvent' => $baseDir . '/src/pocketmine/event/entity/EntityConsumeTotemEvent.php',
     'pocketmine\\event\\entity\\EntityDamageByBlockEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDamageByBlockEvent.php',
     'pocketmine\\event\\entity\\EntityDamageByChildEntityEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDamageByChildEntityEvent.php',
     'pocketmine\\event\\entity\\EntityDamageByEntityEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDamageByEntityEvent.php',

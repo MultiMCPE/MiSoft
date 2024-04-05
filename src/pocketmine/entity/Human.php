@@ -27,6 +27,7 @@ use InvalidArgumentException;
 use InvalidStateException;
 use pocketmine\entity\projectile\ProjectileSource;
 use pocketmine\entity\utils\ExperienceUtils;
+use pocketmine\event\entity\EntityConsumeTotemEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityRegainHealthEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
@@ -815,22 +816,27 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		parent::applyPostDamageEffects($source);
 		$totemModifier = $source->getModifier(EntityDamageEvent::MODIFIER_TOTEM);
 		if($totemModifier < 0){ //Totem prevented death
-			$this->removeAllEffects();
+			$event = new EntityConsumeTotemEvent($this);
+			$this->server->getPluginManager()->callEvent($event);
 
-			$this->addEffect(new EffectInstance(Effect::getEffect(Effect::REGENERATION), 40 * 20, 1));
-			$this->addEffect(new EffectInstance(Effect::getEffect(Effect::FIRE_RESISTANCE), 40 * 20, 1));
-			$this->addEffect(new EffectInstance(Effect::getEffect(Effect::ABSORPTION), 5 * 20, 1));
+			if(!$event->isCancelled()){
+		    	$this->removeAllEffects();
 
-			$this->broadcastEntityEvent(ActorEventPacket::CONSUME_TOTEM);
-			$this->level->broadcastLevelEvent($this->add(0, $this->eyeHeight, 0), LevelEventPacket::EVENT_SOUND_TOTEM);
+		    	$this->addEffect(new EffectInstance(Effect::getEffect(Effect::REGENERATION), 40 * 20, 1));
+		    	$this->addEffect(new EffectInstance(Effect::getEffect(Effect::FIRE_RESISTANCE), 40 * 20, 1));
+		    	$this->addEffect(new EffectInstance(Effect::getEffect(Effect::ABSORPTION), 5 * 20, 1));
 
-			$hand = $this->inventory->getItemInHand();
-			if($hand instanceof Totem){
-				$hand->pop(); //Plugins could alter max stack size
-				$this->inventory->setItemInHand($hand);
-			}elseif(($offHand = $this->offHandInventory->getItem(0)) instanceof Totem){
-				$offHand->pop();
-				$this->offHandInventory->setItem(0, $offHand);
+		    	$this->broadcastEntityEvent(ActorEventPacket::CONSUME_TOTEM);
+		    	$this->level->broadcastLevelEvent($this->add(0, $this->eyeHeight, 0), LevelEventPacket::EVENT_SOUND_TOTEM);
+
+		    	$hand = $this->inventory->getItemInHand();
+		    	if($hand instanceof Totem){
+			    	$hand->pop(); //Plugins could alter max stack size
+			    	$this->inventory->setItemInHand($hand);
+		    	}elseif(($offHand = $this->offHandInventory->getItem(0)) instanceof Totem){
+			    	$offHand->pop();
+			    	$this->offHandInventory->setItem(0, $offHand);
+				}
 			}
 		}
 	}
