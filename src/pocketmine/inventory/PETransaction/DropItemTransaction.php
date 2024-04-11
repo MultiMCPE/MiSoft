@@ -62,7 +62,8 @@ class DropItemTransaction extends Transaction{
         $ev = new PlayerDropItemEvent($player, $item);
         $ev->call();
         if($ev->isCancelled()){
-            $player->getInventory()->sendContents($player);
+            $transactionQueue->getInventory()->removeItem($item);
+            $player->getInventory()->addItem($item);
             return true;
         }
 

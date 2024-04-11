@@ -915,7 +915,7 @@ class Chunk{
 	    	}
 		}
 		for($y = 0; $y < $subChunkCount; ++$y){
-			$result .= $this->networkSerializeSubChunk($this->getSubChunk($y), $playerProtocol);
+			$result .= $this->networkSerializeSubChunk($this->subChunks[$y], $playerProtocol);
 		}
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
