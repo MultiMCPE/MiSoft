@@ -178,20 +178,23 @@ class Arrow extends Projectile{
 		$this->broadcastEntityEvent(ActorEventPacket::ARROW_SHAKE, 7); //7 ticks
 	}
 
-	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : void{
-		parent::onHitEntity($entityHit, $hitResult);
-		if($this->potionId !== 0){
-			foreach(Potion::getPotionEffectsById($this->potionId - 1) as $effect){
-				$entityHit->addEffect($effect->setDuration((int) ($effect->getDuration() / 8)));
+	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : bool{
+		if(($hit = parent::onHitEntity($entityHit, $hitResult))){
+	    	if($this->potionId !== 0){
+		    	foreach(Potion::getPotionEffectsById($this->potionId - 1) as $effect){
+			    	$entityHit->addEffect($effect->setDuration((int) ($effect->getDuration() / 8)));
+		    	}
+	    	}
+	    	if($this->punchKnockback > 0){
+		    	$horizontalSpeed = sqrt($this->motion->x ** 2 + $this->motion->z ** 2);
+		    	if($horizontalSpeed > 0){
+			    	$multiplier = $this->punchKnockback * 0.6 / $horizontalSpeed;
+			    	$entityHit->setMotion($entityHit->getMotion()->add($this->motion->x * $multiplier, 0.1, $this->motion->z * $multiplier));
+				}
 			}
 		}
-		if($this->punchKnockback > 0){
-			$horizontalSpeed = sqrt($this->motion->x ** 2 + $this->motion->z ** 2);
-			if($horizontalSpeed > 0){
-				$multiplier = $this->punchKnockback * 0.6 / $horizontalSpeed;
-				$entityHit->setMotion($entityHit->getMotion()->add($this->motion->x * $multiplier, 0.1, $this->motion->z * $multiplier));
-			}
-		}
+
+		return $hit;
 	}
 
 	/**

@@ -306,15 +306,18 @@ abstract class Projectile extends Entity{
 	 * @param Entity         $entityHit
 	 * @param RayTraceResult $hitResult
 	 */
-	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : void{
+	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : bool{
 		$damage = $this->getResultDamage();
 
+		$damageEv = null;
 		if($damage >= 0){
 			if($this->getOwningEntity() === null){
 				$ev = new EntityDamageByEntityEvent($this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
 			}else{
 				$ev = new EntityDamageByChildEntityEvent($this->getOwningEntity(), $this, $entityHit, EntityDamageEvent::CAUSE_PROJECTILE, $damage);
 			}
+
+			$damageEv = $ev;
 
 			$entityHit->attack($ev);
 
@@ -328,6 +331,8 @@ abstract class Projectile extends Entity{
 		}
 
 		$this->flagForDespawn();
+
+		return ($damageEv !== null ? !$damageEv->isCancelled() : false);
 	}
 
 	/**
