@@ -76,6 +76,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 	private const DAMAGE_TAG = "Damage"; //TAG_Int
 	private const DAMAGE_TAG_CONFLICT_RESOLUTION = "___Damage_ProtocolCollisionResolution___";
+	private const PM_ID_TAG = "___Id___";
 	private const PM_META_TAG = "___Meta___";
 
 	public function getString() : string{
@@ -498,6 +499,13 @@ class NetworkBinaryStream extends BinaryStream{
 			}
 
 			if($nbt !== null){
+				if($nbt->hasTag(self::PM_ID_TAG, IntTag::class)){
+					$id = $nbt->getInt(self::PM_ID_TAG);
+					$nbt->removeTag(self::PM_ID_TAG);
+					if($nbt->count() === 0){
+						$nbt = null;
+					}
+				}
 				if($nbt->hasTag(self::DAMAGE_TAG, IntTag::class)){
 					$meta = $nbt->getInt(self::DAMAGE_TAG);
 					$nbt->removeTag(self::DAMAGE_TAG);
@@ -532,8 +540,48 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$coreData = $item->getDamage();
 
+		$isBlockItem = $item->getId() < 256;
+
+		$nbt = null;
+		if($item->hasCompoundTag()){
+			$nbt = clone $item->getNamedTag();
+		}
+
         $palette = ItemPalette::getPalette($playerProtocol);
-		[$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $coreData);
+		$idMeta = $palette::getRuntimeFromLegacyIdQuiet($item->getId(), $coreData);
+		if($idMeta === null){
+			//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
+			//other unmapped items.
+			[$netId, $netData] = $palette::getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
+			if($nbt === null){
+				$nbt = new CompoundTag();
+			}
+			$nbt->setInt(self::PM_ID_TAG, $item->getId());
+			$nbt->setInt(self::PM_META_TAG, $coreData);
+		}else{
+	    	[$netId, $netData] = $idMeta;
+
+			if($item instanceof Durable and $coreData > 0){
+				if($nbt !== null){
+					if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
+						$nbt->removeTag(self::DAMAGE_TAG);
+						$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+						$nbt->setTag($existing);
+					}
+				}else{
+					$nbt = new CompoundTag();
+				}
+				$nbt->setInt(self::DAMAGE_TAG, $coreData);
+			}elseif($isBlockItem && $coreData !== 0){
+				//TODO HACK: This foul-smelling code ensures that we can correctly deserialize an item when the
+				//client sends it back to us, because as of 1.16.220, blockitems quietly discard their metadata
+				//client-side. Aside from being very annoying, this also breaks various server-side behaviours.
+				if($nbt === null){
+					$nbt = new CompoundTag();
+				}
+				$nbt->setInt(self::PM_META_TAG, $coreData);
+			}
+		}
 
 		$this->putVarInt($netId);
 		($this->buffer .= (pack("v", $item->getCount())));
@@ -549,7 +597,6 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
 		$blockRuntimeId = 0;
-		$isBlockItem = $item->getId() < 256;
 		if($isBlockItem){
 			$block = $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
@@ -558,31 +605,6 @@ class NetworkBinaryStream extends BinaryStream{
 			}
 		}
 		$this->putVarInt($blockRuntimeId);
-
-		$nbt = null;
-		if($item->hasCompoundTag()){
-			$nbt = clone $item->getNamedTag();
-		}
-		if($item instanceof Durable and $coreData > 0){
-			if($nbt !== null){
-				if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
-					$nbt->removeTag(self::DAMAGE_TAG);
-					$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-					$nbt->setTag($existing);
-				}
-			}else{
-				$nbt = new CompoundTag();
-			}
-			$nbt->setInt(self::DAMAGE_TAG, $coreData);
-		}elseif($isBlockItem && $coreData !== 0){
-			//TODO HACK: This foul-smelling code ensures that we can correctly deserialize an item when the
-			//client sends it back to us, because as of 1.16.220, blockitems quietly discard their metadata
-			//client-side. Aside from being very annoying, this also breaks various server-side behaviours.
-			if($nbt === null){
-				$nbt = new CompoundTag();
-			}
-			$nbt->setInt(self::PM_META_TAG, $coreData);
-		}
 
 		$this->putString(
 		(static function() use ($nbt, $netId) : string{

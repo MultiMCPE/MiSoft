@@ -131,9 +131,12 @@ final class ItemPalette534 extends Palette{
 	 * @param int $id
 	 * @param int $meta
 	 *
-	 * @return int[]
+	 * @return ?int[]
 	 */
-	public static function getRuntimeFromLegacyId(int $id, int $meta = 0) : array{
+	public static function getRuntimeFromLegacyIdQuiet(int $id, int $meta = 0) : ?array{
+		if($meta === -1){
+			$meta = 0x7fff;
+		}
 		if(isset(self::$complexLegacyToRuntimeIdMap[$id][$meta])){
 			return [self::$complexLegacyToRuntimeIdMap[$id][$meta], 0];
 		}
@@ -141,7 +144,18 @@ final class ItemPalette534 extends Palette{
 			return [self::$simpleLegacyToRuntimeIdMap[$id], $meta];
 		}
 
-		throw new InvalidArgumentException("Unmapped ID/metadata combination $id:$meta");
+		return null;
+	}
+
+	/**
+	 * @param int $id
+	 * @param int $meta
+	 *
+	 * @return int[]
+	 */
+	public static function getRuntimeFromLegacyId(int $id, int $meta = 0) : array{
+	    return self::getRuntimeFromLegacyIdQuiet($id, $meta) ??
+		    throw new InvalidArgumentException("Unmapped ID/metadata combination $id:$meta");
 	}
 
 	/**
