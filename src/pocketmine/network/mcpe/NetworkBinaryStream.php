@@ -667,16 +667,24 @@ class NetworkBinaryStream extends BinaryStream{
 		    	$this->putVarInt($item->getCount());
 	    	}
 		}else{
-			$this->putByte(1); // internal item descriptor type
-			$palette = ItemPalette::getPalette($playerProtocol);
 			if($item->isNull()){
-			    $this->putLShort(0);
+				$this->putByte(0); // internal item descriptor type
+			    $this->putVarInt(0);
 			}else{
-			    [$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $item->getDamage());
+				$this->putByte(1); // internal item descriptor type
+
+		        $palette = ItemPalette::getPalette($playerProtocol);
+		        if($item->hasAnyDamageValue()){
+		            [$netId, ] = $palette::getRuntimeFromLegacyId($item->getId(), 0);
+		            $netData = 0x7fff;
+		        }else{
+		            [$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $item->getDamage());
+		        }
+
 			    $this->putLShort($netId);
 				$this->putLShort($netData);
+				$this->putVarInt($item->getCount());
 			}
-			$this->putVarInt($item->getCount());
 		}
 	}
 
