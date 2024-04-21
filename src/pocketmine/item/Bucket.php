@@ -30,6 +30,7 @@ use pocketmine\block\Liquid;
 use pocketmine\entity\Living;
 use pocketmine\event\player\PlayerBucketEmptyEvent;
 use pocketmine\event\player\PlayerBucketFillEvent;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
@@ -84,8 +85,12 @@ class Bucket extends Item implements Consumable{
 			$ev = new PlayerBucketEmptyEvent($player, $blockReplace, $face, $this, ItemFactory::get(Item::BUCKET));
 			$ev->call();
 			if(!$ev->isCancelled()){
-				$player->getLevel()->setBlock($blockReplace, $resultBlock->getFlowingForm(), true, true);
-				$player->getLevel()->broadcastLevelSoundEvent($blockReplace->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
+				//Only disallow water placement in the Nether, allow other liquids to be placed
+				//In vanilla, water buckets are emptied when used in the Nether, but no water placed.
+				if(!($player->getLevel()->getDimensionId() === DimensionIds::NETHER and $targetBlock->getId() === self::WATER)){
+			    	$player->getLevel()->setBlock($blockReplace, $resultBlock->getFlowingForm(), true, true);
+			    	$player->getLevel()->broadcastLevelSoundEvent($blockReplace->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
+				}
 
 				if($player->isSurvival()){
 					$player->getInventory()->setItemInHand($ev->getItem());
