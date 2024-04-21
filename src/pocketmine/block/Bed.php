@@ -27,9 +27,11 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\lang\TranslationContainer;
 use pocketmine\level\Level;
+use pocketmine\level\Explosion;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\tile\Bed as TileBed;
 use pocketmine\tile\Tile;
 use pocketmine\utils\TextFormat;
@@ -135,6 +137,14 @@ class Bed extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
+		$dimensionId = $this->getLevel()->getDimensionId();
+		if($dimensionId === DimensionIds::NETHER or $dimensionId === DimensionIds::THE_END){
+			$explosion = new Explosion($this, 6, $this);
+			$explosion->explodeA();
+			$explosion->explodeB();
+			return true;
+		}
+
 		if($player !== null){
 			$other = $this->getOtherHalf();
 			if($other === null){

@@ -2164,7 +2164,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($this->spawned){
 			if($this->server->netherEnabled){
-				if((($this->isSurvival() or $this->isCreative()) and $this->server->getTick() - $this->portalTime >= 80) and $this->portalTime > 0){
+				if(($this->isCreative() or $this->isSurvival() and $this->server->getTick() - $this->portalTime >= 80) and $this->portalTime > 0){
 					$netherLevel = null;
 					if($this->server->isLevelLoaded($this->server->netherName) or $this->server->loadLevel($this->server->netherName)){
 						$netherLevel = $this->server->getLevelByName($this->server->netherName);

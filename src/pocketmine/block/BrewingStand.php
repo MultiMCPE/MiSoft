@@ -89,7 +89,7 @@ class BrewingStand extends Transparent{
 		if($tile instanceof BrewingStandTile){
 			$player->addWindow($tile->getInventory());
 		}else{
-			$nbt = BrewingStandTile::createNBT($this, $face, $item, $player);
+			$nbt = BrewingStandTile::createNBT($this, null, $item, $player);
 			$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
 
 			if($item->hasCustomName()){

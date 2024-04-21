@@ -571,7 +571,12 @@ class LevelSoundEventPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->entityType = $this->getString();
 		}else{
-		    $this->entityType = (AddActorPacket::LEGACY_ID_MAP_BC[$this->getVarInt()] ?? ":");
+            $entityType = $this->getVarInt();
+            if($this->sound === self::SOUND_THROW && $entityType === 319){
+                $this->entityType = "minecraft:player";
+            }else{
+		        $this->entityType = (AddActorPacket::LEGACY_ID_MAP_BC[$entityType] ?? ":");
+            }
 		}
 		$this->isBabyMob = (($this->get(1) !== "\x00"));
 		$this->disableRelativeVolume = (($this->get(1) !== "\x00"));
@@ -599,7 +604,11 @@ class LevelSoundEventPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->putString($this->entityType);
 		}else{
-		    $entityType = array_search($this->entityType, AddActorPacket::LEGACY_ID_MAP_BC, true);
+            if($this->sound === self::SOUND_THROW && $this->entityType === "minecraft:player"){
+                $entityType = 319;
+            }else{
+		        $entityType = array_search($this->entityType, AddActorPacket::LEGACY_ID_MAP_BC, true);
+            }
 		    $this->putVarInt($entityType === false ? 1 : $entityType);
 		}
 		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));
