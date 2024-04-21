@@ -87,7 +87,7 @@ class Bucket extends Item implements Consumable{
 			if(!$ev->isCancelled()){
 				//Only disallow water placement in the Nether, allow other liquids to be placed
 				//In vanilla, water buckets are emptied when used in the Nether, but no water placed.
-				if(!($player->getLevel()->getDimensionId() === DimensionIds::NETHER and $targetBlock->getId() === self::WATER)){
+				if(!($player->getLevel()->getDimensionId() === DimensionIds::NETHER and $resultBlock->getId() === self::FLOWING_WATER)){
 			    	$player->getLevel()->setBlock($blockReplace, $resultBlock->getFlowingForm(), true, true);
 			    	$player->getLevel()->broadcastLevelSoundEvent($blockReplace->add(0.5, 0.5, 0.5), $resultBlock->getBucketEmptySound());
 				}
