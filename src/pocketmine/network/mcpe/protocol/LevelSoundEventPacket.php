@@ -510,7 +510,15 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_VAULT_DEACTIVATE = 507;
 	public const SOUND_HURT_REDUCED = 508;
 	public const SOUND_WIND_CHARGE_BURST = 509;
-    public const SOUND_UNDEFINED = 510;
+
+	public const SOUND_ARMOR_CRACK_WOLF = 511;
+	public const SOUND_ARMOR_BREAK_WOLF = 512;
+	public const SOUND_ARMOR_REPAIR_WOLF = 513;
+	public const SOUND_MACE_SMASH_AIR = 514;
+	public const SOUND_MACE_SMASH_GROUND = 515;
+
+	public const SOUND_MACE_HEAVY_SMASH_GROUND = 520;
+    public const SOUND_UNDEFINED = 521;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

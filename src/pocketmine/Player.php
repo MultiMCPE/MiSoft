@@ -2784,6 +2784,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				//the client remove its own non-server-supplied resource packs.
 				$pk->mustAccept = false;
 				$pk->experiments = new Experiments([], false);
+				$pk->useVanillaEditorPacks = false;
 				$this->dataPacket($pk);
 				break;
 			case ResourcePackClientResponsePacket::STATUS_COMPLETED:

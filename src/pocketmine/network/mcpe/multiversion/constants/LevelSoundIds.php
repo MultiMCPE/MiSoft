@@ -509,6 +509,14 @@ final class LevelSoundIds{
 			"SOUND_HURT_REDUCED" => 508,
 			"SOUND_WIND_CHARGE_BURST" => 509,
 
+		    "SOUND_ARMOR_CRACK_WOLF" => 511,
+			"SOUND_ARMOR_BREAK_WOLF" => 512,
+			"SOUND_ARMOR_REPAIR_WOLF" => 513,
+			"SOUND_MACE_SMASH_AIR" => 514,
+			"SOUND_MACE_SMASH_GROUND" => 515,
+		
+			"SOUND_MACE_HEAVY_SMASH_GROUND" => 520,
+
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
             "SOUND_SCULK_SENSOR_POWER_OFF" => 329,
@@ -531,7 +539,7 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
             "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
-            "SOUND_UNDEFINED" => 510
+            "SOUND_UNDEFINED" => 521
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,

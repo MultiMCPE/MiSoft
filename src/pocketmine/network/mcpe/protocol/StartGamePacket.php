@@ -88,6 +88,8 @@ class StartGamePacket extends DataPacket{
 	public $generator = GeneratorType::OVERWORLD;
 	/** @var int */
 	public $worldGamemode;
+	/** @var bool */
+	public $hardcore = false;
 	/** @var int */
 	public $difficulty;
 	/** @var int */
@@ -263,6 +265,9 @@ class StartGamePacket extends DataPacket{
 		$this->spawnSettings = SpawnSettings::read($this);
 		$this->generator = $this->getVarInt();
 		$this->worldGamemode = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
+			$this->hardcore = (($this->get(1) !== "\x00"));
+		}
 		$this->difficulty = $this->getVarInt();
 		$this->getBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		$this->hasAchievementsDisabled = (($this->get(1) !== "\x00"));
@@ -501,6 +506,9 @@ class StartGamePacket extends DataPacket{
 		$this->spawnSettings->write($this);
 		$this->putVarInt($this->generator);
 		$this->putVarInt($this->worldGamemode);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
+			($this->buffer .= ($this->hardcore ? "\x01" : "\x00"));
+		}
 		$this->putVarInt($this->difficulty);
 		$this->putBlockPosition($this->spawnX, $this->spawnY, $this->spawnZ);
 		($this->buffer .= ($this->hasAchievementsDisabled ? "\x01" : "\x00"));

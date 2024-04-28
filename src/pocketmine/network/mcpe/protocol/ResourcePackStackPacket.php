@@ -47,6 +47,8 @@ class ResourcePackStackPacket extends DataPacket{
 	public $baseGameVersion = ProtocolInfo::MINECRAFT_VERSION_NETWORK;
 	/** @var Experiments */
 	public $experiments;
+	/** @var bool */
+	public $useVanillaEditorPacks;
 
 	protected function decodePayload(){
 		$this->mustAccept = (($this->get(1) !== "\x00"));
@@ -76,6 +78,9 @@ class ResourcePackStackPacket extends DataPacket{
 	        	$this->baseGameVersion = $this->getString();
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	        	    $this->experiments = Experiments::read($this);
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
+				    	$this->useVanillaEditorPacks = (($this->get(1) !== "\x00"));
+					}
 	        	}
 	    	}
 		}
@@ -110,6 +115,9 @@ class ResourcePackStackPacket extends DataPacket{
 	        	$this->putString($this->baseGameVersion);
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	        	    $this->experiments->write($this);
+					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
+						($this->buffer .= ($this->useVanillaEditorPacks ? "\x01" : "\x00"));
+					}
 	        	}
 	    	}
 		}

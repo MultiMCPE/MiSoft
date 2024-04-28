@@ -142,6 +142,9 @@ class CraftingDataPacket extends DataPacket{
 				    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
 				        	$entry["priority"] = $this->getVarInt();
 				        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
+									$entry["symmetric"] = $this->getBool();
+								}
 				        	    $entry["net_id"] = $this->readGenericTypeNetworkId();
 				        	}
 				    	}
@@ -320,6 +323,9 @@ class CraftingDataPacket extends DataPacket{
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
 				$stream->putVarInt(50); //TODO: priority
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+					if($playerProtocol >= ProtocolInfo::PROTOCOL_671){
+						$stream->putBool(true); //symmetric
+					}
 	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
 	    	}

@@ -38,10 +38,14 @@ class UpdatePlayerGameTypePacket extends DataPacket/* implements ClientboundPack
 	/** @var int */
 	private $playerEntityUniqueId;
 
-	public static function create(int $gameMode, int $playerEntityUniqueId) : self{
+	/** @var int */
+	private $tick;
+
+	public static function create(int $gameMode, int $playerEntityUniqueId, int $tick) : self{
 		$result = new self;
 		$result->gameMode = $gameMode;
 		$result->playerEntityUniqueId = $playerEntityUniqueId;
+		$result->tick = $tick;
 		return $result;
 	}
 
@@ -49,14 +53,18 @@ class UpdatePlayerGameTypePacket extends DataPacket/* implements ClientboundPack
 
 	public function getPlayerEntityUniqueId() : int{ return $this->playerEntityUniqueId; }
 
+	public function getTick() : int{ return $this->tick; }
+
 	protected function decodePayload() : void{
 		$this->gameMode = $this->getVarInt();
 		$this->playerEntityUniqueId = $this->getEntityUniqueId();
+		$this->tick = $this->getUnsignedVarInt();
 	}
 
 	protected function encodePayload() : void{
 		$this->putVarInt($this->gameMode);
 		$this->putEntityUniqueId($this->playerEntityUniqueId);
+		$this->putUnsignedVarInt($this->tick);
 	}
 
 	public function handle(NetworkSession $handler) : bool{

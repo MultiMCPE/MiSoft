@@ -57,6 +57,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds594;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds618;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds649;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds662;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds671;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use function array_key_last;
 use ReflectionClass;
@@ -64,6 +65,7 @@ use SplFixedArray;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_671 => PacketsIds671::class,
 		ProtocolInfo::PROTOCOL_662 => PacketsIds662::class,
 		ProtocolInfo::PROTOCOL_649 => PacketsIds649::class,
 		ProtocolInfo::PROTOCOL_618 => PacketsIds618::class,
