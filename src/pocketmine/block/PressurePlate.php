@@ -57,9 +57,6 @@ class PressurePlate extends RedstoneSource{
 				$this->meta = 1;
 				$this->getLevel()->setBlock($this, $this, true, false);
 				$this->getLevel()->addSound(new GenericSound($this, 1000));
-			}
-
-			if(!$this->isActivated() or ($this->isActivated() and ($this->getLevel()->getServer()->getTick() % 30) === 0)){
 				$this->activate();
 			}
 
