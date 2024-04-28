@@ -73,6 +73,9 @@ abstract class Tile extends Position{
 	public const SKULL = "Skull";
 	public const BEACON = "Beacon";
     public const SHULKER_BOX = "ShulkerBox";
+	public const DAY_LIGHT_DETECTOR = "DLDetector";
+	public const DISPENSER = "Dispenser";
+	public const DROPPER = "Dropper";
 
 	/** @var int */
 	public static $tileCount = 1;
@@ -99,6 +102,9 @@ abstract class Tile extends Position{
 		self::registerTile(BrewingStand::class, [self::BREWING_STAND, "minecraft:brewing_stand"]);
 		self::registerTile(Chest::class, [self::CHEST, "minecraft:chest"]);
 		self::registerTile(Cauldron::class, [self::CAULDRON, "minecraft:cauldron"]);
+		self::registerTile(Dispenser::class, [self::DISPENSER, "minecaft:dispenser"]);
+		self::registerTile(DLDetector::class, [self::DAY_LIGHT_DETECTOR, "minecraft:daylight_detector"]);
+		self::registerTile(Dropper::class, [self::DROPPER, "minecraft:dropper"]);
 		self::registerTile(EnchantTable::class, [self::ENCHANT_TABLE, "minecraft:enchanting_table"]);
 		self::registerTile(EnderChest::class, [self::ENDER_CHEST, "minecraft:ender_chest"]);
 		self::registerTile(FlowerPot::class, [self::FLOWER_POT, "minecraft:flower_pot"]);

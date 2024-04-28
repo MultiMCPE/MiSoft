@@ -90,7 +90,7 @@ class BlockFactory{
 		self::registerBlock(new Glass());
 		self::registerBlock(new LapisOre());
 		self::registerBlock(new Lapis());
-		//TODO: DISPENSER
+		self::registerBlock(new Dispenser());
 		self::registerBlock(new Sandstone());
 		self::registerBlock(new NoteBlock());
 		self::registerBlock(new Bed());
@@ -191,7 +191,7 @@ class BlockFactory{
 		//TODO: DRAGON_EGG
 		self::registerBlock(new RedstoneLamp());
 		self::registerBlock(new LitRedstoneLamp());
-		//TODO: DROPPER
+		self::registerBlock(new Dropper());
 		self::registerBlock(new ActivatorRail());
 		self::registerBlock(new CocoaBlock());
 		self::registerBlock(new SandstoneStairs());
@@ -244,7 +244,7 @@ class BlockFactory{
 		self::registerBlock(new DoublePlant());
 		self::registerBlock(new StandingBanner());
 		self::registerBlock(new WallBanner());
-		//TODO: DAYLIGHT_DETECTOR_INVERTED
+		self::registerBlock(new DaylightSensorInverted());
 		self::registerBlock(new RedSandstone());
 		self::registerBlock(new RedSandstoneStairs());
 		self::registerBlock(new DoubleStoneSlab2());

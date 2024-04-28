@@ -55,7 +55,7 @@ class TNT extends Solid{
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$place = $this->getLevel()->setBlock($this, $this, true, true);
 		if($place){
-	    	$this->getLevel()->scheduleDelayedBlockUpdate($this, 40);
+	    	$this->getLevel()->scheduleDelayedBlockUpdate($this, 20);
 		}
 
 		return $place;
@@ -98,13 +98,23 @@ class TNT extends Solid{
 	}
 
     public function onScheduledUpdate() : void{
+		$this->checkIgnite();
+	}
+
+    public function onNearbyBlockChange() : void{
+		$this->checkIgnite();
+	}
+
+    public function checkIgnite() : void{
 		$sides = [
 			0,
 			1,
 			2,
 			3,
 			4,
-			5
+			5,
+			6,
+			7
 		];
 
 		foreach($sides as $side){

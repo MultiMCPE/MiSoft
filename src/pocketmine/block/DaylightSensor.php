@@ -23,8 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-class DaylightSensor extends Transparent{
+use pocketmine\Player;
+use pocketmine\item\Item;
+use pocketmine\math\AxisAlignedBB;
+use pocketmine\tile\DLDetector;
 
+class DaylightSensor extends RedstoneSource{
 	protected $id = self::DAYLIGHT_SENSOR;
 
 	public function __construct(int $meta = 0){
@@ -47,5 +51,49 @@ class DaylightSensor extends Transparent{
 		return BlockToolType::TYPE_AXE;
 	}
 
-	//TODO
+	public function getBoundingBox() : AxisAlignedBB{
+		if($this->boundingBox === null){
+			$this->boundingBox = $this->recalculateBoundingBox();
+		}
+		return $this->boundingBox;
+	}
+
+	public function canBeFlowedInto() : bool{
+		return false;
+	}
+
+	protected function getTile() : DLDetector{
+		$t = $this->getLevel()->getTile($this);
+		if($t instanceof DLDetector){
+			return $t;
+		}else{
+			return new DLDetector($this->getLevel(), DLDetector::createNBT($this, null));
+		}
+	}
+
+	public function onActivate(Item $item, Player $player = null) : bool{
+		$this->getLevel()->setBlock($this, new DaylightSensorInverted(), true, true);
+		$this->getTile()->onUpdate();
+
+		return true;
+	}
+
+	public function isActivated(Block $from = null) : bool{
+		return $this->getTile()->isActivated();
+	}
+
+	public function onBreak(Item $item, Player $player = null) : bool{
+		$this->getLevel()->setBlock($this, new Air(), true, true);
+		if($this->isActivated()){
+			$this->deactivate();
+		}
+
+		return true;
+	}
+
+	public function getDrops(Item $item) : array{
+		return [
+			Item::get(self::DAYLIGHT_SENSOR, 0, 1)
+		];
+	}
 }

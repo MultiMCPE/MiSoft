@@ -105,7 +105,7 @@ class RedstoneSource extends Flowable {
 		}
 
 		if($block->getId() === Block::TNT){
-			$block->onActivate(new Item(Item::FLINT_AND_STEEL));
+			$block->ignite();
 		}
 
 		/** @var InactiveRedstoneLamp $block */
@@ -118,7 +118,7 @@ class RedstoneSource extends Flowable {
 			$block->activate();
 		}
 
-		/** @var PoweredRepeater $block */
+		/** @var UnoweredRepeater $block */
 		if($block->getId() === Block::UNPOWERED_REPEATER){
 			if($this->equals($block->getSide($block->getDirection()))){
 				$block->activate();
@@ -171,7 +171,7 @@ class RedstoneSource extends Flowable {
 		}
 
 		/** @var PoweredRepeater $block */
-		if($block->getId() === Block::REPEATER_BLOCK){
+		if($block->getId() === Block::POWERED_REPEATER){
 			if($this->equals($block->getSide($block->getDirection()))){
 				$block->deactivate();
 			}
