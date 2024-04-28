@@ -25,7 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\TieredTool;
 
-class Redstone extends Solid{
+class Redstone extends RedstoneSource{
 
 	protected $id = self::REDSTONE_BLOCK;
 
@@ -47,5 +47,21 @@ class Redstone extends Solid{
 
 	public function getName() : string{
 		return "Redstone Block";
+	}
+
+	/**
+	 * @param Block|null $from
+	 *
+	 * @return bool
+	 */
+	public function isActivated(Block $from = null) : bool{
+		return true;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function canBeFlowedInto() : bool{
+		return false;
 	}
 }

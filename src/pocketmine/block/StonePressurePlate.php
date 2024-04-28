@@ -25,7 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\TieredTool;
 
-class StonePressurePlate extends Transparent{
+class StonePressurePlate extends PressurePlate{
 
 	protected $id = self::STONE_PRESSURE_PLATE;
 

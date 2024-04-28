@@ -29,6 +29,7 @@ use pocketmine\item\TieredTool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\network\mcpe\protocol\LevelEventPacket;
 
 class Anvil extends Fallable{
 
@@ -110,6 +111,8 @@ class Anvil extends Fallable{
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$direction = ($player !== null ? $player->getDirection() : 0) & 0x03;
 		$this->meta = $this->getVariant() | $direction;
-		return $this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevel()->broadcastLevelEvent($this, LevelEventPacket::EVENT_SOUND_ANVIL_FALL);
+		return true;
 	}
 }

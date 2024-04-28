@@ -38,4 +38,18 @@ class RedstoneLamp extends Solid{
 	public function getHardness() : float{
 		return 0.3;
 	}
+
+	public function isLightedByAround() : bool{
+		return false;
+	}
+
+	public function turnOn() : bool{
+		$this->getLevel()->setBlock($this, new LitRedstoneLamp(), true, true);
+
+		return true;
+	}
+
+	public function turnOff() : bool{
+		return true;
+	}
 }

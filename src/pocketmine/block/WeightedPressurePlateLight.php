@@ -25,7 +25,7 @@ namespace pocketmine\block;
 
 use pocketmine\item\TieredTool;
 
-class WeightedPressurePlateLight extends Transparent{
+class WeightedPressurePlateLight extends PressurePlate{
 
 	protected $id = self::LIGHT_WEIGHTED_PRESSURE_PLATE;
 

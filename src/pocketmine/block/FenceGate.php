@@ -102,4 +102,8 @@ class FenceGate extends Transparent{
 	public function getFlammability() : int{
 		return 20;
 	}
+
+	public function isOpened() : bool{
+		return (($this->getDamage() & 0x04) > 0);
+	}
 }

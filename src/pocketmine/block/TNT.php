@@ -52,6 +52,15 @@ class TNT extends Solid{
 		return 0;
 	}
 
+	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
+		$place = $this->getLevel()->setBlock($this, $this, true, true);
+		if($place){
+	    	$this->getLevel()->scheduleDelayedBlockUpdate($this, 40);
+		}
+
+		return $place;
+	}
+
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($item instanceof FlintSteel or $item->hasEnchantment(Enchantment::FIRE_ASPECT)){
 			if($item instanceof Durable){
@@ -85,6 +94,25 @@ class TNT extends Solid{
 
 		if($tnt !== null){
 			$tnt->spawnToAll();
+		}
+	}
+
+    public function onScheduledUpdate() : void{
+		$sides = [
+			0,
+			1,
+			2,
+			3,
+			4,
+			5
+		];
+
+		foreach($sides as $side){
+			$block = $this->getSide($side);
+			if($block instanceof RedstoneSource and $block->isActivated($this)){
+				$this->ignite();
+				break;
+			}
 		}
 	}
 

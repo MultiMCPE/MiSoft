@@ -25,9 +25,10 @@ namespace pocketmine\block;
 
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\level\sound\ButtonClickSound;
 use pocketmine\Player;
 
-abstract class Button extends Flowable{
+abstract class Button extends RedstoneSource{
 
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
@@ -38,14 +39,83 @@ abstract class Button extends Flowable{
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		//TODO: check valid target block
-		$this->meta = $face;
-
-		return $this->level->setBlock($this, $this, true, true);
+		if($blockClicked->isTransparent() === false){
+			$this->meta = $face;
+			$this->getLevel()->setBlock($this, $this, true, true);
+			return true;
+		}
+		return false;
 	}
 
-	public function onActivate(Item $item, Player $player = null) : bool{
-		//TODO
+	/**
+	 * @param Item        $item
+	 * @param Player|null $player
+	 *
+	 * @return bool
+	 */
+	public function onBreak(Item $item, Player $player = null) : bool{
+		if($this->isActivated()){
+			$this->meta ^= 0x08;
+			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->deactivate();
+		}
+		$this->getLevel()->setBlock($this, new Air(), true, false);
+
 		return true;
+	}
+
+	/**
+	 * @param Block|null $from
+	 *
+	 * @return bool
+	 */
+	public function isActivated(Block $from = null) : bool{
+		return (($this->meta & 0x08) === 0x08);
+	}
+
+	/**
+	 * @param Item        $item
+	 * @param Player|null $player
+	 *
+	 * @return bool
+	 */
+	public function onActivate(Item $item, Player $player = null) : bool{
+		if(!$this->isActivated()){
+			$this->meta ^= 0x08;
+			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->getLevel()->addSound(new ButtonClickSound($this));
+			$this->activate();
+			$this->getLevel()->scheduleDelayedBlockUpdate($this, 30);
+		}
+		return true;
+	}
+
+	public function onScheduledUpdate() : void{
+		if($this->isActivated()){
+			$this->meta ^= 0x08;
+			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevel()->addSound(new ButtonClickSound($this));
+			$this->deactivate();
+		}
+	}
+
+	public function onNearbyBlockChange() : void{
+		$side = $this->getDamage();
+		if($this->isActivated()){
+			$side ^= 0x08;
+		}
+
+		$faces = [
+			0 => 1,
+			1 => 0,
+			2 => 3,
+			3 => 2,
+			4 => 5,
+			5 => 4,
+		];
+
+		if($this->getSide($faces[$side]) instanceof Transparent){
+			$this->getLevel()->useBreakOn($this);
+		}
 	}
 }

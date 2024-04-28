@@ -24,10 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
+use pocketmine\level\sound\ButtonClickSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class Lever extends Flowable{
+class Lever extends RedstoneSource{
 
 	protected $id = self::LEVER;
 
@@ -73,6 +74,25 @@ class Lever extends Flowable{
 		return $this->level->setBlock($blockReplace, $this, true, true);
 	}
 
+	/**
+	 * @param Item        $item
+	 * @param Player|null $player
+	 *
+	 * @return bool
+	 */
+	public function onActivate(Item $item, Player $player = null) : bool{
+		$this->meta ^= 0x08;
+		$this->getLevel()->setBlock($this, $this, true, false);
+		$this->getLevel()->addSound(new ButtonClickSound($this));
+		if($this->isActivated()){
+			$this->activate();
+		}else{
+			$this->deactivate();
+		}
+
+		return true;
+	}
+
 	public function onNearbyBlockChange() : void{
 		$faces = [
 			0 => Vector3::SIDE_UP,
@@ -84,10 +104,104 @@ class Lever extends Flowable{
 			6 => Vector3::SIDE_DOWN,
 			7 => Vector3::SIDE_UP
 		];
-		if(!$this->getSide($faces[$this->meta & 0x07])->isSolid()){
+
+		$side = $this->meta;
+		if($this->isActivated()){
+			$side ^= 0x08;
+		}
+
+		if(!$this->getSide($faces[$side])->isSolid()){
 			$this->level->useBreakOn($this);
 		}
 	}
 
-	//TODO
+	/**
+	 * @param Item        $item
+	 * @param Player|null $player
+	 *
+	 * @return bool
+	 */
+	public function onBreak(Item $item, Player $player = null) : bool{
+		if($this->isActivated()){
+			$this->meta ^= 0x08;
+			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->deactivate();
+		}
+		$this->getLevel()->setBlock($this, new Air(), true, false);
+
+		return true;
+	}
+
+	/**
+	 * @param array $ignore
+	 *
+	 * @return bool|void
+	 */
+	public function activate(array $ignore = []){
+		parent::activate($ignore);
+
+		$side = $this->meta;
+		if($this->isActivated()){
+			$side ^= 0x08;
+		}
+
+		$faces = [
+			0 => Vector3::SIDE_UP,
+			1 => Vector3::SIDE_WEST,
+			2 => Vector3::SIDE_EAST,
+			3 => Vector3::SIDE_NORTH,
+			4 => Vector3::SIDE_SOUTH,
+			5 => Vector3::SIDE_DOWN,
+			6 => Vector3::SIDE_DOWN,
+			7 => Vector3::SIDE_UP
+		];
+
+		$block = $this->getSide($faces[$side])->getSide(Vector3::SIDE_UP);
+		if(!$this->equals($block)){
+			$this->activateBlock($block);
+		}
+
+		$this->checkTorchOn($this->getSide($faces[$side]), [static::getOppositeSide($faces[$side])]);
+	}
+
+	/**
+	 * @param array $ignore
+	 *
+	 * @return bool|void
+	 */
+	public function deactivate(array $ignore = []){
+		parent::deactivate($ignore);
+
+		$side = $this->meta;
+		if($this->isActivated()){
+			$side ^= 0x08;
+		}
+
+		$faces = [
+			0 => Vector3::SIDE_UP,
+			1 => Vector3::SIDE_WEST,
+			2 => Vector3::SIDE_EAST,
+			3 => Vector3::SIDE_NORTH,
+			4 => Vector3::SIDE_SOUTH,
+			5 => Vector3::SIDE_DOWN,
+			6 => Vector3::SIDE_DOWN,
+			7 => Vector3::SIDE_UP
+		];
+
+		$block = $this->getSide($faces[$side])->getSide(Vector3::SIDE_UP);
+		if(!$this->equals($block)){
+			$this->deactivateBlock($block);
+		}
+
+		$this->checkTorchOff($this->getSide($faces[$side]), [static::getOppositeSide($faces[$side])]);
+	}
+
+	/**
+	 * @param Block|null $from
+	 *
+	 * @return bool
+	 */
+	public function isActivated(Block $from = null) : bool{
+		return (($this->meta & 0x08) === 0x08);
+	}
 }

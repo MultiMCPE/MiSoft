@@ -275,6 +275,10 @@ abstract class Door extends Transparent{
 		return false;
 	}
 
+	public function isOpened() : bool{
+		return (($this->getFullDamage() & 0x04) > 0);
+	}
+
 	public function getAffectedBlocks() : array{
 		if(($this->getDamage() & 0x08) === 0x08){
 			$down = $this->getSide(Vector3::SIDE_DOWN);

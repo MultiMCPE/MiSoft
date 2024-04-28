@@ -400,6 +400,10 @@ class Server{
 	/** @var bool */
 	public $mobAiEnabled = false;
 
+	public $redstoneEnabled = true;
+	public $allowFrequencyPulse = true;
+	public $pulseFrequency = 20;
+
 	/**
 	 * @return string
 	 */

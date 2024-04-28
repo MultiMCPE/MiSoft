@@ -406,6 +406,53 @@ class Block extends Position implements BlockIds, Metadatable{
 		return false;
 	}
 
+	/**
+	 * @param array $ignore
+	 */
+	public function activate(array $ignore = []){
+		return false;
+	}
+
+	/**
+	 * @param array $ignore
+	 */
+	public function deactivate(array $ignore = []){
+		return false;
+	}
+
+	/**
+	 * @param ?Block $from
+	 */
+	public function isActivated(Block $from = null) : bool{
+		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isLightedByAround() : bool{
+		return false;
+	}
+
+	public function lightAround() : void{
+
+	}
+
+	/**
+	 * @param array $ignore
+	 */
+	public function turnAroundOff(array $ignore = []) : void{
+
+	}
+
+	public function turnOn() : bool{
+		return false;
+	}
+
+	public function turnOff() : bool{
+		return false;
+	}
+
 	public function hasEntityCollision() : bool{
 		return false;
 	}
