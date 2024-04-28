@@ -27,6 +27,7 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use function in_array;
 
 class RedstoneTorch extends RedstoneSource{
 
@@ -47,9 +48,6 @@ class RedstoneTorch extends RedstoneSource{
 		return 7;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getLastUpdateTime() : int{
 		return $this->getLevel()->getBlockTempData($this);
 	}
@@ -58,9 +56,6 @@ class RedstoneTorch extends RedstoneSource{
 		$this->getLevel()->setBlockTempData($this, $this->getLevel()->getServer()->getTick());
 	}
 
-	/**
-	 * @return mixed
-	 */
 	public function canCalcTurn(){
 		if(!parent::canCalc()){
 			return false;
@@ -73,25 +68,14 @@ class RedstoneTorch extends RedstoneSource{
 		return ($this->canScheduleUpdate() ? 1 : false);
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function canScheduleUpdate() : bool{
 		return $this->getLevel()->getServer()->allowFrequencyPulse;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getFrequency() : int{
 		return $this->getLevel()->getServer()->pulseFrequency;
 	}
 
-	/**
-	 * @param string $ignore
-	 *
-	 * @return bool
-	 */
 	public function turnOn(string $ignore = "") : bool{
 		$result = $this->canCalcTurn();
 		$this->setLastUpdateTimeNow();
@@ -116,11 +100,6 @@ class RedstoneTorch extends RedstoneSource{
 		return false;
 	}
 
-	/**
-	 * @param string $ignore
-	 *
-	 * @return bool
-	 */
 	public function turnOff(string $ignore = "") : bool{
 		$result = $this->canCalcTurn();
 		$this->setLastUpdateTimeNow();
@@ -145,10 +124,6 @@ class RedstoneTorch extends RedstoneSource{
 		return false;
 	}
 
-	/**
-	 * @param array $ignore
-	 * @param array $notCheck
-	 */
 	public function activateTorch(array $ignore = [], array $notCheck = []) : void{
 		if($this->canCalc()){
 			$this->activated = true;
@@ -174,28 +149,14 @@ class RedstoneTorch extends RedstoneSource{
 		}
 	}
 
-	/**
-	 * @param array $ignore
-	 *
-	 * @return bool|void
-	 */
 	public function activate(array $ignore = []){
 		$this->activateTorch($ignore);
 	}
 
-	/**
-	 * @param array $ignore
-	 *
-	 * @return bool|void
-	 */
 	public function deactivate(array $ignore = []){
 		$this->deactivateTorch($ignore);
 	}
 
-	/**
-	 * @param array $ignore
-	 * @param array $notCheck
-	 */
 	public function deactivateTorch(array $ignore = [], array $notCheck = []) : void{
 		if($this->canCalc()){
 			$this->activated = false;
@@ -311,11 +272,6 @@ class RedstoneTorch extends RedstoneSource{
 		}
 	}
 
-	/**
-	 * @param Block|null $from
-	 *
-	 * @return bool
-	 */
 	public function isActivated(Block $from = null) : bool{
 		return true;
 	}

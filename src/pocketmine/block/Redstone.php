@@ -49,18 +49,10 @@ class Redstone extends RedstoneSource{
 		return "Redstone Block";
 	}
 
-	/**
-	 * @param Block|null $from
-	 *
-	 * @return bool
-	 */
 	public function isActivated(Block $from = null) : bool{
 		return true;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function canBeFlowedInto() : bool{
 		return false;
 	}

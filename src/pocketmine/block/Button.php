@@ -44,15 +44,10 @@ abstract class Button extends RedstoneSource{
 			$this->getLevel()->setBlock($this, $this, true, true);
 			return true;
 		}
+
 		return false;
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
 		if($this->isActivated()){
 			$this->meta ^= 0x08;
@@ -64,21 +59,10 @@ abstract class Button extends RedstoneSource{
 		return true;
 	}
 
-	/**
-	 * @param Block|null $from
-	 *
-	 * @return bool
-	 */
 	public function isActivated(Block $from = null) : bool{
 		return (($this->meta & 0x08) === 0x08);
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if(!$this->isActivated()){
 			$this->meta ^= 0x08;

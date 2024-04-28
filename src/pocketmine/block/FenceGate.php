@@ -29,7 +29,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
-class FenceGate extends Transparent{
+class FenceGate extends Transparent implements ElectricalAppliance{
 
 	public function getHardness() : float{
 		return 2;

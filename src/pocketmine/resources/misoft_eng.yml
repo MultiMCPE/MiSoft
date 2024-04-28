@@ -41,3 +41,15 @@ mobs:
  # If enabled, mobs can move around
  # Note: this feature can cause lag in your server when lots of mob are spawned
  enable-mob-ai: false
+
+redstone:
+ ################################################
+ ####Choose if the redstone system is enabled####
+ ################################################
+ #If it is false, the redstone system won't work#
+ ################################################
+ enable: false
+ #Choose if frequency pulses are enabled
+ frequency-pulse: false
+ #Set the frequency of pulse. Default = 1s
+ pulse-frequency: 1

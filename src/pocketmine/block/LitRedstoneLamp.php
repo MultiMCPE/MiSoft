@@ -23,9 +23,15 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-class LitRedstoneLamp extends RedstoneLamp{
+use pocketmine\math\Vector3;
+use pocketmine\item\Item;
 
+class LitRedstoneLamp extends Solid implements ElectricalAppliance{
 	protected $id = self::LIT_REDSTONE_LAMP;
+
+	public function __construct(int $meta = 0){
+		$this->meta = $meta;
+	}
 
 	public function getName() : string{
 		return "Lit Redstone Lamp";
@@ -123,5 +129,11 @@ class LitRedstoneLamp extends RedstoneLamp{
 		$this->getLevel()->setBlock($this, new RedstoneLamp(), true, true);
 
 		return true;
+	}
+
+	public function getDrops(Item $item) : array{
+		return [
+			Item::get(Item::REDSTONE_LAMP, 0, 1)
+		];
 	}
 }

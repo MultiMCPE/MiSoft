@@ -31,6 +31,8 @@ use pocketmine\level\sound\GenericSound;
 use pocketmine\math\Vector3;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\Player;
+use function array_filter;
+use function count;
 
 class PressurePlate extends RedstoneSource{
 	/** @var int */
@@ -38,23 +40,25 @@ class PressurePlate extends RedstoneSource{
 	/** @var bool */
 	protected $canActivate = true;
 
-	/**
-	 * @return bool
-	 */
 	public function hasEntityCollision() : bool{
 		return true;
 	}
 
-	/**
-	 * @param Entity $entity
-	 */
 	public function onEntityCollide(Entity $entity) : void{
-		if($this->canActivate){
+		if($this->getLevel()->getServer()->redstoneEnabled and $this->canActivate){
+			$entities = $this->getLevel()->getNearbyEntities($this->getHitCollision());
+			$entities = array_filter($entities, fn($entity) => $entity instanceof Living);
+			if(count($entities) === 0){
+				$this->getLevel()->scheduleDelayedBlockUpdate($this, 20);
+				return;
+			}
+
 			if(!$this->isActivated()){
 				$this->meta = 1;
 				$this->getLevel()->setBlock($this, $this, true, false);
 				$this->getLevel()->addSound(new GenericSound($this, 1000));
 			}
+
 			if(!$this->isActivated() or ($this->isActivated() and ($this->getLevel()->getServer()->getTick() % 30) === 0)){
 				$this->activate();
 			}
@@ -63,11 +67,6 @@ class PressurePlate extends RedstoneSource{
 		}
 	}
 
-	/**
-	 * @param Block|null $from
-	 *
-	 * @return bool
-	 */
 	public function isActivated(Block $from = null) : bool{
 		return ($this->meta === 0) ? false : true;
 	}
@@ -98,6 +97,7 @@ class PressurePlate extends RedstoneSource{
 		if((($this->getLevel()->getServer()->getTick() - $this->activateTime)) >= 3){
 			$this->meta = 0;
 			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->getLevel()->addSound(new GenericSound($this, 1000));
 			$this->deactivate();
 		}
 	}
@@ -114,31 +114,16 @@ class PressurePlate extends RedstoneSource{
         );
     }
 
-	/**
-	 * @param Item        $item
-	 * @param Block       $blockReplace
-	 * @param Block       $blockClicked
-	 * @param int         $face
-	 * @param Vector3     $clickVector
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$below = $this->getSide(Vector3::SIDE_DOWN);
 		if($below instanceof Transparent){
 			return false;
 		}else{
-		    return $this->getLevel()->setBlock($this, $this, true, true);
+		    $this->getLevel()->setBlock($this, $this, true, true);
+			return true;
 		}
 	}
 
-	/**
-	 * @param Item        $item
-	 * @param Player|null $player
-	 *
-	 * @return bool
-	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
 		if($this->isActivated()){
 			$this->meta = 0;
@@ -146,6 +131,8 @@ class PressurePlate extends RedstoneSource{
 		}
 		$this->canActivate = false;
 
-		return $this->getLevel()->setBlock($this, new Air(), true);
+		$this->getLevel()->setBlock($this, new Air(), true, true);
+
+		return true;
 	}
 }

@@ -36,7 +36,7 @@ use function cos;
 use function sin;
 use const M_PI;
 
-class TNT extends Solid{
+class TNT extends Solid implements ElectricalAppliance{
 
 	protected $id = self::TNT;
 
@@ -112,9 +112,7 @@ class TNT extends Solid{
 			2,
 			3,
 			4,
-			5,
-			6,
-			7
+			5
 		];
 
 		foreach($sides as $side){

@@ -65,25 +65,14 @@ class PoweredRepeater extends RedstoneSource{
 		return $direction;
 	}
 
-	/**
-	 * @return int
-	 */
 	public function getOppositeDirection() : int{
 		return static::getOppositeSide($this->getDirection());
 	}
 
-	/**
-	 * @return float
-	 */
 	public function getDelayLevel() : float{
 		return round(($this->meta - ($this->meta % 4)) / 4) + 1;
 	}
 
-	/**
-	 * @param Block|null $from
-	 *
-	 * @return bool
-	 */
 	public function isActivated(Block $from = null) : bool{
 		if(!$from instanceof Block){
 			return false;
@@ -98,11 +87,6 @@ class PoweredRepeater extends RedstoneSource{
 		}
 	}
 
-	/**
-	 * @param array $ignore
-	 *
-	 * @return bool|void
-	 */
 	public function activate(array $ignore = []){
 		if($this->canCalc()){
 			if($this->id !== self::POWERED_REPEATER){
@@ -114,11 +98,6 @@ class PoweredRepeater extends RedstoneSource{
 		}
 	}
 
-	/**
-	 * @param array $ignore
-	 *
-	 * @return bool|void
-	 */
 	public function deactivate(array $ignore = []){
 		if($this->canCalc()){
 			if($this->id !== self::UNPOWERED_REPEATER){
@@ -170,11 +149,6 @@ class PoweredRepeater extends RedstoneSource{
 		return true;
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return mixed|void
-	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
 		$this->deactivateImmediately();
 		$this->getLevel()->setBlock($this, new Air(), true, true);
@@ -183,11 +157,6 @@ class PoweredRepeater extends RedstoneSource{
 		return true;
 	}
 
-	/**
-	 * @param Item $item
-	 *
-	 * @return array
-	 */
 	public function getDrops(Item $item) : array{
 		return [
 			Item::get(Item::REPEATER, 0, 1)

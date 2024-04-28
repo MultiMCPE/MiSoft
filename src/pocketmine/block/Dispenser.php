@@ -30,7 +30,7 @@ use pocketmine\tile\Tile;
 use pocketmine\math\Vector3;
 use function abs;
 
-class Dispenser extends Solid{
+class Dispenser extends Solid implements ElectricalAppliance{
 	protected $id = self::DISPENSER;
 
 	public function __construct(int $meta = 0){

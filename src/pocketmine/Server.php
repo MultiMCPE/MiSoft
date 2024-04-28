@@ -400,8 +400,11 @@ class Server{
 	/** @var bool */
 	public $mobAiEnabled = false;
 
-	public $redstoneEnabled = true;
-	public $allowFrequencyPulse = true;
+	/** @var bool */
+	public $redstoneEnabled = false;
+	/** @var bool */
+	public $allowFrequencyPulse = false;
+	/** @var int */
 	public $pulseFrequency = 20;
 
 	/**
@@ -1969,6 +1972,10 @@ class Server{
 		$this->folderpluginloader = $this->getAdvancedProperty("developer.folder-plugin-loader", false);
 
 		$this->mobAiEnabled = $this->getAdvancedProperty("mobs.enable-mob-ai", false);
+
+		$this->redstoneEnabled = $this->getAdvancedProperty("redstone.enable", false);
+		$this->allowFrequencyPulse = $this->getAdvancedProperty("redstone.allow-frequency-pulse", false);
+		$this->pulseFrequency = $this->getAdvancedProperty("redstone.pulse-frequency", 20);
 	}
 
 	public function handleNotifications() : void{

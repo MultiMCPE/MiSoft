@@ -27,11 +27,12 @@ use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use function in_array;
 
 /*
  * This class is the power of all redstone blocks!
  */
-class RedstoneSource extends Flowable {
+class RedstoneSource extends Flowable{
 	/** @var int */
 	protected $maxStrength = 15;
 	/** @var bool */
