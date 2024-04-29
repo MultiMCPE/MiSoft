@@ -70,7 +70,7 @@ class ChunkRequestTask extends AsyncTask{
         $tiles = "";
 		foreach($chunk->getTiles() as $tile){
 			if($tile instanceof Spawnable){
-				$tiles .= $tile->getSerializedSpawnCompound();
+				$tiles .= $tile->getProtocolSerializedSpawnCompound($protocol);
 			}
 		}
         $this->tiles = $tiles;

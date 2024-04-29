@@ -25,7 +25,13 @@ namespace pocketmine\tile;
 
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\tag\LongTag;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
+use pocketmine\Player;
 
 class ItemFrame extends Spawnable{
 	public const TAG_ITEM_ROTATION = "ItemRotation";
@@ -38,6 +44,12 @@ class ItemFrame extends Spawnable{
 	private $itemRotation;
 	/** @var float */
 	private $itemDropChance;
+
+	/** @var NetworkLittleEndianNBTStream|null */
+	private static $nbtWriter = null;
+
+	/** @var int[string|null] */
+	private $protocolSpawnCompoundCache = [];
 
 	protected function readSaveData(CompoundTag $nbt) : void{
 		if(($itemTag = $nbt->getCompoundTag(self::TAG_ITEM)) !== null){
@@ -97,6 +109,68 @@ class ItemFrame extends Spawnable{
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
 		$nbt->setFloat(self::TAG_ITEM_DROP_CHANCE, $this->itemDropChance);
 		$nbt->setByte(self::TAG_ITEM_ROTATION, $this->itemRotation);
-		$nbt->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM));
+	}
+
+	public function spawnTo(Player $player) : bool{
+		if($this->closed){
+			return false;
+		}
+
+		$pk = new BlockActorDataPacket();
+		$pk->x = $this->x;
+		$pk->y = $this->y;
+		$pk->z = $this->z;
+		$pk->namedtag = $this->getProtocolSerializedSpawnCompound($player->getProtocol());
+
+		$player->dataPacket($pk);
+
+		return true;
+	}
+
+	public function spawnToAll(){
+		if($this->closed){
+			return;
+		}
+
+		$viewers = $this->level->getViewersForPosition($this);
+		foreach($viewers as $viewer){
+			$this->spawnTo($viewer);
+		}
+	}
+
+	/**
+	 * Performs actions needed when the tile is modified, such as clearing caches and respawning the tile to players.
+	 * WARNING: This MUST be called to clear spawn-compound and chunk caches when the tile's spawn compound has changed!
+	 */
+	protected function onChanged() : void{
+		$this->protocolSpawnCompoundCache = [];
+		$this->spawnToAll();
+
+		$this->level->clearChunkCache($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
+	}
+
+	public function getProtocolSerializedSpawnCompound(int $playerProtocol) : string{
+		$compound = $this->getSpawnCompound();
+		if(!($this->item->getNamedTagEntry("map_uuid") instanceof LongTag) || $playerProtocol >= ProtocolInfo::PROTOCOL_130){
+			$compound->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM));
+		}else{
+		    $item = clone $this->item;
+			$mapId = $item->getNamedTagEntry("map_uuid")->getValue();
+	    	$item->removeNamedTagEntry("map_uuid");
+	    	$item->setNamedTagEntry(new StringTag("map_uuid", (string) $mapId));
+
+			$compound->setTag($item->nbtSerialize(-1, self::TAG_ITEM));
+		}
+
+		$protocolKey = ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? ProtocolInfo::PROTOCOL_130 : ProtocolInfo::PROTOCOL_100);
+		if(!isset($this->protocolSpawnCompoundCache[$protocolKey])){
+			if(self::$nbtWriter === null){
+				self::$nbtWriter = new NetworkLittleEndianNBTStream();
+			}
+
+			$this->protocolSpawnCompoundCache[$protocolKey] = self::$nbtWriter->write($compound);
+		}
+
+		return $this->protocolSpawnCompoundCache[$protocolKey];
 	}
 }

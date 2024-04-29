@@ -113,6 +113,13 @@ abstract class Spawnable extends Tile{
 		return $nbt;
 	}
 
+    /**
+	 * @param int $playerProtocol
+	 */
+	public function getProtocolSerializedSpawnCompound(int $playerProtocol) : string{
+		return $this->getSerializedSpawnCompound();
+	}
+
 	/**
 	 * An extension to getSpawnCompound() for
 	 * further modifying the generic tile NBT.
