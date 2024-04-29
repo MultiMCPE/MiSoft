@@ -2209,6 +2209,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}
 				}
 			}
+			if($this->getInventory() !== null){
+				$this->inventory->getItemInHand()->onUpdate($this);
+			}
+			if($this->getOffHandInventory() !== null){
+				$this->offHandInventory->getItemInHand()->onUpdate($this);
+			}
 			$this->processMovement($tickDiff);
 			$this->motion->x = $this->motion->y = $this->motion->z = 0; //TODO: HACK! (Fixes player knockback being messed up)
 			if($this->onGround){
@@ -4427,8 +4433,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				return true;
 			}
 
+			$item = $tile->getItem();
+			$item->setOnItemFrame(false);
 			if(lcg_value() <= $tile->getItemDropChance()){
-				$this->level->dropItem($tile->getBlock(), $tile->getItem());
+				$this->level->dropItem($tile->getBlock(), $item);
 			}
 			$tile->setItem(null);
 			$tile->setItemRotation(0);

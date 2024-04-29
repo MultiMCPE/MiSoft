@@ -210,6 +210,8 @@ class Item implements ItemIds, JsonSerializable{
 	public $count = 1;
 	/** @var string */
 	protected $name;
+	/** @var bool */
+	protected $onItemFrame = false;
 
 	/**
 	 * Constructs a new Item type. This constructor should ONLY be used when constructing a new item TYPE to register
@@ -787,6 +789,10 @@ class Item implements ItemIds, JsonSerializable{
 		return 1;
 	}
 
+	public function onUpdate(Player $player) : void{
+
+	}
+
 	/**
 	 * Called when a player uses this item on a block.
 	 *
@@ -1044,5 +1050,19 @@ class Item implements ItemIds, JsonSerializable{
 
 	public function __clone(){
 		$this->cachedNBT = null;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isOnItemFrame() : bool{
+		return $this->onItemFrame;
+	}
+
+	/**
+	 * @param bool $onItemFrame
+	 */
+	public function setOnItemFrame(bool $onItemFrame) : void{
+		$this->onItemFrame = $onItemFrame;
 	}
 }

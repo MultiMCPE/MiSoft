@@ -26,7 +26,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
 
-
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\MapDecoration;
@@ -260,6 +259,28 @@ class ClientboundMapItemDataPacket extends DataPacket{
 				}
 			}
 		}
+	}
+
+	/**
+	 * Crops the texture to wanted size
+	 *
+	 * @param int $minX
+	 * @param int $minY
+	 * @param int $maxX
+	 * @param int $maxY
+	 */
+	public function cropTexture(int $minX, int $minY, int $maxX, int $maxY) : void{
+		$this->height = $maxY;
+		$this->width = $maxX;
+		$this->xOffset = $minX;
+		$this->yOffset = $minY;
+		$newColors = [];
+		for($y = 0; $y < $maxY; $y++){
+			for($x = 0; $x < $maxX; $x++){
+				$newColors[$y][$x] = $this->colors[$minY + $y][$minX + $x];
+			}
+		}
+		$this->colors = $newColors;
 	}
 
 	public function handle(NetworkSession $session) : bool{

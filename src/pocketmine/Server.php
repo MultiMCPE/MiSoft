@@ -55,6 +55,7 @@ use pocketmine\level\generator\Generator;
 use pocketmine\level\generator\GeneratorManager;
 use pocketmine\level\Level;
 use pocketmine\level\LevelException;
+use pocketmine\maps\MapManager;
 use pocketmine\metadata\EntityMetadataStore;
 use pocketmine\metadata\LevelMetadataStore;
 use pocketmine\metadata\PlayerMetadataStore;
@@ -1829,6 +1830,7 @@ class Server{
 			ItemFactory::init();
 			Item::initCreativeItems();
 			Biome::init();
+			MapManager::loadIdCounts();
 			Color::initDyeColors();
 
 			LevelProviderManager::init();
@@ -2336,6 +2338,9 @@ class Server{
 			foreach($this->getLevels() as $level){
 				$this->unloadLevel($level, true);
 			}
+
+			$this->getLogger()->debug("Saving all maps");
+			MapManager::saveMaps();
 
 			$this->getLogger()->debug("Removing event handlers");
 			HandlerList::unregisterAll();

@@ -312,7 +312,7 @@ class NetworkBinaryStream extends BinaryStream{
 			    throw new UnexpectedValueException("Unexpected root tag type for itemstack");
 		    }
             if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $id === ItemIds::FILLED_MAP && $decodedNBT->hasTag("map_uuid", StringTag::class)){
-                $decodedNBT->setLong("map_uuid", (int) $decodedNBT->getString("map_uuid"));
+                $decodedNBT->setLong("map_uuid", (int) $decodedNBT->getString("map_uuid"), true);
             }
 		    $nbt = $decodedNBT;
 		}
@@ -411,7 +411,7 @@ class NetworkBinaryStream extends BinaryStream{
                 if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $item->getId() === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
                     $tag = $item->getNamedTag();
                     $uuid = $tag->getLong("map_uuid");
-                    $nbt->setString("map_uuid", (string) $uuid);
+                    $nbt->setString("map_uuid", (string) $uuid, true);
                 }
                 $nbt = (new LittleEndianNBTStream())->write($nbt);
 		    	($this->buffer .= (pack("v", strlen($nbt))));

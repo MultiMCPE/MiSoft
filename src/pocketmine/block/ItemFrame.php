@@ -72,8 +72,10 @@ class ItemFrame extends Flowable{
 		    return false;
 		}
 
+		$item = $tile->getItem();
+		$item->setOnItemFrame(false);
 		if(lcg_value() <= $tile->getItemDropChance()){
-			$this->level->dropItem($this, $tile->getItem());
+			$this->level->dropItem($this, $item);
 		}
 		$tile->setItem(null);
 		$tile->setItemRotation(0);
