@@ -34,7 +34,7 @@ class PlayerActionPacket extends DataPacket{
     public const ACTION_STOP_BREAK = 2;
     public const ACTION_GET_UPDATED_BLOCK = 3;
     public const ACTION_DROP_ITEM = 4;
-    public const ACTION_RELEASE_ITEM = 992921;
+    public const ACTION_RELEASE_ITEM = 38;
     public const ACTION_START_SLEEPING = 5;
     public const ACTION_STOP_SLEEPING = 6;
     public const ACTION_RESPAWN = 7;
@@ -44,7 +44,7 @@ class PlayerActionPacket extends DataPacket{
     public const ACTION_START_SNEAK = 11;
     public const ACTION_STOP_SNEAK = 12;
     public const ACTION_CREATIVE_PLAYER_DESTROY_BLOCK = 13;
-    public const ACTION_DIMENSION_CHANGE_REQUEST = 999999; //sent when dying in different dimension
+    public const ACTION_DIMENSION_CHANGE_REQUEST = 37; //sent when dying in different dimension
     public const ACTION_DIMENSION_CHANGE_ACK = 14; //sent when spawning in a different dimension to tell the server we spawned
     public const ACTION_START_GLIDE = 15;
     public const ACTION_STOP_GLIDE = 16;
