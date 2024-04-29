@@ -32,7 +32,6 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\multiversion\actor\AvailableActorIdentifiersPalette;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
@@ -63,7 +62,6 @@ class Network{
 		MultiversionEnums::init();
 		MetadataConvertor::init();
         ItemPalette::init();
-        BlockPalette::init();
         BiomeDefinitionPalette::init();
         AvailableActorIdentifiersPalette::init();
 		SerializedSkin::init();

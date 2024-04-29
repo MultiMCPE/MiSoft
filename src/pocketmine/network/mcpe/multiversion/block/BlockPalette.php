@@ -72,9 +72,13 @@ class BlockPalette{
     protected static $palettes = [];
 
     /**
-     * @return void
+     * @param int $paletteProtocol
      */
-    public static function init() : void{
+    public static function initPalette(int $paletteProtocol) : void{
+        if(self::getPalette($paletteProtocol) !== null){
+            return;
+        }
+
         $pools = [
             ProtocolInfo::PROTOCOL_671 => new BlockPalette671(),
             ProtocolInfo::PROTOCOL_662 => new BlockPalette662(),
@@ -117,15 +121,19 @@ class BlockPalette{
             ProtocolInfo::PROTOCOL_220 => new BlockPalette220()
         ];
 
-        foreach($pools as $poolProtocol => $pool){
-            Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
-                $pool,
-                $poolProtocol,
-                function(Palette $palette, int $poolProtocol) : void{
-                    self::$palettes[$poolProtocol] = $palette;
-                    krsort(self::$palettes);
-                }
-            ));
+        foreach($pools as $protocol => $paletteClass){
+            if($paletteProtocol >= $protocol){
+                Server::getInstance()->getAsyncPool()->submitTask(new BlockPaletteInitTask(
+                    $paletteClass,
+                    $protocol,
+                    function(Palette $palette, int $protocol) : void{
+                        self::$palettes[$protocol] = $palette;
+                        krsort(self::$palettes);
+                    }
+                ));
+
+                break;
+            }
         }
     }
 

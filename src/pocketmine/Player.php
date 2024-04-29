@@ -196,6 +196,7 @@ use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\PacketRateLimiter;
 use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
@@ -2429,6 +2430,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         $this->originalProtocol = $packet->protocol;
         $this->chunkProtocol = ProtocolConvertor::convertChunkProtocol($this->protocol);
         $this->craftingProtocol = ProtocolConvertor::convertCraftingProtocol($this->protocol);
+		BlockPalette::initPalette($this->protocol);
 
 		$this->username = TextFormat::clean($packet->username);
 		$this->displayName = $this->username;
