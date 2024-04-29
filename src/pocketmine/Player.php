@@ -5246,6 +5246,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function doCloseInventory() : void{
+        if($this->transactionQueue instanceof TransactionQueue){
+            $this->transactionQueue->onCloseWindow();
+        }
+
 		/** @var Inventory[] $inventories */
 		$inventories = [$this->craftingGrid, $this->cursorInventory];
 		foreach($inventories as $inventory){
