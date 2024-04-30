@@ -49,7 +49,7 @@ class Map extends Item{
 	}
 
 	public function onUpdate(Player $player) : void{
-		if($this->isMapInit()){
+		/*if($this->isMapInit()){
 			if($data = $this->getMapData()){
 				$data->renderMap($player);
 
@@ -59,7 +59,7 @@ class Map extends Item{
 					$player->sendDataPacket($pk);
 				}
 			}
-		}
+		}*/
 	}
 
 	public function initMap(Player $player, int $scale) : void{

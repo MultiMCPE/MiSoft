@@ -41,7 +41,7 @@ class EmptyMap extends Item{
 	 * @return bool
 	 */
 	public function onClickAir(Player $player, Vector3 $directionVector) : bool{
-		$map = new Map();
+		/*$map = new Map();
 		$map->initMap($player, 0);
 
 		if($this->getDamage() === self::TYPE_EXPLORER_MAP){
@@ -54,7 +54,7 @@ class EmptyMap extends Item{
 			$player->dropItem($map);
 		}
 
-		$this->pop();
+		$this->pop();*/
 
 		return true;
 	}

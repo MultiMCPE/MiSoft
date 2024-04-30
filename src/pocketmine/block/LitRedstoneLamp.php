@@ -41,93 +41,14 @@ class LitRedstoneLamp extends Solid implements ElectricalAppliance{
 		return 15;
 	}
 
-	public function isLightedByAround() : bool{
-		return ($this->meta === 1);
-	}
-
-	protected function checkPower(array $ignore = []) : bool{
-		if($this->isLightedByAround()){
-			$sides = [
-				Vector3::SIDE_EAST,
-				Vector3::SIDE_WEST,
-				Vector3::SIDE_SOUTH,
-				Vector3::SIDE_NORTH,
-				Vector3::SIDE_UP,
-				Vector3::SIDE_DOWN
-			];
-
-			foreach($sides as $side){
-				if(!in_array($side, $ignore)){
-					/** @var LitRedstoneLamp $block */
-					$block = $this->getSide($side);
-					if($block->getId() === $this->id){
-						if(!$block->isLightedByAround()){
-							return true;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public function lightAround() : void{
-		$sides = [
-			Vector3::SIDE_EAST,
-			Vector3::SIDE_WEST,
-			Vector3::SIDE_SOUTH,
-			Vector3::SIDE_NORTH,
-			Vector3::SIDE_UP,
-			Vector3::SIDE_DOWN
-		];
-
-		foreach($sides as $side){
-			/** @var RedstoneLamp $block */
-			$block = $this->getSide($side);
-			if($block->getId() === self::REDSTONE_LAMP){
-				$block->turnOn();
-			}
-		}
-	}
-
-	public function turnAroundOff(array $ignore = []) : void{
-		if(!$this->isLightedByAround()){
-			$sides = [
-				Vector3::SIDE_EAST,
-				Vector3::SIDE_WEST,
-				Vector3::SIDE_SOUTH,
-				Vector3::SIDE_NORTH,
-				Vector3::SIDE_UP,
-				Vector3::SIDE_DOWN
-			];
-
-			foreach($sides as $side){
-				if(!in_array($side, $ignore)){
-					/** @var LitRedstoneLamp $block */
-					$block = $this->getSide($side);
-					if($block->getId() === $this->id){
-						if($block->isLightedByAround()){
-							if(!$block->checkPower([$this->getOppositeSide($side)])){
-								$block->turnOff();
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	public function turnOn() : bool{
 		$this->meta = 0;
 		$this->getLevel()->setBlock($this, $this, true, false);
-
 		return true;
 	}
 
 	public function turnOff() : bool{
 		$this->getLevel()->setBlock($this, new RedstoneLamp(), true, true);
-
 		return true;
 	}
 

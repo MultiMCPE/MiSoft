@@ -428,17 +428,6 @@ class Block extends Position implements BlockIds, Metadatable{
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isLightedByAround() : bool{
-		return false;
-	}
-
-	public function lightAround() : void{
-
-	}
-
-	/**
 	 * @param array $ignore
 	 */
 	public function turnAroundOff(array $ignore = []) : void{

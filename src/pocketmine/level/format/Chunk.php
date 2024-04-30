@@ -950,8 +950,12 @@ class Chunk{
 		$result->put($subChunk->getBlockIdArray());
 		$result->put($subChunk->getBlockDataArray());
 		if($playerProtocol < ProtocolInfo::PROTOCOL_130){
-			$result->put($subChunk->getBlockSkyLightArray());
-			$result->put($subChunk->getBlockLightArray());
+			/*$result->put($subChunk->getBlockSkyLightArray());
+			$result->put($subChunk->getBlockLightArray());*/
+
+			// HACK! No shadows for 1.1
+			$result->put(str_repeat("\xff", 2048)); // sky light
+			$result->put(str_repeat("\x00", 2048)); // block light
 		}
 
 		return $result->buffer;
