@@ -25,6 +25,8 @@ namespace pocketmine\block;
 
 interface BlockIds{
 
+	public const CARVED_PUMPKIN = -155;
+
 	public const AIR = 0;
 	public const STONE = 1;
 	public const GRASS = 2;

@@ -31,6 +31,7 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\block\BlockIds;
+use pocketmine\block\BlockFactory;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
@@ -342,6 +343,13 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
 		if($nbt !== null){
+			if($nbt->hasTag(self::PM_ID_TAG, IntTag::class)){
+				$id = $nbt->getInt(self::PM_ID_TAG);
+				$nbt->removeTag(self::PM_ID_TAG);
+				if($nbt->count() === 0){
+					$nbt = null;
+				}
+			}
 			if($nbt->hasTag(self::DAMAGE_TAG, IntTag::class)){
 				$data = $nbt->getInt(self::DAMAGE_TAG);
 				$nbt->removeTag(self::DAMAGE_TAG);
@@ -355,6 +363,13 @@ class NetworkBinaryStream extends BinaryStream{
 				$conflicted->setName(self::DAMAGE_TAG);
 				$nbt->setTag($conflicted);
 			}
+		    if(($metaTag = $nbt->getTag(self::PM_META_TAG)) instanceof IntTag){
+		    	$data = $metaTag->getValue();
+		    	$nbt->removeTag(self::PM_META_TAG);
+		    	if($nbt->count() === 0){
+			     	$nbt = null;
+		    	}
+	    	}
 		}
 		end:
 		return ItemFactory::get($id, $data, $cnt, $nbt);
@@ -376,31 +391,67 @@ class NetworkBinaryStream extends BinaryStream{
         $id = $item->getId();
         $damage = $item->getDamage();
 
-        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-            $palette = ItemPalette::getPalette($playerProtocol);
-            [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
-        }
-
-		$this->putVarInt($id);
-		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
-		$this->putVarInt($auxValue);
-
 		$nbt = null;
 		if($item->hasCompoundTag()){
 			$nbt = clone $item->getNamedTag();
 		}
-		if($item instanceof Durable and $item->getDamage() > 0){
-			if($nbt !== null){
-				if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
-					$nbt->removeTag(self::DAMAGE_TAG);
-					$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-					$nbt->setTag($existing);
-				}
-			}else{
-				$nbt = new CompoundTag();
-			}
-			$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
+
+		if($id === ItemIds::PUMPKIN && $playerProtocol >= ProtocolInfo::PROTOCOL_260){
+		    if($nbt === null){
+		    	$nbt = new CompoundTag();
+	    	}
+	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
+	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
+
+			$id = ItemIds::CARVED_PUMPKIN;
 		}
+
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
+            $palette = ItemPalette::getPalette($playerProtocol);
+            $idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, $damage);
+
+			if($idMeta === null){
+				//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
+				//other unmapped items.
+				[$id, $damage] = $palette::getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
+				if($nbt === null){
+					$nbt = new CompoundTag();
+				}
+				$nbt->setInt(self::PM_ID_TAG, $item->getId());
+				$nbt->setInt(self::PM_META_TAG, $item->getDamage());
+			}else{
+				[$id, $damage] = $idMeta;
+				if($item instanceof Durable and $item->getDamage() > 0){
+					if($nbt !== null){
+						if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
+							$nbt->removeTag(self::DAMAGE_TAG);
+							$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+							$nbt->setTag($existing);
+						}
+					}else{
+						$nbt = new CompoundTag();
+					}
+					$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
+				}
+			}
+        }else{
+			if($item instanceof Durable and $item->getDamage() > 0){
+				if($nbt !== null){
+					if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
+						$nbt->removeTag(self::DAMAGE_TAG);
+						$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+						$nbt->setTag($existing);
+					}
+				}else{
+					$nbt = new CompoundTag();
+				}
+				$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
+			}
+		}
+
+		$this->putVarInt($id);
+		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+		$this->putVarInt($auxValue);
 
 		if($nbt !== null){
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_330){
@@ -538,6 +589,7 @@ class NetworkBinaryStream extends BinaryStream{
 			return;
 		}
 
+		$id = $item->getId();
 		$coreData = $item->getDamage();
 
 		$isBlockItem = $item->getId() < 256;
@@ -547,8 +599,18 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
+		if($id === ItemIds::PUMPKIN){
+		    if($nbt === null){
+		    	$nbt = new CompoundTag();
+	    	}
+	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
+	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
+
+			$id = ItemIds::CARVED_PUMPKIN;
+		}
+
         $palette = ItemPalette::getPalette($playerProtocol);
-		$idMeta = $palette::getRuntimeFromLegacyIdQuiet($item->getId(), $coreData);
+		$idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, $coreData);
 		if($idMeta === null){
 			//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
 			//other unmapped items.
@@ -556,7 +618,7 @@ class NetworkBinaryStream extends BinaryStream{
 			if($nbt === null){
 				$nbt = new CompoundTag();
 			}
-			$nbt->setInt(self::PM_ID_TAG, $item->getId());
+			$nbt->setInt(self::PM_ID_TAG, $id);
 			$nbt->setInt(self::PM_META_TAG, $coreData);
 		}else{
 	    	[$netId, $netData] = $idMeta;
@@ -598,7 +660,12 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$blockRuntimeId = 0;
 		if($isBlockItem){
-			$block = $item->getBlock();
+			if($id === ItemIds::CARVED_PUMPKIN){
+				$block = BlockFactory::get(ItemIds::PUMPKIN);
+			}else{
+		    	$block = $item->getBlock();
+			}
+
 			if($block->getId() !== BlockIds::AIR){
 			    $palette = BlockPalette::getPalette($playerProtocol);
 			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());
