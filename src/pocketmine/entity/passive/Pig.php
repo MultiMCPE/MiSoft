@@ -51,7 +51,7 @@ class Pig extends Animal{
 		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
 		$this->behaviorPool->setBehavior(1, new PanicBehavior($this, 1.25));
 		$this->behaviorPool->setBehavior(2, new MateBehavior($this, 1.0));
-		$this->behaviorPool->setBehavior(3, new TemptBehavior($this, [Item::WHEAT], 1.2));
+		$this->behaviorPool->setBehavior(3, new TemptBehavior($this, [Item::CARROT], 1.2));
 		// TODO: Add ControlledByPlayerBehavior
 		$this->behaviorPool->setBehavior(4, new FollowParentBehavior($this, 1.1));
 		$this->behaviorPool->setBehavior(5, new RandomStrollBehavior($this, 1.0));
@@ -118,5 +118,9 @@ class Pig extends Animal{
 
 	public function getRiderSeatPosition(int $seatNumber = 0) : Vector3{
 		return new Vector3(0, 0.63, 0);
+	}
+
+	public function isBreedingItem(Item $item) : bool{
+		return $item->getId() === Item::CARROT;
 	}
 }
