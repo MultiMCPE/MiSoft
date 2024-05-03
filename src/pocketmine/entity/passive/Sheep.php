@@ -97,6 +97,10 @@ class Sheep extends Animal{
 			}
 
 			if($item instanceof Dye){
+				if($this->propertyManager->getByte(self::DATA_COLOR) !== Color::COLOR_SHEEP_WHITE){
+					return false;
+				}
+
 				if($player->isSurvival()){
 					$item->pop();
 				}
