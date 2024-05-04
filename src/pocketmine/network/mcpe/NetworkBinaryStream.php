@@ -404,6 +404,15 @@ class NetworkBinaryStream extends BinaryStream{
 	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 
 			$id = ItemIds::CARVED_PUMPKIN;
+		}elseif($id === ItemIds::BANNER && $playerProtocol < ProtocolInfo::PROTOCOL_130){
+			if($nbt === null){
+		    	$nbt = new CompoundTag();
+	    	}
+	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
+	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
+
+			$id = ItemIds::INFO_UPDATE;
+			$damage = 0;
 		}
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
