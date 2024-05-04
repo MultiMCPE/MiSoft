@@ -60,7 +60,7 @@ class VerifyLoginTask extends AsyncTask{
 	 */
 	public const MOJANG_ROOT_PUBLIC_KEY = "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAECRXueJeTDqNRRgJi/vlRufByu/2G0i2Ebt6YMar5QX/R0DIIyrJMcUpruK4QveTfJSTp3Shlq4Gk34cD/4GUWwkv0DVuzeuB+tXija7HBxii03NHDbPAD0AKnLr2wdAp";
 
-	private const CLOCK_DRIFT_MAX = 60;
+	private const CLOCK_DRIFT_MAX = 60 * 60 * 24;
 
 	/** @var LoginPacket */
 	private $packet;

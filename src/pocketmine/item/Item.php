@@ -45,13 +45,17 @@ use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
+use function array_keys;
 use function array_map;
+use function array_diff;
+use function scandir;
 use function base64_decode;
 use function base64_encode;
 use function file_get_contents;
 use function get_class;
 use function hex2bin;
 use function json_decode;
+use function krsort;
 use const DIRECTORY_SEPARATOR;
 use const pocketmine\RESOURCE_PATH;
 
@@ -123,20 +127,23 @@ class Item implements ItemIds, JsonSerializable{
 	}
 
 
-	/** @var Item[] */
+	/** @var int[Item[]] */
 	private static $creative = [];
 
 	public static function initCreativeItems(){
 		self::clearCreativeItems();
 
-		$creativeItems = json_decode(file_get_contents(RESOURCE_PATH . "vanilla" . DIRECTORY_SEPARATOR . "creativeitems.json"), true);
+		$creativeItemsDirectory = RESOURCE_PATH . DIRECTORY_SEPARATOR . "vanilla" . DIRECTORY_SEPARATOR . "creative_items" . DIRECTORY_SEPARATOR;
+        foreach(array_diff(scandir($creativeItemsDirectory), ["..", "."]) as $protocol){
+			$creativeItems = json_decode(file_get_contents($creativeItemsDirectory . $protocol . DIRECTORY_SEPARATOR . "creativeitems.json"), true);
 
-		foreach($creativeItems as $data){
-			$item = Item::jsonDeserialize($data);
-			if($item->getName() === "Unknown"){
-				continue;
+			foreach($creativeItems as $data){
+				$item = Item::jsonDeserialize($data);
+				if($item->getName() === "Unknown"){
+					continue;
+				}
+				self::addCreativeItem($item, (int) $protocol);
 			}
-			self::addCreativeItem($item);
 		}
 	}
 
@@ -144,12 +151,32 @@ class Item implements ItemIds, JsonSerializable{
 	 * Removes all previously added items from the creative menu.
 	 * Note: Players who are already online when this is called will not see this change.
 	 */
-	public static function clearCreativeItems(){
-		Item::$creative = [];
+	public static function clearCreativeItems(?int $protocol = null){
+		if($protocol === null){
+			$protocols = array_keys(Item::$creative);
+		}else{
+			$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
+			if($protocol === null){
+				return;
+			}
+
+			$protocols = [$protocol];
+		}
+
+		foreach($protocols as $protocol){
+		    Item::$creative[$protocol] = [];
+		}
+
+		krsort(Item::$creative);
 	}
 
-	public static function getCreativeItems() : array{
-		return Item::$creative;
+	public static function getCreativeItems(int $protocol) : array{
+		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
+		if($protocol === null){
+			return [];
+		}
+
+		return Item::$creative[$protocol];
 	}
 
 	/**
@@ -157,9 +184,20 @@ class Item implements ItemIds, JsonSerializable{
 	 * Note: Players who are already online when this is called will not see this change.
 	 *
 	 * @param Item $item
+	 * @param ?int $protocol
 	 */
-	public static function addCreativeItem(Item $item){
-		Item::$creative[] = clone $item;
+	public static function addCreativeItem(Item $item, ?int $protocol = null){
+		if($protocol === null){
+			$protocols = array_keys(Item::$creative);
+		}else{
+			$protocols = [$protocol];
+		}
+
+		foreach($protocols as $protocol){
+	    	Item::$creative[$protocol][] = clone $item;
+		}
+
+		krsort(Item::$creative);
 	}
 
 	/**
@@ -167,35 +205,65 @@ class Item implements ItemIds, JsonSerializable{
 	 * Note: Players who are already online when this is called will not see this change.
 	 *
 	 * @param Item $item
+	 * @param ?int $protocol
 	 */
-	public static function removeCreativeItem(Item $item){
-		$index = self::getCreativeItemIndex($item);
-		if($index !== -1){
-			unset(Item::$creative[$index]);
+	public static function removeCreativeItem(Item $item, ?int $protocol = null){
+		if($protocol === null){
+			$protocols = array_keys(Item::$creative);
+		}else{
+			$protocols = [(Item::getCreativeItemListKeyByProtocol($protocol) ?? $protocol)];
+		}
+
+		foreach($protocols as $protocol){
+		    $index = self::getCreativeItemIndex($item, $protocol);
+	    	if($index !== -1){
+		    	unset(Item::$creative[$protocol][$index]);
+			}
 		}
 	}
 
-	public static function isCreativeItem(Item $item) : bool{
-		return Item::getCreativeItemIndex($item) !== -1;
+	public static function isCreativeItem(Item $item, int $protocol) : bool{
+		return Item::getCreativeItemIndex($item, $protocol) !== -1;
 	}
 
 	/**
 	 * @param int $index
+	 * @param int $protocol
 	 *
 	 * @return Item|null
 	 */
-	public static function getCreativeItem(int $index){
-		return Item::$creative[$index] ?? null;
+	public static function getCreativeItem(int $index, int $protocol){
+		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
+		if($protocol === null){
+			return null;
+		}
+
+		return Item::$creative[$protocol][$index] ?? null;
 	}
 
-	public static function getCreativeItemIndex(Item $item) : int{
-		foreach(Item::$creative as $i => $d){
+	public static function getCreativeItemIndex(Item $item, int $protocol) : int{
+		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
+		if($protocol === null){
+			return -1;
+		}
+
+		foreach(Item::$creative[$protocol] as $i => $d){
 			if($item->equals($d, !($item instanceof Durable))){
 				return $i;
 			}
 		}
 
 		return -1;
+	}
+
+    public static function getCreativeItemListKeyByProtocol(int $protocol) : ?int{
+		foreach(Item::$creative as $listProtocol => $items){
+			if($protocol >= $listProtocol){
+				return $listProtocol;
+			}
+		}
+
+		return null;
 	}
 
 	/** @var int */
