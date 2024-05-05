@@ -289,7 +289,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	private const MAX_CHAT_BYTE_LENGTH = self::MAX_CHAT_CHAR_LENGTH * 4;
 
-	private const INCOMING_PACKET_BATCH_PER_TICK = 2; //usually max 1 per tick, but transactions arrive separately
+	private const INCOMING_PACKET_BATCH_PER_TICK = 6; //usually max 1 per tick, but transactions arrive separately
 	private const INCOMING_PACKET_BATCH_BUFFER_TICKS = 100; //enough to account for a 5-second lag spike
 
 	private const INCOMING_GAME_PACKETS_PER_TICK = 40;
