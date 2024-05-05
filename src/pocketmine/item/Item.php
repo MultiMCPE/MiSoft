@@ -34,6 +34,8 @@ use pocketmine\block\BlockToolType;
 use pocketmine\entity\Entity;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\enchantment\EnchantmentInstance;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\NBT;
@@ -1051,14 +1053,26 @@ class Item implements ItemIds, JsonSerializable{
 	 *
 	 * @param int    $slot optional, the inventory slot of the item
 	 * @param string $tagName the name to assign to the CompoundTag object
+	 * @param ?int $playerProtocol
 	 *
 	 * @return CompoundTag
 	 */
-	public function nbtSerialize(int $slot = -1, string $tagName = "") : CompoundTag{
+	public function nbtSerialize(int $slot = -1, string $tagName = "", ?int $playerProtocol = null) : CompoundTag{
+		$id = $this->id;
+		$meta = $this->meta;
+		if($this->id !== 0 && $playerProtocol !== null && $playerProtocol >= ProtocolInfo::PROTOCOL_419){
+			$palette = ItemPalette::getPalette($playerProtocol);
+			[$id, $meta] = ($palette::getRuntimeFromLegacyIdQuiet($id, $meta) ?? [0, 0]);
+
+			$idTag = new StringTag("Name", $palette::getStringFromRuntimeId($id));
+		}else{
+			$idTag = new ShortTag("id", $id);
+		}
+
 		$result = new CompoundTag($tagName, [
-			new ShortTag("id", $this->id),
+			$idTag,
 			new ByteTag("Count", Binary::signByte($this->count)),
-			new ShortTag("Damage", $this->meta)
+			new ShortTag("Damage", $meta)
 		]);
 
 		if($this->hasCompoundTag()){

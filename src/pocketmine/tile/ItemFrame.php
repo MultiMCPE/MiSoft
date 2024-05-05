@@ -152,7 +152,7 @@ class ItemFrame extends Spawnable{
 	public function getProtocolSerializedSpawnCompound(int $playerProtocol) : string{
 		$compound = $this->getSpawnCompound();
 		if(!($this->item->getNamedTagEntry("map_uuid") instanceof LongTag) || $playerProtocol >= ProtocolInfo::PROTOCOL_130){
-			$compound->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM));
+			$compound->setTag($this->item->nbtSerialize(-1, self::TAG_ITEM, $playerProtocol));
 		}else{
 		    $item = clone $this->item;
 			$mapId = $item->getNamedTagEntry("map_uuid")->getValue();
@@ -162,15 +162,14 @@ class ItemFrame extends Spawnable{
 			$compound->setTag($item->nbtSerialize(-1, self::TAG_ITEM));
 		}
 
-		$protocolKey = ($playerProtocol >= ProtocolInfo::PROTOCOL_130 ? ProtocolInfo::PROTOCOL_130 : ProtocolInfo::PROTOCOL_100);
-		if(!isset($this->protocolSpawnCompoundCache[$protocolKey])){
+		if(!isset($this->protocolSpawnCompoundCache[$playerProtocol])){
 			if(self::$nbtWriter === null){
 				self::$nbtWriter = new NetworkLittleEndianNBTStream();
 			}
 
-			$this->protocolSpawnCompoundCache[$protocolKey] = self::$nbtWriter->write($compound);
+			$this->protocolSpawnCompoundCache[$playerProtocol] = self::$nbtWriter->write($compound);
 		}
 
-		return $this->protocolSpawnCompoundCache[$protocolKey];
+		return $this->protocolSpawnCompoundCache[$playerProtocol];
 	}
 }
