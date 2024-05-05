@@ -78,4 +78,8 @@ interface ResourcePack{
 	 * @throws InvalidArgumentException if the chunk does not exist
 	 */
 	public function getPackChunk(int $start, int $length) : string;
+
+	public function getEncryptionKey() : ?string;
+
+	public function setEncryptionKey(string $key);
 }

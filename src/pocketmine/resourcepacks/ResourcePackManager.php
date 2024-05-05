@@ -29,10 +29,12 @@ use InvalidArgumentException;
 use Logger;
 use pocketmine\utils\Config;
 use SplFileInfo;
+use LogicException;
 use function array_keys;
 use function copy;
 use function count;
 use function file_exists;
+use function file_get_contents;
 use function gettype;
 use function is_array;
 use function is_dir;
@@ -54,6 +56,12 @@ class ResourcePackManager{
 
 	/** @var ResourcePack[] */
 	private $uuidList = [];
+
+	/**
+	 * @var string[]
+	 * @phpstan-var array<string, string>
+	 */
+	private $encryptionKeys = [];
 
 	/**
 	 * @param string  $path Path to resource-packs directory.
@@ -112,6 +120,21 @@ class ResourcePackManager{
 				if($newPack instanceof ResourcePack){
 					$this->resourcePacks[] = $newPack;
 					$this->uuidList[strtolower($newPack->getPackId())] = $newPack;
+
+					$keyPath = $this->path . DIRECTORY_SEPARATOR . $pack . ".key";
+					if(file_exists($keyPath)){
+						try{
+							$key = file_get_contents($keyPath);
+							if($key === false){
+								throw new LogicException("Block must not return false when no error occurred. Use trap() if the block may return false.");
+							}
+
+							$this->encryptionKeys[strtolower($newPack->getPackId())] = $key;
+							$newPack->setEncryptionKey($key);
+						}catch(\ErrorException $e){
+							throw new ResourcePackException("Could not read encryption key file: " . $e->getMessage(), 0, $e);
+						}
+					}
 				}else{
 					throw new ResourcePackException("Format not recognized");
 				}
@@ -162,5 +185,12 @@ class ResourcePackManager{
 	 */
 	public function getPackIdList() : array{
 		return array_keys($this->uuidList);
+	}
+
+    /**
+	 * Returns the key with which the pack was encrypted, or null if the pack has no key.
+	 */
+	public function getPackEncryptionKey(string $id) : ?string{
+		return $this->encryptionKeys[strtolower($id)] ?? null;
 	}
 }

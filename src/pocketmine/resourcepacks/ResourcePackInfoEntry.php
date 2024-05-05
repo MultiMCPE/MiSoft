@@ -27,11 +27,13 @@ class ResourcePackInfoEntry{
 	protected $packId; //UUID
 	protected $version;
 	protected $packSize;
+	protected $encryptionKey;
 
-	public function __construct(string $packId, string $version, int $packSize = 0){
+	public function __construct(string $packId, string $version, int $packSize = 0, ?string $encryptionKey = null){
 		$this->packId = $packId;
 		$this->version = $version;
 		$this->packSize = $packSize;
+		$this->encryptionKey = $encryptionKey;
 	}
 
 	public function getPackId() : string{
@@ -44,5 +46,9 @@ class ResourcePackInfoEntry{
 
 	public function getPackSize() : int{
 		return $this->packSize;
+	}
+
+	public function getEncryptionKey() : ?string{
+		return $this->encryptionKey ?? null;
 	}
 }

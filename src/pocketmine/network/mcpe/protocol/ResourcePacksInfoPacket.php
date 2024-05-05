@@ -140,7 +140,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
 			($this->buffer .= (pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
-			$this->putString(""); //TODO: encryption key
+			$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){

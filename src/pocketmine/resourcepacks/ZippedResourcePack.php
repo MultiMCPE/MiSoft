@@ -77,6 +77,9 @@ class ZippedResourcePack implements ResourcePack{
 	/** @var resource */
 	protected $fileResource;
 
+    /** @var string */
+	protected $encryptionKey;
+
 	/**
 	 * @param string $zipPath Path to the resource pack zip
 	 * @throws ResourcePackException
@@ -158,5 +161,13 @@ class ZippedResourcePack implements ResourcePack{
 			throw new InvalidArgumentException("Requested a resource pack chunk with invalid start offset");
 		}
 		return fread($this->fileResource, $length);
+	}
+
+	public function getEncryptionKey() : ?string{
+		return $this->encryptionKey ?? null;
+	}
+
+	public function setEncryptionKey(string $key){
+		$this->encryptionKey = $key;
 	}
 }
