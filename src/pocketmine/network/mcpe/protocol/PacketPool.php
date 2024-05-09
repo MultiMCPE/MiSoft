@@ -403,16 +403,16 @@ class PacketPool {
      * @param int $id
      * @param int $playerProtocol
      * 
-     * @return ?int
+     * @return int
      */
-    public static function getPacketMagicById(int $id, int $playerProtocol) : ?int{
+    public static function getPacketMagicById(int $id, int $playerProtocol) : int{
         foreach(self::$protocolList as $protocol){
             if($playerProtocol >= $protocol){
-                return isset(self::$magicPoolFrom[$protocol][$id]) ? self::$magicPoolFrom[$protocol][$id] : null;
+                return isset(self::$magicPoolFrom[$protocol][$id]) ? self::$magicPoolFrom[$protocol][$id] : -1;
             }
         }
 
-        return null;
+        return -1;
     }
 
 }
