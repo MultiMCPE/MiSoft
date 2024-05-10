@@ -51,12 +51,17 @@ class DaylightSensor extends RedstoneSource{
 		return BlockToolType::TYPE_AXE;
 	}
 
-	public function getBoundingBox() : AxisAlignedBB{
-		if($this->boundingBox === null){
-			$this->boundingBox = $this->recalculateBoundingBox();
-		}
-		return $this->boundingBox;
-	}
+    public function getBoundingBox() : AxisAlignedBB {
+        if($this->boundingBox === null){
+            $boundingBox = $this->recalculateBoundingBox();
+            if ($boundingBox === null) {
+                $this->boundingBox = new AxisAlignedBB(0, 0, 0, 1, 1, 1);
+            } else {
+                $this->boundingBox = $boundingBox;
+            }
+        }
+        return $this->boundingBox;
+    }
 
 	public function canBeFlowedInto() : bool{
 		return false;

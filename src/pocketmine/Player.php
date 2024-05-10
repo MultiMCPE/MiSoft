@@ -3069,6 +3069,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * @return bool
      */
     public function attackEntity(Entity $target) : bool{
+		if($this->isSpectator()){
+			return true;
+		}
+
 		if(!$target->isAlive()){
 			return true;
 		}

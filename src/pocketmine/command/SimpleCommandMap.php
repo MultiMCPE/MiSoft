@@ -67,6 +67,7 @@ use pocketmine\command\defaults\WeatherCommand;
 use pocketmine\command\defaults\WhitelistCommand;
 use pocketmine\command\utils\InvalidCommandSyntaxException;
 use pocketmine\Server;
+use pocketmine\utils\TextFormat;
 use function array_shift;
 use function count;
 use function explode;
@@ -268,13 +269,16 @@ class SimpleCommandMap implements CommandMap{
 
 		$target->timings->startTiming();
 
-		try{
-			$target->execute($sender, $sentCommandLabel, $args);
-		}catch(InvalidCommandSyntaxException $e){
-			$sender->sendMessage($this->server->getLanguage()->translateString("commands.generic.usage", [$target->getUsage()]));
-		}finally{
-			$target->timings->stopTiming();
-		}
+        try {
+            $target->execute($sender, $sentCommandLabel, $args);
+        } catch (InvalidCommandSyntaxException $e) {
+            $sender->sendMessage($this->server->getLanguage()->translateString("commands.generic.usage", [$target->getUsage()]));
+        } catch (\Throwable $e) {
+            $sender->sendMessage(TextFormat::RED . "Произошла неизвестная ошибка при выполнении команды");
+            $this->server->getLogger()->critical($this->server->getLanguage()->translateString("pocketmine.command.exception", [$commandLine, (string)$target, $e->getMessage()]));
+            $sender->getServer()->getLogger()->logException($e);
+        }
+        $target->timings->stopTiming();
 
 		return true;
 	}

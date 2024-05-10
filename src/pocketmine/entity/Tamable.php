@@ -27,6 +27,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\utils\UUID;
 use function boolval;
 use function intval;
+use function strlen;
 
 abstract class Tamable extends Animal{
 
@@ -43,19 +44,22 @@ abstract class Tamable extends Animal{
 		}
 	}
 
-	protected function initEntity() : void{
-		parent::initEntity();
+    protected function initEntity() : void{
+        parent::initEntity();
 
-		$this->setTamed(boolval($this->namedtag->getByte("Tamed", 0)));
-		$this->setSitting(boolval($this->namedtag->getByte("Sitting", 0)));
-		if($this->namedtag->hasTag("OwnerUUID", StringTag::class)){
-			$owner = $this->server->getPlayerByUUID(UUID::fromString($this->namedtag->getString("OwnerUUID"))); // why only player?
+        $this->setTamed(boolval($this->namedtag->getByte("Tamed", 0)));
+        $this->setSitting(boolval($this->namedtag->getByte("Sitting", 0)));
+        if($this->namedtag->hasTag("OwnerUUID", StringTag::class)){
+            $uuid = $this->namedtag->getString("OwnerUUID");
+            if(strlen($uuid) === 16){
+                $owner = $this->server->getPlayerByUUID(UUID::fromString($uuid)); // why only player?
 
-			if($owner !== null){
-				$this->setOwningEntity($owner);
-			}
-		}
-	}
+                if($owner !== null){
+                    $this->setOwningEntity($owner);
+                }
+            }
+        }
+    }
 
 	public function isTamed() : bool{
 		return $this->getGenericFlag(self::DATA_FLAG_TAMED);
