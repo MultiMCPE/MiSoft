@@ -128,5 +128,5 @@ interface EntityMetadataProperties{
     public const DATA_CAN_RIDE_TARGET = 112; //byte
 	public const DATA_IS_BUOYANT = 119; //byte
 	public const DATA_BUOYANCY = 121; //string
-    public const DATA_RIDER_SEAT_ROTATION_OFFSET = 999; //float
+    public const DATA_RIDER_SEAT_ROTATION_OFFSET = 200; //float
 }

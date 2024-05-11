@@ -162,7 +162,6 @@ class FallingBlock extends Entity{
 	    	$pk->motion = $this->getMotion();
 	    	$pk->yaw = $this->yaw;
 	    	$pk->headYaw = $this->yaw; //TODO
-	    	$pk->bodyYaw = $this->yaw;
 	    	$pk->pitch = $this->pitch;
 	    	$pk->attributes = $this->attributeMap->getAll();
 	    	$pk->metadata = $this->propertyManager->getAll();
