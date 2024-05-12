@@ -65,6 +65,10 @@ abstract class Monster extends Mob{
 		return $this->level->getDifficulty() !== Level::DIFFICULTY_PEACEFUL and $this->isValidLightLevel();
 	}
 
+        public function canDespawn() : bool{
+		return false;
+        }
+	
 	public function getBlockPathWeight(Vector3 $pos) : float{
 		return 0.5 - max(
 				$this->level->getRealBlockSkyLightAt($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ()),
