@@ -32,7 +32,7 @@ use pocketmine\Player;
 use function abs;
 
 class Transaction{
-    /** @var Inventory */
+    /** @var ?Inventory */
     protected $inventory;
     /** @var int */
     protected $slot;
@@ -55,9 +55,9 @@ class Transaction{
     }
 
     /**
-     * @return Inventory
+     * @return ?Inventory
      */
-    public function getInventory() : Inventory{
+    public function getInventory() : ?Inventory{
         return $this->inventory;
     }
 
