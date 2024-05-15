@@ -270,6 +270,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public const SPECTATOR = 3;
 	public const VIEW = Player::SPECTATOR;
 
+	private const MOVES_PER_TICK = 2;
+	private const MOVE_BACKLOG_SIZE = 100 * self::MOVES_PER_TICK; //100 ticks backlog (5 seconds)
+
 	//TODO: HACK!
 	//these IDs are used for 1.16 to restore 1.14ish crafting & inventory behaviour; since they don't seem to have any
 	//effect on the behaviour of inventory transactions I don't currently plan to integrate these into the main system.
@@ -445,10 +448,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var bool[] map: raw UUID (string) => bool */
 	protected $hiddenPlayers = [];
 
+    /** @var float */
+    protected $moveRateLimit = 10 * self::MOVES_PER_TICK;
+	/** @var float|null */
+	protected $lastMovementProcess = null;
 	/** @var Vector3|null */
-	protected $newPosition;
-	/** @var bool */
-	protected $isTeleporting = false;
+	protected $forceMoveSync = null;
+
 	/** @var int */
 	protected $inAirTicks = 0;
 	/** @var float */
@@ -1129,11 +1135,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->lastPingMeasure = $pingMS;
 	}
 
-	/**
-	 * @return Position
+    /**
+	 * @deprecated
 	 */
 	public function getNextPosition() : Position{
-		return $this->newPosition !== null ? Position::fromObject($this->newPosition, $this->level) : $this->getPosition();
+		return $this->getPosition();
 	}
 
 	public function getInAirTicks() : int{
@@ -1727,6 +1733,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->setGenericFlag(self::DATA_FLAG_HAS_COLLISION, false);
 			$this->setFlying(true);
 			$this->keepMovement = true;
+			$this->onGround = false;
 
 			//TODO: HACK! this syncs the onground flag with the client so that flying works properly
 			//this is a yucky hack but we don't have any other options :(
@@ -1736,6 +1743,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}else{
 			$this->setGenericFlag(self::DATA_FLAG_HAS_COLLISION, true);
 			$this->keepMovement = $this->allowMovementCheats;
+			$this->checkGroundState(0, 0, 0, 0, 0, 0);
 			if($this->isSurvival()){
 				$this->setFlying(false);
 			}
@@ -1947,11 +1955,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	protected function checkGroundState(float $movX, float $movY, float $movZ, float $dx, float $dy, float $dz) : void{
-		$bb = clone $this->boundingBox;
-		$bb->minY = $this->y - 0.2;
-		$bb->maxY = $this->y + 0.2;
+		if($this->isSpectator()){
+			$this->onGround = false;
+		}else{
+			$bb = clone $this->boundingBox;
+			$bb->minY = $this->y - 0.2;
+			$bb->maxY = $this->y + 0.2;
 
-		$this->onGround = $this->isCollided = count($this->level->getCollisionBlocks($bb, true)) > 0;
+			$this->onGround = $this->isCollided = count($this->level->getCollisionBlocks($bb, true)) > 0;
+		}
 	}
 
 	public function canBeMovedByCurrents() : bool{
@@ -1970,20 +1982,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 	}
 
-	protected function processMovement(int $tickDiff){
-		if(!$this->isAlive() or !$this->spawned or $this->newPosition === null or $this->isSleeping()){
+	protected function handleMovement(Vector3 $newPos) : void{
+		$this->moveRateLimit--;
+		if($this->moveRateLimit < 0){
 			return;
 		}
 
-		assert($this->x !== null and $this->y !== null and $this->z !== null);
-		assert($this->newPosition->x !== null and $this->newPosition->y !== null and $this->newPosition->z !== null);
-
-		$newPos = $this->newPosition;
-		$distanceSquared = $newPos->distanceSquared($this);
+		$oldPos = $this->asLocation();
+		$distanceSquared = $newPos->distanceSquared($oldPos);
 
 		$revert = false;
 
-		if(($distanceSquared / ($tickDiff ** 2)) > 100){
+		if($distanceSquared > 100){
+			//TODO: this is probably too big if we process every movement
 			/* !!! BEWARE YE WHO ENTER HERE !!!
 			 *
 			 * This is NOT an anti-cheat check. It is a safety check.
@@ -1995,7 +2006,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			 * asking for help if you suffer the consequences of messing with this.
 			 */
 			$this->server->getLogger()->debug($this->getName() . " moved too fast, reverting movement");
-			$this->server->getLogger()->debug("Old position: " . $this->asVector3() . ", new position: " . $this->newPosition);
+			$this->server->getLogger()->debug("Old position: " . $this->asVector3() . ", new position: " . $newPos);
 			$revert = true;
 		}elseif(!$this->level->isInLoadedTerrain($newPos) or !$this->level->isChunkGenerated($newPos->getFloorX() >> 4, $newPos->getFloorZ() >> 4)){
 			$revert = true;
@@ -2007,10 +2018,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$dy = $newPos->y - $this->y;
 			$dz = $newPos->z - $this->z;
 
+			//the client likes to clip into blocks like stairs, but we do full server-side prediction of that without
+			//help from the client's position changes, so we deduct the expected clip height from the moved distance.
+			$expectedClipDistance = $this->ySize * (1 - self::STEP_CLIP_MULTIPLIER);
+			$dy -= $expectedClipDistance;
 			$this->move($dx, $dy, $dz);
 
-			$diff = $this->distanceSquared($newPos) / $tickDiff ** 2;
+			$diff = $this->distanceSquared($newPos);
 
+			//TODO: Explore lowering this threshold now that stairs work properly.
 			if($this->isSurvival() and $diff > 0.0625){
 				$ev = new PlayerIllegalMoveEvent($this, $newPos, new Vector3($this->lastX, $this->lastY, $this->lastZ));
 				$ev->setCancelled($this->allowMovementCheats);
@@ -2020,7 +2036,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				if(!$ev->isCancelled()){
 					$revert = true;
 					$this->server->getLogger()->debug($this->getServer()->getLanguage()->translateString("pocketmine.player.invalidMove", [$this->getName()]));
-					$this->server->getLogger()->debug("Old position: " . $this->asVector3() . ", new position: " . $this->newPosition);
+					$this->server->getLogger()->debug("Old position: " . $this->asVector3() . ", new position: " . $newPos . ", expected clip distance: $expectedClipDistance");
 				}
 			}
 
@@ -2029,73 +2045,87 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 		}
 
+		if($revert){
+			$this->revertMovement($oldPos);
+		}
+	}
+
+	/**
+	 * Fires movement events and synchronizes player movement, every tick.
+	 */
+	protected function processMostRecentMovements() : void{
+		$now = microtime(true);
+		$multiplier = $this->lastMovementProcess !== null ? ($now - $this->lastMovementProcess) * 20 : 1;
+		$exceededRateLimit = $this->moveRateLimit < 0;
+		$this->moveRateLimit = min(self::MOVE_BACKLOG_SIZE, max(0, $this->moveRateLimit) + self::MOVES_PER_TICK * $multiplier);
+		$this->lastMovementProcess = $now;
+
 		$from = new Location($this->lastX, $this->lastY, $this->lastZ, $this->lastYaw, $this->lastPitch, $this->level);
 		$to = $this->getLocation();
 
 		$delta = (($this->lastX - $to->x) ** 2) + (($this->lastY - $to->y) ** 2) + (($this->lastZ - $to->z) ** 2);
 		$deltaAngle = abs($this->lastYaw - $to->yaw) + abs($this->lastPitch - $to->pitch);
 
-		if(!$revert and ($delta > 0.0001 or $deltaAngle > 1.0)){
+		if($delta > 0.0001 or $deltaAngle > 1.0){
+			$ev = new PlayerMoveEvent($this, $from, $to);
+
+			$ev->call();
+
+			if($ev->isCancelled()){
+				$this->revertMovement($from);
+				return;
+			}
+
+			if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
+				$this->teleport($ev->getTo());
+				return;
+			}
+
 			$this->lastX = $to->x;
 			$this->lastY = $to->y;
 			$this->lastZ = $to->z;
 
 			$this->lastYaw = $to->yaw;
 			$this->lastPitch = $to->pitch;
+			$this->broadcastMovement();
 
-			$ev = new PlayerMoveEvent($this, $from, $to);
+			$distance = sqrt((($from->x - $to->x) ** 2) + (($from->z - $to->z) ** 2));
+			if($this->isSprinting()){
+				$this->exhaust(0.1 * $distance, PlayerExhaustEvent::CAUSE_SPRINTING);
+			}elseif($this->isSwimming()){
+				$this->exhaust(0.015 * $distance, PlayerExhaustEvent::CAUSE_SWIMMING);
+			}else{
+				$this->exhaust(0.01 * $distance, PlayerExhaustEvent::CAUSE_WALKING);
+			}
 
-			$ev->call();
-
-			if(!($revert = $ev->isCancelled())){ //Yes, this is intended
-				if($this->server->netherEnabled){
-					if($this->isInsideOfPortal()){
-						if($this->portalTime === 0){
-							$this->portalTime = $this->server->getTick();
-						}
-					}else{
-						$this->portalTime = 0;
+			if($this->server->netherEnabled){
+				if($this->isInsideOfPortal()){
+					if($this->portalTime === 0){
+						$this->portalTime = $this->server->getTick();
 					}
-				}
-				if($to->distanceSquared($ev->getTo()) > 0.01){ //If plugins modify the destination
-					$this->teleport($ev->getTo());
 				}else{
-					$this->broadcastMovement();
-
-					$distance = sqrt((($from->x - $to->x) ** 2) + (($from->z - $to->z) ** 2));
-					if($this->isSprinting()){
-						$this->exhaust(0.1 * $distance, PlayerExhaustEvent::CAUSE_SPRINTING);
-					}elseif($this->isSwimming()){
-						$this->exhaust(0.015 * $distance, PlayerExhaustEvent::CAUSE_SWIMMING);
-					}else{
-						$this->exhaust(0.01 * $distance, PlayerExhaustEvent::CAUSE_WALKING);
-					}
-
-					if($this->isOnGround() && $this->isGliding()){
-						$this->toggleGlide(false);
-					}
+					$this->portalTime = 0;
 				}
 			}
-		}
 
-		if($revert){
+			if($this->isOnGround() && $this->isGliding()){
+				$this->toggleGlide(false);
+			}
 
-			$this->lastX = $from->x;
-			$this->lastY = $from->y;
-			$this->lastZ = $from->z;
-
-			$this->lastYaw = $from->yaw;
-			$this->lastPitch = $from->pitch;
-
-			$this->setPosition($from);
-			$this->sendPosition($from, $from->yaw, $from->pitch, MovePlayerPacket::MODE_RESET);
-		}else{
-			if($distanceSquared != 0 and $this->nextChunkOrderRun > 20){
+			if($this->nextChunkOrderRun > 20){
 				$this->nextChunkOrderRun = 20;
 			}
 		}
 
-		$this->newPosition = null;
+		if($exceededRateLimit){ //client and server positions will be out of sync if this happens
+			$this->server->getLogger()->debug("Player " . $this->getName() . " exceeded movement rate limit, forcing to last accepted position");
+			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_RESET);
+		}
+	}
+
+	protected function revertMovement(Location $from) : void{
+		$this->setPosition($from);
+		$this->sendPosition($from, $from->yaw, $from->pitch, MovePlayerPacket::MODE_RESET);
 	}
 
 	public function fall(float $fallDistance) : void{
@@ -2216,7 +2246,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			if($this->getOffHandInventory() !== null){
 				$this->offHandInventory->getItemInHand()->onUpdate($this);
 			}
-			$this->processMovement($tickDiff);
+			$this->processMostRecentMovements();
 			$this->motion->x = $this->motion->y = $this->motion->z = 0; //TODO: HACK! (Fixes player knockback being messed up)
 			if($this->onGround){
 				$this->inAirTicks = 0;
@@ -3179,10 +3209,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleMovePlayer(MovePlayerPacket $packet) : bool{
-		$newPos = $packet->position->subtract(0, $this->baseOffset, 0);
+		$rawPos = $packet->position;
+		foreach([$rawPos->x, $rawPos->y, $rawPos->z, $packet->yaw, $packet->headYaw, $packet->pitch] as $float){
+			if(is_infinite($float) || is_nan($float)){
+				$this->server->getLogger()->debug("Invalid movement from " . $this->getName() . ", contains NAN/INF components");
+				return false;
+			}
+		}
 
-		if($this->isTeleporting and $newPos->distanceSquared($this) > 1){  //Tolerate up to 1 block to avoid problems with client-sided physics when spawning in blocks
-			$this->sendPosition($this, null, null, MovePlayerPacket::MODE_RESET);
+		$newPos = $rawPos->round(4)->subtract(0, $this->baseOffset, 0);
+		if($this->forceMoveSync !== null and $newPos->distanceSquared($this->forceMoveSync) > 1){  //Tolerate up to 1 block to avoid problems with client-sided physics when spawning in blocks
 			$this->server->getLogger()->debug("Got outdated pre-teleport movement from " . $this->getName() . ", received " . $newPos . ", expected " . $this->asVector3());
 			//Still getting movements from before teleport, ignore them
 		}elseif((!$this->isAlive() or !$this->spawned) and $newPos->distanceSquared($this) > 0.01){
@@ -3190,9 +3226,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->server->getLogger()->debug("Reverted movement of " . $this->getName() . " due to not alive or not spawned, received " . $newPos . ", locked at " . $this->asVector3());
 		}else{
 			// Once we get a movement within a reasonable distance, treat it as a teleport ACK and remove position lock
-			if($this->isTeleporting){
-				$this->isTeleporting = false;
-			}
+			$this->forceMoveSync = null;
 
 			$packet->yaw = fmod($packet->yaw, 360);
 			$packet->pitch = fmod($packet->pitch, 360);
@@ -3202,7 +3236,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 
 			$this->setRotation($packet->yaw, $packet->pitch);
-			$this->newPosition = $newPos;
+			$this->handleMovement($newPos);
 		}
 
 		return true;
@@ -4493,14 +4527,26 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$modifiedPages[] = $packet->pageNumber;
 				break;
 			case BookEditPacket::TYPE_ADD_PAGE:
+				if(!$newBook->pageExists($packet->pageNumber)){
+					//this may only come before a page which already exists
+					//TODO: the client can send insert-before actions on trailing client-side pages which cause odd behaviour on the server
+					return false;
+				}
 				$newBook->insertPage($packet->pageNumber, $packet->text);
 				$modifiedPages[] = $packet->pageNumber;
 				break;
 			case BookEditPacket::TYPE_DELETE_PAGE:
+				if(!$newBook->pageExists($packet->pageNumber)){
+					return false;
+				}
 				$newBook->deletePage($packet->pageNumber);
 				$modifiedPages[] = $packet->pageNumber;
 				break;
 			case BookEditPacket::TYPE_SWAP_PAGES:
+				if(!$newBook->pageExists($packet->pageNumber) or !$newBook->pageExists($packet->secondaryPageNumber)){
+					//the client will create pages on its own without telling us until it tries to switch them
+					$newBook->addPage(max($packet->pageNumber, $packet->secondaryPageNumber));
+				}
 				$newBook->swapPages($packet->pageNumber, $packet->secondaryPageNumber);
 				$modifiedPages = [$packet->pageNumber, $packet->secondaryPageNumber];
 				break;
@@ -5184,12 +5230,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->ridingEid = intval($this->ridingEid);
 
 		if($targets !== null){
+			if(in_array($this, $targets, true)){
+				$this->forceMoveSync = $pos->asVector3();
+				$this->ySize = 0;
+			}
 			$this->server->broadcastPacket($targets, $pk);
 		}else{
+			$this->forceMoveSync = $pos->asVector3();
+			$this->ySize = 0;
 			$this->dataPacket($pk);
 		}
-
-		$this->newPosition = null;
 	}
 
 	/**
@@ -5207,10 +5257,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			$this->resetFallDistance();
 			$this->nextChunkOrderRun = 0;
-			$this->newPosition = null;
+			if($this->spawnChunkLoadCount !== -1){
+				$this->spawnChunkLoadCount = 0;
+			}
 			$this->stopSleep();
-
-			$this->isTeleporting = true;
 
 			//TODO: workaround for player last pos not getting updated
 			//Entity::updateMovement() normally handles this, but it's overridden with an empty function in Player
@@ -5423,7 +5473,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function onChunkChanged(Chunk $chunk){
-		if(isset($this->usedChunks[$hash = ((($chunk->getX()) & 0xFFFFFFFF) << 32) | (( $chunk->getZ()) & 0xFFFFFFFF)])){
+		$hasSent = $this->usedChunks[$hash = Level::chunkHash($chunk->getX(), $chunk->getZ())] ?? false;
+		if($hasSent){
 			$this->usedChunks[$hash] = false;
 			$this->nextChunkOrderRun = 0;
 		}

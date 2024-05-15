@@ -1037,9 +1037,9 @@ class NetworkBinaryStream extends BinaryStream{
 	 */
 	public function getVector3() : Vector3{
 		return new Vector3(
-			((round((unpack("g", $this->get(4))[1]),  4))),
-			((round((unpack("g", $this->get(4))[1]),  4))),
-			((round((unpack("g", $this->get(4))[1]),  4)))
+			(((unpack("g", $this->get(4))[1]))),
+			(((unpack("g", $this->get(4))[1]))),
+			(((unpack("g", $this->get(4))[1])))
 		);
 	}
 
