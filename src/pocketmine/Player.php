@@ -507,12 +507,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	/** @var float */
 	protected $lastRightClickTime = 0.0;
-	/** @var Vector3|null */
-	protected $lastRightPlayerPos = null;
-	/** @var Vector3|null */
-	protected $lastRightBlockPos = null;
-	/** @var Vector3|null */
-	protected $lastRightClickPos = null;
+	/** @var \stdClass|null */
+	protected $lastRightClickData = null;
 
     /** @var string */
     protected $lastRequestedFullSkinId = null;
@@ -3402,16 +3398,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				switch($type){
 					case InventoryTransactionPacket::USE_ITEM_ACTION_CLICK_BLOCK:
 						//TODO: start hack for client spam bug
-						$spamBug = ($this->lastRightClickPos !== null and $this->lastRightPlayerPos !== null and $this->lastRightBlockPos !== null and
+						$spamBug = ($this->lastRightClickData !== null and
 							microtime(true) - $this->lastRightClickTime < 0.1 and //100ms
-							$this->lastRightPlayerPos->distanceSquared($packet->trData->playerPos) < 0.00001 and
-							$this->lastRightBlockPos->equals($blockVector) and
-							$this->lastRightClickPos->distanceSquared($packet->trData->clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
+							$this->lastRightClickData->playerPos->distanceSquared($packet->trData->playerPos) < 0.00001 and
+							$this->lastRightClickData->x === $packet->trData->x and
+							$this->lastRightClickData->y === $packet->trData->y and
+							$this->lastRightClickData->z === $packet->trData->z and
+							$this->lastRightClickData->clickPos->distanceSquared($packet->trData->clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
 						);
 						//get rid of continued spam if the player clicks and holds right-click
-						$this->lastRightClickPos = clone $packet->trData->clickPos;
-						$this->lastRightPlayerPos = clone $packet->trData->playerPos;
-						$this->lastRightBlockPos = $blockVector;
+						$this->lastRightClickData = $packet->trData;
 						$this->lastRightClickTime = microtime(true);
 						if($spamBug){
 							return true;
