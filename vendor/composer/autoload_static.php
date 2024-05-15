@@ -762,6 +762,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\item\\CookedSalmon' => __DIR__ . '/../..' . '/src/pocketmine/item/CookedSalmon.php',
         'pocketmine\\item\\Cookie' => __DIR__ . '/../..' . '/src/pocketmine/item/Cookie.php',
         'pocketmine\\item\\EmptyMap' => __DIR__ . '/../..' . '/src/pocketmine/item/EmptyMap.php',
+        'pocketmine\\item\\EnchantedBook' => __DIR__ . '/../..' . '/src/pocketmine/item/EnchantedBook.php',
         'pocketmine\\item\\Map' => __DIR__ . '/../..' . '/src/pocketmine/item/Map.php',
         'pocketmine\\item\\DiamondBoots' => __DIR__ . '/../..' . '/src/pocketmine/item/DiamondBoots.php',
         'pocketmine\\item\\DiamondChestplate' => __DIR__ . '/../..' . '/src/pocketmine/item/DiamondChestplate.php',

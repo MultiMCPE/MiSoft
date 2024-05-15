@@ -691,6 +691,7 @@ return array(
     'pocketmine\\item\\CookedSalmon' => $baseDir . '/src/pocketmine/item/CookedSalmon.php',
     'pocketmine\\item\\Cookie' => $baseDir . '/src/pocketmine/item/Cookie.php',
     'pocketmine\\item\\EmptyMap' => $baseDir . '/src/pocketmine/item/EmptyMap.php',
+    'pocketmine\\item\\EnchantedBook' => $baseDir . '/src/pocketmine/item/EnchantedBook.php',
     'pocketmine\\item\\Map' => $baseDir . '/src/pocketmine/item/Map.php',
     'pocketmine\\item\\DiamondBoots' => $baseDir . '/src/pocketmine/item/DiamondBoots.php',
     'pocketmine\\item\\DiamondChestplate' => $baseDir . '/src/pocketmine/item/DiamondChestplate.php',
