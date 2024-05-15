@@ -82,7 +82,7 @@ class SerializedSkin{
     public static function isSkinIdPE(string $skinId) : bool{
         self::lazyInit();
 
-        return isset(self::$skinIdToBedrockMap[$skin->getSkinId()]);
+        return isset(self::$skinIdToBedrockMap[$skinId]);
     }
 
     /**
