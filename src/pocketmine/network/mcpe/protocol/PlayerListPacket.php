@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use function chr;
 use function count;
 use function ord;
@@ -43,31 +44,12 @@ class PlayerListPacket extends DataPacket{
 	/** @var int */
 	public $type;
 
-    protected const PE_SKIN_PACKS = ["Standard", "BattleAndBeasts", "Skyrim", "GreekMythology", "MagicTheGathering", "Fallout", "ChineseMythology", "PowerRangers", "BiomeSettlers03", "FestiveMashup26", "CampfireTales", "Villains", "Biome2", "StoryMode", "Redstone", "JTTW", "Festive", "PvPWarriors", "Halloween", "CityFolk", "TownFolk"];
-
     public static function getPESkinId(Skin $skin) : string{
 		$skinId = $skin->getSkinId();
 
-		if($skinId === "Standard_Steve" || $skinId === "Standard_Alex"){
+		if(SerializedSkin::isSkinIdPE($skinId)){
 			return $skinId;
 		}
-
-		if($skinId !== "Custom"){
-			$id = explode(" ", $skinId);
-			if(count($id) < 2){
-				$id = explode("_", $skinId);
-				if(count($id) < 2){
-					goto end;
-				}
-			}
-
-			$packId = array_shift($id);
-			if(in_array($packId, self::PE_SKIN_PACKS, true)){
-			    return $skinId;
-			}
-		}
-
-        end:
 
         $type = "Custom";
 		switch ($skin->getGeometryName()){

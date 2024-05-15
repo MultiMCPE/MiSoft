@@ -75,6 +75,17 @@ class SerializedSkin{
     }
 
     /**
+     * @param string $skinId
+     * 
+     * @return bool
+     */
+    public static function isSkinIdPE(string $skinId) : bool{
+        self::lazyInit();
+
+        return isset(self::$skinIdToBedrockMap[$skin->getSkinId()]);
+    }
+
+    /**
      * @param Skin $skin
      * 
      * @return SerializedSkin
