@@ -66,6 +66,7 @@ use pocketmine\entity\passive\Villager;
 use pocketmine\entity\passive\Wolf;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\entity\projectile\FishingHook;
+use pocketmine\entity\projectile\SmallFireball;
 use pocketmine\entity\projectile\Egg;
 use pocketmine\entity\projectile\EnderPearl;
 use pocketmine\entity\projectile\ExperienceBottle;
@@ -185,6 +186,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(Minecart::class, false, ['Minecart', 'minecraft:minecart']);
 		Entity::registerEntity(FireworksRocket::class, false, ['FireworksRocket', 'minecraft:fireworks_rocket']);
 		Entity::registerEntity(Blaze::class, false, ['Blaze', 'minecraft:blaze']);
+		Entity::registerEntity(SmallFireball::class, false, ['SmallFireball', 'minecraft:small_fireball']);
 		Entity::registerEntity(Squid::class, false, ['Squid', 'minecraft:squid']);
 		Entity::registerEntity(Villager::class, false, ['Villager', 'minecraft:villager']);
 		Entity::registerEntity(Wolf::class, false, ['Wolf', 'minecraft:wolf']);
