@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\behavior;
 
+use pocketmine\Player;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Mob;
 
@@ -50,6 +51,12 @@ class LookAtEntityBehavior extends Behavior{
 			$target = $this->mob->level->getNearestEntity($this->mob->asVector3(), $this->lookDistance, $this->targetClass);
 
 			if($target !== null){
+				if($target instanceof Player){
+					if($target->isSpectator()){
+						return false;
+					}
+				}
+
 				$this->nearestEntity = $target;
 
 				return true;
@@ -64,7 +71,7 @@ class LookAtEntityBehavior extends Behavior{
 	}
 
 	public function canContinue() : bool{
-		return !($this->nearestEntity->isAlive() ? false : (($this->mob->distanceSquared($this->nearestEntity) > $this->lookDistance ** 2) ? false : ($this->lookTime > 0)));
+		return (!$this->nearestEntity->isAlive() ? false : (($this->nearestEntity instanceof Player && $this->nearestEntity->isSpectator()) ? false : (($this->mob->distanceSquared($this->nearestEntity) > $this->lookDistance ** 2) ? false : ($this->lookTime > 0))));
 	}
 
 	public function onTick() : void{
