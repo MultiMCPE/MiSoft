@@ -109,11 +109,18 @@ abstract class Armor extends Durable{
 	}
 
 	public function onClickAir(Player $player, Vector3 $directionVector) : bool{
-		$existing = $player->getArmorInventory()->getItem($this->getArmorSlot());
-		if(!$existing->isNull()){
-			return false;
+		$current = $player->getArmorInventory()->getItem($this->getArmorSlot());
+		if($current->isNull()){
+			$player->getArmorInventory()->setItem($this->getArmorSlot(), $this->pop());
+
+			return true;
+		}elseif(!$current->equals($this) and $player->getInventory()->canAddItem($current)){
+			$player->getArmorInventory()->setItem($this->getArmorSlot(), $this->pop());
+			$player->getInventory()->addItem($current);
+
+			return true;
 		}
-		$player->getArmorInventory()->setItem($this->getArmorSlot(), $this->pop());
-		return true;
+
+		return false;
 	}
 }
