@@ -23,13 +23,23 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
-class Elytra extends Item{
+use pocketmine\inventory\ArmorInventory;
+
+class Elytra extends Armor{
 	public function __construct(int $meta = 0){
 		parent::__construct(Item::ELYTRA, $meta, "Elytra Wings");
 	}
 
 	public function getArmorSlot() : int{
-		return 1;
+		return ArmorInventory::SLOT_CHEST;
+	}
+
+	public function getDefensePoints() : int{
+		return 0;
+	}
+
+	public function getMaxDurability() : int{
+		return 431;
 	}
 
 	public function getMaxStackSize() : int{
