@@ -859,6 +859,7 @@ return array(
     'pocketmine\\level\\generator\\object\\Tree' => $baseDir . '/src/pocketmine/level/generator/object/Tree.php',
     'pocketmine\\level\\generator\\populator\\Cave' => $baseDir . '/src/pocketmine/level/generator/populator/Cave.php',
     'pocketmine\\level\\generator\\populator\\EnderPilar' => $baseDir . '/src/pocketmine/level/generator/populator/EnderPilar.php',
+    'pocketmine\\level\\generator\\populator\\Flower' => $baseDir . '/src/pocketmine/level/generator/populator/Flower.php',
     'pocketmine\\level\\generator\\populator\\GroundCover' => $baseDir . '/src/pocketmine/level/generator/populator/GroundCover.php',
     'pocketmine\\level\\generator\\populator\\Ore' => $baseDir . '/src/pocketmine/level/generator/populator/Ore.php',
     'pocketmine\\level\\generator\\populator\\Pond' => $baseDir . '/src/pocketmine/level/generator/populator/Pond.php',
