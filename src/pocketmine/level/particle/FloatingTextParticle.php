@@ -92,6 +92,7 @@ class FloatingTextParticle extends Particle{
 
         if(!$this->invisible){
             $uuid = UUID::fromRandom();
+	    $name = $this->title . ($this->text !== "" ? "\n" . $this->text : "");
 
             $add = new PlayerListPacket();
             $add->type = PlayerListPacket::TYPE_ADD;
