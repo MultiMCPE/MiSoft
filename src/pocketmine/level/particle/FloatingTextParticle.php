@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\level\particle;
 
 use pocketmine\entity\Entity;
-use pocketmine\entity\object\FallingBlock;
+use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\Skin;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
@@ -92,7 +92,6 @@ class FloatingTextParticle extends Particle{
 
         if(!$this->invisible){
             $uuid = UUID::fromRandom();
-            $name = $this->title . ($this->text !== "" ? "\n" . $this->text : "");
 
             $add = new PlayerListPacket();
             $add->type = PlayerListPacket::TYPE_ADD;
@@ -101,8 +100,8 @@ class FloatingTextParticle extends Particle{
 
             $pk = new AddActorPacket();
             $pk->entityRuntimeId = $this->entityId;
-            $pk->type = FallingBlock::NETWORK_ID;
-            $pk->position = new Vector3($this->x, $this->y - 0.49, $this->z); //TODO: check offset
+            $pk->type = ItemEntity::NETWORK_ID;
+            $pk->position = $this->asVector3(); //TODO: check offset
             $pk->syncedProperties = new PropertySyncData([], []);
             $pk->attributes = [];
 
