@@ -217,17 +217,17 @@ abstract class PluginBase implements Plugin{
 			return false;
 		}
 
+		$out = $this->dataFolder . $filename;
+		if(file_exists($out) and !$replace){
+			return false;
+		}
+
 		if(($resource = $this->getResource($filename)) === null){
 			return false;
 		}
 
-		$out = $this->dataFolder . $filename;
 		if(!file_exists(dirname($out))){
 			mkdir(dirname($out), 0755, true);
-		}
-
-		if(file_exists($out) and !$replace){
-			return false;
 		}
 
 		$ret = stream_copy_to_stream($resource, $fp = fopen($out, "wb")) > 0;
