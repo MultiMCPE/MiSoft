@@ -57,7 +57,7 @@ class SetTitlePacket extends DataPacket{
 	protected function decodePayload(){
 		$this->type = $this->getVarInt();
 		$this->text = $this->getString();
-		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221) {
+		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224) {
 		    $this->authorXUID = $this->getString();
 		}
 		$this->fadeInTime = $this->getVarInt();
@@ -72,7 +72,7 @@ class SetTitlePacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVarInt($this->type);
 		$this->putString($this->text);
-		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221) {
+		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224) {
 		    $this->putString($this->authorXUID);
 		}
 		$this->putVarInt($this->fadeInTime);

@@ -271,7 +271,7 @@ class SerializedSkin{
         $this->premiumSkin = $premiumSkin;
         $this->personaSkin = $personaSkin;
         $this->capeOnClassicSkin = $capeOnClassicSkin;
-        $this->fullSkinId = $fullSkinId ?? $this->generateFullSkinId();
+        $this->fullSkinId = $this->generateFullSkinId();
         $this->armSize = $armSize;
         $this->skinColor = $skinColor;
         $this->personaPieces = $personaPieces;
@@ -448,16 +448,7 @@ class SerializedSkin{
 				"alex" => new Skin("Standard_Alex", file_get_contents(RESOURCE_PATH . '/vanilla/skins/alex.skindata')),
 			];
 
-			if($this->personaSkin and substr($this->skinId, -4, 3) === "_0_"){
-				$num = substr($this->skinId, -1);
-				if($num === "0"){
-					$skin = self::$defaultSkins["steve"];
-				}else{
-					$skin = self::$defaultSkins["alex"];
-				}
-			}
-
-			$skin = $skin ?? self::$defaultSkins[array_rand(self::$defaultSkins)];
+			$skin = self::$defaultSkins[array_rand(self::$defaultSkins)];
 			$skin->setSerializedSkin($this);
 
 			return $skin;

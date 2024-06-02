@@ -165,14 +165,7 @@ class PlayerListPacket extends DataPacket{
 				            $this->putLInt(1); // num skins, always 1
 			        	}
 
-			        	$emptySkin = str_repeat("\x00", 8192);
-			            $skinData = !empty($entry->skin->getSkinData()) ? $entry->skin->getSkinData() : $emptySkin;
-			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
-			            	if(empty($entry->skin->getGeometryData()) && strlen($skinData) === 8192){
-				            	$skinData = $this->duplicateArmAndLeg($skinData);
-			            	}
-			        	}
-			        	$this->putString($skinData);
+			        	$this->putString($entry->skin->getClientFriendlySkinData($this->getProtocol()));
 
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_131){
 			            	$capeData = $entry->skin->getCapeData();
@@ -225,7 +218,7 @@ class PlayerListPacket extends DataPacket{
 			    	}
 				} else {
 				    $this->putString(self::getPESkinId($entry->skin));
-				    $this->putString($entry->skin->getSkinData());
+				    $this->putString($entry->skin->getClientFriendlySkinData($this->getProtocol()));
 				}
 			}else{
 				$this->putUUID($entry->uuid);

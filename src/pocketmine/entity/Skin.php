@@ -25,19 +25,27 @@ namespace pocketmine\entity;
 
 use Ahc\Json\Comment as CommentedJsonDecoder;
 use InvalidArgumentException;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use function implode;
 use function in_array;
 use function json_encode;
 use function strlen;
+use function imagecreatetruecolor;
+use function imagesavealpha;
+use function imagecolorallocatealpha;
+use function imagefill;
+use function ord;
+use function imagesetpixel;
+use function imagecopyresampled;
+use function imagecolorat;
+use function imagedestroy;
 
 class Skin{
 	public const ACCEPTED_SKIN_SIZES = [
         64 * 32 * 4,
         64 * 64 * 4,
         128 * 128 * 4,
-        256 * 128 * 4,
-        256 * 256 * 4
 	];
 
 	/** @var string */
@@ -52,6 +60,8 @@ class Skin{
 	private $geometryData;
     /** @var SerializedSkin */
     private $serializedSkin;
+	/** @var string[] */
+	private $skinDataSizeCache = [];
 
 	public function __construct(string $skinId, string $skinData, string $capeData = "", string $geometryName = "", string $geometryData = ""){
 		$this->skinId = $skinId;
@@ -108,6 +118,17 @@ class Skin{
 	/**
 	 * @return string
 	 */
+	public function getSkinDataSize(int $neededSize) : string{
+		if(!isset($this->skinDataSizeCache[$neededSize])){
+			$this->skinDataSizeCache[$neededSize] = $this->skinResize($this->skinData, $neededSize);
+		}
+
+		return $this->skinDataSizeCache[$neededSize];
+	}
+
+	/**
+	 * @return string
+	 */
 	public function getCapeData() : string{
 		return $this->capeData;
 	}
@@ -152,4 +173,98 @@ class Skin{
 			$this->geometryData = (string) json_encode((new CommentedJsonDecoder())->decode($this->geometryData));
 		}
 	}
+
+	/**
+	 * @param int $protocol
+	 * 
+	 * @return string
+	 */
+    public function getClientFriendlySkinData(int $protocol) : string{
+        static $sizes = [
+            128 * 128 * 4 => ProtocolInfo::PROTOCOL_224,
+			64 * 64 * 4   => ProtocolInfo::PROTOCOL_100,
+			64 * 32 * 4   => ProtocolInfo::PROTOCOL_100,
+        ];
+        
+        
+        $skinSize = strlen($this->skinData);
+        if(isset($sizes[$skinSize])){
+            if($sizes[$skinSize] > $protocol){
+                foreach($sizes as $size => $sizeProtocol){
+                    if($protocol >= $sizeProtocol){
+                        return $this->getSkinDataSize($size);
+                    }
+                }
+            }
+        }
+
+        return $this->skinData;
+    }
+
+	/**
+	 * @param string $skinData
+	 * @param int $neededSize
+	 * 
+	 * @return string
+	 */
+    protected function skinResize(string $skinData, int $neededSize) : string{
+		$skinSize = strlen($skinData);
+        $dimensions = [
+            64 * 32 * 4 => [64, 32],
+            64 * 64 * 4 => [64, 64],
+            128 * 128 * 4 => [128, 128],
+        ];
+
+        if(!isset($dimensions[$skinSize])){
+            throw new InvalidArgumentException("Invalid skin size $skinSize");
+        }
+
+        [$skinW, $skinH] = $dimensions[$skinSize];
+
+        if(!in_array($neededSize, array_keys($dimensions))){
+            throw new InvalidArgumentException("Invalid neededSize $neededSize");
+        }
+
+        [$newW, $newH] = $dimensions[$neededSize];
+
+        $originalImage = imagecreatetruecolor($skinW, $skinH);
+        imagesavealpha($originalImage, true);
+        $transColour = imagecolorallocatealpha($originalImage, 0, 0, 0, 127);
+        imagefill($originalImage, 0, 0, $transColour);
+
+        $skinPos = 0;
+        for($y = 0; $y < $skinH; $y++){
+            for($x = 0; $x < $skinW; $x++){
+                $r = ord($skinData[$skinPos]);
+                $g = ord($skinData[$skinPos + 1]);
+                $b = ord($skinData[$skinPos + 2]);
+                $a = ord($skinData[$skinPos + 3]);
+                $color = imagecolorallocatealpha($originalImage, $r, $g, $b, 127 - intdiv($a, 2));
+                imagesetpixel($originalImage, $x, $y, $color);
+                $skinPos += 4;
+            }
+        }
+
+        $resizedImage = imagecreatetruecolor($newW, $newH);
+        imagesavealpha($resizedImage, true);
+        imagefill($resizedImage, 0, 0, $transColour);
+        imagecopyresampled($resizedImage, $originalImage, 0, 0, 0, 0, $newW, $newH, $skinW, $skinH);
+
+        $resizedSkinData = "";
+        for($y = 0; $y < $newH; $y++){
+            for($x = 0; $x < $newW; $x++){
+                $color = @imagecolorat($resizedImage, $x, $y);
+                $a = 127 - (($color >> 24) & 0x7F);
+                $r = ($color >> 16) & 0xFF;
+                $g = ($color >> 8) & 0xFF;
+                $b = $color & 0xFF;
+                $resizedSkinData .= chr($r) . chr($g) . chr($b) . chr($a);
+            }
+        }
+
+        imagedestroy($originalImage);
+        imagedestroy($resizedImage);
+
+        return $resizedSkinData;
+    }
 }
