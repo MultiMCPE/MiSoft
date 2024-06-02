@@ -197,6 +197,7 @@ use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
 use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\OpenSignPacket;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\PacketRateLimiter;
 use pocketmine\network\mcpe\VerifyLoginTask;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
@@ -3294,7 +3295,46 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					return false;
 				}
 
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+					$id = $packet->data >> 16;
+					$palette = ItemPalette::getPalette($this->getProtocol());
+					[$id, ] = $palette::getLegacyFromRuntimeId($id, 0);
+				}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_386){
+					$id = $packet->data >> 16;
+				}else{
+					$id = $packet->data;
+				}
+
+				if($this->inventory->getItemInHand()->getId() !== $id){
+					return false;
+				}
+
+				$viewers = $this->getViewers();
+				foreach($viewers as $viewer){
+					$pk = new ActorEventPacket();
+					$pk->entityRuntimeId = $this->getId();
+					$pk->event = ActorEventPacket::EATING_ITEM;
+
+					if($viewer->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+						$palette = ItemPalette::getPalette($viewer->getProtocol());
+						$idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, 0);
+						if($idMeta === null){
+							continue;
+						}
+
+						[$netId, ] = $idMeta;
+						$pk->data = $netId << 16;
+					}elseif($viewer->getProtocol() >= ProtocolInfo::PROTOCOL_386){
+						$pk->data = $id << 16;
+					}else{
+						$pk->data = $id;
+					}
+
+					$viewer->dataPacket($pk);
+				}
+
 				$this->dataPacket($packet);
+
 				break;
 			default:
 				return false;

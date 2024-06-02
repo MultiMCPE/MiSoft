@@ -24,15 +24,21 @@ declare(strict_types=1);
 namespace pocketmine\level\particle;
 
 use pocketmine\entity\Entity;
-use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\Skin;
+use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\AddActorPacket;
+use pocketmine\network\mcpe\protocol\AddPlayerPacket;
+use pocketmine\network\mcpe\protocol\AdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
+use pocketmine\network\mcpe\protocol\types\AbilitiesData;
+use pocketmine\network\mcpe\protocol\types\AbilitiesLayer;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\utils\UUID;
+use function array_fill;
 use function str_repeat;
 
 class FloatingTextParticle extends Particle{
@@ -78,57 +84,61 @@ class FloatingTextParticle extends Particle{
 		$this->invisible = $value;
 	}
 
-    public function encode(){
-        $p = [];
+	public function encode(){
+		$p = [];
 
-        if($this->entityId === null){
-            $this->entityId = Entity::$entityCount++;
-        }else{
-            $pk0 = new RemoveActorPacket();
-            $pk0->entityUniqueId = $this->entityId;
+		if($this->entityId === null){
+			$this->entityId = Entity::$entityCount++;
+		}else{
+			$pk0 = new RemoveActorPacket();
+			$pk0->entityUniqueId = $this->entityId;
 
-            $p[] = $pk0;
-        }
+			$p[] = $pk0;
+		}
 
-        if(!$this->invisible){
-            $uuid = UUID::fromRandom();
-	    $name = $this->title . ($this->text !== "" ? "\n" . $this->text : "");
+		if(!$this->invisible){
+			$uuid = UUID::fromRandom();
+			$name = $this->title . ($this->text !== "" ? "\n" . $this->text : "");
 
-            $add = new PlayerListPacket();
-            $add->type = PlayerListPacket::TYPE_ADD;
-            $add->entries = [PlayerListEntry::createAdditionEntry($uuid, $this->entityId, $name, new Skin("Standard_Custom", str_repeat("\x00", 8192)))];
-            $p[] = $add;
+			$add = new PlayerListPacket();
+			$add->type = PlayerListPacket::TYPE_ADD;
+			$add->entries = [PlayerListEntry::createAdditionEntry($uuid, $this->entityId, $name, new Skin("Standard_Custom", str_repeat("\x00", 8192)))];
+			$p[] = $add;
 
-            $pk = new AddActorPacket();
-            $pk->entityRuntimeId = $this->entityId;
-            $pk->type = ItemEntity::NETWORK_ID;
-            $pk->position = $this->asVector3(); //TODO: check offset
+			$pk = new AddPlayerPacket();
+			$pk->uuid = $uuid;
+			$pk->username = $name;
+			$pk->entityRuntimeId = $this->entityId;
+			$pk->position = $this->asVector3(); //TODO: check offset
+			$pk->item = ItemFactory::get(Item::AIR, 0, 0);
             $pk->syncedProperties = new PropertySyncData([], []);
-            $pk->attributes = [];
+	        $pk->abilitiesData = new AbilitiesData(AdventureSettingsPacket::PERMISSION_NORMAL, PlayerPermissions::VISITOR, $this->entityId /* TODO: this should be unique ID */, [
+		    	new AbilitiesLayer(
+			    	AbilitiesLayer::LAYER_BASE,
+			    	array_fill(0, AbilitiesLayer::NUMBER_OF_ABILITIES, false),
+			    	0.0,
+			    	0.0
+		    	)
+	    	]);
 
-            $flags = (
-                (1 << Entity::DATA_FLAG_CAN_SHOW_NAMETAG) |
-                (1 << Entity::DATA_FLAG_ALWAYS_SHOW_NAMETAG) |
-                (1 << Entity::DATA_FLAG_IMMOBILE)
-            );
-            $pk->metadata = [
-                Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
-                Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0.01], //zero causes problems on debug builds
-                Entity::DATA_BOUNDING_BOX_WIDTH => [Entity::DATA_TYPE_FLOAT, 0.0],
-                Entity::DATA_BOUNDING_BOX_HEIGHT => [Entity::DATA_TYPE_FLOAT, 0.0],
-                Entity::DATA_NAMETAG => [Entity::DATA_TYPE_STRING, $this->title . ($this->text !== "" ? "\n" . $this->text : "")],
-                Entity::DATA_VARIANT => [Entity::DATA_TYPE_INT, 0]
-            ];
+			$flags = (
+				(1 << Entity::DATA_FLAG_CAN_SHOW_NAMETAG) |
+				(1 << Entity::DATA_FLAG_ALWAYS_SHOW_NAMETAG) |
+				(1 << Entity::DATA_FLAG_IMMOBILE)
+			);
+			$pk->metadata = [
+				Entity::DATA_FLAGS => [Entity::DATA_TYPE_LONG, $flags],
+				Entity::DATA_SCALE => [Entity::DATA_TYPE_FLOAT, 0.01] //zero causes problems on debug builds
+			];
 
-            $pk->links = [];
-            $p[] = $pk;
+			$p[] = $pk;
 
-            $remove = new PlayerListPacket();
-            $remove->type = PlayerListPacket::TYPE_REMOVE;
-            $remove->entries = [PlayerListEntry::createRemovalEntry($uuid)];
-            $p[] = $remove;
-        }
+			$remove = new PlayerListPacket();
+			$remove->type = PlayerListPacket::TYPE_REMOVE;
+			$remove->entries = [PlayerListEntry::createRemovalEntry($uuid)];
+			$p[] = $remove;
+		}
 
-        return $p;
-    }
+		return $p;
+	}
 }
