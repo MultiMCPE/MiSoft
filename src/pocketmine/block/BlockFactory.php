@@ -96,12 +96,12 @@ class BlockFactory{
 		self::registerBlock(new Bed());
 		self::registerBlock(new PoweredRail());
 		self::registerBlock(new DetectorRail());
-		//TODO: STICKY_PISTON
+		self::registerBlock(new StickyPiston());
 		self::registerBlock(new Cobweb());
 		self::registerBlock(new TallGrass());
 		self::registerBlock(new DeadBush());
-		//TODO: PISTON
-		//TODO: PISTONARMCOLLISION
+		self::registerBlock(new Piston());
+		self::registerBlock(new PistonHead());
 		self::registerBlock(new Wool());
 
 		self::registerBlock(new Dandelion());

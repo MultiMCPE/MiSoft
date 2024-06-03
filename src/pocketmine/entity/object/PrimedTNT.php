@@ -86,9 +86,7 @@ class PrimedTNT extends Entity implements Explosive{
 
 		$hasUpdate = parent::entityBaseTick($tickDiff);
 
-		if($this->fuse % 5 === 0){ //don't spam it every tick, it's not necessary
-			$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuse);
-		}
+		$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuse);
 
 		if(!$this->isFlaggedForDespawn()){
 			$this->fuse -= $tickDiff;

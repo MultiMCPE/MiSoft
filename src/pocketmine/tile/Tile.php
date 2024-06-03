@@ -76,6 +76,7 @@ abstract class Tile extends Position{
 	public const DAY_LIGHT_DETECTOR = "DLDetector";
 	public const DISPENSER = "Dispenser";
 	public const DROPPER = "Dropper";
+	public const PISTON_HEAD = "PistonHead";
 
 	/** @var int */
 	public static $tileCount = 1;
@@ -117,6 +118,7 @@ abstract class Tile extends Position{
 		self::registerTile(MobSpawner::class, [self::MOB_SPAWNER, "minecraft:mob_spawner"]);
 		self::registerTile(Beacon::class, [self::BEACON, "minecraft:beacon"]);
 		self::registerTile(ShulkerBox::class, [self::SHULKER_BOX, "minecraft:shulker_box"]);
+		self::registerTile(PistonHead::class, [self::PISTON_HEAD]);
 	}
 
 	/**

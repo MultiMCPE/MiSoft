@@ -60,6 +60,7 @@ class ActorEventPacket extends DataPacket{
 	public const WITCH_DRINK_POTION = 29;
 	public const WITCH_THROW_POTION = 30;
 	public const MINECART_TNT_PRIME_FUSE = 31;
+	public const CREEPER_PRIME_FUSE = 32;
 
 	public const PLAYER_ADD_XP_LEVELS = 34;
 	public const ELDER_GUARDIAN_CURSE = 35;

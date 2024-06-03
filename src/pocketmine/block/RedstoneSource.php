@@ -119,6 +119,11 @@ class RedstoneSource extends Flowable{
 			$block->activate();
 		}
 
+		/** @var Piston|StickyPiston $block */
+		if($block instanceof Piston){
+		    $block->activate();
+		}
+
 		/** @var UnoweredRepeater $block */
 		if($block->getId() === Block::UNPOWERED_REPEATER){
 			if($this->equals($block->getSide($block->getDirection()))){
@@ -169,6 +174,11 @@ class RedstoneSource extends Flowable{
 			if($block->getId() === Block::LIT_REDSTONE_LAMP){
 				$block->turnOff();
 			}
+
+		    /** @var Piston|StickyPiston $block */
+	    	if($block instanceof Piston){
+				$block->deactivate();
+		    }
 		}
 
 		/** @var PoweredRepeater $block */
