@@ -38,6 +38,7 @@ use pocketmine\block\Fire;
 use pocketmine\entity\hostile\Blaze;
 use pocketmine\entity\hostile\CaveSpider;
 use pocketmine\entity\hostile\Creeper;
+use pocketmine\entity\hostile\Enderman;
 use pocketmine\entity\hostile\Husk;
 use pocketmine\entity\hostile\MagmaCube;
 use pocketmine\entity\hostile\Skeleton;
@@ -207,6 +208,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(Spider::class, false, ['Spider', 'minecraft:spider']);
 		Entity::registerEntity(CaveSpider::class, false, ['CaveSpider', 'minecraft:cave_spider']);
 		Entity::registerEntity(Creeper::class, false, ['Creeper', 'minecraft:creeper']);
+		Entity::registerEntity(Enderman::class, false, ['Enderman', 'minecraft:enderman']);
 		Entity::registerEntity(FishingHook::class, false, ['FishingHook', 'minecraft:fishing_hook']);
 		Entity::registerEntity(LeashKnot::class, false, ['LeashKnot', 'minecraft:leash_knot']);
 		Entity::registerEntity(Human::class, true);

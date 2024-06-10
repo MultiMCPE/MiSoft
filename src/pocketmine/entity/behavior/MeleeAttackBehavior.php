@@ -81,6 +81,9 @@ class MeleeAttackBehavior extends Behavior{
 
 		if($target === null){
 			return;
+		}elseif(!$target->isAlive()){
+			$this->mob->setTargetEntity(null);
+			return;
 		}
 
 		$distanceToPlayer = $this->mob->distanceSquared($target);
