@@ -44,6 +44,7 @@ use pocketmine\entity\hostile\Skeleton;
 use pocketmine\entity\hostile\Slime;
 use pocketmine\entity\hostile\Spider;
 use pocketmine\entity\hostile\Stray;
+use pocketmine\entity\hostile\Witch;
 use pocketmine\entity\hostile\Zombie;
 use pocketmine\entity\object\Lightning;
 use pocketmine\entity\object\EnderCrystal;
@@ -85,6 +86,8 @@ use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\Location;
 use pocketmine\level\Position;
+use pocketmine\level\weather\Weather;
+use pocketmine\level\biome\Biome;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
@@ -198,6 +201,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(Cat::class, false, ['Cat', 'minecraft:cat']);
 		Entity::registerEntity(Skeleton::class, false, ['Skeleton', 'minecraft:skeleton']);
 		Entity::registerEntity(Stray::class, false, ['Stray', 'minecraft:stray']);
+		Entity::registerEntity(Witch::class, false, ['Witch', 'minecraft:witch']);
 		Entity::registerEntity(Husk::class, false, ['Husk', 'minecraft:husk']);
 		Entity::registerEntity(Chicken::class, false, ['Chicken', 'minecraft:chicken']);
 		Entity::registerEntity(Spider::class, false, ['Spider', 'minecraft:spider']);
@@ -1131,7 +1135,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			$hasUpdate = true;
 		}
 
-		if($this->isOnFire() and ($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder())){
+		if($this->isOnFire() and in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->x, $this->z) !== Biome::DESERT){
 			$this->extinguish();
 		}
 

@@ -513,6 +513,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\entity\\hostile\\Slime' => __DIR__ . '/../..' . '/src/pocketmine/entity/hostile/Slime.php',
         'pocketmine\\entity\\hostile\\Spider' => __DIR__ . '/../..' . '/src/pocketmine/entity/hostile/Spider.php',
         'pocketmine\\entity\\hostile\\Stray' => __DIR__ . '/../..' . '/src/pocketmine/entity/hostile/Stray.php',
+        'pocketmine\\entity\\hostile\\Witch' => __DIR__ . '/../..' . '/src/pocketmine/entity/hostile/Witch.php',
         'pocketmine\\entity\\hostile\\Zombie' => __DIR__ . '/../..' . '/src/pocketmine/entity/hostile/Zombie.php',
         'pocketmine\\entity\\Mob' => __DIR__ . '/../..' . '/src/pocketmine/entity/Mob.php',
         'pocketmine\\entity\\passive\\Cat' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Cat.php',

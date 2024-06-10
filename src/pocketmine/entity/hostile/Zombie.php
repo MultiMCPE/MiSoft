@@ -33,12 +33,15 @@ use pocketmine\entity\behavior\RandomStrollBehavior;
 use pocketmine\entity\Monster;
 use pocketmine\entity\passive\Villager;
 use pocketmine\entity\Smite;
+use pocketmine\level\weather\Weather;
+use pocketmine\level\biome\Biome;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\Player;
 use function mt_rand;
+use function in_array;
 
 class Zombie extends Monster implements Ageable, Smite{
 	public const NETWORK_ID = self::ZOMBIE;
@@ -105,7 +108,7 @@ class Zombie extends Monster implements Ageable, Smite{
 
 	public function entityBaseTick(int $diff = 1) : bool{
 		if(!$this->isOnFire() and $this->level->isDayTime() and !$this->isImmobile()){
-			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder())){
+			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !(in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->x, $this->z) !== Biome::DESERT)){
 				$this->setOnFire(5);
 			}
 		}

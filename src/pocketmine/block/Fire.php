@@ -31,8 +31,11 @@ use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
+use pocketmine\level\weather\Weather;
+use pocketmine\level\biome\Biome;
 use function min;
 use function mt_rand;
+use function in_array;
 
 class Fire extends Flowable{
 
@@ -103,7 +106,7 @@ class Fire extends Flowable{
 		$canSpread = true;
 
 		if(!$down->burnsForever()){
-			if(($this->level->getWeather()->isRainy() or $this->level->getWeather()->isRainyThunder()) and
+			if((in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->x, $this->z) !== Biome::DESERT) and
 		    	($this->level->canBlockSeeSky($this) or
 			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_EAST)) or
 			    	$this->level->canBlockSeeSky($this->getSide(Vector3::SIDE_WEST)) or

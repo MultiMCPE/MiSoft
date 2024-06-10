@@ -442,6 +442,7 @@ return array(
     'pocketmine\\entity\\hostile\\Slime' => $baseDir . '/src/pocketmine/entity/hostile/Slime.php',
     'pocketmine\\entity\\hostile\\Spider' => $baseDir . '/src/pocketmine/entity/hostile/Spider.php',
     'pocketmine\\entity\\hostile\\Stray' => $baseDir . '/src/pocketmine/entity/hostile/Stray.php',
+    'pocketmine\\entity\\hostile\\Witch' => $baseDir . '/src/pocketmine/entity/hostile/Witch.php',
     'pocketmine\\entity\\hostile\\Zombie' => $baseDir . '/src/pocketmine/entity/hostile/Zombie.php',
     'pocketmine\\entity\\Mob' => $baseDir . '/src/pocketmine/entity/Mob.php',
     'pocketmine\\entity\\passive\\Cat' => $baseDir . '/src/pocketmine/entity/passive/Cat.php',
