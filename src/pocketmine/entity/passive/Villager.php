@@ -29,6 +29,8 @@ use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Mob;
 use pocketmine\entity\NPC;
+use pocketmine\entity\hostile\Zombie;
+use pocketmine\entity\behavior\AvoidMobTypeBehavior;
 use pocketmine\entity\behavior\FloatBehavior;
 use pocketmine\entity\behavior\LookAtPlayerBehavior;
 use pocketmine\entity\behavior\PanicBehavior;
@@ -100,6 +102,7 @@ class Villager extends Mob implements NPC, Ageable{
 		$this->behaviorPool->setBehavior(2, new RandomStrollBehavior($this, 2.0));
 		$this->behaviorPool->setBehavior(3, new LookAtPlayerBehavior($this, 6.0));
 		$this->behaviorPool->setBehavior(4, new RandomLookAroundBehavior($this));
+		$this->behaviorPool->setBehavior(5, new AvoidMobTypeBehavior($this, Zombie::class, null, 6.0, 4.0, 4.2));
 	}
 
 	protected function initEntity() : void{
