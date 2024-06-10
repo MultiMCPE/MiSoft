@@ -108,7 +108,7 @@ class Zombie extends Monster implements Ageable, Smite{
 
 	public function entityBaseTick(int $diff = 1) : bool{
 		if(!$this->isOnFire() and $this->level->isDayTime() and !$this->isImmobile()){
-			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !(in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->x, $this->z) !== Biome::DESERT)){
+			if(!$this->isInsideOfWater() and $this->level->canSeeSky($this) and !(in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->getFloorX(), $this->getFloorZ()) !== Biome::DESERT)){
 				$this->setOnFire(5);
 			}
 		}

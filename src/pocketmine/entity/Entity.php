@@ -1135,7 +1135,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 			$hasUpdate = true;
 		}
 
-		if($this->isOnFire() and in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->x, $this->z) !== Biome::DESERT){
+		if($this->isOnFire() and in_array($this->level->getWeather()->getWeather(), [Weather::RAIN, Weather::RAINY_THUNDER, Weather::THUNDER]) and $this->level->getBiomeId($this->getFloorX(), $this->getFloorZ()) !== Biome::DESERT){
 			$this->extinguish();
 		}
 
