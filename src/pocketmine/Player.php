@@ -2717,13 +2717,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected function processLogin(){
 		foreach($this->server->getLoggedInPlayers() as $p){
 			if($p !== $this and ($p->iusername === $this->iusername or $this->getUniqueId()->equals($p->getUniqueId()))){
-				if(!$p->kick("logged in from another location")){
-					$this->close($this->getLeaveMessage(), "Logged in from another location");
-
-					return;
-				}
+			   $this->close($this->getLeaveMessage(), "Logged in from another location");
+			   return;
 			}
 		}
+
+		if($this->loggedIn){ //fix double players join
+                   return;
+        	}
 
 		$this->namedtag = $this->server->getOfflinePlayerData($this->username);
 
