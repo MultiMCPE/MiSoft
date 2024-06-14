@@ -3217,6 +3217,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$newPos = $rawPos->round(4)->subtract(0, $this->baseOffset, 0);
 		if($this->forceMoveSync !== null and $newPos->distanceSquared($this->forceMoveSync) > 1){  //Tolerate up to 1 block to avoid problems with client-sided physics when spawning in blocks
+			$this->sendPosition($this, null, null, MovePlayerPacket::MODE_RESET);
 			$this->server->getLogger()->debug("Got outdated pre-teleport movement from " . $this->getName() . ", received " . $newPos . ", expected " . $this->asVector3());
 			//Still getting movements from before teleport, ignore them
 		}elseif((!$this->isAlive() or !$this->spawned) and $newPos->distanceSquared($this) > 0.01){
@@ -5271,13 +5272,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return $result;
 	}
 
-	public function sendPosition(Vector3 $pos, float $yaw = null, float $pitch = null, int $mode = MovePlayerPacket::MODE_NORMAL, array $targets = null, bool $baseOffsetOverrided = true){
+	public function sendPosition(Vector3 $pos, float $yaw = null, float $pitch = null, int $mode = MovePlayerPacket::MODE_NORMAL, array $targets = null){
 		$yaw = $yaw ?? $this->yaw;
 		$pitch = $pitch ?? $this->pitch;
 
 		$pk = new MovePlayerPacket();
 		$pk->entityRuntimeId = $this->getId();
-		$pk->position = $baseOffsetOverrided ? $this->getOffsetPosition($pos) : $pos;
+		$pk->position = $this->getOffsetPosition($pos);
 		$pk->pitch = $pitch;
 		$pk->headYaw = $yaw;
 		$pk->yaw = $yaw;
@@ -5286,12 +5287,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		if($targets !== null){
 			if(in_array($this, $targets, true)){
-				$this->forceMoveSync = $pos->asVector3();
 				$this->ySize = 0;
 			}
 			$this->server->broadcastPacket($targets, $pk);
 		}else{
-			$this->forceMoveSync = $pos->asVector3();
 			$this->ySize = 0;
 			$this->dataPacket($pk);
 		}
@@ -5305,8 +5304,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			$this->removeAllWindows();
 
-			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_TELEPORT, null, false);
-			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_TELEPORT, $this->getViewers(), false);
+			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_TELEPORT, null);
+			$this->sendPosition($this, $this->yaw, $this->pitch, MovePlayerPacket::MODE_TELEPORT, $this->getViewers());
 
 			$this->spawnToAll();
 
@@ -5316,6 +5315,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->spawnChunkLoadCount = 0;
 			}
 			$this->stopSleep();
+
+			$this->forceMoveSync = $pos->asVector3();
 
 			//TODO: workaround for player last pos not getting updated
 			//Entity::updateMovement() normally handles this, but it's overridden with an empty function in Player
