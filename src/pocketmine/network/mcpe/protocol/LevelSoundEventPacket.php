@@ -516,9 +516,21 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_ARMOR_REPAIR_WOLF = 513;
 	public const SOUND_MACE_SMASH_AIR = 514;
 	public const SOUND_MACE_SMASH_GROUND = 515;
-
+    public const SOUND_TRIAL_SPAWNER_CHARGE_ACTIVATE = 516;
+	public const SOUND_TRIAL_SPAWNER_AMBIENT_OMINOUS = 517;
+	public const SOUND_OMINOUS_ITEM_SPAWNER_SPAWN_ITEM = 518;
+	public const SOUND_OMINOUS_BOTTLE_END_USE = 519;
 	public const SOUND_MACE_HEAVY_SMASH_GROUND = 520;
-    public const SOUND_UNDEFINED = 521;
+    public const SOUND_OMINOUS_ITEM_SPAWNER_SPAWN_ITEM_BEGIN = 521;
+
+	public const SOUND_APPLY_EFFECT_BAD_OMEN = 523;
+	public const SOUND_APPLY_EFFECT_RAID_OMEN = 524;
+	public const SOUND_APPLY_EFFECT_TRIAL_OMEN = 525;
+	public const SOUND_OMINOUS_ITEM_SPAWNER_ABOUT_TO_SPAWN_ITEM = 526;
+	public const SOUND_RECORD_CREATOR = 527;
+	public const SOUND_RECORD_CREATOR_MUSIC_BOX = 528;
+	public const SOUND_RECORD_PRECIPICE = 529;
+    public const SOUND_UNDEFINED = 530;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

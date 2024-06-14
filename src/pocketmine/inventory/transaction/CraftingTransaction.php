@@ -175,6 +175,7 @@ class CraftingTransaction extends InventoryTransaction{
 		}else{
 	    	$pk->windowId = ContainerIds::NONE;
 		}
+		$pk->windowType = $this->source->getCurrentWindowType();
 		$pk->server = true;
 		$this->source->dataPacket($pk);
 	}

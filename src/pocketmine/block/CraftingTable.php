@@ -64,6 +64,9 @@ class CraftingTable extends Solid{
 		    	$pk->x = $this->getFloorX();
 		    	$pk->y = $this->getFloorY();
 		    	$pk->z = $this->getFloorZ();
+
+				$player->setCurrentWindowType($pk->type);
+
 		    	$player->sendDataPacket($pk);
 				$player->openHardcodedWindows[$windowId] = true;
 			}

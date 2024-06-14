@@ -22,15 +22,17 @@ class CodeBuilderSourcePacket extends DataPacket{
 	private int $operation;
 	private int $category;
 	private string $value;
+	private int $codeStatus;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $operation, int $category, string $value) : self{
+	public static function create(int $operation, int $category, string $value, int $codeStatu) : self{
 		$result = new self;
 		$result->operation = $operation;
 		$result->category = $category;
 		$result->value = $value;
+		$result->codeStatus = $codeStatus;
 		return $result;
 	}
 
@@ -40,16 +42,26 @@ class CodeBuilderSourcePacket extends DataPacket{
 
 	public function getValue() : string{ return $this->value; }
 
+	public function getCodeStatus() : int{ return $this->codeStatus; }
+
 	protected function decodePayload(){
 		$this->operation = $this->getByte();
 		$this->category = $this->getByte();
-		$this->value = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+			$this->codeStatus = $this->getByte();
+		}else{
+			$this->value = $this->getString();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putByte($this->operation);
 		$this->putByte($this->category);
-		$this->putString($this->value);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+			$this->putByte($this->codeStatus);
+		}else{
+	    	$this->putString($this->value);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

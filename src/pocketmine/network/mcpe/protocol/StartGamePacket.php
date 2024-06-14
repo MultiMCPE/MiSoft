@@ -196,6 +196,12 @@ class StartGamePacket extends DataPacket{
 	public $chatRestrictionLevel = ChatRestrictionLevel::NONE;
 	/** @var bool */
 	public $disablePlayerInteractions = false;
+	/** @var string */
+	public $serverIdentifier = "";
+	/** @var string */
+	public $worldIdentifier = "";
+	/** @var string */
+	public $scenarioIdentifier = "";
 
 	/** @var string */
 	public $levelId = ""; //base64 string, usually the same as world folder name in vanilla
@@ -378,6 +384,11 @@ class StartGamePacket extends DataPacket{
 	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	                                	        $this->chatRestrictionLevel = ord($this->get(1));
 	                                	        $this->disablePlayerInteractions = (($this->get(1) !== "\x00"));
+												if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+													$this->serverIdentifier = $this->getString();
+													$this->worldIdentifier = $this->getString();
+													$this->scenarioIdentifier = $this->getString();
+												}
 	                                	    }
 	                                	}
 	                            	}
@@ -618,6 +629,11 @@ class StartGamePacket extends DataPacket{
 	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	                                	        ($this->buffer .= (chr($this->chatRestrictionLevel)));
 	                                	        ($this->buffer .= ($this->disablePlayerInteractions ? "\x01" : "\x00"));
+												if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+													$this->putString($this->serverIdentifier);
+													$this->putString($this->worldIdentifier);
+													$this->putString($this->scenarioIdentifier);
+												}
 	                                	    }
 	                                	}
                                     }

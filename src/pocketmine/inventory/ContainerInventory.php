@@ -57,6 +57,8 @@ abstract class ContainerInventory extends BaseInventory{
 			$pk->z = $holder->getFloorZ();
 		}
 
+		$who->setCurrentWindowType($pk->type);
+
 		$who->dataPacket($pk);
 
 		$this->sendContents($who);
@@ -65,6 +67,7 @@ abstract class ContainerInventory extends BaseInventory{
 	public function onClose(Player $who) : void{
 		$pk = new ContainerClosePacket();
 		$pk->windowId = $who->getWindowId($this);
+		$pk->windowType = $who->getCurrentWindowType();
 		$pk->server = $who->getClosingWindowId() !== $pk->windowId;
 		$who->dataPacket($pk);
 		parent::onClose($who);

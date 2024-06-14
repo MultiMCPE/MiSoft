@@ -60,6 +60,7 @@ use pocketmine\entity\object\LeashKnot;
 use pocketmine\entity\passive\Cat;
 use pocketmine\entity\passive\Chicken;
 use pocketmine\entity\passive\Cow;
+use pocketmine\entity\passive\Horse;
 use pocketmine\entity\passive\Mooshroom;
 use pocketmine\entity\passive\Pig;
 use pocketmine\entity\passive\Sheep;
@@ -188,6 +189,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(MagmaCube::class, false, ['MagmaCube', 'minecraft:magma_cube']);
 		Entity::registerEntity(Boat::class, false, ['Boat', 'minecraft:boat']);
 		Entity::registerEntity(Minecart::class, false, ['Minecart', 'minecraft:minecart']);
+		Entity::registerEntity(Horse::class, false, ['Horse', 'minecraft:horse']);
 		Entity::registerEntity(FireworksRocket::class, false, ['FireworksRocket', 'minecraft:fireworks_rocket']);
 		Entity::registerEntity(Blaze::class, false, ['Blaze', 'minecraft:blaze']);
 		Entity::registerEntity(SmallFireball::class, false, ['SmallFireball', 'minecraft:small_fireball']);

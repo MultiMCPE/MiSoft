@@ -285,6 +285,9 @@ class CraftingDataPacket extends DataPacket{
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
 				$stream->putVarInt(50); //TODO: priority
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
+					if($playerProtocol >= ProtocolInfo::PROTOCOL_685){
+						$stream->putByte(1); // Requirement ordinal, 1 = ALWAYS_UNLOCKED
+					}
 	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
 	    	}
@@ -325,6 +328,9 @@ class CraftingDataPacket extends DataPacket{
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
 					if($playerProtocol >= ProtocolInfo::PROTOCOL_671){
 						$stream->putBool(true); //symmetric
+						if($playerProtocol >= ProtocolInfo::PROTOCOL_685){
+							$stream->putByte(1); // Requirement ordinal, 1 = ALWAYS_UNLOCKED
+						}
 					}
 	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}

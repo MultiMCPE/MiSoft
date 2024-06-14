@@ -66,6 +66,8 @@ class TextPacket extends DataPacket{
 	public $xboxUserId = "";
 	/** @var string */
 	public $platformChatId = "";
+	/** @var string */
+	public $filteredMessage = "";
 
 	protected function decodePayload(){
 		$this->type = MultiversionEnums::getMessageType($this->getProtocol(), (ord($this->get(1))));
@@ -113,6 +115,9 @@ class TextPacket extends DataPacket{
 	    	$this->xboxUserId = $this->getString();
 	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->platformChatId = $this->getString();
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+					$this->filteredMessage = $this->getString();
+				}
 	    	}
 		}
 	}
@@ -160,6 +165,9 @@ class TextPacket extends DataPacket{
 	    	$this->putString($this->xboxUserId);
 	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
 	        	$this->putString($this->platformChatId);
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+					$this->putString($this->filteredMessage);
+				}
 	    	}
 		}
 	}

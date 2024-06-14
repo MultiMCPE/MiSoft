@@ -40,6 +40,7 @@ use pocketmine\entity\Living;
 use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\entity\projectile\FishingHook;
+use pocketmine\entity\passive\AbstractHorse;
 use pocketmine\entity\Skin;
 use pocketmine\entity\vehicle\Boat;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
@@ -3951,8 +3952,18 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				    $pk->type = WindowTypes::INVENTORY;
 				    $pk->x = $pk->y = $pk->z = 0;
 				    $pk->entityUniqueId = $this->getId();
+					$this->setCurrentWindowType($pk->type);
 				    $this->sendDataPacket($pk);
 				    break;
+				}elseif($target instanceof InventoryHolder){
+					if(!($target instanceof AbstractHorse and !$target->isTamed())){
+						if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+							$this->sendMessage("ебатть броузи лошади на >=1.15 не ворк покачт сори бро ваще бро прости ужас я так не хотел бро");
+						}else{
+						    $this->addWindow($target->getInventory());
+						}
+						return true;
+					}
 				}
 				return false;
 			case InteractPacket::ACTION_RIGHT_CLICK:
@@ -4300,6 +4311,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @internal */
 	public function getClosingWindowId() : ?int{ return $this->closingWindowId; }
 
+	/** @var int */
+	private $currentWindowType = WindowTypes::CONTAINER;
+
+	/** @internal */
+	public function getCurrentWindowType() : ?int{ return $this->currentWindowType; }
+
+	/** @internal */
+	public function setCurrentWindowType(int $windowType) : void{ $this->currentWindowType = $windowType; }
+
 	public function handleContainerClose(ContainerClosePacket $packet) : bool{
 		if(!$this->spawned or ($this->getProtocol() < ProtocolInfo::PROTOCOL_392 && $packet->windowId === 0)){
 			return true;
@@ -4317,6 +4337,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	        	if($packet->windowId >= self::RESERVED_WINDOW_ID_RANGE_START and $packet->windowId <= self::RESERVED_WINDOW_ID_RANGE_END){
 		            $pk = new ContainerClosePacket();
 		            $pk->windowId = $packet->windowId;
+					$pk->windowType = $this->getCurrentWindowType();
 		            $this->sendDataPacket($pk);
 		            return true;
 				}
@@ -4340,6 +4361,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	 */
 		    	$pk = new ContainerClosePacket();
 		    	$pk->windowId = $packet->windowId;
+				$pk->windowType = $this->getCurrentWindowType();
 		    	$pk->server = false;
 		    	$this->sendDataPacket($pk);
 			}else{

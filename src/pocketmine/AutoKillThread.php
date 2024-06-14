@@ -30,7 +30,7 @@ use function getmypid;
 
 class AutoKillThread extends Thread{
     /** @var bool */
-	private $isResponded = true;
+	public $isResponded = true;
 
     /** @var bool */
 	private $running = true;

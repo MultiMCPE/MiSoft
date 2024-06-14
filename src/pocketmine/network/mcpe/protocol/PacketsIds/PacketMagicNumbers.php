@@ -233,6 +233,7 @@ interface PacketMagicNumbers{
 	public const PLAYER_TOGGLE_CRAFTER_SLOT_REQUEST_PACKET = 0x132;
 	public const SET_PLAYER_INVENTORY_OPTIONS_PACKET = 0x133;
 	public const SET_HUD_PACKET = 0x134;
+	public const AWARD_ACHIEVEMENT_PACKET = 0x135;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1

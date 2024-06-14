@@ -68,7 +68,7 @@ use pocketmine\network\mcpe\protocol\NetworkStackLatencyPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\PlayerHotbarPacket;
 use pocketmine\network\mcpe\protocol\PlayerInputPacket;
-use pocketmine\network\mcpe\protocol\PassengerJumpPacket;
+use pocketmine\network\mcpe\protocol\RiderJumpPacket;
 use pocketmine\network\mcpe\protocol\PlayerSkinPacket;
 use pocketmine\network\mcpe\protocol\RequestAbilityPacket;
 use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket;
@@ -85,6 +85,7 @@ use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\TickSyncPacket;
 use pocketmine\network\mcpe\protocol\EmoteListPacket;
+use pocketmine\entity\passive\AbstractHorse;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
@@ -274,8 +275,16 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		return true;
 	}
 
-	public function handlePassengerJump(PassengerJumpPacket $packet) : bool{
-		return true;
+	public function handleRiderJump(RiderJumpPacket $packet) : bool{
+		if($this->player->isRiding()){
+			$horse = $this->player->getRidingEntity();
+			if($horse instanceof AbstractHorse){
+				$horse->setJumpPower($packet->jumpStrength);
+
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
