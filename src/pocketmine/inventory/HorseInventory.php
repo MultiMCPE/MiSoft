@@ -33,6 +33,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\network\mcpe\protocol\ContainerClosePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\MobArmorEquipmentPacket;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
@@ -122,9 +123,17 @@ class HorseInventory extends AbstractHorseInventory{
 		$this->sendContents($who);
 	}
 
+	public function onClose(Player $who) : void{
+		$pk = new ContainerClosePacket();
+		$pk->windowId = $who->getWindowId($this);
+		$pk->windowType = $who->getCurrentWindowType();
+		$pk->server = $who->getClosingWindowId() !== $pk->windowId;
+		$who->dataPacket($pk);
+		parent::onClose($who);
+	}
+
 	public function getNamedtag(int $playerProtocol) : CompoundTag{
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
-			// здесь какой-то проеб (не с айди брони, где я отсылаю вместо нейма айдишник, без него тоже крашит)
 			$saddle = [
 				new ListTag("acceptedItems", [
 					new CompoundTag("", [
@@ -173,7 +182,7 @@ class HorseInventory extends AbstractHorseInventory{
 			];
 			if(!$this->getArmor()->isNull()){
 				$armor[] = new CompoundTag("item", [
-					new StringTag("Name", (string) $this->getArmor()->getId()),
+					new StringTag("Name", $this->translateHorseArmorIdToStringName($this->getArmor()->getId())),
 					new ShortTag("Aux", 32767)
 				]);
 			}
@@ -216,5 +225,16 @@ class HorseInventory extends AbstractHorseInventory{
 				])
 			]);
 	    }
+	}
+
+	
+	public function translateHorseArmorIdToStringName(int $armorId) : string{
+		return match($armorId){
+			Item::HORSE_ARMOR_DIAMOND => "minecraft:diamond_horse_armor",
+			Item::HORSE_ARMOR_GOLD => "minecraft:golden_horse_armor",
+			Item::HORSE_ARMOR_IRON => "minecraft:iron_horse_armor",
+			Item::HORSE_ARMOR_LEATHER => "minecraft:leather_horse_armor",
+			default => "minecraft:leather_horse_armor",
+	    };
 	}
 }

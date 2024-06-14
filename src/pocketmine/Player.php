@@ -3957,11 +3957,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				    break;
 				}elseif($target instanceof InventoryHolder){
 					if(!($target instanceof AbstractHorse and !$target->isTamed())){
-						if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-							$this->sendMessage("ебатть броузи лошади на >=1.15 не ворк покачт сори бро ваще бро прости ужас я так не хотел бро");
-						}else{
-						    $this->addWindow($target->getInventory());
-						}
+						$this->setCurrentWindowType(WindowTypes::HORSE);
+						$this->addWindow($target->getInventory());
 						return true;
 					}
 				}

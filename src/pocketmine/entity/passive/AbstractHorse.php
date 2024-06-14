@@ -86,6 +86,9 @@ abstract class AbstractHorse extends Tamable{
 		$this->setSaddled(boolval($this->namedtag->getByte("Saddled", 0)));
 		$this->setChested(boolval($this->namedtag->getByte("Chested", 0)));
 
+		$this->propertyManager->setByte(self::DATA_CONTAINER_TYPE, 12);
+		$this->propertyManager->setInt(self::DATA_CONTAINER_BASE_SIZE, 2);
+
 		parent::initEntity();
 	}
 
