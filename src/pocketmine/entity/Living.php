@@ -113,11 +113,7 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	public function setRevengeTarget(?Entity $revengeTarget) : void{
-		if($revengeTarget === null){
-			$this->revengeTargetId = null;
-		}else{
-			$this->revengeTargetId = $revengeTarget->getId();
-		}
+		$this->revengeTargetId = $revengeTarget?->getId();
 
 		$this->revengeTimer = $this->ticksLived;
 	}
@@ -131,11 +127,7 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	public function setLastAttackedEntity(?Entity $attackedEntity) : void{
-		if($attackedEntity === null){
-			$this->lastAttackedEntityId = null;
-		}else{
-			$this->lastAttackedEntityId = $attackedEntity->getId();
-		}
+            $this->lastAttackedEntityId = $attackedEntity?->getId();
 	}
 
 	public function getRevengeTimer() : int{
@@ -424,9 +416,7 @@ abstract class Living extends Entity implements Damageable{
 			return false;
 		}
 
-		if($oldEffect !== null){
-			$oldEffect->getType()->remove($this, $oldEffect);
-		}
+		$oldEffect?->getType()->remove($this, $oldEffect);
 
 		$effect->getType()->add($this, $effect);
 		$this->sendEffectAdd($effect, $oldEffect !== null);
