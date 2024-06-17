@@ -24,10 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion;
 
 use pocketmine\entity\Entity;
+use pocketmine\network\mcpe\multiversion\utils\ActorMetadataConvertor;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
-use pocketmine\network\mcpe\multiversion\utils\ActorMetadataConvertor;
 use ReflectionClass;
 
 final class MetadataConvertor{

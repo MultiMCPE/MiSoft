@@ -11,9 +11,9 @@
 namespace FG\ASN1\Universal;
 
 use Exception;
-use FG\ASN1\Parsable;
-use FG\ASN1\Identifier;
 use FG\ASN1\Exception\ParserException;
+use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
 
 class RelativeObjectIdentifier extends ObjectIdentifier implements Parsable
 {

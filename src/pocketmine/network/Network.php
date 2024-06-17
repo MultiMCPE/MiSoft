@@ -28,12 +28,12 @@ namespace pocketmine\network;
 
 use pocketmine\event\server\NetworkInterfaceRegisterEvent;
 use pocketmine\event\server\NetworkInterfaceUnregisterEvent;
-use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\multiversion\MultiversionEnums;
-use pocketmine\network\mcpe\multiversion\MetadataConvertor;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
-use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\multiversion\actor\AvailableActorIdentifiersPalette;
+use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\MetadataConvertor;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
 use pocketmine\Server;
 use function spl_object_hash;

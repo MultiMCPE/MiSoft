@@ -43,12 +43,12 @@ use raklib\utils\InternetAddress;
 use Throwable;
 use function addcslashes;
 use function base64_encode;
+use function chr;
 use function get_class;
 use function implode;
 use function rtrim;
 use function spl_object_hash;
 use function unserialize;
-use function chr;
 use const pocketmine\COMPOSER_AUTOLOADER_PATH;
 use const PTHREADS_INHERIT_CONSTANTS;
 

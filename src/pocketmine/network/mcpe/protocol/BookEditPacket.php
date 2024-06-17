@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
-
 use pocketmine\network\mcpe\NetworkSession;
 use UnexpectedValueException;
 use function chr;

@@ -11,12 +11,12 @@
 namespace FG\ASN1\Universal;
 
 use Exception;
-use FG\ASN1\Base128;
-use FG\ASN1\OID;
 use FG\ASN1\ASNObject;
-use FG\ASN1\Parsable;
-use FG\ASN1\Identifier;
+use FG\ASN1\Base128;
 use FG\ASN1\Exception\ParserException;
+use FG\ASN1\Identifier;
+use FG\ASN1\OID;
+use FG\ASN1\Parsable;
 
 class ObjectIdentifier extends ASNObject implements Parsable
 {

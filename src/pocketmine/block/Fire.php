@@ -30,12 +30,12 @@ use pocketmine\event\entity\EntityCombustByBlockEvent;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
-use pocketmine\math\Vector3;
-use pocketmine\level\weather\Weather;
 use pocketmine\level\biome\Biome;
+use pocketmine\level\weather\Weather;
+use pocketmine\math\Vector3;
+use function in_array;
 use function min;
 use function mt_rand;
-use function in_array;
 
 class Fire extends Flowable{
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use InvalidArgumentException;
-use pocketmine\inventory\ShulkerBoxInventory;
 use pocketmine\inventory\InventoryHolder;
+use pocketmine\inventory\ShulkerBoxInventory;
 use pocketmine\item\Item;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;

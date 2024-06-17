@@ -12,8 +12,8 @@ namespace FG\ASN1\Universal;
 
 use Exception;
 use FG\ASN1\ASNObject;
-use FG\ASN1\Parsable;
 use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
 
 class OctetString extends ASNObject implements Parsable
 {

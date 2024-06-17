@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\tile;
 
-use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ByteTag;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\utils\Binary;

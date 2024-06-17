@@ -23,20 +23,18 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use ErrorException;
 use Generator;
 use InvalidArgumentException;
-use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\utils\Binary;
 use UnexpectedValueException;
 use function get_class;
 use function strlen;
 use function zlib_decode;
 use function zlib_encode;
 use const ZLIB_ENCODING_DEFLATE;
+
 
 class OldBatchPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BATCH_PACKET;

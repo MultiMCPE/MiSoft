@@ -27,10 +27,10 @@ use pocketmine\nbt\BigEndianNBTStream;
 use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Server;
-use function mkdir;
-use function file_put_contents;
 use function file_get_contents;
+use function file_put_contents;
 use function is_file;
+use function mkdir;
 
 class MapManager{
 

@@ -27,14 +27,13 @@ use DateTime;
 use pocketmine\Server;
 use pocketmine\utils\MainLogger;
 use Throwable;
+use function date;
 use function fclose;
 use function fgets;
 use function fopen;
 use function fwrite;
 use function is_resource;
-use function date;
 use function strtolower;
-use function time;
 
 class BanList{
 

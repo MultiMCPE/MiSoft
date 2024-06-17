@@ -24,8 +24,8 @@ declare(strict_types=1);
 namespace pocketmine;
 
 use AttachableThreadedLogger;
-use pocketmine\utils\Utils;
 use pocketmine\snooze\SleeperNotifier;
+use pocketmine\utils\Utils;
 use function getmypid;
 
 class AutoKillThread extends Thread{

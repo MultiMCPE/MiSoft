@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use UnexpectedValueException;
 use pocketmine\network\mcpe\NetworkSession;
+use UnexpectedValueException;
 use function chr;
 use function count;
 use function ord;

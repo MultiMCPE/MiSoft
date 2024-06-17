@@ -25,10 +25,10 @@ namespace pocketmine\block;
 
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\item\Item;
-use pocketmine\Player;
 use pocketmine\network\mcpe\protocol\ContainerOpenPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
+use pocketmine\Player;
 use function array_key_exists;
 
 class CraftingTable extends Solid{

@@ -25,9 +25,9 @@ namespace pocketmine\inventory\PETransaction;
 
 use pocketmine\event\inventory\InventoryClickEvent;
 use pocketmine\event\inventory\InventoryTransactionEvent;
+use pocketmine\inventory\ContainerInventory;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\PlayerInventory;
-use pocketmine\inventory\ContainerInventory;
 use pocketmine\Player;
 use SplQueue;
 use function get_class;

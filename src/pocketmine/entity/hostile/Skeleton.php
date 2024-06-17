@@ -41,13 +41,13 @@ use pocketmine\entity\Smite;
 use pocketmine\inventory\EntityEquipment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\level\weather\Weather;
 use pocketmine\level\biome\Biome;
+use pocketmine\level\weather\Weather;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\Player;
-use function rand;
 use function in_array;
+use function rand;
 
 class Skeleton extends Monster implements RangedAttackerMob, Smite{
 

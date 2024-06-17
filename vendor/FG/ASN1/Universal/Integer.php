@@ -11,11 +11,11 @@
 namespace FG\ASN1\Universal;
 
 use Exception;
-use FG\Utility\BigInteger;
-use FG\ASN1\Exception\ParserException;
 use FG\ASN1\ASNObject;
-use FG\ASN1\Parsable;
+use FG\ASN1\Exception\ParserException;
 use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
+use FG\Utility\BigInteger;
 
 class Integer extends ASNObject implements Parsable
 {

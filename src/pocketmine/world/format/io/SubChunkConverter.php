@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace pocketmine\world\format\io;
 
 use pocketmine\level\format\io\ChunkUtils;
-use pocketmine\world\format\storage\BlockStorage;
 use pocketmine\world\format\PalettedBlockArray;
+use pocketmine\world\format\storage\BlockStorage;
 use SplFixedArray;
 use function array_flip;
 use function array_keys;

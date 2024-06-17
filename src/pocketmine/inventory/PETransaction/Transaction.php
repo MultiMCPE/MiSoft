@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory\PETransaction;
 
-use pocketmine\inventory\Inventory;
 use pocketmine\inventory\AnvilInventory;
 use pocketmine\inventory\EnchantInventory;
+use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
 use pocketmine\Player;

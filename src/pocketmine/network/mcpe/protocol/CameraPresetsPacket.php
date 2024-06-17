@@ -14,9 +14,9 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\nbt\NetworkLittleEndianNBTStream;
 
 class CameraPresetsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CAMERA_PRESETS_PACKET;

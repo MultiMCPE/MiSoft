@@ -23,20 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use InvalidArgumentException;
 use Ahc\Json\Comment;
+use InvalidArgumentException;
 use pocketmine\entity\Skin;
-use pocketmine\utils\UUID;
 use pocketmine\utils\Color;
+use pocketmine\utils\UUID;
 use SplFixedArray;
+use function array_rand;
+use function file_get_contents;
 use function json_decode;
 use function json_encode;
 use function json_last_error_msg;
-use function microtime;
-use function random_int;
-use function substr;
-use function array_rand;
-use function file_get_contents;
 use const pocketmine\RESOURCE_PATH;
 
 class SerializedSkin{

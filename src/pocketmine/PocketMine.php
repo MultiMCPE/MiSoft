@@ -23,18 +23,18 @@ declare(strict_types=1);
 
 namespace pocketmine {
 
-	use BaseClassLoader;
-	use Logger;
-	use Phar;
-	use pocketmine\utils\MainLogger;
-	use pocketmine\utils\ServerKiller;
-	use pocketmine\utils\Terminal;
-	use pocketmine\utils\Timezone;
-	use pocketmine\utils\Utils;
-	use pocketmine\utils\VersionString;
-	use pocketmine\wizard\SetupWizard;
+    use BaseClassLoader;
+    use Logger;
+    use Phar;
+    use pocketmine\utils\MainLogger;
+    use pocketmine\utils\ServerKiller;
+    use pocketmine\utils\Terminal;
+    use pocketmine\utils\Timezone;
+    use pocketmine\utils\Utils;
+    use pocketmine\utils\VersionString;
+    use pocketmine\wizard\SetupWizard;
 
-	require_once __DIR__ . '/VersionInfo.php';
+    require_once __DIR__ . '/VersionInfo.php';
 
 	const MIN_PHP_VERSION = "8.1.0";
 

@@ -23,9 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\utils\Binary;
 use function pack;
 
 class NetworkStackLatencyPacket extends DataPacket{

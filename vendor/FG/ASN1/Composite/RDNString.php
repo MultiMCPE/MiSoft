@@ -11,9 +11,9 @@
 namespace FG\ASN1\Composite;
 
 use FG\ASN1\ASNObject;
+use FG\ASN1\Universal\IA5String;
 use FG\ASN1\Universal\ObjectIdentifier;
 use FG\ASN1\Universal\PrintableString;
-use FG\ASN1\Universal\IA5String;
 use FG\ASN1\Universal\UTF8String;
 
 class RDNString extends RelativeDistinguishedName

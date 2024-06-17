@@ -26,10 +26,10 @@ use raklib\protocol\OpenConnectionRequest2;
 use raklib\protocol\UnconnectedPing;
 use raklib\protocol\UnconnectedPong;
 use raklib\utils\InternetAddress;
+use function implode;
+use function in_array;
 use function min;
 use function reset;
-use function in_array;
-use function implode;
 
 class OfflineMessageHandler{
 	/** @var SessionManager */

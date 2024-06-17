@@ -23,10 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt;
 
+use pocketmine\utils\Binary;
 use function count;
 use function strlen;
-
-use pocketmine\utils\Binary;
 
 class NetworkLittleEndianNBTStream extends LittleEndianNBTStream{
 

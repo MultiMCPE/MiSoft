@@ -24,13 +24,9 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
-use pocketmine\network\mcpe\multiversion\MultiversionEnums;
-use pocketmine\network\mcpe\protocol\types\ResourcePackType;
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
+use pocketmine\network\mcpe\protocol\types\ResourcePackType;
+use pocketmine\utils\Binary;
 use function pack;
 use function unpack;
 

@@ -36,9 +36,9 @@ use pocketmine\network\mcpe\protocol\types\MapTrackedObject;
 use pocketmine\Player;
 use pocketmine\utils\Color;
 use function array_fill;
+use function array_keys;
 use function count;
 use function floor;
-use function array_keys;
 use function spl_object_hash;
 use function spl_object_id;
 

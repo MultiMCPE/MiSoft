@@ -24,11 +24,11 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use InvalidArgumentException;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
 use pocketmine\utils\TextFormat;

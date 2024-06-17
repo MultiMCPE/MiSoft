@@ -25,7 +25,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
-
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\types\MapDecoration;

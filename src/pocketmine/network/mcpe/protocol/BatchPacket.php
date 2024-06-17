@@ -26,11 +26,9 @@ namespace pocketmine\network\mcpe\protocol;
 use ErrorException;
 use Generator;
 use InvalidArgumentException;
-use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\utils\Binary;
 use UnexpectedValueException;
 use function assert;
 use function chr;
@@ -40,6 +38,7 @@ use function strlen;
 use function zlib_decode;
 use function zlib_encode;
 use const ZLIB_ENCODING_RAW;
+
 
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;

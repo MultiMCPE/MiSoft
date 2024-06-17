@@ -8,10 +8,10 @@ use InvalidArgumentException;
 use InvalidStateException;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use UnexpectedValueException;
+use function array_key_exists;
 use function count;
 use function file_get_contents;
 use function json_decode;
-use function array_key_exists;
 use const pocketmine\RESOURCE_PATH;
 
 final class ItemPalette534 extends Palette{

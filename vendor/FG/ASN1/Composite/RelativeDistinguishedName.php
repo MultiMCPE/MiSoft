@@ -10,8 +10,8 @@
 
 namespace FG\ASN1\Composite;
 
-use FG\ASN1\Exception\NotImplementedException;
 use FG\ASN1\ASNObject;
+use FG\ASN1\Exception\NotImplementedException;
 use FG\ASN1\Universal\ObjectIdentifier;
 use FG\ASN1\Universal\Set;
 

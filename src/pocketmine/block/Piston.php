@@ -24,14 +24,14 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\item\Item;
-use pocketmine\Player;
-use pocketmine\tile\Tile;
-use pocketmine\tile\PistonHead as PistonHeadTile;
-use pocketmine\math\Vector3;
 use pocketmine\level\sound\PistonInSound;
 use pocketmine\level\sound\PistonOutSound;
-use function in_array;
+use pocketmine\math\Vector3;
+use pocketmine\Player;
+use pocketmine\tile\PistonHead as PistonHeadTile;
+use pocketmine\tile\Tile;
 use function abs;
+use function in_array;
 
 class Piston extends RedstoneSource{
 	protected $id = self::PISTON;

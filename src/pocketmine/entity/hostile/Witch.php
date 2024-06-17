@@ -23,10 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\hostile;
 
-use pocketmine\entity\behavior\AvoidMobTypeBehavior;
 use pocketmine\entity\behavior\FloatBehavior;
-use pocketmine\entity\behavior\LookAtPlayerBehavior;
 use pocketmine\entity\behavior\HurtByTargetBehavior;
+use pocketmine\entity\behavior\LookAtPlayerBehavior;
 use pocketmine\entity\behavior\NearestAttackableTargetBehavior;
 use pocketmine\entity\behavior\RandomLookAroundBehavior;
 use pocketmine\entity\behavior\RandomStrollBehavior;

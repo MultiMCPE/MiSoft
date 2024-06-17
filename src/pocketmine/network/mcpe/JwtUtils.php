@@ -8,7 +8,6 @@ use Exception;
 use FG\ASN1\Exception\ParserException;
 use FG\ASN1\Universal\Integer;
 use FG\ASN1\Universal\Sequence;
-
 use InvalidArgumentException;
 use JsonException;
 use function base64_decode;

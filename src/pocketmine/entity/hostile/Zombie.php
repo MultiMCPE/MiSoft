@@ -33,15 +33,15 @@ use pocketmine\entity\behavior\RandomStrollBehavior;
 use pocketmine\entity\Monster;
 use pocketmine\entity\passive\Villager;
 use pocketmine\entity\Smite;
-use pocketmine\level\weather\Weather;
-use pocketmine\level\biome\Biome;
 use pocketmine\event\entity\EntityDamageEvent;
-use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\level\biome\Biome;
+use pocketmine\level\weather\Weather;
+use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\Player;
-use function mt_rand;
 use function in_array;
+use function mt_rand;
 
 class Zombie extends Monster implements Ageable, Smite{
 	public const NETWORK_ID = self::ZOMBIE;

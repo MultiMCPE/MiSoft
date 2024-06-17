@@ -24,10 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\entity;
 
 use pocketmine\math\Vector3;
-use function atan;
-use function rad2deg;
 use function abs;
 use function asin;
+use function atan;
+use function rad2deg;
 
 abstract class Creature extends Living{
 	/**

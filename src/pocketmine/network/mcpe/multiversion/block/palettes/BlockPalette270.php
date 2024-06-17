@@ -25,9 +25,9 @@ namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\block\BlockIds;
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use function count;
 use function file_get_contents;
 use function json_decode;
-use function count;
 use function max;
 use const pocketmine\RESOURCE_PATH;
 

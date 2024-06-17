@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\object;
 
-use pocketmine\Player;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Fallable;
@@ -38,6 +37,7 @@ use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
+use pocketmine\Player;
 use UnexpectedValueException;
 use function abs;
 use function get_class;

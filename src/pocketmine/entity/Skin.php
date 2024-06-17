@@ -27,19 +27,19 @@ use Ahc\Json\Comment as CommentedJsonDecoder;
 use InvalidArgumentException;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
+use function imagecolorallocatealpha;
+use function imagecolorat;
+use function imagecopyresampled;
+use function imagecreatetruecolor;
+use function imagedestroy;
+use function imagefill;
+use function imagesavealpha;
+use function imagesetpixel;
 use function implode;
 use function in_array;
 use function json_encode;
-use function strlen;
-use function imagecreatetruecolor;
-use function imagesavealpha;
-use function imagecolorallocatealpha;
-use function imagefill;
 use function ord;
-use function imagesetpixel;
-use function imagecopyresampled;
-use function imagecolorat;
-use function imagedestroy;
+use function strlen;
 
 class Skin{
 	public const ACCEPTED_SKIN_SIZES = [

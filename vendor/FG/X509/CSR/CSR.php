@@ -11,11 +11,11 @@
 namespace FG\X509\CSR;
 
 use FG\ASN1\OID;
-use FG\ASN1\Universal\Integer;
 use FG\ASN1\Universal\BitString;
+use FG\ASN1\Universal\Integer;
 use FG\ASN1\Universal\Sequence;
-use FG\X509\CertificateSubject;
 use FG\X509\AlgorithmIdentifier;
+use FG\X509\CertificateSubject;
 use FG\X509\PublicKey;
 
 class CSR extends Sequence

@@ -26,10 +26,10 @@ namespace pocketmine\block;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\tile\Sign as TileSign;
 use pocketmine\tile\Tile;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function floor;
 
 class SignPost extends Transparent{

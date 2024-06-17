@@ -10,11 +10,11 @@
 
 namespace FG\X509;
 
+use FG\ASN1\Composite\RDNString;
 use FG\ASN1\Composite\RelativeDistinguishedName;
 use FG\ASN1\Identifier;
 use FG\ASN1\OID;
 use FG\ASN1\Parsable;
-use FG\ASN1\Composite\RDNString;
 use FG\ASN1\Universal\Sequence;
 
 class CertificateSubject extends Sequence implements Parsable

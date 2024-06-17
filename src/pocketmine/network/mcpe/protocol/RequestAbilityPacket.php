@@ -14,11 +14,11 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use InvalidArgumentException;
+use LogicException;
 use pocketmine\network\mcpe\NetworkSession;
 use function is_bool;
 use function is_float;
-use InvalidArgumentException;
-use LogicException;
 
 /**
  * Sent by the client to request server enabling/disabling/changing certain abilities, such as flying, noclip, etc.

@@ -32,6 +32,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\utils\BinaryDataException;
 use UnexpectedValueException;
 use function call_user_func;
 use function chr;
@@ -46,7 +47,6 @@ use function strlen;
 use function substr;
 use function zlib_decode;
 use function zlib_encode;
-use pocketmine\utils\BinaryDataException;
 
 /**
  * Base Named Binary Tag encoder/decoder

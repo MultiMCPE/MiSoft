@@ -24,13 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
-
 use pocketmine\entity\Attribute;
 use pocketmine\entity\EntityIds;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
+use pocketmine\network\mcpe\protocol\types\EntityLink;
 use UnexpectedValueException;
 use function array_search;
 use function count;

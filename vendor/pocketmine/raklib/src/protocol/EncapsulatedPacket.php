@@ -23,7 +23,6 @@ use function ord;
 use function pack;
 use function strlen;
 use function substr;
-
 use function unpack;
 
 class EncapsulatedPacket{

@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator;
 
-use pocketmine\item\ItemFactory;
 use pocketmine\block\BlockFactory;
+use pocketmine\item\ItemFactory;
 use pocketmine\level\biome\Biome;
 use pocketmine\level\Level;
 use pocketmine\level\SimpleChunkManager;

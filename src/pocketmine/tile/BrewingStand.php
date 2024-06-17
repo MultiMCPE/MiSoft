@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\tile;
 
 use InvalidArgumentException;
-use pocketmine\Server;
 use pocketmine\inventory\BrewingInventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
@@ -35,10 +34,11 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\network\mcpe\protocol\ContainerSetDataPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
+use pocketmine\Server;
 use function in_array;
-use function strval;
 use function intval;
 use function max;
+use function strval;
 
 class BrewingStand extends Spawnable implements InventoryHolder, Container, Nameable {
 	use NameableTrait, ContainerTrait;

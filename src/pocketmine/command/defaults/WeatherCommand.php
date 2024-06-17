@@ -28,9 +28,9 @@ use pocketmine\level\weather\Weather;
 use pocketmine\Player;
 use pocketmine\utils\TextFormat;
 use function count;
-use function mt_rand;
-use function min;
 use function max;
+use function min;
+use function mt_rand;
 
 class WeatherCommand extends VanillaCommand{
 

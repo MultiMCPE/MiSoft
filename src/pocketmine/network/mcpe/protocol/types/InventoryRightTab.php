@@ -14,8 +14,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
-
 enum InventoryRightTab : int{
 	use PacketIntEnumTrait;
 

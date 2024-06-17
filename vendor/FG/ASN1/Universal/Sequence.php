@@ -11,8 +11,8 @@
 namespace FG\ASN1\Universal;
 
 use FG\ASN1\Construct;
-use FG\ASN1\Parsable;
 use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
 
 class Sequence extends Construct implements Parsable
 {

@@ -10,8 +10,8 @@
 
 namespace FG\X509;
 
-use FG\ASN1\Universal\NullObject;
 use FG\ASN1\Composite\AttributeTypeAndValue;
+use FG\ASN1\Universal\NullObject;
 
 class AlgorithmIdentifier extends AttributeTypeAndValue
 {

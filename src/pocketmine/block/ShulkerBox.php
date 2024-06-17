@@ -23,13 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\block\utils\ColorBlockMetaHelper;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\tile\Container;
+use pocketmine\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\tile\Tile;
 
 class ShulkerBox extends Transparent{

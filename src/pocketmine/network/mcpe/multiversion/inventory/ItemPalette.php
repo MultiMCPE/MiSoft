@@ -23,7 +23,6 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\inventory;
 
-use pocketmine\network\mcpe\multiversion\inventory\palettes\Palette;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette419;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette431;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette440;
@@ -46,6 +45,7 @@ use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette649;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette662;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette671;
 use pocketmine\network\mcpe\multiversion\inventory\palettes\ItemPalette685;
+use pocketmine\network\mcpe\multiversion\inventory\palettes\Palette;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class ItemPalette{

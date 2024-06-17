@@ -23,11 +23,9 @@ declare(strict_types = 1);
 
 namespace pocketmine\entity\object;
 
-use pocketmine\entity\hostile\Creeper;
 use pocketmine\block\Liquid;
-use pocketmine\entity\{
-	Entity, Living
-};
+use pocketmine\entity\{Entity, Living};
+use pocketmine\entity\hostile\Creeper;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;

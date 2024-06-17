@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\actor;
 
 use function array_diff;
-use function scandir;
 use function file_get_contents;
 use function krsort;
+use function scandir;
 use const pocketmine\RESOURCE_PATH;
 
 class AvailableActorIdentifiersPalette{

@@ -10,15 +10,15 @@
 
 namespace FG\X509;
 
-use FG\ASN1\Exception\ParserException;
-use FG\ASN1\OID;
 use FG\ASN1\ASNObject;
-use FG\ASN1\Parsable;
+use FG\ASN1\Exception\ParserException;
 use FG\ASN1\Identifier;
-use FG\ASN1\Universal\OctetString;
-use FG\ASN1\Universal\Set;
-use FG\ASN1\Universal\Sequence;
+use FG\ASN1\OID;
+use FG\ASN1\Parsable;
 use FG\ASN1\Universal\ObjectIdentifier;
+use FG\ASN1\Universal\OctetString;
+use FG\ASN1\Universal\Sequence;
+use FG\ASN1\Universal\Set;
 use FG\X509\SAN\SubjectAlternativeNames;
 
 class CertificateExtensions extends Set implements Parsable

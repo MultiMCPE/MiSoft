@@ -24,9 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\plugin;
 
 use ClassLoader;
-use function is_dir;
 use function file_exists;
 use function file_get_contents;
+use function is_dir;
 
 class FolderPluginLoader implements PluginLoader{
 

@@ -12,10 +12,10 @@ namespace FG\X509;
 
 use FG\ASN1\ASNObject;
 use FG\ASN1\OID;
-use FG\ASN1\Universal\NullObject;
-use FG\ASN1\Universal\Sequence;
 use FG\ASN1\Universal\BitString;
+use FG\ASN1\Universal\NullObject;
 use FG\ASN1\Universal\ObjectIdentifier;
+use FG\ASN1\Universal\Sequence;
 
 class PublicKey extends Sequence
 {

@@ -28,9 +28,9 @@ use pocketmine\level\ChunkManager;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;
 use function cos;
-use function sin;
-use function pi;
 use function floor;
+use function pi;
+use function sin;
 
 class Cave extends Populator {
 	/**

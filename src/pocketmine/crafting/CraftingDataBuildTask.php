@@ -23,14 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\crafting;
 
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
-use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\protocol\CraftingDataPacket;
+use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\protocol\BatchPacket;
+use pocketmine\network\mcpe\protocol\CraftingDataPacket;
+use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
-use pocketmine\item\ItemFactory;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use function assert;

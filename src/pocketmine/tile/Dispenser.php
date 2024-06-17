@@ -26,10 +26,10 @@ namespace pocketmine\tile;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\projectile\Arrow;
-use pocketmine\entity\projectile\Snowball;
 use pocketmine\entity\projectile\Egg;
-use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\entity\projectile\ExperienceBottle;
+use pocketmine\entity\projectile\Snowball;
+use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\inventory\DispenserInventory;
 use pocketmine\inventory\InventoryHolder;
 use pocketmine\item\Item;
@@ -39,8 +39,8 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use function count;
 use function is_array;
-use function mt_rand;
 use function lcg_value;
+use function mt_rand;
 
 class Dispenser extends Spawnable implements InventoryHolder, Container, Nameable{
 	use NameableTrait {

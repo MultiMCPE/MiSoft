@@ -28,8 +28,8 @@ use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
-use pocketmine\Player;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
+use pocketmine\Player;
 
 class Anvil extends Fallable{
 

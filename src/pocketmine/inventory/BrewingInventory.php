@@ -23,10 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\inventory;
 
-use pocketmine\tile\BrewingStand;
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
 use pocketmine\Player;
+use pocketmine\tile\BrewingStand;
 
 class BrewingInventory extends ContainerInventory{
 	public const SLOT_INGREDIENT = 0;

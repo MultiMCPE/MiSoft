@@ -24,13 +24,12 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\utils\Binary;
-
-
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\utils\Binary;
 use function pack;
 use function strlen;
 use function unpack;
+
 
 class ResourcePackChunkDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACK_CHUNK_DATA_PACKET;

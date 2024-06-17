@@ -23,9 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\Player;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
+use pocketmine\Player;
 use pocketmine\tile\DLDetector;
 
 class DaylightSensor extends RedstoneSource{

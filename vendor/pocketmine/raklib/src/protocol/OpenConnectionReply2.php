@@ -18,7 +18,6 @@ declare(strict_types=1);
 namespace raklib\protocol;
 
 use pocketmine\utils\Binary;
-
 use raklib\utils\InternetAddress;
 use function chr;
 use function ord;

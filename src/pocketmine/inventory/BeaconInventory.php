@@ -21,7 +21,6 @@
 
 namespace pocketmine\inventory;
 
-use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;

@@ -27,7 +27,6 @@ use InvalidArgumentException;
 use pocketmine\nbt\NBT;
 use pocketmine\nbt\NBTStream;
 use pocketmine\nbt\ReaderTracker;
-
 use function chr;
 
 class ByteTag extends NamedTag{

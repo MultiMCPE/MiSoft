@@ -23,8 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\utils\UUID;
 use pocketmine\entity\Skin;
+use pocketmine\utils\UUID;
 
 class PlayerListEntry{
 

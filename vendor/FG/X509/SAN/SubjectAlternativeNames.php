@@ -10,11 +10,11 @@
 
 namespace FG\X509\SAN;
 
-use FG\ASN1\Exception\ParserException;
 use FG\ASN1\ASNObject;
+use FG\ASN1\Exception\ParserException;
+use FG\ASN1\Identifier;
 use FG\ASN1\OID;
 use FG\ASN1\Parsable;
-use FG\ASN1\Identifier;
 use FG\ASN1\Universal\Sequence;
 
 /**

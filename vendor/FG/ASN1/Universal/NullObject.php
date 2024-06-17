@@ -11,9 +11,9 @@
 namespace FG\ASN1\Universal;
 
 use FG\ASN1\ASNObject;
-use FG\ASN1\Parsable;
-use FG\ASN1\Identifier;
 use FG\ASN1\Exception\ParserException;
+use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
 
 class NullObject extends ASNObject implements Parsable
 {

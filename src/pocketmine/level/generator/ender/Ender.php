@@ -23,14 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator\ender;
 
-use pocketmine\block\BlockIds;
 use pocketmine\block\BlockFactory;
-use pocketmine\level\ChunkManager;
+use pocketmine\block\BlockIds;
 use pocketmine\level\biome\Biome;
-use pocketmine\level\generator\populator\EnderPilar;
+use pocketmine\level\ChunkManager;
 use pocketmine\level\generator\Generator;
 use pocketmine\level\generator\InvalidGeneratorOptionsException;
 use pocketmine\level\generator\noise\Simplex;
+use pocketmine\level\generator\populator\EnderPilar;
 use pocketmine\level\generator\populator\Populator;
 use pocketmine\math\Vector3;
 use pocketmine\utils\Random;

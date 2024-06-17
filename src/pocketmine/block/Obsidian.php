@@ -23,11 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\Player;
-use pocketmine\block\Block;
 use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
 use pocketmine\math\Vector3;
+use pocketmine\Player;
 
 class Obsidian extends Solid{
 

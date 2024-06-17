@@ -25,8 +25,8 @@ namespace pocketmine\level\biome;
 
 use pocketmine\block\Block;
 use pocketmine\level\ChunkManager;
-use pocketmine\level\generator\populator\Populator;
 use pocketmine\level\generator\populator\Flower;
+use pocketmine\level\generator\populator\Populator;
 use pocketmine\utils\Random;
 use SplFixedArray;
 

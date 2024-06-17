@@ -13,9 +13,9 @@ namespace FG\ASN1\Universal;
 use DateTime;
 use DateTimeZone;
 use FG\ASN1\AbstractTime;
-use FG\ASN1\Parsable;
-use FG\ASN1\Identifier;
 use FG\ASN1\Exception\ParserException;
+use FG\ASN1\Identifier;
+use FG\ASN1\Parsable;
 
 /**
  * This ASN.1 universal type contains the calendar date and time.

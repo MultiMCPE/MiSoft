@@ -24,10 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidStateException;
-
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\CommandListJson;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ChainedSubCommandData;
 use pocketmine\network\mcpe\protocol\types\ChainedSubCommandValue;
 use pocketmine\network\mcpe\protocol\types\CommandData;

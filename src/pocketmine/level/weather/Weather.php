@@ -23,18 +23,18 @@ declare(strict_types=1);
 
 namespace pocketmine\level\weather;
 
+use pocketmine\entity\Entity;
 use pocketmine\event\level\WeatherChangeEvent;
 use pocketmine\level\Level;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
-use pocketmine\entity\Entity;
 use pocketmine\Player;
-use function min;
-use function max;
 use function array_rand;
 use function count;
-use function mt_rand;
 use function is_int;
+use function max;
+use function min;
+use function mt_rand;
 
 class Weather{
 	public const CLEAR = 0;

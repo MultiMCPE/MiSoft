@@ -23,12 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\nbt;
 
+use pocketmine\utils\Binary;
 use function array_values;
 use function count;
 use function pack;
 use function unpack;
-
-use pocketmine\utils\Binary;
 
 class LittleEndianNBTStream extends NBTStream{
 

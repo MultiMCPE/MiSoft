@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
-use pocketmine\utils\Binary;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds100;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds105;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds110;
@@ -59,10 +59,10 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds649;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds662;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds671;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds685;
-use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
-use function array_key_last;
+use pocketmine\utils\Binary;
 use ReflectionClass;
 use SplFixedArray;
+use function array_key_last;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
