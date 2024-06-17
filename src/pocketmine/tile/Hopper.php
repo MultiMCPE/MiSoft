@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\tile;
 
+use pocketmine\inventory\ShulkerBoxInventory;
 use pocketmine\inventory\HopperInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\item\Item;
@@ -162,14 +163,16 @@ class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
                     $targetItem = clone $item;
                     $targetItem->setCount(1);
 
-                    if($inv->canAddItem($targetItem)){
-                        $this->inventory->removeItem($targetItem);
-                        $inv->addItem($targetItem);
-                        $this->resetCooldownTicks();
-                        if($target instanceof Hopper){
-                            $target->resetCooldownTicks();
+                    if(!(($targetItem->getId() === Item::SHULKER_BOX or $targetItem->getId() === Item::UNDYED_SHULKER_BOX) && $inv instanceof ShulkerBoxInventory)){
+                        if($inv->canAddItem($targetItem)){
+                            $this->inventory->removeItem($targetItem);
+                            $inv->addItem($targetItem);
+                            $this->resetCooldownTicks();
+                            if($target instanceof Hopper){
+                                $target->resetCooldownTicks();
+                            }
+                            break;
                         }
-                        break;
                     }
 
                 }
