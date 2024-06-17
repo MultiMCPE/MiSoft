@@ -27,7 +27,9 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
+use pocketmine\nbt\tag\IntTag;
 use pocketmine\Player;
+use pocketmine\tile\Banner;
 use pocketmine\tile\Banner as TileBanner;
 use pocketmine\tile\Tile;
 use function floor;
@@ -93,8 +95,12 @@ class StandingBanner extends Transparent{
 		$tile = $this->level->getTile($this);
 
 		$drop = ItemFactory::get(Item::BANNER, ($tile instanceof TileBanner ? $tile->getBaseColor() : 0));
-		if($tile instanceof TileBanner and !($patterns = $tile->getPatterns())->empty()){
-			$drop->setNamedTagEntry(clone $patterns);
+		if($tile instanceof TileBanner){
+            if(!($patterns = $tile->getPatterns())->empty()) {
+                $drop->setNamedTagEntry(clone $patterns);
+            }
+
+            $drop->setNamedTagEntry(new IntTag(Banner::TAG_TYPE, $tile->getType()));
 		}
 
 		return [$drop];
