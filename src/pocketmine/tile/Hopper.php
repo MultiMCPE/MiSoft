@@ -23,10 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\tile;
 
+use pocketmine\entity\Entity;
 use pocketmine\entity\object\ItemEntity as DroppedItem;
+use pocketmine\inventory\FurnaceInventory;
 use pocketmine\inventory\HopperInventory;
 use pocketmine\inventory\InventoryHolder;
-use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
@@ -38,13 +39,13 @@ class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
 
     private const TAG_TRANSFER_COOLDOWN = "TransferCooldown";
 
-    /** @var HopperInventory */
-    private $inventory;
-
-    /** @var int */
-    private $transferCooldown = 0;
+    private ?HopperInventory $inventory = null;
+    protected int $transferCooldown = 0;
+    protected AxisAlignedBB $pullBox;
 
     public function readSaveData(CompoundTag $nbt) : void{
+        $this->pullBox = new AxisAlignedBB($this->x, $this->y, $this->z, $this->x + 1, $this->y + 1.5, $this->z + 1);
+
         $this->inventory = new HopperInventory($this);
 
         $this->loadItems($nbt);
@@ -89,93 +90,158 @@ class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
         return $this->inventory;
     }
 
-
-    public function resetCooldownTicks(){
-        $this->transferCooldown = 8;
+    public function isOnTransferCooldown() : bool{
+        return $this->transferCooldown > 0;
     }
 
-    public function onUpdate(): bool{
-        //Pickup dropped items
-        //This can happen at any time regardless of cooldown
-		$pickupCollisionBox = new AxisAlignedBB(
-		    $this->getBlock()->getX(),
-		    $this->getBlock()->getY() + 1,
-		    $this->getBlock()->getZ(),
-		    $this->getBlock()->getX() + 1,
-		    $this->getBlock()->getY() + 1.75,
-		    $this->getBlock()->getZ() + 1
-		);
-		foreach($this->getBlock()->getLevel()->getNearbyEntities($pickupCollisionBox) as $entity){
-			if($entity->isClosed() || $entity->isFlaggedForDespawn() || !$entity instanceof DroppedItem){
-				continue;
-			}
-			// Unlike Java Edition, Bedrock Edition's hoppers don't save in which order item entities landed on top of them to collect them in that order.
-			// In Bedrock Edition hoppers collect item entities in the order in which they entered the chunk.
-			// Because of how entities are saved by PocketMine-MP the first entities of this loop are also the first ones who were saved.
-			// That's why we don't need to implement any sorting mechanism.
-			$item = $entity->getItem();
-			if(!$this->inventory->canAddItem($item)){
-				continue;
-			}
+    public function setTransferCooldown(int $cooldown): void{
+        $this->transferCooldown = $cooldown;
+    }
 
-			$this->inventory->addItem($item);
-			$entity->flagForDespawn();
+    public function onUpdate() : bool{
+        if($this->closed){
+            return false;
         }
 
-        if($this->transferCooldown > 0){ //Hoppers only update CONTENTS every 8th tick
+        if($this->isOnTransferCooldown()){
             $this->transferCooldown--;
-            return true;
-        }
+        }else{
+            $transfer = $this->pushItems();
 
-        //дюперы, я ебал вашу маму.
-        $source = $this->getLevel()->getTile($this->getBlock()->getSide(Vector3::SIDE_UP));
-        if($source instanceof ShulkerBox) {
-            return true;
-        }
-
-        //Suck items from above tile inventories
-        if($source instanceof Tile and $source instanceof InventoryHolder){
-            $inventory = $source->getInventory();
-            $item = clone $inventory->getItem($inventory->firstOccupied());
-            $item->setCount(1);
-            if($this->inventory->canAddItem($item)){
-                $this->inventory->addItem($item);
-                $inventory->removeItem($item);
-                $this->resetCooldownTicks();
-                if($source instanceof Hopper){
-                    $source->resetCooldownTicks();
-                }
+            if(!$transfer and !$this->isFull()){
+                $transfer = $this->pullItems();
             }
-        }
 
-        //Feed item into target inventory
-        //Do not do this if there's a hopper underneath this hopper, to follow vanilla behaviour
-        if(!($this->getLevel()->getTile($this->getBlock()->getSide(Vector3::SIDE_DOWN)) instanceof Hopper)){
-            $target = $this->getLevel()->getTile($this->getBlock()->getSide($this->getBlock()->getDamage()));
-            if($target instanceof Tile and $target instanceof InventoryHolder){
-                $inv = $target->getInventory();
-                foreach($this->inventory->getContents() as $item){
-                    if($item->getId() === Item::AIR or $item->getCount() < 1){
-                        continue;
-                    }
-
-                    $targetItem = clone $item;
-                    $targetItem->setCount(1);
-
-                    if($inv->canAddItem($targetItem)){
-                        $this->inventory->removeItem($targetItem);
-                        $inv->addItem($targetItem);
-                        $this->resetCooldownTicks();
-                        if($target instanceof Hopper){
-                            $target->resetCooldownTicks();
-                        }
-                        break;
-                    }
-
-                }
+            if($transfer){
+                $this->setTransferCooldown(8);
             }
         }
 
         return true;
+    }
+
+    public function isEmpty() : bool{
+        return count($this->inventory->getContents()) === 0;
+    }
+
+    public function isFull() : bool{
+        if($this->inventory->getSize() < $this->inventory->getDefaultSize()) return false;
+
+        foreach($this->inventory->getContents() as $slot => $item){
+            if($item->getMaxStackSize() !== $item->getCount()){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function pushItems() : bool{
+        $tile = $this->level->getTile($this->getSide($direction = $this->getBlock()->getDamage()));
+
+        if($tile instanceof Furnace){
+            $inv = $tile->getInventory();
+
+            for($i = 0, $size = $this->inventory->getSize(); $i < $size; $i++){
+                $item = $this->inventory->getItem($i);
+                if($item->isNull()){
+                    continue;
+                }
+
+                ($itemToAdd = clone $item)->setCount(1);
+                if($direction === Vector3::SIDE_DOWN){
+                    $smelting = $inv->getSmelting();
+
+                    if($smelting->isNull()){
+                        $inv->setSmelting($itemToAdd);
+                        $item->pop();
+                        $this->inventory->setItem($i, $item);
+                        return true;
+                    }elseif($smelting->equals($itemToAdd, true, false)){
+                        $smelting->setCount($smelting->getCount() + 1);
+                        $inv->setSmelting($smelting);
+                        $item->pop();
+                        $this->inventory->setItem($i, $item);
+                        return true;
+                    }
+                }elseif($item->getFuelTime() > 0){
+                    $fuel = $inv->getFuel();
+
+                    if($fuel->isNull()){
+                        $inv->setFuel($itemToAdd);
+                        $item->pop();
+                        $this->inventory->setItem($i, $item);
+                        return true;
+                    }elseif($fuel->equals($itemToAdd, true, false)){
+                        $fuel->setCount($fuel->getCount() + 1);
+                        $inv->setFuel($fuel);
+                        $item->pop();
+                        $this->inventory->setItem($i, $item);
+                        return true;
+                    }
+                }
+            }
+        }elseif($tile instanceof Chest or $tile instanceof Hopper){
+            $inv = $tile->getInventory();
+
+            for($i = 0, $size = $this->inventory->getSize(); $i < $size; $i++){
+                $item = $this->inventory->getItem($i);
+                if($item->isNull()){
+                    continue;
+                }
+
+                ($itemToAdd = clone $item)->setCount(1);
+                if(count($inv->addItem($itemToAdd)) === 0){
+                    $item->pop();
+                    $this->inventory->setItem($i, $item);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function pullItems() : bool{
+        $tile = $this->level->getTile($this->up());
+
+        if($tile instanceof Container){
+            if($tile instanceof Hopper){
+                return false;
+            }
+            $inv = $tile->getInventory();
+
+            for($i = 0, $size = $inv->getSize(); $i < $size; $i++){
+                if($inv instanceof FurnaceInventory and $i !== 2){ //So only results of Furnaces go trough
+                    continue;
+                }
+                $item = $inv->getItem($i);
+                if($item->isNull()){
+                    continue;
+                }
+
+                ($itemToAdd = clone $item)->setCount(1);
+                if(count($this->inventory->addItem($itemToAdd)) === 0){
+                    $item->pop();
+                    $inv->setItem($i, $item);
+
+                    return true;
+                }
+            }
+        }else{
+            /** @var DroppedItem $entity */
+            foreach(array_filter($this->level->getNearbyEntities($this->pullBox), function(Entity $entity) : bool{
+                return $entity instanceof DroppedItem and !$entity->isFlaggedForDespawn();
+            }) as $entity){
+                $item = $entity->getItem();
+                if($this->inventory->canAddItem($item)){
+                    $this->inventory->addItem($item);
+                    $entity->flagForDespawn();
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
