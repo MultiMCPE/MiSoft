@@ -272,17 +272,13 @@ class PlayerInventory extends BaseInventory{
 		if($holder->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 		    $pk = new CreativeContentPacket();
 		    $pk->groups = CreativeGroup::getAll();
-		    $pk->items = $items;
-
-		    $holder->dataPacket($pk);
-		}else{
+        }else{
 	    	$pk = new InventoryContentPacket();
 	    	$pk->windowId = ContainerIds::CREATIVE;
-	    	$pk->items = $items;
-
-	    	$holder->dataPacket($pk);
-		}
-	}
+        }
+        $pk->items = $items;
+        $holder->dataPacket($pk);
+    }
 
 	/**
 	 * This override is here for documentation and code completion purposes only.
