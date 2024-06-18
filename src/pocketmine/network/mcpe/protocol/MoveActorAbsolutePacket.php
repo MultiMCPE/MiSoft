@@ -70,14 +70,16 @@ class MoveActorAbsolutePacket extends DataPacket{
 	    	$this->zRot = $this->getByteRotation();
 
 	    	$this->flags = 0;
-	    	$onGround = $this->getBool();
-	    	$isTeleported = $this->getBool();
-	    	if($onGround){
-	    	    $this->flags |= self::FLAG_GROUND;
-	    	}
-	    	if($isTeleported){
-	    	    $this->flags |= self::FLAG_TELEPORT;
-	    	}
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110) {
+                $onGround = $this->getBool();
+                $isTeleported = $this->getBool();
+                if ($onGround) {
+                    $this->flags |= self::FLAG_GROUND;
+                }
+                if ($isTeleported) {
+                    $this->flags |= self::FLAG_TELEPORT;
+                }
+            }
 		}
 	}
 
@@ -100,10 +102,16 @@ class MoveActorAbsolutePacket extends DataPacket{
 	    	$this->putByteRotation($this->yRot);
 	    	$this->putByteRotation($this->zRot);
 
-	    	$onGround = ($this->flags & self::FLAG_GROUND) !== 0;
-	    	$isTeleported = ($this->flags & self::FLAG_TELEPORT) !== 0;
-            $this->putBool($onGround);
-            $this->putBool($isTeleported);
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110) {
+                $onGround = $this->getBool();
+                $isTeleported = $this->getBool();
+                if ($onGround) {
+                    $this->flags |= self::FLAG_GROUND;
+                }
+                if ($isTeleported) {
+                    $this->flags |= self::FLAG_TELEPORT;
+                }
+            }
 		}
 	}
 
