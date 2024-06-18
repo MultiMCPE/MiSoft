@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\event\block\ItemFrameDropItemEvent;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
@@ -67,15 +68,17 @@ class ItemFrame extends Flowable{
 		    return false;
 		}
 
+        $ev = new ItemFrameDropItemEvent($player, $this, $tile, $tile->getItem());
+        $ev->call();
+
 		$tileItem = $tile->getItem();
-		if($tileItem->isNull()){
+		if($ev->isCancelled() || $tileItem->isNull()){
 		    return false;
 		}
 
-		$item = $tile->getItem();
-		$item->setOnItemFrame(false);
+        $tileItem->setOnItemFrame(false);
 		if(lcg_value() <= $tile->getItemDropChance()){
-			$this->level->dropItem($this, $item);
+			$this->level->dropItem($this, $tileItem);
 		}
 		$tile->setItem(null);
 		$tile->setItemRotation(0);

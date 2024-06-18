@@ -496,6 +496,7 @@ return array(
     'pocketmine\\event\\HandlerList' => $baseDir . '/src/pocketmine/event/HandlerList.php',
     'pocketmine\\event\\Listener' => $baseDir . '/src/pocketmine/event/Listener.php',
     'pocketmine\\event\\block\\BlockBreakEvent' => $baseDir . '/src/pocketmine/event/block/BlockBreakEvent.php',
+    'pocketmine\\event\\block\\ItemFrameDropItemEvent' => $baseDir . '/src/pocketmine/event/block/ItemFrameDropItemEvent.php',
     'pocketmine\\event\\block\\BlockBurnEvent' => $baseDir . '/src/pocketmine/event/block/BlockBurnEvent.php',
     'pocketmine\\event\\block\\BlockEvent' => $baseDir . '/src/pocketmine/event/block/BlockEvent.php',
     'pocketmine\\event\\block\\BlockFormEvent' => $baseDir . '/src/pocketmine/event/block/BlockFormEvent.php',

@@ -567,6 +567,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\event\\HandlerList' => __DIR__ . '/../..' . '/src/pocketmine/event/HandlerList.php',
         'pocketmine\\event\\Listener' => __DIR__ . '/../..' . '/src/pocketmine/event/Listener.php',
         'pocketmine\\event\\block\\BlockBreakEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/block/BlockBreakEvent.php',
+        'pocketmine\\event\\block\\ItemFrameDropItemEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/block/ItemFrameDropItemEvent.php',
         'pocketmine\\event\\block\\BlockBurnEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/block/BlockBurnEvent.php',
         'pocketmine\\event\\block\\BlockEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/block/BlockEvent.php',
         'pocketmine\\event\\block\\BlockFormEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/block/BlockFormEvent.php',
