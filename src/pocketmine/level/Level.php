@@ -2245,6 +2245,7 @@ class Level implements ChunkManager, Metadatable{
 					if(!($entity instanceof $entityType) or $entity->isClosed() or $entity->isFlaggedForDespawn() or (!$includeDead and !$entity->isAlive())){
 						continue;
 					}
+
 					$distSq = $entity->distanceSquared($pos);
 					if($distSq < $currentTargetDistSq){
 						$currentTargetDistSq = $distSq;

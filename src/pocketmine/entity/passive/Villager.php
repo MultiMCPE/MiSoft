@@ -102,7 +102,7 @@ class Villager extends Mob implements NPC, Ageable{
 		$this->behaviorPool->setBehavior(2, new RandomStrollBehavior($this, 2.0));
 		$this->behaviorPool->setBehavior(3, new LookAtPlayerBehavior($this, 6.0));
 		$this->behaviorPool->setBehavior(4, new RandomLookAroundBehavior($this));
-		$this->behaviorPool->setBehavior(5, new AvoidMobTypeBehavior($this, Zombie::class, null, 6.0, 4.0, 4.2));
+		$this->behaviorPool->setBehavior(5, new AvoidMobTypeBehavior($this, Zombie::class, 6.0, 4.0, 4.2));
 	}
 
 	protected function initEntity() : void{

@@ -94,7 +94,7 @@ class Creeper extends Monster implements Ageable{
 		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
 		$this->behaviorPool->setBehavior(1, new CreeperSwellBehavior($this));
 		// TODO: Avoid from ocelot
-		$this->behaviorPool->setBehavior(2, new AvoidMobTypeBehavior($this, Cat::class, null, 6, 1, 1.2));
+		$this->behaviorPool->setBehavior(2, new AvoidMobTypeBehavior($this, Cat::class, 6, 1, 1.2));
 		$this->behaviorPool->setBehavior(3, new MeleeAttackBehavior($this, 1.0));
 		$this->behaviorPool->setBehavior(4, new RandomStrollBehavior($this, 0.8));
 		$this->behaviorPool->setBehavior(5, new LookAtPlayerBehavior($this, 8.0));

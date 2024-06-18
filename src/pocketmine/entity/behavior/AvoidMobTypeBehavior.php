@@ -32,7 +32,6 @@ use pocketmine\Player;
 class AvoidMobTypeBehavior extends Behavior{
 
 	protected $targetEntityClass;
-	protected $avoidTargetSelector;
 	protected $avoidDistance;
 	protected $farSpeed;
 	protected $nearSpeed;
@@ -41,11 +40,10 @@ class AvoidMobTypeBehavior extends Behavior{
 
 	protected $path;
 
-	public function __construct(Mob $mob, string $targetEntityClass, ?Closure $avoidTargetSelector, float $avoidDistance, float $farSpeed, float $nearSpeed){
+	public function __construct(Mob $mob, string $targetEntityClass, float $avoidDistance, float $farSpeed, float $nearSpeed){
 		parent::__construct($mob);
 
 		$this->targetEntityClass = $targetEntityClass;
-		$this->avoidTargetSelector = $avoidTargetSelector;
 		$this->avoidDistance = $avoidDistance;
 		$this->farSpeed = $farSpeed;
 		$this->nearSpeed = $nearSpeed;
@@ -54,12 +52,7 @@ class AvoidMobTypeBehavior extends Behavior{
 	}
 
 	public function canStart() : bool{
-		$nearest = $this->mob->level->getNearestEntity($this->mob, $this->avoidDistance, $this->targetEntityClass, false, [function(Entity $entity) : bool{
-			return !($entity instanceof Player and $entity->isSpectator());
-		}, function(Entity $entity) : bool{
-			return $this->mob->canSeeEntity($entity);
-		}, $this->avoidTargetSelector
-		]);
+		$nearest = $this->mob->level->getNearestEntity($this->mob, $this->avoidDistance, $this->targetEntityClass);
 
 		if($nearest !== null){
 			$this->nearestEntity = $nearest;
@@ -68,8 +61,7 @@ class AvoidMobTypeBehavior extends Behavior{
 
 			if($vec !== null and $nearest->distanceSquared($vec) >= $nearest->distanceSquared($this->mob)){
 				$this->path = $this->mob->getNavigator()->findPath($vec);
-
-				return $this->path !== null;
+				return true;
 			}
 		}
 

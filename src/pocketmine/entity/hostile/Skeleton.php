@@ -91,7 +91,7 @@ class Skeleton extends Monster implements RangedAttackerMob, Smite{
 		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
 		$this->behaviorPool->setBehavior(1, new RestrictSunBehavior($this));
 		$this->behaviorPool->setBehavior(2, new FleeSunBehavior($this, 1.0));
-		$this->behaviorPool->setBehavior(3, new AvoidMobTypeBehavior($this, Wolf::class, null, 6.0, 1.0, 1.2));
+		$this->behaviorPool->setBehavior(3, new AvoidMobTypeBehavior($this, Wolf::class, 6.0, 1.0, 1.2));
 		$this->behaviorPool->setBehavior(4, new RandomStrollBehavior($this, 1.0));
 		$this->behaviorPool->setBehavior(5, new RangedAttackBehavior($this, 1.0, 20, 60, 15.0));
 		$this->behaviorPool->setBehavior(6, new LookAtPlayerBehavior($this, 8.0));
