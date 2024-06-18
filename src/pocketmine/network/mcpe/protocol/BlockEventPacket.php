@@ -29,6 +29,11 @@ use pocketmine\network\mcpe\NetworkSession;
 class BlockEventPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BLOCK_EVENT_PACKET;
 
+    public const TYPE_CHEST = 1;
+
+    public const DATA_CHEST_CLOSED = 0;
+    public const DATA_CHEST_OPEN = 1;
+
 	/** @var int */
 	public $x;
 	/** @var int */
