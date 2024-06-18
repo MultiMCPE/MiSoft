@@ -26,6 +26,8 @@ namespace pocketmine\item;
 use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Living;
+use pocketmine\event\entity\EntityDrinkPotionEvent;
+use pocketmine\Player;
 
 class Potion extends Item implements Consumable{
 
@@ -286,9 +288,9 @@ class Potion extends Item implements Consumable{
 		return 1;
 	}
 
-	public function onConsume(Living $consumer){
-
-	}
+    public function onConsume(Living $consumer): void{
+        new EntityDrinkPotionEvent($consumer, $this);
+    }
 
 	public function getAdditionalEffects() : array{
 		//TODO: check CustomPotionEffects NBT

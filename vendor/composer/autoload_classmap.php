@@ -518,6 +518,7 @@ return array(
     'pocketmine\\event\\entity\\EntityDamageEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDamageEvent.php',
     'pocketmine\\event\\entity\\EntityDeathEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDeathEvent.php',
     'pocketmine\\event\\entity\\EntityDespawnEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDespawnEvent.php',
+    'pocketmine\\event\\entity\\EntityDrinkPotionEvent' => $baseDir . '/src/pocketmine/event/entity/EntityDrinkPotionEvent.php',
     'pocketmine\\event\\entity\\EntityEffectAddEvent' => $baseDir . '/src/pocketmine/event/entity/EntityEffectAddEvent.php',
     'pocketmine\\event\\entity\\EntityEffectEvent' => $baseDir . '/src/pocketmine/event/entity/EntityEffectEvent.php',
     'pocketmine\\event\\entity\\EntityEffectRemoveEvent' => $baseDir . '/src/pocketmine/event/entity/EntityEffectRemoveEvent.php',
