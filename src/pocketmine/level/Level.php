@@ -2544,10 +2544,10 @@ class Level implements ChunkManager, Metadatable{
 	 *
 	 * @return Chunk|null
 	 */
-	public function getChunk(int $x, int $z, bool $create = false){
-		if(isset($this->chunks[$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)])){
+	public function getChunk(int $chunkX, int $chunkZ, bool $create = false){
+		if(isset($this->chunks[$index = ((($chunkX) & 0xFFFFFFFF) << 32) | (( $chunkZ) & 0xFFFFFFFF)])){
 			return $this->chunks[$index];
-		}elseif($this->loadChunk($x, $z, $create)){
+		}elseif($this->loadChunk($chunkX, $chunkZ, $create)){
 			return $this->chunks[$index];
 		}
 
