@@ -30,6 +30,7 @@ use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityBlockChangeEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\ItemFactory;
+use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
@@ -152,7 +153,11 @@ class FallingBlock extends Entity{
 	 * @param Player $player
 	 */
 	public function spawnTo(Player $player) : void{
-		if(!isset($this->hasSpawned[$player->getLoaderId()]) and $this->chunk !== null and isset($player->usedChunks[((($this->chunk->getX()) & 0xFFFFFFFF) << 32) | (( $this->chunk->getZ()) & 0xFFFFFFFF)])){
+		if(
+            !isset($this->hasSpawned[$player->getLoaderId()]) and
+            $this->chunk !== null and
+            isset($player->usedChunks[Level::chunkHash($this->chunk->getX(), $this->chunk->getZ())])
+        ){
 			$this->hasSpawned[$player->getLoaderId()] = $player;
 
 	    	$pk = new AddActorPacket();

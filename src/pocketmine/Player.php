@@ -1203,12 +1203,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected function switchLevel(Level $targetLevel) : bool{
 		$oldLevel = $this->level;
 		if(parent::switchLevel($targetLevel)){
-			if($oldLevel !== null){
-				foreach($this->usedChunks as $index => $d){
-					 $X = ($index >> 32);  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;
-					$this->unloadChunk($X, $Z, $oldLevel);
-				}
-			}
+			if($oldLevel !== null) {
+                foreach ($this->usedChunks as $index => $d) {
+                    Level::getXZ($index, $X, $Z);
+                    $this->unloadChunk($X, $Z, $oldLevel);
+                }
+            }
 
 			$this->usedChunks = [];
 			$this->loadQueue = [];
@@ -1237,7 +1237,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	protected function unloadChunk(int $x, int $z, Level $level = null){
 		$level = $level ?? $this->level;
-		$index = ((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF);
+        $index = Level::chunkHash($x, $z);
 		if(isset($this->usedChunks[$index])){
 			foreach($level->getChunkEntities($x, $z) as $entity){
 				if($entity !== $this){
@@ -1256,7 +1256,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return;
 		}
 
-		$this->usedChunks[((($x) & 0xFFFFFFFF) << 32) | (( $z) & 0xFFFFFFFF)] = true;
+		$this->usedChunks[Level::chunkHash($x, $z)] = true;
 		$this->dataPacket($payload);
 
 		if($this->spawned){
@@ -1278,38 +1278,36 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	protected function sendNextChunk(){
-		if(!$this->isConnected()){
-			return;
-		}
+        if (!$this->isConnected()) {
+            return;
+        }
 
-		Timings::$playerChunkSendTimer->startTiming();
+        Timings::$playerChunkSendTimer->startTiming();
 
-		$count = 0;
-		foreach($this->loadQueue as $index => $distance){
-			if($count >= $this->chunksPerTick){
-				break;
-			}
+        $count = 0;
+        foreach ($this->loadQueue as $index => $distance) {
+            if ($count >= $this->chunksPerTick) {
+                break;
+            }
 
-			$X = null;
-			$Z = null;
-			 $X = ($index >> 32);  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;
-			assert(is_int($X) and is_int($Z));
+            Level::getXZ($index, $X, $Z);
+            assert(is_int($X) and is_int($Z));
 
-			++$count;
+            ++$count;
 
-			$this->usedChunks[$index] = false;
-			$this->level->registerChunkLoader($this, $X, $Z, false);
+            $this->usedChunks[$index] = false;
+            $this->level->registerChunkLoader($this, $X, $Z, false);
 
-			if(!$this->level->populateChunk($X, $Z)){
-				continue;
-			}
+            if (!$this->level->populateChunk($X, $Z)) {
+                continue;
+            }
 
-			unset($this->loadQueue[$index]);
-			$this->level->requestChunk($X, $Z, $this);
-		}
+            unset($this->loadQueue[$index]);
+            $this->level->requestChunk($X, $Z, $this);
+        }
 
-		Timings::$playerChunkSendTimer->stopTiming();
-	}
+        Timings::$playerChunkSendTimer->stopTiming();
+    }
 
 	public function doFirstSpawn(){
 		if($this->spawned){
@@ -1341,17 +1339,18 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->noDamageTicks = 60;
 
-		foreach($this->usedChunks as $index => $hasSent){
-			if(!$hasSent){
-				continue; //this will happen when the chunk is ready to send
-			}
-			 $chunkX = ($index >> 32);  $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;
-			foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
-				if($entity !== $this and !$entity->isClosed() and $entity->isAlive() and !$entity->isFlaggedForDespawn()){
-					$entity->spawnTo($this);
-				}
-			}
-		}
+		foreach($this->usedChunks as $index => $hasSent) {
+            if (!$hasSent) {
+                continue; //this will happen when the chunk is ready to send
+            }
+
+            Level::getXZ($index, $chunkX, $chunkZ);
+            foreach ($this->level->getChunkEntities($chunkX, $chunkZ) as $entity) {
+                if ($entity !== $this and !$entity->isClosed() and $entity->isAlive() and !$entity->isFlaggedForDespawn()) {
+                    $entity->spawnTo($this);
+                }
+            }
+        }
 
 		$this->spawnToAll();
 
@@ -1375,102 +1374,81 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->dataPacket($pk);
 	}
 
-	protected function orderChunks() : void{
-		if(!$this->isConnected() or $this->viewDistance === -1){
-			return;
-		}
+    protected function selectChunks(): \Generator
+    {
+        $radius = $this->server->getAllowedViewDistance($this->viewDistance);
+        $radiusSquared = $radius ** 2;
 
-		Timings::$playerChunkOrderTimer->startTiming();
+        $centerX = $this->getFloorX() >> 4;
+        $centerZ = $this->getFloorZ() >> 4;
 
-		$radius = $this->server->getAllowedViewDistance($this->viewDistance);
-		$radiusSquared = $radius ** 2;
+        for ($x = 0; $x < $radius; ++$x) {
+            for ($z = 0; $z <= $x; ++$z) {
+                if (($x ** 2 + $z ** 2) > $radiusSquared) {
+                    break; //skip to next band
+                }
 
-		$newOrder = [];
-		$unloadChunks = $this->usedChunks;
+                //If the chunk is in the radius, others at the same offsets in different quadrants are also guaranteed to be.
 
-		$centerX = $this->getFloorX() >> 4;
-		$centerZ = $this->getFloorZ() >> 4;
+                /* Top right quadrant */
+                yield Level::chunkHash($centerX + $x, $centerZ + $z);
+                /* Top left quadrant */
+                yield Level::chunkHash($centerX - $x - 1, $centerZ + $z);
+                /* Bottom right quadrant */
+                yield Level::chunkHash($centerX + $x, $centerZ - $z - 1);
+                /* Bottom left quadrant */
+                yield Level::chunkHash($centerX - $x - 1, $centerZ - $z - 1);
 
-		for($x = 0; $x < $radius; ++$x){
-			for($z = 0; $z <= $x; ++$z){
-				if(($x ** 2 + $z ** 2) > $radiusSquared){
-					break; //skip to next band
-				}
+                if ($x !== $z) {
+                    /* Top right quadrant mirror */
+                    yield Level::chunkHash($centerX + $z, $centerZ + $x);
+                    /* Top left quadrant mirror */
+                    yield Level::chunkHash($centerX - $z - 1, $centerZ + $x);
+                    /* Bottom right quadrant mirror */
+                    yield Level::chunkHash($centerX + $z, $centerZ - $x - 1);
+                    /* Bottom left quadrant mirror */
+                    yield Level::chunkHash($centerX - $z - 1, $centerZ - $x - 1);
+                }
+            }
+        }
+    }
 
-				//If the chunk is in the radius, others at the same offsets in different quadrants are also guaranteed to be.
+    protected function orderChunks() : void{
+        if(!$this->isConnected() or $this->viewDistance === -1){
+            return;
+        }
 
-				/* Top right quadrant */
-				if(!isset($this->usedChunks[$index = ((($centerX + $x) & 0xFFFFFFFF) << 32) | (( $centerZ + $z) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-					$newOrder[$index] = true;
-				}
-				unset($unloadChunks[$index]);
+        Timings::$playerChunkOrderTimer->startTiming();
 
-				/* Top left quadrant */
-				if(!isset($this->usedChunks[$index = ((($centerX - $x - 1) & 0xFFFFFFFF) << 32) | (( $centerZ + $z) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-					$newOrder[$index] = true;
-				}
-				unset($unloadChunks[$index]);
+        $newOrder = [];
+        $unloadChunks = $this->usedChunks;
 
-				/* Bottom right quadrant */
-				if(!isset($this->usedChunks[$index = ((($centerX + $x) & 0xFFFFFFFF) << 32) | (( $centerZ - $z - 1) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-					$newOrder[$index] = true;
-				}
-				unset($unloadChunks[$index]);
+        foreach ($this->selectChunks() as $hash) {
+            if (!isset($this->usedChunks[$hash]) or $this->usedChunks[$hash] === false) {
+                $newOrder[$hash] = true;
+            }
+            unset($unloadChunks[$hash]);
+        }
 
+        foreach ($unloadChunks as $index => $bool) {
+            Level::getXZ($index, $X, $Z);
+            $this->unloadChunk($X, $Z);
+        }
 
-				/* Bottom left quadrant */
-				if(!isset($this->usedChunks[$index = ((($centerX - $x - 1) & 0xFFFFFFFF) << 32) | (( $centerZ - $z - 1) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-					$newOrder[$index] = true;
-				}
-				unset($unloadChunks[$index]);
+        $this->loadQueue = $newOrder;
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
+            if(!empty($this->loadQueue) or !empty($unloadChunks)){
+                $pk = new NetworkChunkPublisherUpdatePacket();
+                $pk->x = $this->getFloorX();
+                $pk->y = $this->getFloorY();
+                $pk->z = $this->getFloorZ();
+                $pk->radius = $this->viewDistance * 16; //blocks, not chunks >.>
+                $this->sendDataPacket($pk);
+            }
+        }
 
-				if($x !== $z){
-					/* Top right quadrant mirror */
-					if(!isset($this->usedChunks[$index = ((($centerX + $z) & 0xFFFFFFFF) << 32) | (( $centerZ + $x) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-						$newOrder[$index] = true;
-					}
-					unset($unloadChunks[$index]);
-
-					/* Top left quadrant mirror */
-					if(!isset($this->usedChunks[$index = ((($centerX - $z - 1) & 0xFFFFFFFF) << 32) | (( $centerZ + $x) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-						$newOrder[$index] = true;
-					}
-					unset($unloadChunks[$index]);
-
-					/* Bottom right quadrant mirror */
-					if(!isset($this->usedChunks[$index = ((($centerX + $z) & 0xFFFFFFFF) << 32) | (( $centerZ - $x - 1) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-						$newOrder[$index] = true;
-					}
-					unset($unloadChunks[$index]);
-
-					/* Bottom left quadrant mirror */
-					if(!isset($this->usedChunks[$index = ((($centerX - $z - 1) & 0xFFFFFFFF) << 32) | (( $centerZ - $x - 1) & 0xFFFFFFFF)]) or $this->usedChunks[$index] === false){
-						$newOrder[$index] = true;
-					}
-					unset($unloadChunks[$index]);
-				}
-			}
-		}
-
-		foreach($unloadChunks as $index => $bool){
-			 $X = ($index >> 32);  $Z = ($index & 0xFFFFFFFF) << 32 >> 32;
-			$this->unloadChunk($X, $Z);
-		}
-
-		$this->loadQueue = $newOrder;
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
-	    	if(!empty($this->loadQueue) or !empty($unloadChunks)){
-		    	$pk = new NetworkChunkPublisherUpdatePacket();
-		    	$pk->x = $this->getFloorX();
-		    	$pk->y = $this->getFloorY();
-		    	$pk->z = $this->getFloorZ();
-		    	$pk->radius = $this->viewDistance * 16; //blocks, not chunks >.>
-		    	$this->dataPacket($pk);
-	    	}
-		}
-
-		Timings::$playerChunkOrderTimer->stopTiming();
-	}
+        Timings::$playerChunkOrderTimer->stopTiming();
+    }
 
 	/**
 	 * @return Position
@@ -2840,7 +2818,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		/** @var float[] $pos */
 		$pos = $this->namedtag->getListTag("Pos")->getAllValues();
 		$this->level->registerChunkLoader($this, ((int) floor($pos[0])) >> 4, ((int) floor($pos[2])) >> 4, true);
-		$this->usedChunks[(((((int) floor($pos[0])) >> 4) & 0xFFFFFFFF) << 32) | (( ((int) floor($pos[2])) >> 4) & 0xFFFFFFFF)] = false;
+		$this->usedChunks[Level::chunkHash((((int) floor($pos[0])) >> 4), (((int) floor($pos[2])) >> 4))] = false;
 
 		parent::__construct($this->level, $this->namedtag);
 		$ev = new PlayerLoginEvent($this, "Plugin reason");
@@ -5034,16 +5012,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->save();
 			}
 
-			if($this->isValid()){
-				foreach($this->usedChunks as $index => $d){
-					 $chunkX = ($index >> 32);  $chunkZ = ($index & 0xFFFFFFFF) << 32 >> 32;
-					$this->level->unregisterChunkLoader($this, $chunkX, $chunkZ);
-					foreach($this->level->getChunkEntities($chunkX, $chunkZ) as $entity){
-						$entity->despawnFrom($this);
-					}
-					unset($this->usedChunks[$index]);
-				}
-			}
+			if($this->isValid()) {
+                foreach ($this->usedChunks as $index => $d) {
+                    Level::getXZ($index, $chunkX, $chunkZ);
+                    $this->level->unregisterChunkLoader($this, $chunkX, $chunkZ);
+                    foreach ($this->level->getChunkEntities($chunkX, $chunkZ) as $entity) {
+                        $entity->despawnFrom($this);
+                    }
+                    unset($this->usedChunks[$index]);
+                }
+            }
 			$this->usedChunks = [];
 			$this->loadQueue = [];
 
