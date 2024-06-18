@@ -71,6 +71,10 @@ class Piston extends RedstoneSource{
 		return $this->meta & 0x07; // first 3 bits is face
 	}
 
+    public function isSolid() : bool{
+        return true;
+    }
+
 	public function activate(array $ignore = []){
 		if($this->moveNextBlocks()){
 			$this->getLevel()->addSound(new PistonInSound($this));
