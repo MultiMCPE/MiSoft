@@ -26,10 +26,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
-use function pack;
-use function unpack;
 
 class MovePlayerPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_PLAYER_PACKET;

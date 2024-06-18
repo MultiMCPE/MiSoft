@@ -24,8 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use function pack;
-use function unpack;
 
 class TransferPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TRANSFER_PACKET;

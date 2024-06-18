@@ -34,12 +34,10 @@ use pocketmine\utils\Utils;
 use ReflectionClass;
 use UnexpectedValueException;
 use function bin2hex;
-use function chr;
 use function get_class;
 use function is_object;
 use function is_string;
 use function method_exists;
-use function ord;
 
 abstract class DataPacket extends NetworkBinaryStream{
 

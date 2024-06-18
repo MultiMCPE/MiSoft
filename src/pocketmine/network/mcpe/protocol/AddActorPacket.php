@@ -33,8 +33,6 @@ use pocketmine\network\mcpe\protocol\types\EntityLink;
 use UnexpectedValueException;
 use function array_search;
 use function count;
-use function pack;
-use function unpack;
 
 class AddActorPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_ACTOR_PACKET;

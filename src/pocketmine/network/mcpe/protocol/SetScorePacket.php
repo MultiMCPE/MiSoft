@@ -27,11 +27,7 @@ use InvalidArgumentException;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ScorePacketEntry;
 use UnexpectedValueException;
-use function chr;
 use function count;
-use function ord;
-use function pack;
-use function unpack;
 
 class SetScorePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_SCORE_PACKET;

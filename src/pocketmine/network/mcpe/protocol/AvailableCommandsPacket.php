@@ -24,9 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use InvalidStateException;
+
+use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\multiversion\CommandListJson;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
-use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ChainedSubCommandData;
 use pocketmine\network\mcpe\protocol\types\ChainedSubCommandValue;
 use pocketmine\network\mcpe\protocol\types\CommandData;
@@ -418,16 +419,16 @@ class AvailableCommandsPacket extends DataPacket{
 		$this->putString($data->commandName);
 		$this->putString($data->commandDescription);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_448){
-	    	($this->buffer .= chr($data->flags));
+            $this->putByte($data->flags);
 		}else{
 		    $this->putLShort($data->flags);
 		}
-		($this->buffer .= chr($data->permission));
+        $this->putByte($data->permission);
 
 		if($data->aliases !== null){
             $this->putLInt($enumIndexes[$data->aliases->enumName] ?? -1);
 		}else{
-            $this->putLInt(1);
+            $this->putLInt(-1);
 		}
 
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_594){

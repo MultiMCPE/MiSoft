@@ -24,10 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
-use function pack;
-use function unpack;
 
 class CameraShakePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CAMERA_SHAKE_PACKET;

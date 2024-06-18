@@ -26,8 +26,6 @@ namespace pocketmine\network\mcpe\protocol;
 use InvalidArgumentException;
 use pocketmine\network\mcpe\NetworkSession;
 use UnexpectedValueException;
-use function chr;
-use function ord;
 
 class BookEditPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BOOK_EDIT_PACKET;

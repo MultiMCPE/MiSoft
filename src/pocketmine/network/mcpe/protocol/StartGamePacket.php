@@ -44,16 +44,13 @@ use pocketmine\network\mcpe\protocol\types\NetworkPermissions;
 use pocketmine\network\mcpe\protocol\types\PlayerMovementSettings;
 use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
 use pocketmine\network\mcpe\protocol\types\SpawnSettings;
-use pocketmine\utils\Binary;
 use pocketmine\utils\UUID;
 use UnexpectedValueException;
-use function chr;
 use function count;
 use function file_get_contents;
 use function json_decode;
 use function ord;
 use function pack;
-use function unpack;
 use const pocketmine\RESOURCE_PATH;
 
 class StartGamePacket extends DataPacket{

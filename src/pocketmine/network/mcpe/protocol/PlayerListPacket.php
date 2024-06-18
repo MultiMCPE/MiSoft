@@ -27,11 +27,7 @@ use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 use pocketmine\network\mcpe\protocol\types\SerializedSkin;
-use function chr;
 use function count;
-use function ord;
-use function pack;
-use function unpack;
 
 class PlayerListPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_LIST_PACKET;

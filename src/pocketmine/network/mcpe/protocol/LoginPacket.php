@@ -33,8 +33,6 @@ use Throwable;
 use function get_class;
 use function in_array;
 use function json_decode;
-use function ord;
-use function unpack;
 use function zlib_decode;
 
 class LoginPacket extends DataPacket{

@@ -26,9 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use UnexpectedValueException;
-use function chr;
 use function count;
-use function ord;
 
 class TextPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TEXT_PACKET;

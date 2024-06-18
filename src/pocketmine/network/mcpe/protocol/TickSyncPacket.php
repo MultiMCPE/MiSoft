@@ -24,8 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\utils\Binary;
-use function pack;
 
 class TickSyncPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::TICK_SYNC_PACKET;

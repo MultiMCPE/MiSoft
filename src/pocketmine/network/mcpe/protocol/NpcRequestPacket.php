@@ -24,8 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
 
 class NpcRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NPC_REQUEST_PACKET;

@@ -31,11 +31,8 @@ use pocketmine\network\mcpe\protocol\types\DeviceOS;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\network\mcpe\protocol\types\GameMode;
-use pocketmine\utils\Binary;
 use pocketmine\utils\UUID;
 use function count;
-use function pack;
-use function unpack;
 
 class AddPlayerPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ADD_PLAYER_PACKET;

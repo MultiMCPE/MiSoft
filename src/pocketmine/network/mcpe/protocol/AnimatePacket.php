@@ -25,8 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 
 use pocketmine\network\mcpe\NetworkSession;
-use function pack;
-use function unpack;
 
 class AnimatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ANIMATE_PACKET;

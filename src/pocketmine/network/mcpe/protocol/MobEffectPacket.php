@@ -25,8 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
 
 class MobEffectPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOB_EFFECT_PACKET;
