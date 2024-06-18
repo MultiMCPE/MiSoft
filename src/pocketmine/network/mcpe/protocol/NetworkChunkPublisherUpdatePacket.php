@@ -49,7 +49,7 @@ class NetworkChunkPublisherUpdatePacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 			$count = $this->getLInt();
 			if($count > self::MAX_SAVED_CHUNKS){
-				throw new PacketDecodeException("Expected at most " . self::MAX_SAVED_CHUNKS . " saved chunks, got " . $count);
+				throw new \InvalidArgumentException("Expected at most " . self::MAX_SAVED_CHUNKS . " saved chunks, got " . $count);
 			}
 			for($i = 0, $this->savedChunks = []; $i < $count; $i++){
 		    	$this->savedChunks[] = ChunkPosition::read($this);

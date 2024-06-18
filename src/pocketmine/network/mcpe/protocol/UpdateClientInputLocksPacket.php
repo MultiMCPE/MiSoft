@@ -17,7 +17,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 
-class UpdateClientInputLocksPacket extends DataPacket/* implements ClientboundPacket*/{
+class UpdateClientInputLocksPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_CLIENT_INPUT_LOCKS_PACKET;
 
 	private int $flags;
@@ -34,13 +34,13 @@ class UpdateClientInputLocksPacket extends DataPacket/* implements ClientboundPa
 	}
 
 	protected function decodePayload() : void{
-		$this->flags = $in->getUnsignedVarInt();
-		$this->position = $in->getVector3();
+		$this->flags = $this->getUnsignedVarInt();
+		$this->position = $this->getVector3();
 	}
 
 	protected function encodePayload() : void{
-		$out->putUnsignedVarInt($this->flags);
-		$out->putVector3($this->position);
+        $this->putUnsignedVarInt($this->flags);
+        $this->putVector3($this->position);
 	}
 
 	public function handle(NetworkSession $session) : bool{

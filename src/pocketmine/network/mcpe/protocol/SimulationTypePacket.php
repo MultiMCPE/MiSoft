@@ -27,7 +27,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class SimulationTypePacket extends DataPacket/* implements ClientboundPacket*/{
+class SimulationTypePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SIMULATION_TYPE_PACKET;
 
 	public const GAME = 0;
@@ -52,7 +52,7 @@ class SimulationTypePacket extends DataPacket/* implements ClientboundPacket*/{
 		$this->putByte($this->type);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleSimulationType($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleSimulationType($this);
 	}
 }

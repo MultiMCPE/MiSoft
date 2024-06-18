@@ -27,7 +27,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function ord;
 
-class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
+class LecternUpdatePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LECTERN_UPDATE_PACKET;
 
 	/** @var int */
@@ -44,24 +44,24 @@ class LecternUpdatePacket extends DataPacket/* implements ServerboundPacket*/{
 	public $dropBook;
 
 	protected function decodePayload() : void{
-		$this->page = (ord($this->get(1)));
+		$this->page = $this->getByte();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	$this->totalPages = (ord($this->get(1)));
+	    	$this->totalPages = $this->getByte();
     	}
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_662){
-	    	$this->dropBook = (($this->get(1) !== "\x00"));
+	    	$this->dropBook = $this->getBool();
 		}
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= chr($this->page));
+        $this->putByte($this->page);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	($this->buffer .= chr($this->totalPages));
+            $this->putByte($this->totalPages);
 		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_662){
-	    	($this->buffer .= ($this->dropBook ? "\x01" : "\x00"));
+            $this->putBool($this->dropBook);
 		}
 	}
 

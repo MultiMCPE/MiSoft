@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class ItemStackResponsePacket extends DataPacket/* implements ClientboundPacket*/{
+class ItemStackResponsePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ITEM_STACK_RESPONSE_PACKET;
 
 	public function mayHaveUnreadBytes() : bool{
@@ -38,7 +38,7 @@ class ItemStackResponsePacket extends DataPacket/* implements ClientboundPacket*
 	protected function encodePayload() : void{
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleItemStackResponse($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleItemStackResponse($this);
 	}
 }

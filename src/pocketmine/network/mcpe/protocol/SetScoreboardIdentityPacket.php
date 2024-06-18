@@ -41,7 +41,7 @@ class SetScoreboardIdentityPacket extends DataPacket{
 	public $entries = [];
 
 	protected function decodePayload(){
-		$this->type = (ord($this->get(1)));
+		$this->type = $this->getByte();
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$entry = new ScoreboardIdentityPacketEntry();
 			$entry->scoreboardId = $this->getVarLong();
@@ -54,7 +54,7 @@ class SetScoreboardIdentityPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->type));
+        $this->putByte($this->type);
 		$this->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			$this->putVarLong($entry->scoreboardId);

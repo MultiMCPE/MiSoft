@@ -25,7 +25,7 @@ use function is_float;
  * As of 1.19.0, the vanilla server only handles this for flying/noclip, despite there being a large range of additional
  * abilities which could be requested, and the packet supporting the use of float values.
  */
-class RequestAbilityPacket extends DataPacket/* implements ServerboundPacket*/{
+class RequestAbilityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::REQUEST_ABILITY_PACKET;
 
 	private const VALUE_TYPE_BOOL = 1;

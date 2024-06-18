@@ -36,16 +36,16 @@ class NetworkStackLatencyPacket extends DataPacket{
 	public $needResponse;
 
 	protected function decodePayload(){
-		$this->timestamp = (Binary::readLLong($this->get(8)));
+		$this->timestamp = $this->getLLong();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
-	    	$this->needResponse = (($this->get(1) !== "\x00"));
+	    	$this->needResponse = $this->getBool();
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (pack("VV", $this->timestamp & 0xFFFFFFFF, $this->timestamp >> 32)));
+        $this->putLLong($this->timestamp);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
-	    	($this->buffer .= ($this->needResponse ? "\x01" : "\x00"));
+            $this->putBool($this->needResponse);
 		}
 	}
 

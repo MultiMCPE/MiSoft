@@ -29,7 +29,7 @@ use function count;
 use function pack;
 use function unpack;
 
-class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
+class AnimateEntityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ANIMATE_ENTITY_PACKET;
 
 	/** @var string */
@@ -92,7 +92,7 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 			$this->stopExpressionVersion = $this->getLInt();
 		}
 		$this->controller = $this->getString();
-		$this->blendOutTime = ((unpack("g", $this->get(4))[1]));
+		$this->blendOutTime = $this->getLFloat();
 		$this->actorRuntimeIds = [];
 		$len = $this->getUnsignedVarInt();
 		if($len > 128){
@@ -111,14 +111,14 @@ class AnimateEntityPacket extends DataPacket/* implements ClientboundPacket*/{
 			$this->putLInt($this->stopExpressionVersion);
 		}
 		$this->putString($this->controller);
-		($this->buffer .= (pack("g", $this->blendOutTime)));
+        $this->putLFloat($this->blendOutTime);
 		$this->putUnsignedVarInt(count($this->actorRuntimeIds));
 		foreach($this->actorRuntimeIds as $id){
 			$this->putEntityRuntimeId($id);
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleAnimateEntity($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAnimateEntity($this);
 	}
 }

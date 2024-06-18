@@ -36,14 +36,14 @@ class SetTimePacket extends DataPacket{
 	protected function decodePayload(){
 		$this->time = $this->getVarInt();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			$this->started = (($this->get(1) !== "\x00"));
+			$this->started = $this->getBool();
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->time);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			($this->buffer .= ($this->started ? "\x01" : "\x00"));
+            $this->putBool($this->started);
 		}
 	}
 

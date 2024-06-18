@@ -58,7 +58,7 @@ class SetSpawnPositionPacket extends DataPacket{
 	    	$this->dimension = $this->getVarInt();
 	    	$this->getBlockPosition($this->x2, $this->y2, $this->z2);
 		}else{
-	    	$this->spawnForced = (($this->get(1) !== "\x00"));
+	    	$this->spawnForced = $this->getBool();
 		}
 	}
 
@@ -69,7 +69,7 @@ class SetSpawnPositionPacket extends DataPacket{
 	    	$this->putVarInt($this->dimension);
 	    	$this->putBlockPosition($this->x2, $this->y2, $this->z2);
 		}else{
-	    	($this->buffer .= ($this->spawnForced ? "\x01" : "\x00"));
+            $this->putBool($this->spawnForced);
 		}
 	}
 

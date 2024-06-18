@@ -41,7 +41,7 @@ class ShowStoreOfferPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_630){
 	    	$this->redirectType = ShowStoreOfferRedirectType::fromPacket($this->getByte());
 		}else{
-	    	$this->showAll = (($this->get(1) !== "\x00"));
+	    	$this->showAll = $this->getBool();
 		}
 	}
 
@@ -50,7 +50,7 @@ class ShowStoreOfferPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_630){
 	    	$this->putByte($this->redirectType->value);
 		}else{
-	    	($this->buffer .= ($this->showAll ? "\x01" : "\x00"));
+            $this->putBool($this->showAll);
 		}
 	}
 

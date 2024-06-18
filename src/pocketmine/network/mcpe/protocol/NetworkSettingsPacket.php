@@ -28,7 +28,7 @@ use pocketmine\network\mcpe\protocol\types\CompressionAlgorithm;
 use function pack;
 use function unpack;
 
-class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
+class NetworkSettingsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::NETWORK_SETTINGS_PACKET;
 
 	public const COMPRESS_NOTHING = 0;
@@ -75,7 +75,7 @@ class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 	public function getClientThrottleScalar() : float{ return $this->clientThrottleScalar; }
 
 	protected function decodePayload() : void{
-		$this->compressionThreshold = ((unpack("v", $this->get(2))[1]));
+		$this->compressionThreshold = $this->getLShort();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553){
 	    	$this->compressionAlgorithm = $this->getLShort();
 	    	$this->enableClientThrottling = $this->getBool();
@@ -85,7 +85,7 @@ class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (pack("v", $this->compressionThreshold)));
+        $this->putLShort($this->compressionThreshold);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553){
 	    	$this->putLShort($this->compressionAlgorithm);
 	    	$this->putBool($this->enableClientThrottling);
@@ -94,7 +94,7 @@ class NetworkSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleNetworkSettings($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleNetworkSettings($this);
 	}
 }

@@ -35,14 +35,11 @@ use function zlib_decode;
 use function zlib_encode;
 use const ZLIB_ENCODING_DEFLATE;
 
-
 class OldBatchPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::BATCH_PACKET;
 
-	/** @var string */
-	public $payload = "";
-	/** @var int */
-	protected $compressionLevel = 7;
+	public string $payload = "";
+	protected int $compressionLevel = 7;
 
 	public function canBeBatched() : bool{
 		return true;
@@ -60,10 +57,7 @@ class OldBatchPacket extends DataPacket{
 		$this->putString(zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel));
 	}
 
-	/**
-	 * @param DataPacket $packet
-	 */
-	public function addPacket(DataPacket $packet){
+	public function addPacket(DataPacket $packet) : void{
 		if(!$packet->canBeBatched()){
 			throw new InvalidArgumentException(get_class($packet) . " cannot be put inside a BatchPacket");
 		}
@@ -92,7 +86,7 @@ class OldBatchPacket extends DataPacket{
 		return $this->compressionLevel;
 	}
 
-	public function setCompressionLevel(int $level){
+	public function setCompressionLevel(int $level) : void{
 		$this->compressionLevel = $level;
 	}
 

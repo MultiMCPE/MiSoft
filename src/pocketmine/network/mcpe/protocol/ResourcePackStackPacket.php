@@ -51,7 +51,7 @@ class ResourcePackStackPacket extends DataPacket{
 	public $useVanillaEditorPacks;
 
 	protected function decodePayload(){
-		$this->mustAccept = (($this->get(1) !== "\x00"));
+		$this->mustAccept = $this->getBool();
 		$behaviorPackCount = $this->getUnsignedVarInt();
 		while($behaviorPackCount-- > 0){
 			$this->getString();
@@ -72,14 +72,14 @@ class ResourcePackStackPacket extends DataPacket{
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
 		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
-	        	$this->isExperimental = (($this->get(1) !== "\x00"));
+	        	$this->isExperimental = $this->getBool();
 		    }
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	        	$this->baseGameVersion = $this->getString();
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	        	    $this->experiments = Experiments::read($this);
 					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
-				    	$this->useVanillaEditorPacks = (($this->get(1) !== "\x00"));
+				    	$this->useVanillaEditorPacks = $this->getBool();
 					}
 	        	}
 	    	}
@@ -87,7 +87,7 @@ class ResourcePackStackPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= ($this->mustAccept ? "\x01" : "\x00"));
+        $this->putBool($this->mustAccept);
 
 		$this->putUnsignedVarInt(count($this->behaviorPackStack));
 		foreach($this->behaviorPackStack as $entry){
@@ -109,14 +109,14 @@ class ResourcePackStackPacket extends DataPacket{
 
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_290) {
 		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
-	        	($this->buffer .= ($this->isExperimental ? "\x01" : "\x00"));
+                $this->putBool($this->isExperimental);
 		    }
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 	        	$this->putString($this->baseGameVersion);
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	        	    $this->experiments->write($this);
 					if($this->getProtocol() >= ProtocolInfo::PROTOCOL_671){
-						($this->buffer .= ($this->useVanillaEditorPacks ? "\x01" : "\x00"));
+                        $this->putBool($this->useVanillaEditorPacks);
 					}
 	        	}
 	    	}

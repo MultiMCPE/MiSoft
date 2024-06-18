@@ -44,7 +44,7 @@ class CommandRequestPacket extends DataPacket{
 		$this->command = $this->getString();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_140){
 	    	$this->originData = $this->getCommandOriginData();
-	    	$this->isInternal = (($this->get(1) !== "\x00"));
+	    	$this->isInternal = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
 	    	    $this->version = $this->getVarInt();
 	    	}
@@ -57,7 +57,7 @@ class CommandRequestPacket extends DataPacket{
 		$this->putString($this->command);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_140){
 	    	$this->putCommandOriginData($this->originData);
-	    	($this->buffer .= ($this->isInternal ? "\x01" : "\x00"));
+            $this->putBool($this->isInternal);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
 	    	    $this->putVarInt($this->version);
 	    	}

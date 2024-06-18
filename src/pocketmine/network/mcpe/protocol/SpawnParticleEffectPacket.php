@@ -44,7 +44,7 @@ class SpawnParticleEffectPacket extends DataPacket{
 	public $molangVariablesJson = "";
 
 	protected function decodePayload(){
-		$this->dimensionId = (ord($this->get(1)));
+		$this->dimensionId = $this->getByte();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	    	$this->entityUniqueId = $this->getEntityUniqueId();
 		}
@@ -56,7 +56,7 @@ class SpawnParticleEffectPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->dimensionId));
+        $this->putByte($this->dimensionId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
 	    	$this->putEntityUniqueId($this->entityUniqueId);
 		}

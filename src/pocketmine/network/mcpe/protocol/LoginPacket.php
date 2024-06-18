@@ -40,8 +40,6 @@ use function zlib_decode;
 class LoginPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
 
-	public const EDITION_POCKET = 0;
-
 	/** @var string */
 	public $username;
 	/** @var int */
@@ -88,12 +86,12 @@ class LoginPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-        if (((unpack("N", $this->get(4))[1] << 32 >> 32)) === 0x0) {
+        if ($this->getInt() === 0x0) {
             $this->setOffset($this->getOffset() - 0x2);
         } else {
             $this->setOffset($this->getOffset() - 0x4);
         }
-		$this->protocol = ((unpack("N", $this->get(4))[1] << 32 >> 32));
+		$this->protocol = $this->getInt();
 
         if (!in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)) {
             $this->isValidProtocol = false;
@@ -102,7 +100,7 @@ class LoginPacket extends DataPacket{
         }
 
         if ($this->protocol < ProtocolInfo::PROTOCOL_130) {
-            $this->gameEdition = (ord($this->get(1)));
+            $this->gameEdition = $this->getByte();
         }
 
 		try{

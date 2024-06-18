@@ -45,24 +45,24 @@ class ResourcePackChunkDataPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->packId = $this->getString();
-		$this->chunkIndex = ((unpack("V", $this->get(4))[1] << 32 >> 32));
-		$this->progress = (Binary::readLLong($this->get(8)));
+		$this->chunkIndex = $this->getLInt();
+		$this->progress = $this->getLLong();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    $this->data = $this->getString();
 		}else{
-	    	$this->data = $this->get(((unpack("V", $this->get(4))[1] << 32 >> 32)));
+	    	$this->data = $this->get($this->getLInt());
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->packId);
-		($this->buffer .= (pack("V", $this->chunkIndex)));
-		($this->buffer .= (pack("VV", $this->progress & 0xFFFFFFFF, $this->progress >> 32)));
+        $this->putLInt($this->chunkIndex);
+        $this->putLLong($this->progress);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 		    $this->putString($this->data);
 		}else{
-	    	($this->buffer .= (pack("V", strlen($this->data))));
-	    	($this->buffer .= $this->data);
+            $this->putLInt(strlen($this->data));
+            $this->put($this->data);
 		}
 	}
 

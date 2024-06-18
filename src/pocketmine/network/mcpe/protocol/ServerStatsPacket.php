@@ -20,7 +20,7 @@ use pocketmine\network\mcpe\NetworkSession;
  * Relays server performance statistics to the client.
  * It's currently unclear what the purpose of this packet is - probably to power some fancy debug screen.
  */
-class ServerStatsPacket extends DataPacket/* implements ClientboundPacket*/{
+class ServerStatsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SERVER_STATS_PACKET;
 
 	private float $serverTime;

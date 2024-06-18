@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class PacketViolationWarningPacket extends DataPacket/* implements ServerboundPacket*/{
+class PacketViolationWarningPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PACKET_VIOLATION_WARNING_PACKET;
 
 	public const TYPE_MALFORMED = 0;
@@ -76,7 +76,7 @@ class PacketViolationWarningPacket extends DataPacket/* implements ServerboundPa
 		$this->putString($this->message);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handlePacketViolationWarning($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePacketViolationWarning($this);
 	}
 }

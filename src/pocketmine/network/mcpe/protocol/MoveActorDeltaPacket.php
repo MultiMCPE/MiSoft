@@ -59,7 +59,7 @@ class MoveActorDeltaPacket extends DataPacket{
 	private function maybeReadCoord(int $flag) {
 		if($this->flags & $flag){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        return ((unpack("g", $this->get(4))[1]));
+		        return $this->getLFloat();
 		    }else{
 		    	return $this->getVarInt();
 		    }
@@ -77,9 +77,9 @@ class MoveActorDeltaPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-		    $this->flags = ((unpack("v", $this->get(2))[1]));
+		    $this->flags = $this->getLShort();
 		}else{
-	    	$this->flags = (ord($this->get(1)));
+	    	$this->flags = $this->getByte();
 		}
 		$this->xPos = $this->maybeReadCoord(self::FLAG_HAS_X);
 		$this->yPos = $this->maybeReadCoord(self::FLAG_HAS_Y);
@@ -92,7 +92,7 @@ class MoveActorDeltaPacket extends DataPacket{
 	private function maybeWriteCoord(int $flag, $val) : void{
 		if($this->flags & $flag){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        ($this->buffer .= (pack("g", $val)));
+                $this->putLFloat($val);
 		    }else{
 		    	$this->putVarInt($val);
 		    }
@@ -108,9 +108,9 @@ class MoveActorDeltaPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-		    ($this->buffer .= (pack("v", $this->flags)));
+            $this->putLShort($this->flags);
 		}else{
-	    	($this->buffer .= chr($this->flags));
+            $this->putByte($this->flags);
 		}
 		$this->maybeWriteCoord(self::FLAG_HAS_X, $this->xPos);
 		$this->maybeWriteCoord(self::FLAG_HAS_Y, $this->yPos);

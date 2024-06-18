@@ -45,7 +45,7 @@ class PlayerHotbarPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->selectedHotbarSlot = $this->getUnsignedVarInt();
-		$this->windowId = (ord($this->get(1)));
+		$this->windowId = $this->getByte();
 		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
             $slots = $this->getUnsignedVarInt();
             for ($slot = 0; $slot < $slots; ++$slot) {
@@ -53,13 +53,13 @@ class PlayerHotbarPacket extends DataPacket{
             }
 		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_135) {
-	    	$this->selectHotbarSlot = (($this->get(1) !== "\x00"));
+	    	$this->selectHotbarSlot = $this->getBool();
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->selectedHotbarSlot);
-		($this->buffer .= chr($this->windowId));
+        $this->putByte($this->windowId);
 		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
 	    	$this->putUnsignedVarInt(count($this->slots));
 	    	foreach ($this->slots as $slot) {
@@ -67,7 +67,7 @@ class PlayerHotbarPacket extends DataPacket{
 	    	}
 		}
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_135) {
-	    	($this->buffer .= ($this->selectHotbarSlot ? "\x01" : "\x00"));
+            $this->putBool($this->selectHotbarSlot);
 		}
 	}
 

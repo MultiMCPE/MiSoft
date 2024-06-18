@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class CodeBuilderPacket extends DataPacket/* implements ClientboundPacket*/{
+class CodeBuilderPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CODE_BUILDER_PACKET;
 
 	/** @var string */
@@ -50,15 +50,15 @@ class CodeBuilderPacket extends DataPacket/* implements ClientboundPacket*/{
 
 	protected function decodePayload() : void{
 		$this->url = $this->getString();
-		$this->openCodeBuilder = (($this->get(1) !== "\x00"));
+		$this->openCodeBuilder = $this->getBool();
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->url);
-		($this->buffer .= ($this->openCodeBuilder ? "\x01" : "\x00"));
+        $this->putBool($this->openCodeBuilder);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleCodeBuilder($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleCodeBuilder($this);
 	}
 }

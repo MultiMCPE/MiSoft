@@ -46,7 +46,7 @@ class PlayStatusPacket extends DataPacket{
 	public $status;
 
 	protected function decodePayload(){
-		$this->status = ((unpack("N", $this->get(4))[1] << 32 >> 32));
+        $this->status = $this->getInt();
 	}
 
 	public function canBeSentBeforeLogin() : bool{
@@ -54,7 +54,7 @@ class PlayStatusPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= (pack("N", $this->status)));
+        $this->putInt($this->status);
 	}
 
 	public function handle(NetworkSession $session) : bool{

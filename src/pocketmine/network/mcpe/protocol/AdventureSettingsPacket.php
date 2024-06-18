@@ -87,7 +87,7 @@ class AdventureSettingsPacket extends DataPacket{
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
 	        	$this->customFlags = $this->getUnsignedVarInt();
 	    	}
-	    	$this->entityUniqueId = (Binary::readLLong($this->get(8)));
+	    	$this->entityUniqueId = $this->getLLong();
 		}
 	}
 
@@ -100,7 +100,7 @@ class AdventureSettingsPacket extends DataPacket{
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_133) {
 	        	$this->putUnsignedVarInt($this->customFlags);
 	    	}
-	    	($this->buffer .= (pack("VV", $this->entityUniqueId & 0xFFFFFFFF, $this->entityUniqueId >> 32)));
+            $this->putLLong($this->entityUniqueId);
 		}
 	}
 

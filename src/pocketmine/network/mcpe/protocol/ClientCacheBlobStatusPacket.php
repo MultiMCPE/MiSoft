@@ -28,7 +28,7 @@ use pocketmine\utils\Binary;
 use function count;
 use function pack;
 
-class ClientCacheBlobStatusPacket extends DataPacket/* implements ServerboundPacket*/{
+class ClientCacheBlobStatusPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_CACHE_BLOB_STATUS_PACKET;
 
 	/** @var int[] xxHash64 subchunk data hashes */
@@ -71,10 +71,10 @@ class ClientCacheBlobStatusPacket extends DataPacket/* implements ServerboundPac
 		$hitCount = $this->getUnsignedVarInt();
 		$missCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $hitCount; ++$i){
-			$this->hitHashes[] = (Binary::readLLong($this->get(8)));
+			$this->hitHashes[] = $this->getLLong();
 		}
 		for($i = 0; $i < $missCount; ++$i){
-			$this->missHashes[] = (Binary::readLLong($this->get(8)));
+			$this->missHashes[] = $this->getLLong();
 		}
 	}
 
@@ -82,14 +82,14 @@ class ClientCacheBlobStatusPacket extends DataPacket/* implements ServerboundPac
 		$this->putUnsignedVarInt(count($this->hitHashes));
 		$this->putUnsignedVarInt(count($this->missHashes));
 		foreach($this->hitHashes as $hash){
-			($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+            $this->putLLong($hash);
 		}
 		foreach($this->missHashes as $hash){
-			($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+            $this->putLLong($hash);
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleClientCacheBlobStatus($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleClientCacheBlobStatus($this);
 	}
 }

@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 
-class MotionPredictionHintsPacket extends DataPacket/* implements ClientboundPacket*/{
+class MotionPredictionHintsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::MOTION_PREDICTION_HINTS_PACKET;
 
 	/** @var int */
@@ -53,16 +53,16 @@ class MotionPredictionHintsPacket extends DataPacket/* implements ClientboundPac
 	protected function decodePayload() : void{
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->motion = $this->getVector3();
-		$this->onGround = (($this->get(1) !== "\x00"));
+		$this->onGround = $this->getBool();
 	}
 
 	protected function encodePayload() : void{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putVector3($this->motion);
-		($this->buffer .= ($this->onGround ? "\x01" : "\x00"));
+        $this->putBool($this->onGround);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleMotionPredictionHints($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleMotionPredictionHints($this);
 	}
 }

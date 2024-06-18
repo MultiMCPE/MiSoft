@@ -80,16 +80,16 @@ class BossEventPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$this->title = $this->getString();
-				$this->healthPercent = ((unpack("g", $this->get(4))[1]));
+				$this->healthPercent = $this->getLFloat();
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_UNKNOWN_6:
-				$this->unknownShort = ((unpack("v", $this->get(2))[1]));
+				$this->unknownShort = $this->getLShort();
 			case self::TYPE_TEXTURE:
 				$this->color = $this->getUnsignedVarInt();
 				$this->overlay = $this->getUnsignedVarInt();
 				break;
 			case self::TYPE_HEALTH_PERCENT:
-				$this->healthPercent = ((unpack("g", $this->get(4))[1]));
+				$this->healthPercent = $this->getLFloat();
 				break;
 			case self::TYPE_TITLE:
 				$this->title = $this->getString();
@@ -111,16 +111,16 @@ class BossEventPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$this->putString($this->title);
-				($this->buffer .= (pack("g", $this->healthPercent)));
+                $this->putLFloat($this->healthPercent);
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_UNKNOWN_6:
-				($this->buffer .= (pack("v", $this->unknownShort)));
+                $this->putLShort($this->unknownShort);
 			case self::TYPE_TEXTURE:
 				$this->putUnsignedVarInt($this->color);
 				$this->putUnsignedVarInt($this->overlay);
 				break;
 			case self::TYPE_HEALTH_PERCENT:
-				($this->buffer .= (pack("g", $this->healthPercent)));
+                $this->putLFloat($this->healthPercent);
 				break;
 			case self::TYPE_TITLE:
 				$this->putString($this->title);

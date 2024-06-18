@@ -27,7 +27,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function ord;
 
-class AnvilDamagePacket extends DataPacket/* implements ServerboundPacket*/{
+class AnvilDamagePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ANVIL_DAMAGE_PACKET;
 
 	/** @var int */
@@ -63,16 +63,16 @@ class AnvilDamagePacket extends DataPacket/* implements ServerboundPacket*/{
 	}
 
 	protected function decodePayload() : void{
-		$this->damageAmount = (ord($this->get(1)));
+		$this->damageAmount = $this->getByte();
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= chr($this->damageAmount));
+        $this->putByte($this->damageAmount);
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleAnvilDamage($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAnvilDamage($this);
 	}
 }

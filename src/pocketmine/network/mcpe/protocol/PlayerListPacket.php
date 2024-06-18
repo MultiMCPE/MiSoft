@@ -71,7 +71,7 @@ class PlayerListPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->type = (ord($this->get(1)));
+		$this->type = $this->getByte();
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
 			$entry = new PlayerListEntry();
@@ -109,12 +109,12 @@ class PlayerListPacket extends DataPacket{
 			        	$entry->platformChatId = $this->getString();
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	$entry->buildPlatform = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+			                	$entry->buildPlatform = $this->getLInt();
 			        	    }
 			            	$entry->skin = $this->getSkin($this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	$entry->isTeacher = (($this->get(1) !== "\x00"));
-			                	$entry->isHost = (($this->get(1) !== "\x00"));
+			                	$entry->isTeacher = $this->getBool();
+			                	$entry->isHost = $this->getBool();
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 							    	$entry->isSubClient = $this->getBool();
 								}
@@ -139,14 +139,14 @@ class PlayerListPacket extends DataPacket{
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	if($this->type === self::TYPE_ADD){
 		    	for($i = 0; $i < $count; ++$i){
-			    	$this->entries[$i]->skin->getSerializedSkin()->setIsTrustedSkin((($this->get(1) !== "\x00")));
+			    	$this->entries[$i]->skin->getSerializedSkin()->setIsTrustedSkin($this->getBool());
 		    	}
 			}
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->type));
+        $this->putByte($this->type);
 		$this->putUnsignedVarInt(count($this->entries));
 		foreach($this->entries as $entry){
 			if($this->type === self::TYPE_ADD){
@@ -204,12 +204,12 @@ class PlayerListPacket extends DataPacket{
 			        	$this->putString($entry->platformChatId);
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	($this->buffer .= (pack("V", $entry->buildPlatform)));
+                                $this->putLInt($entry->buildPlatform);
 			        	    }
 			            	$this->putSkin($entry->skin, $this->getProtocol());
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-			                	($this->buffer .= ($entry->isTeacher ? "\x01" : "\x00"));
-			                	($this->buffer .= ($entry->isHost ? "\x01" : "\x00"));
+                                $this->putBool($entry->isTeacher);
+                                $this->putBool($entry->isHost);
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 									$this->putBool($entry->isSubClient);
 								}
@@ -227,7 +227,7 @@ class PlayerListPacket extends DataPacket{
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	if($this->type === self::TYPE_ADD){
 		    	foreach($this->entries as $entry){
-			    	($this->buffer .= ($entry->skin->getSerializedSkin()->isTrustedSkin() ? "\x01" : "\x00"));
+                    $this->putBool($entry->skin->getSerializedSkin()->isTrustedSkin());
 		    	}
 			}
 		}

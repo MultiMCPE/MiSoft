@@ -17,7 +17,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\AbilitiesData;
 
-class ClientCheatAbilityPacket extends DataPacket/* implements ServerboundPacket*/{
+class ClientCheatAbilityPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_CHEAT_ABILITY_PACKET;
 
 	private AbilitiesData $data;

@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\GameMode;
 
-class UpdatePlayerGameTypePacket extends DataPacket/* implements ClientboundPacket*/{
+class UpdatePlayerGameTypePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_PLAYER_GAME_TYPE_PACKET;
 
 	/**
@@ -67,7 +67,7 @@ class UpdatePlayerGameTypePacket extends DataPacket/* implements ClientboundPack
 		$this->putUnsignedVarInt($this->tick);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleUpdatePlayerGameType($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleUpdatePlayerGameType($this);
 	}
 }

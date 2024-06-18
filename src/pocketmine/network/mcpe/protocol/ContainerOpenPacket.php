@@ -67,8 +67,8 @@ class ContainerOpenPacket extends DataPacket{
 	];
 
 	protected function decodePayload(){
-		$this->windowId = (ord($this->get(1)));
-		$this->type = (ord($this->get(1)));
+		$this->windowId = $this->getByte();
+		$this->type = $this->getByte();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
 			$this->slots = $this->getVarInt();
 		}
@@ -77,8 +77,8 @@ class ContainerOpenPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->windowId));
-		($this->buffer .= chr($this->type));
+        $this->putByte($this->windowId);
+        $this->putByte($this->type);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
 			$this->putVarInt($this->slots ?? self::HARDCODED_WINDOW_SLOTS[$this->type]);
 		}

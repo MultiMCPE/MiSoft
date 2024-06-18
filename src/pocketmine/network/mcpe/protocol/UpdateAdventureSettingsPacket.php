@@ -22,7 +22,7 @@ use pocketmine\network\mcpe\NetworkSession;
  * In practice, there's no difference between the two for a custom server.
  * This includes flags such as worldImmutable (makes players unable to build), autoJump, showNameTags, noPvM, and noMvP.
  */
-class UpdateAdventureSettingsPacket extends DataPacket/* implements ClientboundPacket*/{
+class UpdateAdventureSettingsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_ADVENTURE_SETTINGS_PACKET;
 
 	private bool $noAttackingMobs;

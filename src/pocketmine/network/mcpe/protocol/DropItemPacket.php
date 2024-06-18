@@ -36,12 +36,12 @@ class DropItemPacket extends DataPacket{
 	public $item;
 
 	public function decodePayload(){
-		$this->type = (ord($this->get(1)));
+		$this->type = $this->getByte();
 		$this->item = $this->getSlot($this->getProtocol());
 	}
 
 	public function encodePayload(){
-		($this->buffer .= chr($this->type));
+        $this->putByte($this->type);
 		$this->putSlot($this->item, $this->getProtocol());
 	}
 

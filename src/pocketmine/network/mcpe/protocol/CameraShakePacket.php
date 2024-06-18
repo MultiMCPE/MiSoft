@@ -29,7 +29,7 @@ use function ord;
 use function pack;
 use function unpack;
 
-class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
+class CameraShakePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CAMERA_SHAKE_PACKET;
 
 	public const TYPE_POSITIONAL = 0;
@@ -65,24 +65,24 @@ class CameraShakePacket extends DataPacket/* implements ClientboundPacket*/{
 	public function getShakeAction() : int{ return $this->shakeAction; }
 
 	protected function decodePayload() : void{
-		$this->intensity = ((unpack("g", $this->get(4))[1]));
-		$this->duration = ((unpack("g", $this->get(4))[1]));
-		$this->shakeType = (ord($this->get(1)));
+		$this->intensity = $this->getLFloat();
+		$this->duration = $this->getLFloat();
+		$this->shakeType = $this->getByte();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
-		    $this->shakeAction = (ord($this->get(1)));
+		    $this->shakeAction = $this->getByte();
 		}
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (pack("g", $this->intensity)));
-		($this->buffer .= (pack("g", $this->duration)));
-		($this->buffer .= chr($this->shakeType));
+        $this->putLFloat($this->intensity);
+        $this->putLFloat($this->duration);
+        $this->putByte($this->shakeType);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
-		    ($this->buffer .= chr($this->shakeAction));
+            $this->putByte($this->shakeAction);
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleCameraShake($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleCameraShake($this);
 	}
 }

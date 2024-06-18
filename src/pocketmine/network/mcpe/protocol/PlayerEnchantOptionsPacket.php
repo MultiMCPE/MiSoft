@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class PlayerEnchantOptionsPacket extends DataPacket/* implements ClientboundPacket*/{
+class PlayerEnchantOptionsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_ENCHANT_OPTIONS_PACKET;
 
 	public function mayHaveUnreadBytes() : bool{
@@ -38,7 +38,7 @@ class PlayerEnchantOptionsPacket extends DataPacket/* implements ClientboundPack
 	protected function encodePayload() : void{
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handlePlayerEnchantOptions($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePlayerEnchantOptions($this);
 	}
 }

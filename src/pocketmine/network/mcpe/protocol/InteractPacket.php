@@ -52,31 +52,31 @@ class InteractPacket extends DataPacket{
 	public $z;
 
 	protected function decodePayload(){
-		$this->action = (ord($this->get(1)));
+		$this->action = $this->getByte();
 		$this->target = $this->getEntityRuntimeId();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	if($this->action === self::ACTION_MOUSEOVER || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_486 && $this->action === self::ACTION_LEAVE_VEHICLE)){
 		    	//TODO: should this be a vector3?
-		    	$this->x = ((unpack("g", $this->get(4))[1]));
-		    	$this->y = ((unpack("g", $this->get(4))[1]));
-		    	$this->z = ((unpack("g", $this->get(4))[1]));
+		    	$this->x = $this->getLFloat();
+		    	$this->y = $this->getLFloat();
+		    	$this->z = $this->getLFloat();
 	    	}
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->action));
-		$this->putEntityRuntimeId($this->target);
+        $this->putByte($this->action);
+        $this->putEntityRuntimeId($this->target);
 
-        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	if($this->action === self::ACTION_MOUSEOVER || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_486 && $this->action === self::ACTION_LEAVE_VEHICLE)){
-		    	($this->buffer .= (pack("g", $this->x)));
-		    	($this->buffer .= (pack("g", $this->y)));
-		    	($this->buffer .= (pack("g", $this->z)));
-	    	}
+        if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+            if ($this->action === self::ACTION_MOUSEOVER || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_486 && $this->action === self::ACTION_LEAVE_VEHICLE)) {
+                $this->putLFloat($this->x);
+                $this->putLFloat($this->y);
+                $this->putLFloat($this->z);
+            }
         }
-	}
+    }
 
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleInteract($this);

@@ -101,8 +101,8 @@ class AddVolumeEntityPacket extends DataPacket{
 		$this->data = $this->getNbtCompoundRoot();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_486){
-	        	$this->jsonIdentifier = $in->getString();
-	        	$this->instanceName = $in->getString();
+	        	$this->jsonIdentifier = $this->getString();
+	        	$this->instanceName = $this->getString();
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 	        	    $this->getBlockPosition($this->minX, $this->minY, $this->minZ);
 	        	    $this->getBlockPosition($this->maxX, $this->maxY, $this->maxZ);
@@ -118,8 +118,8 @@ class AddVolumeEntityPacket extends DataPacket{
 		$this->put((new NetworkLittleEndianNBTStream())->write($this->data));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_486){
-	        	$out->putString($this->jsonIdentifier);
-	        	$out->putString($this->instanceName);
+                $this->putString($this->jsonIdentifier);
+                $this->putString($this->instanceName);
 	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 	            	$this->putBlockPosition($this->minX, $this->minY, $this->minZ);
 	            	$this->putBlockPosition($this->maxX, $this->maxY, $this->maxZ);
@@ -130,7 +130,7 @@ class AddVolumeEntityPacket extends DataPacket{
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleAddVolumeEntity($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleAddVolumeEntity($this);
 	}
 }

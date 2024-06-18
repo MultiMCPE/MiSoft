@@ -43,9 +43,9 @@ class NpcRequestPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->requestType = (ord($this->get(1)));
+		$this->requestType = $this->getByte();
 		$this->commandString = $this->getString();
-		$this->actionType = (ord($this->get(1)));
+		$this->actionType = $this->getByte();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 		    $this->sceneName = $this->getString();
 		}
@@ -53,9 +53,9 @@ class NpcRequestPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		($this->buffer .= chr($this->requestType));
+        $this->putByte($this->requestType);
 		$this->putString($this->commandString);
-		($this->buffer .= chr($this->actionType));
+        $this->putByte($this->actionType);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 		    $this->putString($this->sceneName);
 		}

@@ -46,7 +46,7 @@ class CommandOutputPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->originData = $this->getCommandOriginData();
-		$this->outputType = (ord($this->get(1)));
+		$this->outputType = $this->getByte();
 		$this->successCount = $this->getUnsignedVarInt();
 
 		for($i = 0, $size = $this->getUnsignedVarInt(); $i < $size; ++$i){
@@ -61,7 +61,7 @@ class CommandOutputPacket extends DataPacket{
 	protected function getCommandMessage() : CommandOutputMessage{
 		$message = new CommandOutputMessage();
 
-		$message->isInternal = (($this->get(1) !== "\x00"));
+		$message->isInternal = $this->getBool();
 		$message->messageId = $this->getString();
 
 		for($i = 0, $size = $this->getUnsignedVarInt(); $i < $size; ++$i){
@@ -73,7 +73,7 @@ class CommandOutputPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putCommandOriginData($this->originData);
-		($this->buffer .= chr($this->outputType));
+        $this->putByte($this->outputType);
 		$this->putUnsignedVarInt($this->successCount);
 
 		$this->putUnsignedVarInt(count($this->messages));
@@ -87,7 +87,7 @@ class CommandOutputPacket extends DataPacket{
 	}
 
 	protected function putCommandMessage(CommandOutputMessage $message){
-		($this->buffer .= ($message->isInternal ? "\x01" : "\x00"));
+        $this->putBool($message->isInternal);
 		$this->putString($message->messageId);
 
 		$this->putUnsignedVarInt(count($message->parameters));

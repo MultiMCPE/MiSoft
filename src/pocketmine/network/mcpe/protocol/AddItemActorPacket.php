@@ -54,7 +54,7 @@ class AddItemActorPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->metadata = $this->getEntityMetadata($this->getProtocol());
 	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
-	        	$this->isFromFishing = (($this->get(1) !== "\x00"));
+	        	$this->isFromFishing = $this->getBool();
 			}
 		}
 	}
@@ -68,7 +68,7 @@ class AddItemActorPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->putEntityMetadata($this->metadata, $this->getProtocol());
 	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
-	        	($this->buffer .= ($this->isFromFishing ? "\x01" : "\x00"));
+                $this->putBool($this->isFromFishing);
 			}
 		}
 	}

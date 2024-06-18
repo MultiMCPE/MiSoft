@@ -48,7 +48,7 @@ class ExplodePacket extends DataPacket{
 		$this->radius = (float) ($this->getVarInt() / 32);
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
-			$x = $y = $z = null;
+			$x = $y = $z = 0;
 			$this->getSignedBlockPosition($x, $y, $z);
 			$this->records[$i] = new Vector3($x, $y, $z);
 		}

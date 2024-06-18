@@ -572,7 +572,7 @@ class LevelSoundEventPacket extends DataPacket{
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
 	    	$this->sound = $this->getUnsignedVarInt();
 	    }else{
-	        $this->sound = (ord($this->get(1)));
+	        $this->sound = $this->getByte();
 	    }
 		$this->sound = MultiversionEnums::getLevelSoundEventName($this->getProtocol(), $this->sound);
 		$this->position = $this->getVector3();
@@ -598,8 +598,8 @@ class LevelSoundEventPacket extends DataPacket{
 		        $this->entityType = (AddActorPacket::LEGACY_ID_MAP_BC[$entityType] ?? ":");
             }
 		}
-		$this->isBabyMob = (($this->get(1) !== "\x00"));
-		$this->disableRelativeVolume = (($this->get(1) !== "\x00"));
+		$this->isBabyMob = $this->getBool();
+		$this->disableRelativeVolume = $this->getBool();
 	}
 
 	protected function encodePayload(){
@@ -631,8 +631,8 @@ class LevelSoundEventPacket extends DataPacket{
             }
 		    $this->putVarInt($entityType === false ? 1 : $entityType);
 		}
-		($this->buffer .= ($this->isBabyMob ? "\x01" : "\x00"));
-		($this->buffer .= ($this->disableRelativeVolume ? "\x01" : "\x00"));
+        $this->putBool($this->isBabyMob);
+        $this->putBool($this->disableRelativeVolume);
 	}
 
 	public function handle(NetworkSession $session) : bool{

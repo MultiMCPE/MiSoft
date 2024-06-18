@@ -37,12 +37,12 @@ class TransferPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->address = $this->getString();
-		$this->port = ((unpack("v", $this->get(2))[1]));
+		$this->port = $this->getLShort();
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->address);
-		($this->buffer .= (pack("v", $this->port)));
+        $this->putShort($this->port);
 	}
 
 	public function handle(NetworkSession $session) : bool{

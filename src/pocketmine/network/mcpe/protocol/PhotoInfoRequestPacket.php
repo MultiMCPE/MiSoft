@@ -46,7 +46,7 @@ class PhotoInfoRequestPacket extends DataPacket{
 		$this->putEntityUniqueId($this->photoId);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handlePhotoInfoRequest($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePhotoInfoRequest($this);
 	}
 }

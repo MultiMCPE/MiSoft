@@ -44,10 +44,10 @@ class UpdateBlockPropertiesPacket extends DataPacket{
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= $this->nbt);
+        $this->put($this->nbt);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleUpdateBlockProperties($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleUpdateBlockProperties($this);
 	}
 }

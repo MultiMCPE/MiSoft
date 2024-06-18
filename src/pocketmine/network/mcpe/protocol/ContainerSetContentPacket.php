@@ -47,7 +47,7 @@ class ContainerSetContentPacket extends DataPacket{
 	    	$this->windowid = $this->getUnsignedVarInt();
 	    	$this->targetEid = $this->getEntityUniqueId();
 		}else{
-			$this->windowid = (ord($this->get(1)));
+			$this->windowid = $this->getByte();
 		}
 		$count = $this->getUnsignedVarInt();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
@@ -65,7 +65,7 @@ class ContainerSetContentPacket extends DataPacket{
 	    	$this->putUnsignedVarInt($this->windowid);
 	    	$this->putEntityUniqueId($this->targetEid);
 		}else{
-			($this->buffer .= chr($this->windowid));
+            $this->putByte($this->windowid);
 		}
 		$this->putUnsignedVarInt(count($this->slots));
 		foreach($this->slots as $slot){

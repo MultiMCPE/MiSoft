@@ -31,7 +31,7 @@ use UnexpectedValueException;
 use function pack;
 use function unpack;
 
-class ClientboundDebugRendererPacket extends DataPacket/* implements ClientboundPacket*/{
+class ClientboundDebugRendererPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENTBOUND_DEBUG_RENDERER_PACKET;
 
 	public const TYPE_CLEAR = 1;
@@ -93,7 +93,7 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 	public function getDurationMillis() : int{ return $this->durationMillis; }
 
 	protected function decodePayload() : void{
-		$this->type = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+		$this->type = $this->getLInt();
 
 		switch($this->type){
 			case self::TYPE_CLEAR:
@@ -102,11 +102,11 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 			case self::TYPE_ADD_CUBE:
 				$this->text = $this->getString();
 				$this->position = $this->getVector3();
-				$this->red = ((unpack("g", $this->get(4))[1]));
-				$this->green = ((unpack("g", $this->get(4))[1]));
-				$this->blue = ((unpack("g", $this->get(4))[1]));
-				$this->alpha = ((unpack("g", $this->get(4))[1]));
-				$this->durationMillis = (Binary::readLLong($this->get(8)));
+				$this->red = $this->getLFloat();
+				$this->green = $this->getLFloat();
+				$this->blue = $this->getLFloat();
+				$this->alpha = $this->getLFloat();
+				$this->durationMillis = $this->getLLong();
 				break;
 			default:
 				throw new UnexpectedValueException("Unknown type " . $this->type);
@@ -114,7 +114,7 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= (pack("V", $this->type)));
+        $this->putLInt($this->type);
 
 		switch($this->type){
 			case self::TYPE_CLEAR:
@@ -123,11 +123,11 @@ class ClientboundDebugRendererPacket extends DataPacket/* implements Clientbound
 			case self::TYPE_ADD_CUBE:
 				$this->putString($this->text);
 				$this->putVector3($this->position);
-				($this->buffer .= (pack("g", $this->red)));
-				($this->buffer .= (pack("g", $this->green)));
-				($this->buffer .= (pack("g", $this->blue)));
-				($this->buffer .= (pack("g", $this->alpha)));
-				($this->buffer .= (pack("VV", $this->durationMillis & 0xFFFFFFFF, $this->durationMillis >> 32)));
+                $this->putLFloat($this->red);
+                $this->putLFloat($this->green);
+                $this->putLFloat($this->blue);
+                $this->putLFloat($this->alpha);
+                $this->putLLong($this->durationMillis);
 				break;
 			default:
 				throw new InvalidArgumentException("Unknown type " . $this->type);

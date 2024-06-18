@@ -39,19 +39,19 @@ class ContainerSetSlotPacket extends DataPacket{
 	public $selectSlot = 0;
 
 	public function decodePayload(){
-		$this->windowid = (ord($this->get(1)));
+		$this->windowid = $this->getByte();
 		$this->slot = $this->getVarInt();
 		$this->hotbarSlot = $this->getVarInt();
 		$this->item = $this->getSlot($this->getProtocol());
-		$this->selectSlot = (ord($this->get(1)));
+		$this->selectSlot = $this->getByte();
 	}
 
 	public function encodePayload(){
-		($this->buffer .= chr($this->windowid));
+        $this->putByte($this->windowid);
 		$this->putVarInt($this->slot);
 		$this->putVarInt($this->hotbarSlot);
 		$this->putSlot($this->item, $this->getProtocol());
-		($this->buffer .= chr($this->selectSlot));
+        $this->putByte($this->selectSlot);
 	}
 
 	public function handle(NetworkSession $session) : bool{

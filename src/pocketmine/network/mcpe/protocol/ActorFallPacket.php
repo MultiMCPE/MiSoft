@@ -41,20 +41,20 @@ class ActorFallPacket extends DataPacket{
 	protected function decodePayload(){
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
-	    	$this->fallDistance = ((unpack("g", $this->get(4))[1]));
-	    	$this->isInVoid = (($this->get(1) !== "\x00"));
+	    	$this->fallDistance = $this->getLFloat();
+	    	$this->isInVoid = $this->getBool();
 		}else{
-			$this->fallDistance = ((unpack("g", $this->get(4))[1]));
+			$this->fallDistance = $this->getLFloat();
 		}
 	}
 
 	protected function encodePayload(){
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 		    $this->putEntityRuntimeId($this->entityRuntimeId);
-		    ($this->buffer .= (pack("g", $this->fallDistance)));
-		    ($this->buffer .= ($this->isInVoid ? "\x01" : "\x00"));
+            $this->putLFloat($this->fallDistance);
+            $this->putBool($this->isInVoid);
 		}else{
-			($this->buffer .= (pack("g", $this->fallDistance)));
+            $this->putLFloat($this->fallDistance);
 		}
 	}
 

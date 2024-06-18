@@ -21,7 +21,7 @@ use pocketmine\network\mcpe\NetworkSession;
 /**
  * Unclear purpose, not used in vanilla Bedrock. Seems to be related to a new Minecraft "editor" edition or mode.
  */
-class EditorNetworkPacket extends DataPacket/* implements ClientboundPacket, ServerboundPacket*/{
+class EditorNetworkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::EDITOR_NETWORK_PACKET;
 
 	/** @phpstan-var CompoundTag */

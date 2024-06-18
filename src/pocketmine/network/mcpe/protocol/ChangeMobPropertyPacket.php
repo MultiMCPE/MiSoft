@@ -27,19 +27,19 @@ class ChangeMobPropertyPacket extends DataPacket{
 	private string $propertyName;
 	private bool $boolValue;
 	private string $stringValue;
-	private int $thistValue;
+	private int $intValue;
 	private float $floatValue;
 
 	/**
 	 * @generate-create-func
 	 */
-	private static function create(int $actorUniqueId, string $propertyName, bool $boolValue, string $stringValue, int $thistValue, float $floatValue) : self{
+	private static function create(int $actorUniqueId, string $propertyName, bool $boolValue, string $stringValue, int $intValue, float $floatValue) : self{
 		$result = new self;
 		$result->actorUniqueId = $actorUniqueId;
 		$result->propertyName = $propertyName;
 		$result->boolValue = $boolValue;
 		$result->stringValue = $stringValue;
-		$result->intValue = $thistValue;
+		$result->intValue = $intValue;
 		$result->floatValue = $floatValue;
 		return $result;
 	}
@@ -73,7 +73,7 @@ class ChangeMobPropertyPacket extends DataPacket{
 	public function getFloatValue() : float{ return $this->floatValue; }
 
 	protected function decodePayload(){
-		$this->actorUniqueId = $this->getActorUniqueId();
+		$this->actorUniqueId = $this->getEntityUniqueId();
 		$this->propertyName = $this->getString();
 		$this->boolValue = $this->getBool();
 		$this->stringValue = $this->getString();
@@ -82,7 +82,7 @@ class ChangeMobPropertyPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putActorUniqueId($this->actorUniqueId);
+		$this->putEntityUniqueId($this->actorUniqueId);
 		$this->putString($this->propertyName);
 		$this->putBool($this->boolValue);
 		$this->putString($this->stringValue);

@@ -21,7 +21,7 @@ use pocketmine\network\mcpe\protocol\types\AbilitiesData;
  * Updates player abilities and permissions, such as command permissions, flying/noclip, fly speed, walk speed etc.
  * Abilities may be layered in order to combine different ability sets into a resulting set.
  */
-class UpdateAbilitiesPacket extends DataPacket/* implements ClientboundPacket*/{
+class UpdateAbilitiesPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::UPDATE_ABILITIES_PACKET;
 
 	private AbilitiesData $data;

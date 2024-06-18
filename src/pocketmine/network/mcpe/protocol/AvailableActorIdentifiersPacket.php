@@ -37,7 +37,7 @@ class AvailableActorIdentifiersPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= $this->namedtag ?? AvailableActorIdentifiersPalette::getActorIdsCache($this->getProtocol()));
+        $this->put($this->namedtag ?? AvailableActorIdentifiersPalette::getActorIdsCache($this->getProtocol()));
 	}
 
 	public function handle(NetworkSession $session) : bool{

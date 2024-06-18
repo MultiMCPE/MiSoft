@@ -49,7 +49,7 @@ class AnimatePacket extends DataPacket{
 		$this->action = $this->getVarInt();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->action & 0x80){
-			$this->rowingTime = ((unpack("g", $this->get(4))[1]));
+			$this->rowingTime = $this->getLFloat();
 		}
 	}
 
@@ -57,7 +57,7 @@ class AnimatePacket extends DataPacket{
 		$this->putVarInt($this->action);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->action & 0x80){
-			($this->buffer .= (pack("g", $this->rowingTime)));
+            $this->putLFloat($this->rowingTime);
 		}
 	}
 

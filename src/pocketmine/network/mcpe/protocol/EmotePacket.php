@@ -27,7 +27,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use function chr;
 use function ord;
 
-class EmotePacket extends DataPacket/* implements ClientboundPacket, ServerboundPacket*/{
+class EmotePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::EMOTE_PACKET;
 
 	public const FLAG_SERVER = 1 << 0;
@@ -81,7 +81,7 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 		    $this->xboxUserId = $this->getString();
 		    $this->platformChatId = $this->getString();
 		}
-		$this->flags = (ord($this->get(1)));
+		$this->flags = $this->getByte();
 	}
 
 	protected function encodePayload() : void{
@@ -91,10 +91,10 @@ class EmotePacket extends DataPacket/* implements ClientboundPacket, Serverbound
 		    $this->putString($this->xboxUserId);
 		    $this->putString($this->platformChatId);
 		}
-		($this->buffer .= chr($this->flags));
+        $this->putByte($this->flags);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleEmote($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleEmote($this);
 	}
 }

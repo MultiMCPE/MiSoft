@@ -45,7 +45,7 @@ class BlockActorDataPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		($this->buffer .= $this->namedtag);
+        $this->put($this->namedtag);
 	}
 
 	public function handle(NetworkSession $session) : bool{

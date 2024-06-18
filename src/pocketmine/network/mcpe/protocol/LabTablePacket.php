@@ -44,15 +44,15 @@ class LabTablePacket extends DataPacket{
 	public $reactionType;
 
 	protected function decodePayload(){
-		$this->uselessByte = (ord($this->get(1)));
+		$this->uselessByte = $this->getByte();
 		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
-		$this->reactionType = (ord($this->get(1)));
+		$this->reactionType = $this->getByte();
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->uselessByte));
+        $this->putByte($this->uselessByte);
 		$this->putSignedBlockPosition($this->x, $this->y, $this->z);
-		($this->buffer .= chr($this->reactionType));
+        $this->putByte($this->reactionType);
 	}
 
 	public function handle(NetworkSession $session) : bool{

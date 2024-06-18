@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class FilterTextPacket extends DataPacket/* implements ClientboundPacket, ServerboundPacket*/{
+class FilterTextPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::FILTER_TEXT_PACKET;
 
 	/** @var string */
@@ -46,15 +46,15 @@ class FilterTextPacket extends DataPacket/* implements ClientboundPacket, Server
 
 	protected function decodePayload() : void{
 		$this->text = $this->getString();
-		$this->fromServer = (($this->get(1) !== "\x00"));
+		$this->fromServer = $this->getBool();
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->text);
-		($this->buffer .= ($this->fromServer ? "\x01" : "\x00"));
+        $this->putBool($this->fromServer);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleFilterText($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleFilterText($this);
 	}
 }

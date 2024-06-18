@@ -59,15 +59,15 @@ class UpdateTradePacket extends DataPacket{
 	public $offers;
 
 	protected function decodePayload(){
-		$this->windowId = (ord($this->get(1)));
-		$this->windowType = (ord($this->get(1)));
+		$this->windowId = $this->getByte();
+		$this->windowType = $this->getByte();
 		$this->thisIsAlwaysZero = $this->getVarInt();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
 		    $this->uvarint = $this->getVarInt();
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 		        $this->tradeTier = $this->getVarInt();
 		    }
-		    $this->isWilling = (($this->get(1) !== "\x00"));
+            $this->isWilling = $this->getBool();
 		}else{
 		    $this->tradeTier = $this->getVarInt();
 		}
@@ -75,22 +75,23 @@ class UpdateTradePacket extends DataPacket{
 		$this->playerEid = $this->getEntityUniqueId();
 		$this->displayName = $this->getString();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	$this->isWilling = (($this->get(1) !== "\x00"));
-	    	$this->isV2Trading = (($this->get(1) !== "\x00"));
+            $this->isWilling = $this->getBool();
+            $this->isV2Trading = $this->getBool();
 		}
 		$this->offers = $this->getRemaining();
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->windowId));
-		($this->buffer .= chr($this->windowType));
+        $this->putByte($this->windowId);
+        $this->putByte($this->windowType);
 		$this->putVarInt($this->thisIsAlwaysZero);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_350){
 		    $this->putVarInt($this->uvarint);
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 		        $this->putVarInt($this->tradeTier);
 		    }
-		    ($this->buffer .= ($this->isWilling ? "\x01" : "\x00"));
+
+            $this->putBool($this->isWilling);
 		}else{
 	    	$this->putVarInt($this->tradeTier);
 		}
@@ -98,10 +99,10 @@ class UpdateTradePacket extends DataPacket{
 		$this->putEntityUniqueId($this->playerEid);
 		$this->putString($this->displayName);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_350){
-	    	($this->buffer .= ($this->isWilling ? "\x01" : "\x00"));
-	    	($this->buffer .= ($this->isV2Trading ? "\x01" : "\x00"));
+            $this->putBool($this->isWilling);
+            $this->putBool($this->isV2Trading);
 		}
-		($this->buffer .= $this->offers);
+        $this->put($this->offers);
 	}
 
 	public function handle(NetworkSession $session) : bool{

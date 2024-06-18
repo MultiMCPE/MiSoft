@@ -27,7 +27,7 @@ class CodeBuilderSourcePacket extends DataPacket{
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $operation, int $category, string $value, int $codeStatu) : self{
+	public static function create(int $operation, int $category, string $value, int $codeStatus) : self{
 		$result = new self;
 		$result->operation = $operation;
 		$result->category = $category;

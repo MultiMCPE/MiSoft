@@ -111,7 +111,7 @@ class PacketPool {
 	/** @var int[] */
 	protected static $protocolList = null;
 
-	public static function init() {
+	public static function init() : void{
 		$magicNumbers = (new ReflectionClass(PacketMagicNumbers::class))->getConstants();
 		self::$magicPoolTo = [];
 		self::$magicPoolFrom = [];

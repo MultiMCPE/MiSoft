@@ -50,47 +50,47 @@ class ResourcePacksInfoPacket extends DataPacket{
 	public $cdnUrls = [];
 
 	protected function decodePayload(){
-		$this->mustAccept = (($this->get(1) !== "\x00"));
+		$this->mustAccept = $this->getBool();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
-				$this->hasAddons = (($this->get(1) !== "\x00"));
+				$this->hasAddons = $this->getBool();
 			}
-	    	$this->hasScripts = (($this->get(1) !== "\x00"));
+	    	$this->hasScripts = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	    $this->forceServerPacks = $this->getBool();
 	    	}
 		}
-		$behaviorPackCount = ((unpack("v", $this->get(2))[1]));
+		$behaviorPackCount = $this->getLShort();
 		while($behaviorPackCount-- > 0){
 			$this->getString();
 			$this->getString();
-			(Binary::readLLong($this->get(8)));
+			$this->getLLong();
 			$this->getString();
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->getString();
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
 		        	$this->getString();
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	(($this->get(1) !== "\x00"));
+		            	$this->getBool();
 		        	}
 		    	}
 			}
 		}
 
-		$resourcePackCount = ((unpack("v", $this->get(2))[1]));
+		$resourcePackCount = $this->getLShort();
 		while($resourcePackCount-- > 0){
 			$this->getString();
 			$this->getString();
-			(Binary::readLLong($this->get(8)));
+            $this->getLLong();
 			$this->getString();
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->getString();
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
 		    	    $this->getString();
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	(($this->get(1) !== "\x00"));
+		            	$this->getBool();
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
-		            	    (($this->get(1) !== "\x00"));
+		            	    $this->getBool();
 		            	}
 		        	}
 		    	}
@@ -108,46 +108,47 @@ class ResourcePacksInfoPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= ($this->mustAccept ? "\x01" : "\x00"));
+        $this->putBool($this->mustAccept);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
-				($this->buffer .= ($this->hasAddons ? "\x01" : "\x00"));
+                $this->putBool($this->hasAddons);
 			}
-	    	($this->buffer .= ($this->hasScripts ? "\x01" : "\x00"));
+            $this->putBool($this->hasScripts);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	    $this->putBool($this->forceServerPacks);
 	    	}
 		}
-		($this->buffer .= (pack("v", count($this->behaviorPackEntries))));
+
+        $this->putLShort(count($this->behaviorPackEntries));
 		foreach($this->behaviorPackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			($this->buffer .= (pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
+            $this->putLong($entry->getPackSize());
 			$this->putString(""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
 		        	$this->putString(""); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: has scripts (?)
+                        $this->putBool(false); //TODO: has scripts (?)
 		        	}
 		    	}
 			}
 		}
-		($this->buffer .= (pack("v", count($this->resourcePackEntries))));
+        $this->putLShort(count($this->resourcePackEntries));
 		foreach($this->resourcePackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-			($this->buffer .= (pack("VV", $entry->getPackSize() & 0xFFFFFFFF, $entry->getPackSize() >> 32)));
+            $this->putLong($entry->getPackSize());
 			$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
 		        	$this->putString(""); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	($this->buffer .= (false ? "\x01" : "\x00")); //TODO: seems useless for resource packs
+                        $this->putBool(false); //TODO: seems useless for resource packs
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
-		            	    ($this->buffer .= (false ? "\x01" : "\x00")); //TODO: supports RTX
+		            	    $this->putBool(false); //TODO: supports RTX
 		            	}
 		        	}
 		    	}

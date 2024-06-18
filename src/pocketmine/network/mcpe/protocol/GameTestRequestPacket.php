@@ -15,9 +15,8 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\BlockPosition;
 
-class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
+class GameTestRequestPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::GAME_TEST_REQUEST_PACKET;
 
 	public const ROTATION_0 = 0;
@@ -29,7 +28,9 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 	private int $repeatCount;
 	private int $rotation;
 	private bool $stopOnFailure;
-	private BlockPosition $testPosition;
+	private int $x = 0;
+    private int $y = 0;
+    private int $z = 0;
 	private int $testsPerRow;
 	private string $testName;
 
@@ -41,7 +42,9 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 		int $repeatCount,
 		int $rotation,
 		bool $stopOnFailure,
-		BlockPosition $testPosition,
+		int $x,
+        int $y,
+        int $z,
 		int $testsPerRow,
 		string $testName,
 	) : self{
@@ -50,7 +53,9 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 		$result->repeatCount = $repeatCount;
 		$result->rotation = $rotation;
 		$result->stopOnFailure = $stopOnFailure;
-		$result->testPosition = $testPosition;
+		$result->x = $x;
+        $result->y = $y;
+        $result->z = $z;
 		$result->testsPerRow = $testsPerRow;
 		$result->testName = $testName;
 		return $result;
@@ -67,7 +72,11 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 
 	public function isStopOnFailure() : bool{ return $this->stopOnFailure; }
 
-	public function getTestPosition() : BlockPosition{ return $this->testPosition; }
+    public function getX() : int{ return $this->x; }
+
+    public function getY() : int{ return $this->y; }
+
+    public function getZ() : int{ return $this->z; }
 
 	public function getTestsPerRow() : int{ return $this->testsPerRow; }
 
@@ -78,7 +87,7 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 		$this->repeatCount = $this->getVarInt();
 		$this->rotation = $this->getByte();
 		$this->stopOnFailure = $this->getBool();
-		$this->testPosition = $this->getSignedBlockPosition();
+		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
 		$this->testsPerRow = $this->getVarInt();
 		$this->testName = $this->getString();
 	}
@@ -88,7 +97,7 @@ class GameTestRequestPacket extends DataPacket/* implements ServerboundPacket*/{
 		$this->putVarInt($this->repeatCount);
 		$this->putByte($this->rotation);
 		$this->putBool($this->stopOnFailure);
-		$this->putSignedBlockPosition($this->testPosition);
+		$this->putSignedBlockPosition($this->x, $this->y, $this->z);
 		$this->putVarInt($this->testsPerRow);
 		$this->putString($this->testName);
 	}

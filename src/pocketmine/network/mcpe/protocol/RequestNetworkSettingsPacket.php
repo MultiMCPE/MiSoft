@@ -21,7 +21,7 @@ use pocketmine\network\mcpe\NetworkSession;
  * The server is expected to respond to this with network settings, which will instruct the client which compression
  * type to use, amongst other things.
  */
-class RequestNetworkSettingsPacket extends DataPacket/* implements ServerboundPacket*/{
+class RequestNetworkSettingsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::REQUEST_NETWORK_SETTINGS_PACKET;
 
 	private int $protocolVersion;

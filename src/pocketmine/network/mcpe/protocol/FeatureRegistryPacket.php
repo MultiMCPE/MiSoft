@@ -21,7 +21,7 @@ use function count;
 /**
  * Syncs world generator settings from server to client, for client-sided chunk generation.
  */
-class FeatureRegistryPacket extends DataPacket/* implements ClientboundPacket*/{
+class FeatureRegistryPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::FEATURE_REGISTRY_PACKET;
 
 	/** @var FeatureRegistryPacketEntry[] */

@@ -47,7 +47,7 @@ class UpdateSoftEnumPacket extends DataPacket{
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			$this->values[] = $this->getString();
 		}
-		$this->type = (ord($this->get(1)));
+		$this->type = $this->getByte();
 	}
 
 	protected function encodePayload(){
@@ -56,7 +56,7 @@ class UpdateSoftEnumPacket extends DataPacket{
 		foreach($this->values as $v){
 			$this->putString($v);
 		}
-		($this->buffer .= chr($this->type));
+        $this->putByte($this->type);
 	}
 
 	public function handle(NetworkSession $session) : bool{

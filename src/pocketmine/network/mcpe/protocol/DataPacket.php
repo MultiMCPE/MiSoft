@@ -128,12 +128,12 @@ abstract class DataPacket extends NetworkBinaryStream{
 	 */
 	protected function decodeHeader(){
         if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
-            (ord($this->get(1)));
+            $this->getByte();
             if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
-                $this->senderSubId = (ord($this->get(1)));
-                $this->recipientSubId = (ord($this->get(1)));
+                $this->senderSubId = $this->getByte();
+                $this->recipientSubId = $this->getByte();
                 if($this->senderSubId > 0x4 || $this->recipientSubId > 0x4){
-                    throw new BinaryDataException(($this) . ": Packet decode headers error");
+                    throw new BinaryDataException(($this->getName()) . ": Packet decode headers error");
                 }
             }
         }else{
@@ -164,13 +164,17 @@ abstract class DataPacket extends NetworkBinaryStream{
 	protected function encodeHeader(){
 	    $pid = $this->packetIdToSend ?? PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
         if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
-            ($this->buffer .= chr($pid));
+            $this->putByte($pid);
             if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
-                ($this->buffer .= chr($this->senderSubId));
-                ($this->buffer .= chr($this->recipientSubId));
+                $this->putByte($this->senderSubId);
+                $this->putByte($this->recipientSubId);
             }
         }else{
-            $this->putUnsignedVarInt($pid | ($this->senderSubId << self::SENDER_SUBCLIENT_ID_SHIFT) | ($this->recipientSubId << self::RECIPIENT_SUBCLIENT_ID_SHIFT));
+            $this->putUnsignedVarInt(
+                $pid |
+                ($this->senderSubId << self::SENDER_SUBCLIENT_ID_SHIFT) |
+                ($this->recipientSubId << self::RECIPIENT_SUBCLIENT_ID_SHIFT)
+            );
         }
 	}
 

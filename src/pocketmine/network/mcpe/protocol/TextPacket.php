@@ -70,9 +70,9 @@ class TextPacket extends DataPacket{
 	public $filteredMessage = "";
 
 	protected function decodePayload(){
-		$this->type = MultiversionEnums::getMessageType($this->getProtocol(), (ord($this->get(1))));
+		$this->type = MultiversionEnums::getMessageType($this->getProtocol(), $this->getByte());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	$this->needsTranslation = (($this->get(1) !== "\x00"));
+            $this->needsTranslation = $this->getBool();
 		}
 		switch($this->type){
 			case self::TYPE_CHAT:
@@ -123,9 +123,9 @@ class TextPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr(MultiversionEnums::getMessageTypeId($this->getProtocol(), $this->type)));
+        $this->putByte(MultiversionEnums::getMessageTypeId($this->getProtocol(), $this->type));
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-	    	($this->buffer .= ($this->needsTranslation ? "\x01" : "\x00"));
+            $this->putBool($this->needsTranslation);
 		}
 		switch($this->type){
 			case self::TYPE_CHAT:

@@ -181,21 +181,21 @@ class AddActorPacket extends DataPacket{
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->pitch = ((unpack("g", $this->get(4))[1]));
-		$this->yaw = ((unpack("g", $this->get(4))[1]));
+		$this->pitch = $this->getLFloat();
+		$this->yaw = $this->getLFloat();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
-	    	$this->headYaw = ((unpack("g", $this->get(4))[1]));
+	    	$this->headYaw = $this->getLFloat();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
-	    	    $this->bodyYaw = ((unpack("g", $this->get(4))[1]));
+	    	    $this->bodyYaw = $this->getLFloat();
 	    	}
 		}
 
 		$attrCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $attrCount; ++$i){
 			$name = $this->getString();
-			$min = ((unpack("g", $this->get(4))[1]));
-			$current = ((unpack("g", $this->get(4))[1]));
-			$max = ((unpack("g", $this->get(4))[1]));
+			$min = $this->getLFloat();
+			$current = $this->getLFloat();
+			$max = $this->getLFloat();
 			$attr = Attribute::getAttributeByName($name);
 
 			if($attr !== null){
@@ -232,21 +232,21 @@ class AddActorPacket extends DataPacket{
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-		($this->buffer .= (pack("g", $this->pitch)));
-		($this->buffer .= (pack("g", $this->yaw)));
+        $this->putLFloat($this->pitch);
+        $this->putLFloat($this->yaw);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
-	    	($this->buffer .= (pack("g", $this->headYaw)));
+            $this->putLFloat($this->headYaw);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
-	    	    ($this->buffer .= (pack("g", $this->bodyYaw)));
+                $this->putLFloat($this->bodyYaw);
 	    	}
 		}
 
 		$this->putUnsignedVarInt(count($this->attributes));
 		foreach($this->attributes as $attribute){
 			$this->putString($attribute->getName());
-			($this->buffer .= (pack("g", $attribute->getMinValue())));
-			($this->buffer .= (pack("g", $attribute->getValue())));
-			($this->buffer .= (pack("g", $attribute->getMaxValue())));
+            $this->putLFloat($attribute->getMinValue());
+            $this->putLFloat($attribute->getValue());
+            $this->putLFloat($attribute->getMaxValue());
 		}
 
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());

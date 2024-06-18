@@ -28,7 +28,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ItemComponentPacketEntry;
 use function count;
 
-class ItemComponentPacket extends DataPacket/* implements ClientboundPacket*/{
+class ItemComponentPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::ITEM_COMPONENT_PACKET;
 
 	/**
@@ -70,7 +70,7 @@ class ItemComponentPacket extends DataPacket/* implements ClientboundPacket*/{
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleItemComponent($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleItemComponent($this);
 	}
 }

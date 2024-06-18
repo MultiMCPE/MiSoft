@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\NetworkSession;
 use function count;
 
-class PlayerFogPacket extends DataPacket/* implements ClientboundPacket*/{
+class PlayerFogPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_FOG_PACKET;
 
 	/**
@@ -65,7 +65,7 @@ class PlayerFogPacket extends DataPacket/* implements ClientboundPacket*/{
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handlePlayerFog($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePlayerFog($this);
 	}
 }

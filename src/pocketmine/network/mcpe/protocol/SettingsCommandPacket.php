@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class SettingsCommandPacket extends DataPacket/* implements ServerboundPacket*/{
+class SettingsCommandPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SETTINGS_COMMAND_PACKET;
 
 	/** @var string */
@@ -50,15 +50,15 @@ class SettingsCommandPacket extends DataPacket/* implements ServerboundPacket*/{
 
 	protected function decodePayload() : void{
 		$this->command = $this->getString();
-		$this->suppressOutput = (($this->get(1) !== "\x00"));
+		$this->suppressOutput = $this->getBool();
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->command);
-		($this->buffer .= ($this->suppressOutput ? "\x01" : "\x00"));
+        $this->putBool($this->suppressOutput);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleSettingsCommand($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleSettingsCommand($this);
 	}
 }

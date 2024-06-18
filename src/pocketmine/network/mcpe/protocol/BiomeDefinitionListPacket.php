@@ -37,7 +37,7 @@ class BiomeDefinitionListPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= $this->namedtag ?? BiomeDefinitionPalette::getBiomesCache($this->getProtocol()));
+		$this->put($this->namedtag ?? BiomeDefinitionPalette::getBiomesCache($this->getProtocol()));
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -67,14 +67,14 @@ class PlayerSkinPacket extends DataPacket{
 	    	$this->skin = new Skin($skinId, $skinData, $capeData, $geometryModel, $geometryData);
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && !$this->feof()) {
-	        	$this->premiumSkin = (($this->get(1) !== "\x00"));
+	        	$this->premiumSkin = $this->getBool();
             }
         }else{
             $this->skin = $this->getSkin($this->getProtocol());
 	    	$this->newSkinName = $this->getString();
 	    	$this->oldSkinName = $this->getString();
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-	    	    $trustedSkin = (($this->get(1) !== "\x00"));
+                $this->getBool(); //TODO: trustedSkin
 	    	}
         }
 	}
@@ -94,7 +94,7 @@ class PlayerSkinPacket extends DataPacket{
 	    	$this->putString($skinData);
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_131) {
 		        if ($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_220) {
-		        	$this->putLInt(empty($this->skin->getCapeData()));
+		        	$this->putLInt($this->skin->getCapeData() === "" ? 0 : 1);
 		        	$this->putLInt(strlen($this->skin->getCapeData()));
 	        	}
 	        	$this->putString($this->skin->getCapeData());
@@ -103,14 +103,14 @@ class PlayerSkinPacket extends DataPacket{
 	    	$this->putString($this->skin->getGeometryData());
 
             if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_260) {
-	        	($this->buffer .= ($this->premiumSkin ? "\x01" : "\x00"));
+                $this->putBool($this->premiumSkin);
             }
         }else{
             $this->putSkin($this->skin, $this->getProtocol());
 	    	$this->putString($this->newSkinName);
 	    	$this->putString($this->oldSkinName);
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
-	    	    ($this->buffer .= ($this->skin->getSerializedSkin()->isTrustedSkin() ? "\x01" : "\x00"));
+                $this->putBool($this->skin->getSerializedSkin()->isTrustedSkin());
 	    	}
         }
 	}

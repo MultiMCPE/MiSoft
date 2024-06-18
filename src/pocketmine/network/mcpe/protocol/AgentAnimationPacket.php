@@ -41,12 +41,12 @@ class AgentAnimationPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->animationType = $this->getByte();
-		$this->actorRuntimeId = $this->getActorRuntimeId();
+		$this->actorRuntimeId = $this->getEntityRuntimeId();
 	}
 
 	protected function encodePayload(){
 		$this->putByte($this->animationType);
-		$this->putActorRuntimeId($this->actorRuntimeId);
+		$this->putEntityRuntimeId($this->actorRuntimeId);
 	}
 
 	public function handle(NetworkSession $session) : bool{

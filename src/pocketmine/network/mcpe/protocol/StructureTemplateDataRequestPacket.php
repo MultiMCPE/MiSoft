@@ -51,17 +51,17 @@ class StructureTemplateDataRequestPacket extends DataPacket{
 		$this->structureTemplateName = $this->getString();
 		$this->getBlockPosition($this->structureBlockX, $this->structureBlockY, $this->structureBlockZ);
 		$this->structureSettings = $this->getStructureSettings();
-		$this->structureTemplateResponseType = (ord($this->get(1)));
+		$this->structureTemplateResponseType = $this->getByte();
 	}
 
 	protected function encodePayload() : void{
 		$this->putString($this->structureTemplateName);
 		$this->putBlockPosition($this->structureBlockX, $this->structureBlockY, $this->structureBlockZ);
 		$this->putStructureSettings($this->structureSettings);
-		($this->buffer .= chr($this->structureTemplateResponseType));
+        $this->putByte($this->structureTemplateResponseType);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleStructureTemplateDataRequest($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleStructureTemplateDataRequest($this);
 	}
 }

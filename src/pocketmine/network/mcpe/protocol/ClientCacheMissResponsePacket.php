@@ -29,7 +29,7 @@ use pocketmine\utils\Binary;
 use function count;
 use function pack;
 
-class ClientCacheMissResponsePacket extends DataPacket/* implements ClientboundPacket*/{
+class ClientCacheMissResponsePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_CACHE_MISS_RESPONSE_PACKET;
 
 	/** @var ChunkCacheBlob[] */
@@ -58,7 +58,7 @@ class ClientCacheMissResponsePacket extends DataPacket/* implements ClientboundP
 
 	protected function decodePayload() : void{
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$hash = (Binary::readLLong($this->get(8)));
+			$hash = $this->getLLong();
 			$payload = $this->getString();
 			$this->blobs[] = new ChunkCacheBlob($hash, $payload);
 		}
@@ -67,12 +67,12 @@ class ClientCacheMissResponsePacket extends DataPacket/* implements ClientboundP
 	protected function encodePayload() : void{
 		$this->putUnsignedVarInt(count($this->blobs));
 		foreach($this->blobs as $blob){
-			($this->buffer .= (pack("VV", $blob->getHash() & 0xFFFFFFFF, $blob->getHash() >> 32)));
+            $this->putLLong($blob->getHash());
 			$this->putString($blob->getPayload());
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleClientCacheMissResponse($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleClientCacheMissResponse($this);
 	}
 }

@@ -46,7 +46,7 @@ class RequestChunkRadiusPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVarInt($this->radius);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
-		    ($this->buffer .= (chr($this->maxRadius)));
+            $this->putByte($this->maxRadius);
 		}
 	}
 

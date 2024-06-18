@@ -39,22 +39,22 @@ class ContainerClosePacket extends DataPacket{
 	public $server = false;
 
 	protected function decodePayload(){
-		$this->windowId = (ord($this->get(1)));
+		$this->windowId = $this->getByte();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
 				$this->windowType = $this->getByte();
 			}
-		    $this->server = (($this->get(1) !== "\x00"));
+		    $this->server = $this->getBool();
 		}
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->windowId));
+        $this->putByte($this->windowId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
 				$this->putByte($this->windowType);
 			}
-		    ($this->buffer .= ($this->server ? "\x01" : "\x00"));
+            $this->putBool($this->server);
 		}
 	}
 

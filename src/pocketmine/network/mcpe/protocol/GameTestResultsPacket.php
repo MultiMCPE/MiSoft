@@ -16,7 +16,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 
-class GameTestResultsPacket extends DataPacket/* implements ClientboundPacket*/{
+class GameTestResultsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::GAME_TEST_RESULTS_PACKET;
 
 	private bool $success;

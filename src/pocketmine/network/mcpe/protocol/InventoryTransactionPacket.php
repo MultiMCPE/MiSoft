@@ -98,7 +98,7 @@ class InventoryTransactionPacket extends DataPacket{
 
 		$this->transactionType = $this->getUnsignedVarInt();
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393 && $this->getProtocol() < ProtocolInfo::PROTOCOL_429){
-            $this->hasItemStackIds = (($this->get(1) !== "\x00"));
+            $this->hasItemStackIds = $this->getBool();
         }
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
@@ -194,7 +194,7 @@ class InventoryTransactionPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putUnsignedVarInt($this->transactionType);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_393 && $this->getProtocol() < ProtocolInfo::PROTOCOL_429){
-            ($this->buffer .= ($this->hasItemStackIds ? "\x01" : "\x00"));
+            $this->putBool($this->hasItemStackIds);
 		}
 
 		$this->putUnsignedVarInt(count($this->actions));

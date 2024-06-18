@@ -84,10 +84,10 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		$this->mapId = $this->getEntityUniqueId();
 		$this->type = $this->getUnsignedVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-	    	$this->dimensionId = (ord($this->get(1)));
+	    	$this->dimensionId = $this->getByte();
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
-	    	$this->isLocked = (($this->get(1) !== "\x00"));
+	    	$this->isLocked = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	    	    $this->getSignedBlockPosition($this->originX, $this->originY, $this->originZ);
 	    	}
@@ -106,14 +106,14 @@ class ClientboundMapItemDataPacket extends DataPacket{
             $flags = (self::BITFLAG_DECORATION_UPDATE | self::BITFLAG_TEXTURE_UPDATE);
         }
 		if(($this->type & ($flags)) !== 0){ //Decoration bitflag or colour bitflag
-			$this->scale = (ord($this->get(1)));
+			$this->scale = $this->getByte();
 		}
 
 		if(($this->type & self::BITFLAG_DECORATION_UPDATE) !== 0){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			    	$object = new MapTrackedObject();
-			    	$object->type = ((unpack("V", $this->get(4))[1] << 32 >> 32));
+			    	$object->type = $this->getLInt();
 			    	if($object->type === MapTrackedObject::TYPE_BLOCK){
 				    	$this->getBlockPosition($object->x, $object->y, $object->z);
 			    	}elseif($object->type === MapTrackedObject::TYPE_ENTITY){
@@ -127,15 +127,15 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 			for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-			    	$icon = (ord($this->get(1)));
-			    	$rotation = (ord($this->get(1)));
+			    	$icon = $this->getByte();
+			    	$rotation = $this->getByte();
 			    }else{
 			    	$weird = $this->getVarInt();
 			    	$rotation = $weird & 0x0f;
 			    	$icon = $weird >> 4;
 			    }
-				$xOffset = (ord($this->get(1)));
-				$yOffset = (ord($this->get(1)));
+				$xOffset = $this->getByte();
+				$yOffset = $this->getByte();
 				$label = $this->getString();
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$color = Color::fromABGR($this->getUnsignedVarInt());
@@ -183,10 +183,10 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 		$this->putUnsignedVarInt($type);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-	    	($this->buffer .= chr($this->dimensionId));
+            $this->putByte($this->dimensionId);
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_351){
-	    	($this->buffer .= ($this->isLocked ? "\x01" : "\x00"));
+            $this->putBool($this->isLocked);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 	    	    $this->putSignedBlockPosition($this->originX, $this->originY, $this->originZ);
 	    	}
@@ -212,7 +212,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	$this->putUnsignedVarInt(count($this->trackedEntities));
 		    	foreach($this->trackedEntities as $object){
-			    	($this->buffer .= (pack("V", $object->type)));
+                    $this->putLInt($object->type);
 			    	if($object->type === MapTrackedObject::TYPE_BLOCK){
 				    	$this->putBlockPosition($object->x, $object->y, $object->z);
 			    	}elseif($object->type === MapTrackedObject::TYPE_ENTITY){
@@ -226,13 +226,13 @@ class ClientboundMapItemDataPacket extends DataPacket{
 			$this->putUnsignedVarInt($decorationCount);
 			foreach($this->decorations as $decoration){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
-			    	($this->buffer .= chr($decoration->getIcon()));
-			    	($this->buffer .= chr($decoration->getRotation()));
+                    $this->putByte($decoration->getIcon());
+                    $this->putByte($decoration->getRotation());
 			    }else{
 			        $this->putVarInt(($decoration->getRotation() & 0x0f) | ($decoration->getIcon() << 4));
 			    }
-				($this->buffer .= chr($decoration->getXOffset()));
-				($this->buffer .= chr($decoration->getYOffset()));
+                $this->putByte($decoration->getXOffset());
+                $this->putByte($decoration->getYOffset());
 				$this->putString($decoration->getLabel());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$this->putUnsignedVarInt($decoration->getColor()->toABGR());

@@ -48,7 +48,9 @@ use pocketmine\network\mcpe\protocol\BlockEventPacket;
 use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
 use pocketmine\network\mcpe\protocol\BossEventPacket;
+use pocketmine\network\mcpe\protocol\CameraInstructionPacket;
 use pocketmine\network\mcpe\protocol\CameraPacket;
+use pocketmine\network\mcpe\protocol\CameraPresetsPacket;
 use pocketmine\network\mcpe\protocol\CameraShakePacket;
 use pocketmine\network\mcpe\protocol\ChangeDimensionPacket;
 use pocketmine\network\mcpe\protocol\ChangeMobPropertyPacket;
@@ -79,10 +81,12 @@ use pocketmine\network\mcpe\protocol\CraftingEventPacket;
 use pocketmine\network\mcpe\protocol\CreatePhotoPacket;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\DeathInfoPacket;
 use pocketmine\network\mcpe\protocol\DebugInfoPacket;
 use pocketmine\network\mcpe\protocol\DimensionDataPacket;
 use pocketmine\network\mcpe\protocol\DisconnectPacket;
 use pocketmine\network\mcpe\protocol\DropItemPacket;
+use pocketmine\network\mcpe\protocol\EditorNetworkPacket;
 use pocketmine\network\mcpe\protocol\EducationSettingsPacket;
 use pocketmine\network\mcpe\protocol\EduUriResourcePacket;
 use pocketmine\network\mcpe\protocol\EmoteListPacket;
@@ -217,6 +221,9 @@ use pocketmine\network\mcpe\protocol\TickSyncPacket;
 use pocketmine\network\mcpe\protocol\ToastRequestPacket;
 use pocketmine\network\mcpe\protocol\TransferPacket;
 use pocketmine\network\mcpe\protocol\TrimDataPacket;
+use pocketmine\network\mcpe\protocol\UnlockedRecipesPacket;
+use pocketmine\network\mcpe\protocol\UpdateAbilitiesPacket;
+use pocketmine\network\mcpe\protocol\UpdateAdventureSettingsPacket;
 use pocketmine\network\mcpe\protocol\UpdateAttributesPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPropertiesPacket;
@@ -349,6 +356,18 @@ abstract class NetworkSession{
 	public function handleMobEffect(MobEffectPacket $packet) : bool{
 		return false;
 	}
+
+    public function handleUpdateAdventureSettings(UpdateAdventureSettingsPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleUpdateAbilities(UpdateAbilitiesPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleUnlockedRecipes(UnlockedRecipesPacket $packet) : bool{
+        return false;
+    }
 
 	public function handleUpdateAttributes(UpdateAttributesPacket $packet) : bool{
 		return false;
@@ -706,9 +725,13 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleCamera(CameraPacket $packet) : bool{
-		return false;
-	}
+    public function handleCamera(CameraPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleCameraInstruction(CameraInstructionPacket $packet) : bool{
+        return false;
+    }
 
 	public function handleSimpleEvent(SimpleEventPacket $packet) : bool{
 		return false;
@@ -802,9 +825,13 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleEducationSettings(EducationSettingsPacket $packet) : bool{
-		return false;
-	}
+    public function handleEducationSettings(EducationSettingsPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleEditorNetwork(EditorNetworkPacket $packet) : bool{
+        return false;
+    }
 
 	public function handleEmote(EmotePacket $packet) : bool{
 		return false;
@@ -874,9 +901,13 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleDebugInfo(DebugInfoPacket $packet) : bool{
-		return false;
-	}
+    public function handleDebugInfo(DebugInfoPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleDeathInfo(DeathInfoPacket $packet) : bool{
+        return false;
+    }
 
 	public function handlePacketViolationWarning(PacketViolationWarningPacket $packet) : bool{
 		return false;
@@ -890,9 +921,13 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleCameraShake(CameraShakePacket $packet) : bool{
-		return false;
-	}
+    public function handleCameraShake(CameraShakePacket $packet) : bool{
+        return false;
+    }
+
+    public function handleCameraPresets(CameraPresetsPacket $packet) : bool{
+        return false;
+    }
 
 	public function handlePlayerFog(PlayerFogPacket $packet) : bool{
 		return false;

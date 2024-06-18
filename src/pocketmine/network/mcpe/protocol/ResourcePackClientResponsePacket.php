@@ -45,8 +45,8 @@ class ResourcePackClientResponsePacket extends DataPacket{
 	public $packIds = [];
 
 	protected function decodePayload(){
-		$this->status = (ord($this->get(1)));
-		$entryCount = ((unpack("v", $this->get(2))[1]));
+		$this->status = $this->getByte();
+		$entryCount = $this->getLShort();
 		if($entryCount > 128){
 			throw new UnexpectedValueException("Too many entry count in resource pack response: " . $entryCount);
 		}
@@ -56,8 +56,8 @@ class ResourcePackClientResponsePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		($this->buffer .= chr($this->status));
-		($this->buffer .= (pack("v", count($this->packIds))));
+        $this->putByte($this->status);
+        $this->putLShort(count($this->packIds));
 		foreach($this->packIds as $id){
 			$this->putString($id);
 		}

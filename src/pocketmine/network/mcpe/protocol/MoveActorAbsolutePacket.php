@@ -54,9 +54,9 @@ class MoveActorAbsolutePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
-	        	$this->flags = (ord($this->get(1)));
+	        	$this->flags = $this->getByte();
 	    	} else {
-		        $this->flags = (unpack("v", $this->get(2))[1]);
+                $this->flags = $this->getLShort();
 	    	}
 	    	$this->position = $this->getVector3();
 	    	$this->xRot = $this->getByteRotation();
@@ -70,8 +70,8 @@ class MoveActorAbsolutePacket extends DataPacket{
 	    	$this->zRot = $this->getByteRotation();
 
 	    	$this->flags = 0;
-	    	$onGround = $this->get(1) !== "\x00";
-	    	$isTeleported = $this->get(1) !== "\x00";
+	    	$onGround = $this->getBool();
+	    	$isTeleported = $this->getBool();
 	    	if($onGround){
 	    	    $this->flags |= self::FLAG_GROUND;
 	    	}
@@ -85,9 +85,9 @@ class MoveActorAbsolutePacket extends DataPacket{
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
 	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
-	        	($this->buffer .= chr($this->flags));
+                $this->putByte($this->flags);
 	    	} else {
-		        ($this->buffer .= pack("v", $this->flags));
+                $this->putLShort($this->flags);
 	    	}
 	    	$this->putVector3($this->position);
 	    	$this->putByteRotation($this->xRot);
@@ -102,8 +102,8 @@ class MoveActorAbsolutePacket extends DataPacket{
 
 	    	$onGround = ($this->flags & self::FLAG_GROUND) !== 0;
 	    	$isTeleported = ($this->flags & self::FLAG_TELEPORT) !== 0;
-	    	($this->buffer .= ($onGround ? "\x01" : "\x00"));
-	    	($this->buffer .= ($isTeleported ? "\x01" : "\x00"));
+            $this->putBool($onGround);
+            $this->putBool($isTeleported);
 		}
 	}
 

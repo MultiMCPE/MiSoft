@@ -43,12 +43,9 @@ use const ZLIB_ENCODING_RAW;
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;
 
-	/** @var string */
-	public $payload = "";
-	/** @var bool */
-	public $compressionEnabled = true;
-	/** @var int */
-	protected $compressionLevel = 7;
+	public string $payload = "";
+	public bool $compressionEnabled = true;
+	protected int $compressionLevel = 7;
 
 	public function canBeBatched() : bool{
 		return false;
@@ -59,7 +56,7 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function decodeHeader(){
-		$pid = (ord($this->get(1)));
+		$pid = $this->getByte();
 		assert($pid === static::NETWORK_ID);
 	}
 
@@ -68,7 +65,7 @@ class BatchPacket extends DataPacket{
 	}
 
 	protected function encodeHeader(){
-		($this->buffer .= chr(static::NETWORK_ID));
+        $this->putByte(static::NETWORK_ID);
 	}
 
 	protected function encodePayload(){
@@ -82,7 +79,7 @@ class BatchPacket extends DataPacket{
 	        $payload = $this->payload;
 	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
-		    ($this->buffer .= $payload);
+            $this->put($payload);
 		}else{
 		    $this->putString($payload);
 		}

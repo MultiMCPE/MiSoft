@@ -30,7 +30,7 @@ use UnexpectedValueException;
 use function chr;
 use function ord;
 
-class PositionTrackingDBServerBroadcastPacket extends DataPacket/* implements ClientboundPacket*/{
+class PositionTrackingDBServerBroadcastPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::POSITION_TRACKING_D_B_SERVER_BROADCAST_PACKET;
 
 	public const ACTION_UPDATE = 0;
@@ -59,7 +59,7 @@ class PositionTrackingDBServerBroadcastPacket extends DataPacket/* implements Cl
 	public function getNbt() : CompoundTag{ return $this->nbt; }
 
 	protected function decodePayload() : void{
-		$this->action = (ord($this->get(1)));
+		$this->action = $this->getByte();
 		$this->trackingId = $this->getVarInt();
 		$offset = $this->getOffset();
 		$nbt = (new NetworkLittleEndianNBTStream())->read($this->getBuffer(), false, $offset);
@@ -71,12 +71,12 @@ class PositionTrackingDBServerBroadcastPacket extends DataPacket/* implements Cl
 	}
 
 	protected function encodePayload() : void{
-		($this->buffer .= chr($this->action));
+        $this->putByte($this->action);
 		$this->putVarInt($this->trackingId);
-		($this->buffer .= (new NetworkLittleEndianNBTStream())->write($this->nbt));
+        $this->put((new NetworkLittleEndianNBTStream())->write($this->nbt));
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handlePositionTrackingDBServerBroadcast($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handlePositionTrackingDBServerBroadcast($this);
 	}
 }

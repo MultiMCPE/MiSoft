@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\NetworkSession;
 
-class CorrectPlayerMovePredictionPacket extends DataPacket/* implements ClientboundPacket*/{
+class CorrectPlayerMovePredictionPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CORRECT_PLAYER_MOVE_PREDICTION_PACKET;
 
 	/** @var Vector3 */
@@ -58,18 +58,18 @@ class CorrectPlayerMovePredictionPacket extends DataPacket/* implements Clientbo
 	protected function decodePayload() : void{
 		$this->position = $this->getVector3();
 		$this->delta = $this->getVector3();
-		$this->onGround = (($this->get(1) !== "\x00"));
+		$this->onGround = $this->getBool();
 		$this->tick = $this->getUnsignedVarLong();
 	}
 
 	protected function encodePayload() : void{
 		$this->putVector3($this->position);
 		$this->putVector3($this->delta);
-		($this->buffer .= ($this->onGround ? "\x01" : "\x00"));
+        $this->putBool($this->onGround);
 		$this->putUnsignedVarLong($this->tick);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleCorrectPlayerMovePrediction($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleCorrectPlayerMovePrediction($this);
 	}
 }

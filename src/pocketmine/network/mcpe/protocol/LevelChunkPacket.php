@@ -124,14 +124,14 @@ class LevelChunkPacket extends DataPacket{
 		    	$this->dimensionId = $this->getVarInt();
 			}
 	    	$this->subChunkCount = $this->getUnsignedVarInt();
-	    	$this->cacheEnabled = (($this->get(1) !== "\x00"));
+	    	$this->cacheEnabled = $this->getBool();
 	    	if($this->cacheEnabled){
 				$count = $this->getUnsignedVarInt();
 				if($count > self::MAX_BLOB_HASHES){
 					throw new \InvalidArgumentException("Expected at most " . self::MAX_BLOB_HASHES . " blob hashes, got " . $count);
 				}
 				for($i = 0; $i < $count; ++$i){
-			    	$this->usedBlobHashes[] = (Binary::readLLong($this->get(8)));
+			    	$this->usedBlobHashes[] = $this->getLLong();
 		    	}
 		    }
 		}
@@ -145,18 +145,18 @@ class LevelChunkPacket extends DataPacket{
 				$this->putVarInt($this->dimensionId);
 			}
 	    	$this->putUnsignedVarInt($this->subChunkCount);
-	    	($this->buffer .= ($this->cacheEnabled ? "\x01" : "\x00"));
+            $this->putBool($this->cacheEnabled);
 	    	if($this->cacheEnabled){
 		    	$this->putUnsignedVarInt(count($this->usedBlobHashes));
 		    	foreach($this->usedBlobHashes as $hash){
-			    	($this->buffer .= (pack("VV", $hash & 0xFFFFFFFF, $hash >> 32)));
+                    $this->putLLong($hash);
 		    	}
 			}
 		}
 		$this->putString($this->extraPayload);
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleLevelChunk($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleLevelChunk($this);
 	}
 }

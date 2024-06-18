@@ -21,7 +21,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerPermissions;
  * Sent by the client to request that the server change permissions of a player. This could be itself or another player.
  * Used when toggling permission switches or changing a player's permission level in the pause menu.
  */
-class RequestPermissionsPacket extends DataPacket/* implements ServerboundPacket*/{
+class RequestPermissionsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::REQUEST_PERMISSIONS_PACKET;
 
 	public const FLAG_BUILD = 1 << 0;

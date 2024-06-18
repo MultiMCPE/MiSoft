@@ -111,21 +111,21 @@ class EducationSettingsPacket extends DataPacket{
 		$this->codeBuilderDefaultUri = $this->getString();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	$this->codeBuilderTitle = $this->getString();
-	    	$this->canResizeCodeBuilder = (($this->get(1) !== "\x00"));
+	    	$this->canResizeCodeBuilder = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 	        	$this->disableLegacyTitleBar = $this->getBool();
 	        	$this->postProcessFilter = $this->getString();
 	        	$this->screenshotBorderResourcePath = $this->getString();
 	        	$this->agentCapabilities = $this->getBool() ? EducationSettingsAgentCapabilities::read($this) : null;
 	    	}
-	    	if((($this->get(1) !== "\x00"))){
+	    	if($this->getBool()){
 		    	$this->codeBuilderOverrideUri = $this->getString();
 	    	}else{
 		    	$this->codeBuilderOverrideUri = null;
 	    	}
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	    	$this->hasQuiz = (($this->get(1) !== "\x00"));
+	    	$this->hasQuiz = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 	    	    $this->linkSettings = $this->getBool() ? EducationSettingsExternalLinkSettings::read($this) : null;
 	    	}
@@ -136,7 +136,7 @@ class EducationSettingsPacket extends DataPacket{
 		$this->putString($this->codeBuilderDefaultUri);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
 	    	$this->putString($this->codeBuilderTitle);
-	    	($this->buffer .= ($this->canResizeCodeBuilder ? "\x01" : "\x00"));
+            $this->putBool($this->canResizeCodeBuilder);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 	        	$this->putBool($this->disableLegacyTitleBar);
 	        	$this->putString($this->postProcessFilter);
@@ -149,13 +149,13 @@ class EducationSettingsPacket extends DataPacket{
 		        	$this->putBool(false);
 	        	}
 	    	}
-	    	($this->buffer .= ($this->codeBuilderOverrideUri !== null ? "\x01" : "\x00"));
+            $this->putBool($this->codeBuilderOverrideUri !== null);
 	    	if($this->codeBuilderOverrideUri !== null){
 		    	$this->putString($this->codeBuilderOverrideUri);
 	    	}
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-	    	($this->buffer .= ($this->hasQuiz ? "\x01" : "\x00"));
+            $this->putBool($this->hasQuiz);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 	        	$linkSettings = $this->linkSettings;
 	        	if($linkSettings !== null){
@@ -168,7 +168,7 @@ class EducationSettingsPacket extends DataPacket{
 		}
 	}
 
-	public function handle(NetworkSession $handler) : bool{
-		return $handler->handleEducationSettings($this);
+	public function handle(NetworkSession $session) : bool{
+		return $session->handleEducationSettings($this);
 	}
 }

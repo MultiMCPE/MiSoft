@@ -56,10 +56,10 @@ class DimensionDataPacket extends DataPacket{
 			$dimensionData = DimensionData::read($this);
 
 			if(isset($this->definitions[$dimensionNameId])){
-				throw new PacketDecodeException("Repeated dimension data for key \"$dimensionNameId\"");
+				throw new \InvalidArgumentException("Repeated dimension data for key \"$dimensionNameId\"");
 			}
 			if($dimensionNameId !== DimensionNameIds::OVERWORLD && $dimensionNameId !== DimensionNameIds::NETHER && $dimensionNameId !== DimensionNameIds::THE_END){
-				throw new PacketDecodeException("Invalid dimension name ID \"$dimensionNameId\"");
+				throw new \InvalidArgumentException("Invalid dimension name ID \"$dimensionNameId\"");
 			}
 			$this->definitions[$dimensionNameId] = $dimensionData;
 		}
