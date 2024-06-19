@@ -964,7 +964,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		]));
 
 		$this->namedtag->setFloat("FallDistance", $this->fallDistance);
-		$this->namedtag->setShort("Fire", $this->fireTicks);
+		$this->namedtag->setInt("Fire", $this->fireTicks, true);
 		$this->namedtag->setShort("Air", $this->propertyManager->getShort(self::DATA_AIR));
 		$this->namedtag->setByte("OnGround", $this->onGround ? 1 : 0);
 		$this->namedtag->setByte("Invulnerable", $this->invulnerable ? 1 : 0);
