@@ -607,30 +607,36 @@ class LevelSoundEventPacket extends DataPacket{
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
 	    	$this->putUnsignedVarInt($sound);
 	    }else{
-	        ($this->buffer .= chr($sound));
+            $this->putByte($sound);
 	    }
 		$this->putVector3($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
-		    if($this->extraData < 0){
-		        $this->putVarInt($this->extraData);
-		    }else{
-		        $palette = BlockPalette::getPalette($this->getProtocol());
-		        $runtimeId = $palette::toStaticRuntimeId($this->extraData);
-		        $this->putVarInt($runtimeId);
-		    }
+            if ($this->sound === self::SOUND_HIT || $this->sound === self::SOUND_PLACE) {
+                $palette = BlockPalette::getPalette($this->getProtocol());
+                $runtimeId = $palette::toStaticRuntimeId($this->extraData);
+                $this->putVarInt($runtimeId);
+            } else {
+                $this->putVarInt($this->extraData);
+            }
 		}else{
-		    $this->putVarInt($this->extraData);
+            if($this->sound === self::SOUND_NOTE){
+                $this->putVarInt($this->extraData >> 8);
+            } else {
+                $this->putVarInt($this->extraData);
+            }
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->putString($this->entityType);
-		}else{
-            if($this->sound === self::SOUND_THROW && $this->entityType === "minecraft:player"){
+		}else {
+            if($this->sound === self::SOUND_NOTE){
+                $entityType = $this->extraData & 0xf;
+            }elseif ($this->sound === self::SOUND_THROW && $this->entityType === "minecraft:player") {
                 $entityType = 319;
-            }else{
-		        $entityType = array_search($this->entityType, AddActorPacket::LEGACY_ID_MAP_BC, true);
+            } else {
+                $entityType = array_search($this->entityType, AddActorPacket::LEGACY_ID_MAP_BC, true);
             }
-		    $this->putVarInt($entityType === false ? 1 : $entityType);
-		}
+            $this->putVarInt($entityType === false ? 1 : $entityType);
+        }
         $this->putBool($this->isBabyMob);
         $this->putBool($this->disableRelativeVolume);
 	}

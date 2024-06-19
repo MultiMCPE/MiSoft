@@ -62,6 +62,7 @@ use pocketmine\entity\passive\Chicken;
 use pocketmine\entity\passive\Cow;
 use pocketmine\entity\passive\Horse;
 use pocketmine\entity\passive\Mooshroom;
+use pocketmine\entity\passive\Ocelot;
 use pocketmine\entity\passive\Pig;
 use pocketmine\entity\passive\Sheep;
 use pocketmine\entity\passive\Squid;
@@ -200,6 +201,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Entity::registerEntity(Cow::class, false, ['Cow', 'minecraft:cow']);
 		Entity::registerEntity(Sheep::class, false, ['Sheep', 'minecraft:sheep']);
 		Entity::registerEntity(Mooshroom::class, false, ['Mooshroom', 'minecraft:mooshroom']);
+		Entity::registerEntity(Ocelot::class, false, ['Ocelot', 'minecraft:ocelot']);
 		Entity::registerEntity(Pig::class, false, ['Pig', 'minecraft:pig']);
 		Entity::registerEntity(Cat::class, false, ['Cat', 'minecraft:cat']);
 		Entity::registerEntity(Skeleton::class, false, ['Skeleton', 'minecraft:skeleton']);

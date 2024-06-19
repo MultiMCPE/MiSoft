@@ -2110,6 +2110,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 	}
 
+    public function setSkin(Skin $skin): void
+    {
+        parent::setSkin($skin);
+        if ($this->spawned) {
+            $this->server->updatePlayerListData($this->getUniqueId(), $this->getId(), $this->getDisplayName(), $this->getSkin(), $this->getXuid());
+        }
+    }
+
 	public function jump() : void{
 		(new PlayerJumpEvent($this))->call();
 		parent::jump();

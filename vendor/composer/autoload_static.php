@@ -524,6 +524,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\entity\\passive\\Cow' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Cow.php',
         'pocketmine\\entity\\passive\\Horse' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Horse.php',
         'pocketmine\\entity\\passive\\Mooshroom' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Mooshroom.php',
+        'pocketmine\\entity\\passive\\Ocelot' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Ocelot.php',
         'pocketmine\\entity\\passive\\Pig' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Pig.php',
         'pocketmine\\entity\\passive\\Sheep' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Sheep.php',
         'pocketmine\\entity\\passive\\Squid' => __DIR__ . '/../..' . '/src/pocketmine/entity/passive/Squid.php',

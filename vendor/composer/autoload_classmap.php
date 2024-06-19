@@ -453,6 +453,7 @@ return array(
     'pocketmine\\entity\\passive\\Cow' => $baseDir . '/src/pocketmine/entity/passive/Cow.php',
     'pocketmine\\entity\\passive\\Horse' => $baseDir . '/src/pocketmine/entity/passive/Horse.php',
     'pocketmine\\entity\\passive\\Mooshroom' => $baseDir . '/src/pocketmine/entity/passive/Mooshroom.php',
+    'pocketmine\\entity\\passive\\Ocelot' => $baseDir . '/src/pocketmine/entity/passive/Ocelot.php',
     'pocketmine\\entity\\passive\\Pig' => $baseDir . '/src/pocketmine/entity/passive/Pig.php',
     'pocketmine\\entity\\passive\\Sheep' => $baseDir . '/src/pocketmine/entity/passive/Sheep.php',
     'pocketmine\\entity\\passive\\Squid' => $baseDir . '/src/pocketmine/entity/passive/Squid.php',

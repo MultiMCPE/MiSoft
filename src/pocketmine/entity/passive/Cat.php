@@ -37,12 +37,29 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
+use pocketmine\network\mcpe\protocol\AddActorPacket;
+use pocketmine\network\mcpe\protocol\SetActorDataPacket;
+use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\Player;
 use function mt_rand;
+use function is_array;
 
 class Cat extends Tamable{
 	public const NETWORK_ID = self::CAT;
+
+    public const COLOR_WHITE = 0;
+	public const COLOR_TUXEDO = 1;
+	public const COLOR_RED = 2;
+	public const COLOR_SIAMESE = 3;
+	public const COLOR_BRITISH_SHORTHAIR = 4;
+	public const COLOR_CALICO = 5;
+	public const COLOR_PERSIAN = 6;
+	public const COLOR_RAGDOLL = 7;
+	public const COLOR_TABBY = 8;
+	public const COLOR_BLACK = 9;
+	public const COLOR_JELLIE = 10;
 
 	public $width = 0.6;
 	public $height = 0.7;
@@ -129,9 +146,100 @@ class Cat extends Tamable{
 		$this->behaviorSitting->setSitting($value);
 	}
 
-	public function attack(EntityDamageEvent $source) : void{
-		if($source->getCause() !== EntityDamageEvent::CAUSE_FALL){
-			parent::attack($source);
+	protected function sendSpawnPacket(Player $player) : void{
+		$pk = new AddActorPacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->type = ($player->getProtocol() >= ProtocolInfo::PROTOCOL_310 ? static::NETWORK_ID : Ocelot::NETWORK_ID);
+		$pk->position = $this->asVector3();
+		$pk->motion = $this->getMotion();
+		$pk->yaw = $this->yaw;
+		$pk->headYaw = $this->headYaw ?? $this->yaw;
+		$pk->bodyYaw = $this->yaw;
+		$pk->pitch = $this->pitch;
+		$pk->attributes = $this->attributeMap->getAll();
+		$metadata = $this->propertyManager->getAll();
+		if($player->getProtocol() < ProtocolInfo::PROTOCOL_310){
+	    	if(isset($metadata[self::DATA_VARIANT])){
+				$metadata[self::DATA_VARIANT][1] = self::translateToOcelotColor($metadata[self::DATA_VARIANT][1]);
+			}
 		}
+		$pk->metadata = $metadata;
+		$pk->syncedProperties = new PropertySyncData([], []);
+
+		if(!empty($this->passengers)){
+			foreach($this->getPassengers() as $passenger){
+				$passenger->spawnTo($player);
+			}
+
+			$pk->links = array_map(function(int $entityId){
+				return new EntityLink($this->getId(), $entityId, EntityLink::TYPE_RIDER, true, false);
+			}, $this->passengers);
+		}
+
+		$player->dataPacket($pk);
+	}
+
+	public function sendData($player, ?array $data = null) : void{
+		if(!is_array($player)){
+			$player = [$player];
+		}
+
+		$pk = new SetActorDataPacket();
+		$pk->entityRuntimeId = $this->getId();
+		$pk->metadata = $data ?? $this->propertyManager->getAll();
+		$pk->syncedProperties = new PropertySyncData([], []);
+
+		foreach($player as $p){
+		    if(isset($pk->metadata[self::DATA_VARIANT])){
+				if($p->getProtocol() < ProtocolInfo::PROTOCOL_310){
+			        $pk->metadata[self::DATA_VARIANT][1] = self::translateToOcelotColor($metadata[self::DATA_VARIANT][1]);
+				}
+			}
+
+			$p->dataPacket(clone $pk);
+		}
+	}
+
+	protected static function translateToOcelotColor(int $color) : int{
+		$newColor = Ocelot::TYPE_BLACK;
+		// подходящие цвета подобрал
+		// у кого +- белый цвет, тот стал сиамским оцелотом
+		switch($color){
+			case self::COLOR_WHITE:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+			case self::COLOR_TUXEDO:
+				$newColor = Ocelot::TYPE_BLACK;
+				break;
+			case self::COLOR_RED:
+				$newColor = Ocelot::TYPE_RED;
+				break;
+			case self::COLOR_SIAMESE:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+			case self::COLOR_BRITISH_SHORTHAIR:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+			case self::COLOR_CALICO:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+			case self::COLOR_PERSIAN:
+				$newColor = Ocelot::TYPE_RED;
+				break;
+			case self::COLOR_RAGDOLL:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+			case self::COLOR_TABBY:
+				$newColor = Ocelot::TYPE_RED;
+				break;
+			case self::COLOR_BLACK:
+				$newColor = Ocelot::TYPE_BLACK;
+				break;
+			case self::COLOR_JELLIE:
+				$newColor = Ocelot::TYPE_SIAMESE;
+				break;
+		}
+
+		return $newColor;
 	}
 }
