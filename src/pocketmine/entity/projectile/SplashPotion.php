@@ -27,6 +27,8 @@ use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\Living;
+use pocketmine\entity\Monster;
+use pocketmine\entity\hostile\Witch;
 use pocketmine\event\entity\ProjectileHitBlockEvent;
 use pocketmine\event\entity\ProjectileHitEntityEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
@@ -84,7 +86,7 @@ class SplashPotion extends Throwable{
 		if($hasEffects){
 			if(!$this->willLinger()){
 				foreach($this->level->getNearbyEntities($this->boundingBox->expandedCopy(4.125, 2.125, 4.125), $this) as $entity){
-					if($entity instanceof Living and $entity->isAlive()){
+					if($entity instanceof Living and $entity->isAlive() and !($this->getOwningEntity() instanceof Witch and $entity instanceof Monster)){
 						$distanceSquared = $entity->add(0, $entity->getEyeHeight(), 0)->distanceSquared($this);
 						if($distanceSquared > 16){ //4 blocks
 							continue;

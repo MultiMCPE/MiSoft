@@ -34,6 +34,8 @@ use function strtoupper;
  */
 class Enchantment{
 
+    public const TYPE_INVALID = -1;
+
 	public const PROTECTION = 0;
 	public const FIRE_PROTECTION = 1;
 	public const FEATHER_FALLING = 2;
@@ -154,27 +156,20 @@ class Enchantment{
 		self::$enchantments[$enchantment->getId()] = clone $enchantment;
 	}
 
-	/**
-	 * @param int $id
-	 *
-	 * @return Enchantment|null
-	 */
-	public static function getEnchantment(int $id) : ?Enchantment{
-		return self::$enchantments[$id] ?? null;
-	}
+    public static function getEnchantment(int $id) : ?Enchantment{
+        if(isset(self::$enchantments[$id])){
+            return clone self::$enchantments[$id];
+        }
+        return new Enchantment(self::TYPE_INVALID, "unknown", 0, 0, 0, 5);
+    }
 
-	/**
-	 * @param string $name
-	 *
-	 * @return Enchantment|null
-	 */
-	public static function getEnchantmentByName(string $name) : ?Enchantment{
-		$const = Enchantment::class . "::" . strtoupper($name);
-		if(defined($const)){
-			return self::getEnchantment(constant($const));
-		}
-		return null;
-	}
+    public static function getEnchantmentByName(string $name){
+        $const = Enchantment::class . "::" . strtoupper($name);
+        if(defined($const)){
+            return self::getEnchantment(constant($const));
+        }
+        return new Enchantment(self::TYPE_INVALID, "unknown", 0, 0, 0, 5);
+    }
 
 	/** @var int */
 	private $id;

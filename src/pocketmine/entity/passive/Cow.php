@@ -46,6 +46,11 @@ class Cow extends Animal{
 	public $width = 0.9;
 	public $height = 1.3;
 
+	/** @var int */
+	private $milkingTicks = 0;
+
+    public const MILKING_COOLDOWN = 20 * 60 * 5; // 5 minutes
+
 	protected function addBehaviors() : void{
 		$this->behaviorPool->setBehavior(0, new FloatBehavior($this));
 		$this->behaviorPool->setBehavior(1, new PanicBehavior($this, 2.0));
@@ -61,6 +66,7 @@ class Cow extends Animal{
 		$this->setMaxHealth(10);
 		$this->setMovementSpeed(0.2);
 		$this->setFollowRange(10);
+		$this->milkingTicks = $this->namedtag->getInt("MilkingCooldown", 0);
 
 		parent::initEntity();
 	}
@@ -72,13 +78,32 @@ class Cow extends Animal{
 	public function onInteract(Player $player, Item $item, Vector3 $clickPos) : bool{
 		if(!$this->isImmobile()){
 			if($item instanceof Bucket and $item->getDamage() === 0){
+				if($this->milkingTicks > 0){
+					return false;
+				}
+
 				$item->pop();
 				$player->getInventory()->addItem(ItemFactory::get(Item::BUCKET, 1));
+				$this->milkingTicks = self::MILKING_COOLDOWN;
 				return true;
 			}
 		}
 
 		return parent::onInteract($player, $item, $clickPos);
+	}
+
+	public function entityBaseTick(int $diff = 1) : bool{
+		if($this->milkingTicks > 0){
+			$this->milkingTicks--;
+		}
+
+		return parent::entityBaseTick($diff);
+	}
+
+	public function saveNBT() : void{
+		parent::saveNBT();
+
+		$this->namedtag->setInt("MilkingCooldown", $this->milkingTicks);
 	}
 
 	public function getXpDropAmount() : int{

@@ -294,7 +294,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 */
 	private const MAX_CHAT_BYTE_LENGTH = self::MAX_CHAT_CHAR_LENGTH * 4;
 
-	private const INCOMING_PACKET_BATCH_PER_TICK = 6; //usually max 1 per tick, but transactions arrive separately
+	private const INCOMING_PACKET_BATCH_PER_TICK = 10; //usually max 1 per tick, but transactions arrive separately
 	private const INCOMING_PACKET_BATCH_BUFFER_TICKS = 100; //enough to account for a 5-second lag spike
 
 	private const INCOMING_GAME_PACKETS_PER_TICK = 40;
@@ -1354,7 +1354,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$this->spawnToAll();
 
-		$this->level->getWeather()->sendWeather($this);
+		if($this->level instanceof Level){
+		    $this->level->getWeather()->sendWeather($this);
+		}
 
 		if($this->server->getUpdater()->hasUpdate() and $this->hasPermission(Server::BROADCAST_CHANNEL_ADMINISTRATIVE) and $this->server->getProperty("auto-updater.on-update.warn-ops", true)){
 			$this->server->getUpdater()->showPlayerUpdate($this);

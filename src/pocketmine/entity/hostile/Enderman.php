@@ -36,7 +36,7 @@ use pocketmine\entity\Monster;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\level\generator\biome\Biome;
+use pocketmine\level\biome\Biome;
 use pocketmine\level\Level;
 use pocketmine\level\particle\PortalParticle;
 use pocketmine\level\sound\EndermanTeleportSound;
@@ -66,8 +66,6 @@ class Enderman extends Monster{
 	public $shouldTeleport = false;
 	public $block = null;
 
-    public $stareTick = 0;
-
     public const BLOCK_ID_TAG = "BlockId";
 
     protected function initEntity() : void{
@@ -84,6 +82,8 @@ class Enderman extends Monster{
         }
 
         parent::initEntity();
+
+        $this->getNavigator()->setAvoidsWater(true);
     }
 
 	public function saveNBT() : void{
@@ -144,7 +144,7 @@ class Enderman extends Monster{
 
     protected function addBehaviors() : void{
         $this->behaviorPool->setBehavior(0, new FloatBehavior($this));
-        $this->behaviorPool->setBehavior(1, new MeleeAttackBehavior($this, 3.0));
+        $this->behaviorPool->setBehavior(1, new MeleeAttackBehavior($this, 2));
         $this->behaviorPool->setBehavior(2, new RandomStrollBehavior($this, 1.0));
         $this->behaviorPool->setBehavior(3, new LookAtPlayerBehavior($this, 8.0));
         $this->behaviorPool->setBehavior(4, new RandomLookAroundBehavior($this));
@@ -178,13 +178,20 @@ class Enderman extends Monster{
 			return;
 		}
 
-		$list = $this->level->getCollidingEntities($this->getBoundingBox()->expandedCopy(16, 4.0, 16), $this);
+		$list = $this->level->getCollidingEntities($this->getBoundingBox()->expandedCopy(70, 70.0, 70), $this);
 		foreach($list as $player){
 			if($player instanceof Player){
                 if($player->isSurvival() && $player->isAlive() && $this->isPlayerLookingAt($player)){
                     $this->setTargetEntity($player);
 
-                    $this->stareTick = 100;
+                    $pk = new PlaySoundPacket();
+                    $pk->soundName = "mob.endermen.stare";
+                    $pk->x = $this->getX();
+                    $pk->y = $this->getY();
+                    $pk->z = $this->getZ();
+                    $pk->volume = 2.5;
+                    $pk->pitch = 1.0;
+                    $this->server->broadcastPacket($this->getViewers(), $pk);
 
                     return;
 				}
@@ -200,22 +207,31 @@ class Enderman extends Monster{
             }
 
             if(mt_rand(0, 200) === 1 or $this->shouldTeleport){
-                $x = $this->getFloorX() + mt_rand(-8, 8);
-                $z = $this->getFloorZ() + mt_rand(-8, 8);
-                $y = $this->level->getHighestBlockAt($x, $z) + 1;
+                $found = false;
+                $attempts = 0;
+                while(!$found && $attempts < 2){
+                    $x = $this->getFloorX() + mt_rand(-8, 8);
+                    $z = $this->getFloorZ() + mt_rand(-8, 8);
+                    $y = $this->findSafeY($x, $z);
 
-                for($i = 0; $i < 30; $i++){
-                    $this->level->addParticle(new PortalParticle(new Vector3($x + $this->randomFloat(), $y + $this->randomFloat(-0.8, 2.5), $z + $this->randomFloat())));
+                    if($y !== null){
+                        for($i = 0; $i < 30; $i++){
+                            $this->level->addParticle(new PortalParticle(new Vector3($x + $this->randomFloat(), $y + $this->randomFloat(-0.8, 2.5), $z + $this->randomFloat())));
+                        }
+
+                        for($i = 0; $i < 30; $i++){
+                            $this->level->addParticle(new PortalParticle(new Vector3($x + $this->randomFloat(), $y + $this->randomFloat(-0.8, 2.5), $z + $this->randomFloat())));
+                        }
+
+                        $this->level->addSound(new EndermanTeleportSound($this));
+                        $this->teleport(new Vector3($x, $y, $z));
+                        $this->level->addSound(new EndermanTeleportSound($this));
+                        $this->shouldTeleport = false;
+                        $found = true;
+                    }else{
+                        $attempts++;
+                    }
                 }
-
-                for($i = 0; $i < 30; $i++){
-                    $this->level->addParticle(new PortalParticle(new Vector3($x + $this->randomFloat(), $y + $this->randomFloat(-0.8, 2.5), $z + $this->randomFloat())));
-                }
-
-                $this->level->addSound(new EndermanTeleportSound($this));
-                $this->teleport(new Vector3($x, $y, $z));
-                $this->level->addSound(new EndermanTeleportSound($this));
-                $this->shouldTeleport = false;
             }
 
             if(mt_rand(0, 1000) === 0 and !$this->hasBlock()){
@@ -287,23 +303,30 @@ class Enderman extends Monster{
                 }
             }
 
-            if($this->stareTick > 0){
-                $this->stareTick -= 1; // хуйня с тиками саунда взята с ванильного майнкрафта
-
-                $pk = new PlaySoundPacket();
-                $pk->soundName = "mob.endermen.stare";
-                $pk->x = $this->getX();
-                $pk->y = $this->getY();
-                $pk->z = $this->getZ();
-                $pk->volume = 2.5;
-                $pk->pitch = 1.0;
-                $this->server->broadcastPacket($this->getViewers(), $pk);
-            }
-
 		    $this->findNearestAttackablePlayer();
         }
 
         return parent::entityBaseTick($diff);
+    }
+
+    public function findSafeY(int $x, int $z) : ?int{
+        for($y = $this->level->getHighestBlockAt($x, $z); $y > 0; $y--){
+            $block = $this->level->getBlockAt($x, $y, $z);
+            if(!$this->isUnsafeBlock($block)){
+                return $y + 1;
+            }
+        }
+        return null;
+    }
+
+    public function isUnsafeBlock(Block $block) : bool{
+        $unsafeBlocks = [
+            Block::WATER,
+            Block::STILL_WATER,
+            Block::LEAVES,
+            Block::LEAVES2
+        ];
+        return in_array($block->getId(), $unsafeBlocks);
     }
 
 	/**
