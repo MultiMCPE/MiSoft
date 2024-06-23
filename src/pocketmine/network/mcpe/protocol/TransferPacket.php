@@ -40,7 +40,7 @@ class TransferPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putString($this->address);
-        $this->putShort($this->port);
+        $this->putLShort($this->port);
 	}
 
 	public function handle(NetworkSession $session) : bool{

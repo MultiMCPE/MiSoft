@@ -123,7 +123,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 		foreach($this->behaviorPackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-            $this->putLong($entry->getPackSize());
+            $this->putLLong($entry->getPackSize());
 			$this->putString(""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
@@ -139,7 +139,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 		foreach($this->resourcePackEntries as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
-            $this->putLong($entry->getPackSize());
+            $this->putLLong($entry->getPackSize());
 			$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
