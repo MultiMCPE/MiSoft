@@ -128,7 +128,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		        	$this->putString(""); //TODO: content identity
+		        	$this->putString($entry->getPackId()); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
                         $this->putBool(false); //TODO: has scripts (?)
 		        	}
@@ -144,7 +144,7 @@ class ResourcePacksInfoPacket extends DataPacket{
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		    	$this->putString(""); //TODO: subpack name
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		        	$this->putString(""); //TODO: content identity
+		        	$this->putString($entry->getPackId()); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
                         $this->putBool(false); //TODO: seems useless for resource packs
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
