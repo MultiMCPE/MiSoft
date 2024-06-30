@@ -123,7 +123,7 @@ abstract class BaseLevelProvider implements LevelProvider{
 	}
 
 	public function getSeed() : int{
-		return $this->levelData->getLong("RandomSeed");
+		return $this->levelData->getTag("RandomSeed")->getValue();
 	}
 
 	public function setSeed(int $value){
