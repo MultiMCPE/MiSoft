@@ -19,7 +19,7 @@
  *
 */
 
-//арелик,,
+//арелик,,,
 declare(strict_types=1);
 
 namespace pocketmine;
