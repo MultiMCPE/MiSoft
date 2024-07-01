@@ -19,7 +19,6 @@
  *
 */
 
-//арелик 
 declare(strict_types=1);
 
 namespace pocketmine;
@@ -2361,6 +2360,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
+	    if($this->enableCompression) {
+	        return;
+	    }
+
 		$this->protocol = $packet->getProtocolVersion();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_553 || !in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)){
 	    	$packet = new PlayStatusPacket();
