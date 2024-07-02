@@ -2361,7 +2361,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
 	    if($this->enableCompression) {
-	        return;
+	        return false;
 	    }
 
 		$this->protocol = $packet->getProtocolVersion();
