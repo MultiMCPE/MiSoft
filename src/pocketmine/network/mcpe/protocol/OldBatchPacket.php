@@ -50,11 +50,11 @@ class OldBatchPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->payload = zlib_decode($this->getString(), 1024 * 1024 * 2); //Max 2MB
+		$this->payload = @zlib_decode($this->getString(), 1024 * 1024 * 2); //Max 2MB
 	}
 
 	protected function encodePayload(){
-		$this->putString(zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel));
+		$this->putString(@zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel));
 	}
 
 	public function addPacket(DataPacket $packet) : void{
