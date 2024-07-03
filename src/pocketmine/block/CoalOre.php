@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\TieredTool;
@@ -53,6 +54,14 @@ class CoalOre extends Solid{
 	}
 
 	public function getDropsForCompatibleTool(Item $item) : array{
+        if ($fortune = $item->getEnchantment(Enchantment::FORTUNE)) {
+            $fortune = min($fortune, 3);
+            $times = [1, 1, 2, 3, 4];
+            $time = $times[mt_rand(0, $fortune + 1)];
+            return [
+                Item::get(Item::COAL, 0, $time),
+            ];
+        }
 		return [
 			ItemFactory::get(Item::COAL)
 		];
