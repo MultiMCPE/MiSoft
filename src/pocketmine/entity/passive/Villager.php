@@ -35,7 +35,6 @@ use pocketmine\entity\Effect;
 use pocketmine\entity\EffectInstance;
 use pocketmine\entity\hostile\Zombie;
 use pocketmine\entity\Mob;
-use pocketmine\entity\NPC;
 use pocketmine\inventory\TradeInventory;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
@@ -46,7 +45,7 @@ use function array_rand;
 use function count;
 use function mt_rand;
 
-class Villager extends Mob implements NPC, Ageable{
+class Villager extends Mob implements Ageable{
 
 	public const NETWORK_ID = self::VILLAGER;
 
