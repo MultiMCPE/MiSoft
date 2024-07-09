@@ -1,2 +1,2 @@
-# AquaSoft
-# vk.com/onewearf
+# ScaryDev LEGENDARY
+# SEMENNEJO LEGENDARY
