@@ -401,7 +401,17 @@ class PluginManager{
 
 				$pluginNumbers = array_map("\intval", array_pad(explode(".", $pluginApi[0]), 3, "0")); //plugins might specify API like "3.0" or "3"
 
-	
+				if($pluginNumbers[0] !== $serverNumbers[0]){ //Completely different API version
+					continue;
+				}
+
+				if($pluginNumbers[1] > $serverNumbers[1]){ //If the plugin requires new API features, being backwards compatible
+					continue;
+				}
+
+				if($pluginNumbers[1] === $serverNumbers[1] and $pluginNumbers[2] > $serverNumbers[2]){ //If the plugin requires bug fixes in patches, being backwards compatible
+					continue;
+				}
 			}
 
 			return true;

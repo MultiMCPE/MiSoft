@@ -248,6 +248,5 @@ interface PacketMagicNumbers{
 	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x109;
 	public const ADD_ITEM_PACKET = 0x110;
 	public const BATCH_PACKET = 0x111;
-    public const CLIENTBOUND_CLOSE_FORM_PACKET = 0x136;
 
 }

@@ -23,42 +23,56 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\TieredTool;
 use function mt_rand;
 
-class EmeraldOre extends Solid{
+class EmeraldOre extends Solid
+{
 
-	protected $id = self::EMERALD_ORE;
+    protected $id = self::EMERALD_ORE;
 
-	public function __construct(int $meta = 0){
-		$this->meta = $meta;
-	}
+    public function __construct(int $meta = 0)
+    {
+        $this->meta = $meta;
+    }
 
-	public function getName() : string{
-		return "Emerald Ore";
-	}
+    public function getName(): string
+    {
+        return "Emerald Ore";
+    }
 
-	public function getToolType() : int{
-		return BlockToolType::TYPE_PICKAXE;
-	}
+    public function getToolType(): int
+    {
+        return BlockToolType::TYPE_PICKAXE;
+    }
 
-	public function getToolHarvestLevel() : int{
-		return TieredTool::TIER_IRON;
-	}
+    public function getToolHarvestLevel(): int
+    {
+        return TieredTool::TIER_IRON;
+    }
 
-	public function getHardness() : float{
-		return 3;
-	}
+    public function getHardness(): float
+    {
+        return 3;
+    }
 
-	public function getDropsForCompatibleTool(Item $item) : array{
-		return [
-			ItemFactory::get(Item::EMERALD)
-		];
-	}
+    public function getDropsForCompatibleTool(Item $item): array
+    {
+        if ($fortune = $item->getEnchantment(Enchantment::FORTUNE)) {
+            $fortune = min($fortune, 3);
+            $times = [1, 1, 2, 3, 4];
+            $time = $times[mt_rand(0, $fortune + 1)];
+            return [
+                Item::get(Item::EMERALD, 0, $time),
+            ];
+        }
+        return [ItemFactory::get(Item::EMERALD)];
+    }
 
-	protected function getXpDropAmount() : int{
+    protected function getXpDropAmount() : int{
 		return mt_rand(3, 7);
 	}
 }

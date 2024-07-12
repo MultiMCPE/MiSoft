@@ -59,15 +59,15 @@ class VersionString{
 		$this->development = $isDevBuild;
 		$this->build = $buildNumber;
 
-		//preg_match('/(\d+)\.(\d+)\.(\d+)(?:-(.*))?$/', $this->baseVersion, $matches);
-		//if(count($matches) < 4){
-			//throw new InvalidArgumentException("Invalid base version \"$baseVersion\", should contain at least 3 version digits");
-		//}
+		preg_match('/(\d+)\.(\d+)\.(\d+)(?:-(.*))?$/', $this->baseVersion, $matches);
+		if(count($matches) < 4){
+			throw new InvalidArgumentException("Invalid base version \"$baseVersion\", should contain at least 3 version digits");
+		}
 
-		//$this->major = (int) $matches[1];
-		//$this->minor = (int) $matches[2];
-		//$this->patch = (int) $matches[3];
-		//$this->suffix = $matches[4] ?? "";
+		$this->major = (int) $matches[1];
+		$this->minor = (int) $matches[2];
+		$this->patch = (int) $matches[3];
+		$this->suffix = $matches[4] ?? "";
 	}
 
 	public function getNumber() : int{

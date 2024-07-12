@@ -55,6 +55,8 @@ final class ItemPalette685 extends Palette{
 			$simpleMappings[$stringId] = $intId;
 		}
 
+		$stringToIntMap["minecraft:stone_block_slab"] = 44;
+
 		$complexMappings = [];
 		foreach($itemMap["complex"] as $oldId => $map){
 			foreach($map as $meta => $newId){

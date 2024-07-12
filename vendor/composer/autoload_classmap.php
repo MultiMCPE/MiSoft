@@ -1256,7 +1256,6 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds662' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds662.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds671' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds671.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds685' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds685.php',
-    'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds686' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds686.php',
     'pocketmine\\network\\mcpe\\protocol\\PurchaseReceiptPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PurchaseReceiptPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\RemoveActorPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/RemoveActorPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\RemoveObjectivePacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/RemoveObjectivePacket.php',

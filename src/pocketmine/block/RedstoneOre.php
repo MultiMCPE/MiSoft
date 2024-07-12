@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\TieredTool;
@@ -67,11 +68,18 @@ class RedstoneOre extends Solid{
 		return TieredTool::TIER_IRON;
 	}
 
-	public function getDropsForCompatibleTool(Item $item) : array{
-		return [
-			ItemFactory::get(Item::REDSTONE_DUST, 0, mt_rand(4, 5))
-		];
-	}
+	public function getDropsForCompatibleTool(Item $item) : array
+    {
+        if ($fortune = $item->getEnchantmentLevel(Enchantment::FORTUNE)) {
+            $fortune = min($fortune, 3);
+            return [
+                Item::get(Item::REDSTONE_DUST, 0, mt_rand(4, 5 + $fortune)),
+            ];
+        }
+        return [
+            ItemFactory::get(Item::REDSTONE_DUST, 0, mt_rand(4, 5))
+        ];
+    }
 
 	protected function getXpDropAmount() : int{
 		return mt_rand(1, 5);

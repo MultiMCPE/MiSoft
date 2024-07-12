@@ -789,13 +789,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		return $this->isConnected() and $this->loggedIn;
 	}
 
-    /**
-     * Closes the current viewing form and forms in queue.
-     */
-    public function closeAllForms() : void{
-        $this->sessionAdapter->handleCloseAllForms();
-    }
-
 	/**
 	 * @return bool
 	 */
@@ -2367,6 +2360,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleRequestNetworkSettings(RequestNetworkSettingsPacket $packet) : bool{
+	    if($this->enableCompression) {
+	        return false;
+	    }
+
 		$this->protocol = $packet->getProtocolVersion();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_553 || !in_array($this->protocol, ProtocolInfo::ACCEPTED_PROTOCOLS)){
 	    	$packet = new PlayStatusPacket();
