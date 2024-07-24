@@ -19,8 +19,6 @@
  *
 */
 
-//чат с ареликом 
-
 declare(strict_types=1);
 
 /**
@@ -1671,16 +1669,16 @@ class Server{
 			$this->logger->info($this->getLanguage()->translateString("language.selected", [$this->getLanguage()->getName(), $this->getLanguage()->getLang()]));
 
 			$lang = $this->getProperty("settings.language", BaseLang::FALLBACK_LANGUAGE);
-			if(file_exists(\pocketmine\RESOURCE_PATH . "aquasoft_$lang.yml")){
-				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "aquasoft_$lang.yml");
+			if(file_exists(\pocketmine\RESOURCE_PATH . "misoft_$lang.yml")){
+				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "misoft_$lang.yml");
 			}else{
-				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "aquasoft_rus.yml");
+				$content = file_get_contents($file = \pocketmine\RESOURCE_PATH . "misoft_rus.yml");
 			}
 
-			if(!file_exists($this->dataPath . "aquasoft.yml")){
-				@file_put_contents($this->dataPath . "aquasoft.yml", $content);
+			if(!file_exists($this->dataPath . "misoft.yml")){
+				@file_put_contents($this->dataPath . "misoft.yml", $content);
 			}
-			$this->advancedConfig = new Config($this->dataPath . "aquasoft.yml", Config::YAML, []);
+			$this->advancedConfig = new Config($this->dataPath . "misoft.yml", Config::YAML, []);
 
 			$this->loadAdvancedConfig();
 
