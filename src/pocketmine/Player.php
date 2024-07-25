@@ -1482,14 +1482,14 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if(!($pos instanceof Position)){
 			$level = $this->level;
 		}else{
-			$level = $pos->getLevel();
+			$level = $pos->getLevelNonNull();
 		}
 		$this->spawnPosition = new Position($pos->x, $pos->y, $pos->z, $level);
 		$pk = new SetSpawnPositionPacket();
 		$pk->x = $pk->x2 = $this->spawnPosition->getFloorX();
 		$pk->y = $pk->y2 = $this->spawnPosition->getFloorY();
 		$pk->z = $pk->z2 = $this->spawnPosition->getFloorZ();
-		$pk->dimension = $this->spawnPosition->getLevel()->getDimensionId();
+		$pk->dimension = $this->spawnPosition->getLevelNonNull()->getDimensionId();
 		$pk->spawnType = SetSpawnPositionPacket::TYPE_PLAYER_SPAWN;
 		$pk->spawnForced = false;
 		$this->dataPacket($pk);
@@ -2188,22 +2188,22 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}
 
 					if($netherLevel instanceof Level){
-						if($this->getLevel() !== $netherLevel){
+						if($this->getLevelNonNull() !== $netherLevel){
 							$this->fromPos = $this->getPosition();
 							$this->fromPos->x = ((int) $this->fromPos->x) + 0.5;
 							$this->fromPos->z = ((int) $this->fromPos->z) + 0.5;
 							$this->teleport($this->shouldResPos = $netherLevel->getSafeSpawn());
 						}elseif($this->fromPos instanceof Position){
-							if(!($this->getLevel()->isChunkLoaded((int) $this->fromPos->x, (int) $this->fromPos->z))){
-								$this->getLevel()->loadChunk((int) $this->fromPos->x, (int) $this->fromPos->z);
+							if(!($this->getLevelNonNull()->isChunkLoaded((int) $this->fromPos->x, (int) $this->fromPos->z))){
+								$this->getLevelNonNull()->loadChunk((int) $this->fromPos->x, (int) $this->fromPos->z);
 							}
 							$add = [1, 0, -1, 0, 0, 1, 0, -1];
 							$tempos = null;
 							for($j = 2; $j < 5; $j++){
 								for($i = 0; $i < 4; $i++){
-									if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 0, $add[$i + 4] * $j))->getId() === Block::AIR){
-										if($this->fromPos->getLevel()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 1, $add[$i + 4] * $j))->getId() === Block::AIR){
-											$tempos = Position::fromObject($this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j), $this->fromPos->getLevel());
+									if($this->fromPos->getLevelNonNull()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 0, $add[$i + 4] * $j))->getId() === Block::AIR){
+										if($this->fromPos->getLevelNonNull()->getBlock($this->temporalVector->fromObjectAdd($this->fromPos, $add[$i] * $j, 1, $add[$i + 4] * $j))->getId() === Block::AIR){
+											$tempos = Position::fromObject($this->fromPos->add($add[$i] * $j, 0, $add[$i + 4] * $j), $this->fromPos->getLevelNonNull());
 										    break;
 										}
 									}
@@ -2213,7 +2213,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 								}
 							}
 							if($tempos === null){
-								$tempos = Position::fromObject($this->fromPos->add(mt_rand(-2, 2), 0, mt_rand(-2, 2)), $this->fromPos->getLevel());
+								$tempos = Position::fromObject($this->fromPos->add(mt_rand(-2, 2), 0, mt_rand(-2, 2)), $this->fromPos->getLevelNonNull());
 							}
 							$this->teleport($this->shouldResPos = $tempos);
 							$add = null;
@@ -3239,7 +3239,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		//TODO: add events so plugins can change this
-		$this->getLevel()->broadcastPacketToViewers($this, $packet);
+		$this->getLevelNonNull()->broadcastPacketToViewers($this, $packet);
 		return true;
 	}
 
@@ -4034,7 +4034,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$item = $block->getPickedItem();
 		if($packet->addUserData){
-			$tile = $this->getLevel()->getTile($block);
+			$tile = $this->getLevelNonNull()->getTile($block);
 			if($tile instanceof Tile){
 				$nbt = $tile->getCleanedNBT();
 				if($nbt instanceof CompoundTag){
@@ -5382,7 +5382,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * TODO: add support for editing the rear side of the sign (not currently supported due to technical limitations)
 	 */
 	public function openSignEditor(Vector3 $position) : void{
-		$tile = $this->getLevel()->getTile($position);
+		$tile = $this->getLevelNonNull()->getTile($position);
 		if($tile instanceof TileSign){
 			$tile->setEditorEntityRuntimeId($this->getId());
 			$this->onOpenSignEditor($position, true);

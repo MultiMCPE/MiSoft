@@ -48,9 +48,9 @@ class NoteBlock extends Solid{
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
-		Tile::createTile(Tile::NOTE_BLOCK, $this->getLevel(), TileNoteBlock::createNBT($this, $face, $item, $player));
+		Tile::createTile(Tile::NOTE_BLOCK, $this->getLevelNonNull(), TileNoteBlock::createNBT($this, $face, $item, $player));
 
 		return true;
 	}

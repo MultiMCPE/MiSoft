@@ -202,9 +202,9 @@ abstract class Door extends Transparent implements ElectricalAppliance{
 
 	public function onNearbyBlockChange() : void{
 		if($this->getSide(Vector3::SIDE_DOWN)->getId() === self::AIR){ //Replace with common break method
-			$this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), false);
+			$this->getLevelNonNull()->setBlock($this, BlockFactory::get(Block::AIR), false);
 			if($this->getSide(Vector3::SIDE_UP) instanceof Door){
-				$this->getLevel()->setBlock($this->getSide(Vector3::SIDE_UP), BlockFactory::get(Block::AIR), false);
+				$this->getLevelNonNull()->setBlock($this->getSide(Vector3::SIDE_UP), BlockFactory::get(Block::AIR), false);
 			}
 		}
 	}
@@ -231,8 +231,8 @@ abstract class Door extends Transparent implements ElectricalAppliance{
 			}
 
 			$this->setDamage($player->getDirection() & 0x03);
-			$this->getLevel()->setBlock($blockReplace, $this, true, true); //Bottom
-			$this->getLevel()->setBlock($blockUp, BlockFactory::get($this->getId(), $metaUp), true); //Top
+			$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true); //Bottom
+			$this->getLevelNonNull()->setBlock($blockUp, BlockFactory::get($this->getId(), $metaUp), true); //Top
 			return true;
 		}
 

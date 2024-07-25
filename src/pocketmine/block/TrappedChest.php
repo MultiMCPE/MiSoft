@@ -79,19 +79,19 @@ class TrappedChest extends RedstoneSource{
 
 		$this->meta = $faces[$player instanceof Player ? $player->getDirection() : 0];
 
-		Tile::createTile(Tile::CHEST, $this->getLevel(), TileChest::createNBT($this, $face, $item, $player));
+		Tile::createTile(Tile::CHEST, $this->getLevelNonNull(), TileChest::createNBT($this, $face, $item, $player));
 		return true;
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player instanceof Player){
 
-			$t = $this->getLevel()->getTile($this);
+			$t = $this->getLevelNonNull()->getTile($this);
 			$chest = null;
 			if($t instanceof TileChest){
 				$chest = $t;
 			}else{
-				$chest = Tile::createTile(Tile::CHEST, $this->getLevel(), TileChest::createNBT($this));
+				$chest = Tile::createTile(Tile::CHEST, $this->getLevelNonNull(), TileChest::createNBT($this));
 				if(!($chest instanceof TileChest)){
 					return true;
 				}

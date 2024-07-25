@@ -78,8 +78,8 @@ class Lever extends RedstoneSource{
 
 	public function onActivate(Item $item, Player $player = null) : bool{
 		$this->meta ^= 0x08;
-		$this->getLevel()->setBlock($this, $this, true, false);
-		$this->getLevel()->addSound(new ButtonClickSound($this));
+		$this->getLevelNonNull()->setBlock($this, $this, true, false);
+		$this->getLevelNonNull()->addSound(new ButtonClickSound($this));
 		if($this->isActivated()){
 			$this->activate();
 		}else{
@@ -114,10 +114,10 @@ class Lever extends RedstoneSource{
 	public function onBreak(Item $item, Player $player = null) : bool{
 		if($this->isActivated()){
 			$this->meta ^= 0x08;
-			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->getLevelNonNull()->setBlock($this, $this, true, false);
 			$this->deactivate();
 		}
-		$this->getLevel()->setBlock($this, new Air(), true, false);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, false);
 
 		return true;
 	}

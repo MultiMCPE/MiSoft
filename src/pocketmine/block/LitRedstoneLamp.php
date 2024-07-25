@@ -42,12 +42,12 @@ class LitRedstoneLamp extends Solid implements ElectricalAppliance{
 
 	public function turnOn() : bool{
 		$this->meta = 0;
-		$this->getLevel()->setBlock($this, $this, true, false);
+		$this->getLevelNonNull()->setBlock($this, $this, true, false);
 		return true;
 	}
 
 	public function turnOff() : bool{
-		$this->getLevel()->setBlock($this, new RedstoneLamp(), true, true);
+		$this->getLevelNonNull()->setBlock($this, new RedstoneLamp(), true, true);
 		return true;
 	}
 

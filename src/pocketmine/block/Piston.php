@@ -77,9 +77,9 @@ class Piston extends RedstoneSource{
 
 	public function activate(array $ignore = []){
 		if($this->moveNextBlocks()){
-			$this->getLevel()->addSound(new PistonInSound($this));
+			$this->getLevelNonNull()->addSound(new PistonInSound($this));
 
-			$tile = $this->getLevel()->getTile($this);
+			$tile = $this->getLevelNonNull()->getTile($this);
 			if($tile instanceof Tile){
 				$tile->close();
 			}
@@ -89,19 +89,19 @@ class Piston extends RedstoneSource{
 			$nbt->setByte(PistonHeadTile::TAG_STATE, 0);
 			$nbt->setByte(PistonHeadTile::TAG_STICKY, $this->isSticky() ? 1 : 0);
 
-			$tile = Tile::createTile(Tile::PISTON_HEAD, $this->getLevel(), $nbt);
+			$tile = Tile::createTile(Tile::PISTON_HEAD, $this->getLevelNonNull(), $nbt);
 			$tile->spawnToAll();
 		}
 	}
 
 	public function deactivate(array $ignore = []){
-		$this->getLevel()->addSound(new PistonOutSound($this));
+		$this->getLevelNonNull()->addSound(new PistonOutSound($this));
 
 		if($this->isSticky()){
 			$this->moveBlockBackwards();
 		}
 
-		$tile = $this->getLevel()->getTile($this);
+		$tile = $this->getLevelNonNull()->getTile($this);
 		if($tile instanceof Tile){
 			$tile->close();
 		}
@@ -111,7 +111,7 @@ class Piston extends RedstoneSource{
 		$nbt->setByte(PistonHeadTile::TAG_STATE, 0);
 		$nbt->setByte(PistonHeadTile::TAG_STICKY, $this->isSticky() ? 1 : 0);
 
-		$tile = Tile::createTile(Tile::PISTON_HEAD, $this->getLevel(), $nbt);
+		$tile = Tile::createTile(Tile::PISTON_HEAD, $this->getLevelNonNull(), $nbt);
 		$tile->spawnToAll();
 	}
 
@@ -124,7 +124,7 @@ class Piston extends RedstoneSource{
 					$drops = $nextBlock->getDrops(); //Fixes tile entities being deleted before getting drops
                     foreach($drops as $item){
 						if($item->getCount() > 0) {
-							$this->getLevel()->dropItem($nextBlock->add(0.5, 0.5, 0.5), $item);
+							$this->getLevelNonNull()->dropItem($nextBlock->add(0.5, 0.5, 0.5), $item);
 						}
                     }
 
@@ -134,16 +134,16 @@ class Piston extends RedstoneSource{
 					return false;
 				}
 
-				$this->getLevel()->setBlock($nextBlock, $oldBlock);
+				$this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
 				break;
 			}
 
-			$this->getLevel()->setBlock($nextBlock, $oldBlock);
+			$this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
 			$oldBlock = $nextBlock;
 		}
 
 		if($i > 1 and $i < $this->maxMoveBlocks + 1){
-			$this->getLevel()->setBlock($this->getSide($this->getExtendSide()), new Air());
+			$this->getLevelNonNull()->setBlock($this->getSide($this->getExtendSide()), new Air());
 		}
 
 		if($i === $this->maxMoveBlocks + 1){
@@ -156,8 +156,8 @@ class Piston extends RedstoneSource{
 	public function moveBlockBackwards(): void{
 		$nextBlock = $this->getSide($this->getExtendSide(), 2);
 		if(!in_array($nextBlock->getId(), $this->noMoveBlocks) and $nextBlock->isSolid()){
-			$this->getLevel()->setBlock($this->getSide($this->getExtendSide()), $nextBlock);
-			$this->getLevel()->setBlock($nextBlock, new Air());
+			$this->getLevelNonNull()->setBlock($this->getSide($this->getExtendSide()), $nextBlock);
+			$this->getLevelNonNull()->setBlock($nextBlock, new Air());
 		}
 	}
 
@@ -180,7 +180,7 @@ class Piston extends RedstoneSource{
 		$nbt->setByte(PistonHeadTile::TAG_STATE, 0);
 		$nbt->setByte(PistonHeadTile::TAG_STICKY, $this->isSticky() ? 1 : 0);
 
-		Tile::createTile(Tile::PISTON_HEAD, $this->getLevel(), $nbt);
+		Tile::createTile(Tile::PISTON_HEAD, $this->getLevelNonNull(), $nbt);
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
@@ -210,7 +210,7 @@ class Piston extends RedstoneSource{
 		$this->meta = $faces[$f];
 
 		$this->createPistonArm();
-		$this->getLevel()->setBlock($this, $this, true, true);
+		$this->getLevelNonNull()->setBlock($this, $this, true, true);
 
 		return true;
 	}

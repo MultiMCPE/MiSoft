@@ -65,18 +65,18 @@ class Hopper extends Transparent{
 			5 => 4
 		];
 		$this->meta = $faces[$face];
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
-		Tile::createTile(Tile::HOPPER, $this->getLevel(), TileHopper::createNBT($this, $face, $item, $player));
+		Tile::createTile(Tile::HOPPER, $this->getLevelNonNull(), TileHopper::createNBT($this, $face, $item, $player));
 
 		return true;
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player instanceof Player){
-			$hopper = $this->getLevel()->getTile($this);
+			$hopper = $this->getLevelNonNull()->getTile($this);
 			if(!($hopper instanceof TileHopper)){
-				$hopper = Tile::createTile(Tile::HOPPER, $this->getLevel(), TileHopper::createNBT($this));
+				$hopper = Tile::createTile(Tile::HOPPER, $this->getLevelNonNull(), TileHopper::createNBT($this));
 				if(!($hopper instanceof TileHopper)){
 					return true;
 				}

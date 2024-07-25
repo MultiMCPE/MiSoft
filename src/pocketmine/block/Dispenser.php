@@ -75,14 +75,14 @@ class Dispenser extends Solid implements ElectricalAppliance{
 		];
 		$this->meta = $faces[$f];
 
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
-		Tile::createTile(Tile::DISPENSER, $this->getLevel(), TileDispenser::createNBT($this, $face, $item, $player));
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
+		Tile::createTile(Tile::DISPENSER, $this->getLevelNonNull(), TileDispenser::createNBT($this, $face, $item, $player));
 
 		return true;
 	}
 
 	public function activate(array $ignore = []){
-		$tile = $this->getLevel()->getTile($this);
+		$tile = $this->getLevelNonNull()->getTile($this);
 		if($tile instanceof TileDispenser){
 			$tile->activate();
 		}
@@ -91,12 +91,12 @@ class Dispenser extends Solid implements ElectricalAppliance{
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player instanceof Player){
 
-			$t = $this->getLevel()->getTile($this);
+			$t = $this->getLevelNonNull()->getTile($this);
 			$dispenser = null;
 			if($t instanceof TileDispenser){
 				$dispenser = $t;
 			}else{
-				$dispenser = Tile::createTile(Tile::DISPENSER, $this->getLevel(), TileDispenser::createNBT($this));
+				$dispenser = Tile::createTile(Tile::DISPENSER, $this->getLevelNonNull(), TileDispenser::createNBT($this));
 				if(!($dispenser instanceof TileDispenser)){
 					return true;
 				}

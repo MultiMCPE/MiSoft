@@ -128,7 +128,7 @@ class EnderCrystal extends Entity implements Explosive{
 		$ev = new ExplosionPrimeEvent($this, 6);
 		$ev->call();
 		if(!$ev->isCancelled()){
-			$explosion = new Explosion(Position::fromObject($this->add(0, 0.5, 0), $this->getLevel()), $ev->getForce(), $this);
+			$explosion = new Explosion(Position::fromObject($this->add(0, 0.5, 0), $this->getLevelNonNull()), $ev->getForce(), $this);
 			if($ev->isBlockBreaking()){
 				$explosion->explodeA();
 			}

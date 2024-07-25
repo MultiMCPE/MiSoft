@@ -30,7 +30,7 @@ class DaylightSensorInverted extends DaylightSensor{
 	protected $id = self::DAYLIGHT_SENSOR_INVERTED;
 
 	public function onActivate(Item $item, Player $player = null) : bool{
-		$this->getLevel()->setBlock($this, new DaylightSensor(), true, true);
+		$this->getLevelNonNull()->setBlock($this, new DaylightSensor(), true, true);
 		$this->getTile()->onUpdate();
 
 		return true;

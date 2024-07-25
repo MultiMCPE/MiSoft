@@ -90,40 +90,40 @@ class Portal extends Transparent{
 	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
 		$block = $this;
-		if($this->getLevel()->getBlock($this->temporalVector->setComponents($block->x - 1, $block->y, $block->z))->getId() === BlockIds::PORTAL or
-			$this->getLevel()->getBlock($this->temporalVector->setComponents($block->x + 1, $block->y, $block->z))->getId() === BlockIds::PORTAL
+		if($this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x - 1, $block->y, $block->z))->getId() === BlockIds::PORTAL or
+			$this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x + 1, $block->y, $block->z))->getId() === BlockIds::PORTAL
 		){//x方向
-			for($x = $block->x; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $block->y, $block->z))->getId() === BlockIds::PORTAL; $x++){
-				for($y = $block->y; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y++){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
+			for($x = $block->x; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $block->y, $block->z))->getId() === BlockIds::PORTAL; $x++){
+				for($y = $block->y; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y++){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
 				}
-				for($y = $block->y - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y--){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
+				for($y = $block->y - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y--){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
 				}
 			}
-			for($x = $block->x - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $block->y, $block->z))->getId() === BlockIds::PORTAL; $x--){
-				for($y = $block->y; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y++){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
+			for($x = $block->x - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $block->y, $block->z))->getId() === BlockIds::PORTAL; $x--){
+				for($y = $block->y; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y++){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
 				}
-				for($y = $block->y - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y--){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
+				for($y = $block->y - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($x, $y, $block->z))->getId() === BlockIds::PORTAL; $y--){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($x, $y, $block->z), new Air());
 				}
 			}
 		}else{//z方向
-			for($z = $block->z; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $block->y, $z))->getId() === BlockIds::PORTAL; $z++){
-				for($y = $block->y; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y++){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
+			for($z = $block->z; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x, $block->y, $z))->getId() === BlockIds::PORTAL; $z++){
+				for($y = $block->y; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y++){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
 				}
-				for($y = $block->y - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y--){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
+				for($y = $block->y - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y--){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
 				}
 			}
-			for($z = $block->z - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $block->y, $z))->getId() === BlockIds::PORTAL; $z--){
-				for($y = $block->y; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() == BlockIds::PORTAL; $y++){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
+			for($z = $block->z - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x, $block->y, $z))->getId() === BlockIds::PORTAL; $z--){
+				for($y = $block->y; $this->getLeveNonNulll()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() == BlockIds::PORTAL; $y++){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
 				}
-				for($y = $block->y - 1; $this->getLevel()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y--){
-					$this->getLevel()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
+				for($y = $block->y - 1; $this->getLevelNonNull()->getBlock($this->temporalVector->setComponents($block->x, $y, $z))->getId() === BlockIds::PORTAL; $y--){
+					$this->getLevelNonNull()->setBlock($this->temporalVector->setComponents($block->x, $y, $z), new Air());
 				}
 			}
 		}
@@ -134,7 +134,7 @@ class Portal extends Transparent{
 		if($player instanceof Player){
 			$this->meta = $player->getDirection() & 0x01;
 		}
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
 		return true;
 	}

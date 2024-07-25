@@ -50,11 +50,11 @@ class ChorusFruit extends Food{
 	}
 
 	public function onConsume(Living $consumer){
-		$level = $consumer->getLevel();
+		$level = $consumer->getLevelNonNull();
 		assert($level !== null);
 
 		$minX = $consumer->getFloorX() - 8;
-		$minY = min($consumer->getFloorY(), $consumer->getLevel()->getWorldHeight()) - 8;
+		$minY = min($consumer->getFloorY(), $consumer->getLevelNonNull()->getWorldHeight()) - 8;
 		$minZ = $consumer->getFloorZ() - 8;
 
 		$maxX = $minX + 16;

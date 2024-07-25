@@ -41,7 +41,7 @@ class EndCrystal extends Item{
 
 	public function onActivate(Player $player, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector) : bool{
 		if($blockClicked->getId() === self::OBSIDIAN || $blockClicked instanceof Bedrock){
-			$level = $blockClicked->getLevel();
+			$level = $blockClicked->getLevelNonNull();
 			$entities = $level->getNearbyEntities(new AxisAlignedBB($blockClicked->getX(), $blockClicked->getY(), $blockClicked->getZ(), $blockClicked->getX() + 1, $blockClicked->getY() + 2, $blockClicked->getZ() + 1));
 			if(count($entities) === 0 && $level->getBlock($blockClicked->up()) instanceof Air && $level->getBlock($blockClicked->up(2)) instanceof Air){
 			    $nbt = Entity::createBaseNBT(Location::fromObject($blockClicked->add(0.5, 1.5, 0.5)));

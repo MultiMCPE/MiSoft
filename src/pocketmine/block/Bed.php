@@ -85,7 +85,7 @@ class Bed extends Transparent{
 			$this->meta &= ~self::BITFLAG_OCCUPIED;
 		}
 
-		$this->getLevel()->setBlock($this, $this, false, false);
+		$this->getLevelNonNull()->setBlock($this, $this, false, false);
 
 		if(($other = $this->getOtherHalf()) !== null and $other->isOccupied() !== $occupied){
 			$other->setOccupied($occupied);
@@ -137,7 +137,7 @@ class Bed extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
-		$dimensionId = $this->getLevel()->getDimensionId();
+		$dimensionId = $this->getLevelNonNull()->getDimensionId();
 		if($dimensionId === DimensionIds::NETHER or $dimensionId === DimensionIds::THE_END){
 			$explosion = new Explosion($this, 6, $this);
 			$explosion->explodeA();
@@ -156,7 +156,7 @@ class Bed extends Transparent{
 				return true;
 			}
 
-			$time = $this->getLevel()->getTime() % Level::TIME_FULL;
+			$time = $this->getLevelNonNull()->getTime() % Level::TIME_FULL;
 
 			$isNight = ($time >= Level::TIME_NIGHT and $time < Level::TIME_SUNRISE);
 
@@ -187,11 +187,11 @@ class Bed extends Transparent{
 			$meta = (($player instanceof Player ? $player->getDirection() : 0) - 1) & 0x03;
 			$next = $this->getSide(self::getOtherHalfSide($meta));
 			if($next->canBeReplaced() and !$next->getSide(Vector3::SIDE_DOWN)->isTransparent()){
-				$this->getLevel()->setBlock($blockReplace, BlockFactory::get($this->id, $meta), true, true);
-				$this->getLevel()->setBlock($next, BlockFactory::get($this->id, $meta | self::BITFLAG_HEAD), true, true);
+				$this->getLevelNonNull()->setBlock($blockReplace, BlockFactory::get($this->id, $meta), true, true);
+				$this->getLevelNonNull()->setBlock($next, BlockFactory::get($this->id, $meta | self::BITFLAG_HEAD), true, true);
 
-				Tile::createTile(Tile::BED, $this->getLevel(), TileBed::createNBT($this, $face, $item, $player));
-				Tile::createTile(Tile::BED, $this->getLevel(), TileBed::createNBT($next, $face, $item, $player));
+				Tile::createTile(Tile::BED, $this->getLevelNonNull(), TileBed::createNBT($this, $face, $item, $player));
+				Tile::createTile(Tile::BED, $this->getLevelNonNull(), TileBed::createNBT($next, $face, $item, $player));
 
 				return true;
 			}
@@ -213,7 +213,7 @@ class Bed extends Transparent{
 	}
 
 	private function getItem() : Item{
-		$tile = $this->getLevel()->getTile($this);
+		$tile = $this->getLevelNonNull()->getTile($this);
 		if($tile instanceof TileBed){
 			return ItemFactory::get($this->getItemId(), $tile->getColor());
 		}

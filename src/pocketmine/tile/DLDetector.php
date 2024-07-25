@@ -41,7 +41,7 @@ class DLDetector extends Spawnable{
 	 * @return int
 	 */
 	public function getLightByTime() : int{
-		$time = $this->getLevel()->getTime();
+		$time = $this->getLevelNonNull()->getTime();
 		if(($time >= Level::TIME_DAY and $time <= Level::TIME_SUNSET) or
 			($time >= Level::TIME_SUNRISE and $time <= Level::TIME_FULL)
 		){
@@ -87,7 +87,7 @@ class DLDetector extends Spawnable{
 
 		$this->timings->startTiming();
 
-		if(($this->getLevel()->getServer()->getTick() % 3) === 0){ //Update per 3 ticks
+		if(($this->getLevelNonNull()->getServer()->getTick() % 3) === 0){ //Update per 3 ticks
 			/** @var DaylightSensor $block */
 			$block = $this->getBlock();
 			if(!$this->isActivated()){

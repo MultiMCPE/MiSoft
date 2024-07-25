@@ -58,7 +58,7 @@ class RedstoneSource extends Flowable{
 	 * @return bool
 	 */
 	public function canCalc() : bool{
-		return $this->getLevel()->getServer()->redstoneEnabled;
+		return $this->getLevelNonNull()->getServer()->redstoneEnabled;
 	}
 
 	/**
@@ -72,7 +72,7 @@ class RedstoneSource extends Flowable{
 	 * @return bool
 	 */
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$place = $this->getLevel()->setBlock($this, $this, true);
+		$place = $this->getLevelNonNull()->setBlock($this, $this, true);
 		if($this->isActivated()){
 			$this->activate();
 		}
@@ -87,7 +87,7 @@ class RedstoneSource extends Flowable{
 	 * @return bool
 	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
-		$break = $this->getLevel()->setBlock($this, new Air(), true);
+		$break = $this->getLevelNonNull()->setBlock($this, new Air(), true);
 		if($this->isActivated()){
 			$this->deactivate();
 		}

@@ -184,7 +184,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @return bool
 	 */
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		return $this->getLevel()->setBlock($this, $this, true, true);
+		return $this->getLevelNonNull()->setBlock($this, $this, true, true);
 	}
 
 	/**
@@ -252,7 +252,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @return bool
 	 */
 	public function onBreak(Item $item, Player $player = null) : bool{
-		return $this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
+		return $this->getLevelNonNull()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
 	}
 
 
@@ -633,7 +633,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 */
 	public function getSide(int $side, int $step = 1){
 		if($this->isValid()){
-			return $this->getLevel()->getBlock(Vector3::getSide($side, $step));
+			return $this->getLevelNonNull()->getBlock(Vector3::getSide($side, $step));
 		}
 
 		return BlockFactory::get(Block::AIR, 0, Position::fromObject(Vector3::getSide($side, $step)));

@@ -75,14 +75,14 @@ class Dropper extends Solid implements ElectricalAppliance{
 		];
 		$this->meta = $faces[$f];
 
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
-		Tile::createTile(Tile::DROPPER, $this->getLevel(), TileDropper::createNBT($this, $face, $item, $player));
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
+		Tile::createTile(Tile::DROPPER, $this->getLevelNonNull(), TileDropper::createNBT($this, $face, $item, $player));
 
 		return true;
 	}
 
 	public function activate(array $ignore = []){
-		$tile = $this->getLevel()->getTile($this);
+		$tile = $this->getLevelNonNull()->getTile($this);
 		if($tile instanceof TileDropper){
 			$tile->activate();
 		}
@@ -91,12 +91,12 @@ class Dropper extends Solid implements ElectricalAppliance{
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if($player instanceof Player){
 
-			$t = $this->getLevel()->getTile($this);
+			$t = $this->getLevelNonNull()->getTile($this);
 			$dropper = null;
 			if($t instanceof TileDropper){
 				$dropper = $t;
 			}else{
-				$dropper = Tile::createTile(Tile::DROPPER, $this->getLevel(), TileDropper::createNBT($this, null));
+				$dropper = Tile::createTile(Tile::DROPPER, $this->getLevelNonNull(), TileDropper::createNBT($this, null));
 				if(!($dropper instanceof TileDropper)){
 					return true;
 				}

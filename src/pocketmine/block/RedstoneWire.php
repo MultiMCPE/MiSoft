@@ -78,7 +78,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $this->add(0, 1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block->getId() === $this->id){
 					if($block->getStrength() > $strength){
 						$strength = $block->getStrength();
@@ -92,7 +92,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $this->add(0, -1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block->getId() === $this->id){
 					if($block->getStrength() > $strength){
 						$strength = $block->getStrength();
@@ -132,7 +132,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $this->add(0, 1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block->getId() === $this->id){
 					$hasChecked[$side] = true;
 				}
@@ -143,7 +143,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $this->add(0, -1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block->getId() === $this->id){
 					$hasChecked[$side] = true;
 				}
@@ -280,7 +280,7 @@ class RedstoneWire extends RedstoneSource{
 	public function getPowerSources(RedstoneWire $wire, array $powers = [], array $hasUpdated = [], bool $isStart = false) : array{
 		if(!$isStart){
 			$wire->meta = 0;
-			$wire->getLevel()->setBlock($wire, $wire, true, false);
+			$wire->getLevelNonNull()->setBlock($wire, $wire, true, false);
 			$wire->deactivate();
 		}
 
@@ -320,7 +320,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $wire->add(0, 1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block instanceof RedstoneSource){
 					if($block->isActivated($wire)){
 						if($block->getId() === $this->id){
@@ -338,7 +338,7 @@ class RedstoneWire extends RedstoneSource{
 		$baseBlock = $wire->add(0, -1, 0);
 		foreach($hasChecked as $side => $bool){
 			if(!$bool){
-				$block = $this->getLevel()->getBlock($baseBlock->getSide($side));
+				$block = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 				if($block instanceof RedstoneSource){
 					if($block->isActivated($wire)){
 						if($block->getId() === $this->id){
@@ -362,9 +362,9 @@ class RedstoneWire extends RedstoneSource{
 			$hasUpdated[] = $hash;
 			if($type === self::DESTROY or $type === self::OFF){
 				$this->meta = $strength;
-				$this->getLevel()->setBlock($this, $this, true, false);
+				$this->getLevelNonNull()->setBlock($this, $this, true, false);
 				if($type === self::DESTROY){
-					$this->getLevel()->setBlock($this, new Air(), true, false);
+					$this->getLevelNonNull()->setBlock($this, new Air(), true, false);
 				}
 				if($strength <= 0){
 					$this->deactivate();
@@ -389,7 +389,7 @@ class RedstoneWire extends RedstoneSource{
 
 				if($this->getStrength() < $strength){
 					$this->meta = $strength;
-					$this->getLevel()->setBlock($this, $this, true, false);
+					$this->getLevelNonNull()->setBlock($this, $this, true, false);
 					$this->activate();
 
 					$hasChecked = [
@@ -413,7 +413,7 @@ class RedstoneWire extends RedstoneSource{
 					$baseBlock = $this->add(0, 1, 0);
 					foreach($hasChecked as $side => $bool){
 						if(!$bool){
-							$needUpdate = $this->getLevel()->getBlock($baseBlock->getSide($side));
+							$needUpdate = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 							if(!in_array(Level::chunkBlockHash($needUpdate->x, $needUpdate->y, $needUpdate->z), $hasUpdated)){
 								$result = $this->updateNormalWire($needUpdate, $strength - 1, $type, $hasUpdated);
 								if(count($result) !== count($hasUpdated)){
@@ -427,7 +427,7 @@ class RedstoneWire extends RedstoneSource{
 					$baseBlock = $this->add(0, -1, 0);
 					foreach($hasChecked as $side => $bool){
 						if(!$bool){
-							$needUpdate = $this->getLevel()->getBlock($baseBlock->getSide($side));
+							$needUpdate = $this->getLevelNonNull()->getBlock($baseBlock->getSide($side));
 							if(!in_array(Level::chunkBlockHash($needUpdate->x, $needUpdate->y, $needUpdate->z), $hasUpdated)){
 								$result = $this->updateNormalWire($needUpdate, $strength - 1, $type, $hasUpdated);
 								if(count($result) !== count($hasUpdated)){
@@ -459,7 +459,7 @@ class RedstoneWire extends RedstoneSource{
 	public function onNearbyBlockChange() : void{
 		$down = $this->getSide(Vector3::SIDE_DOWN);
 		if($down instanceof Transparent and $down->getId() !== Block::REDSTONE_LAMP and $down->getId() !== Block::LIT_REDSTONE_LAMP){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 		}
 	}
 
@@ -468,7 +468,7 @@ class RedstoneWire extends RedstoneSource{
 		if($down instanceof Transparent and $down->getId() !== Block::REDSTONE_LAMP and $down->getId() !== Block::LIT_REDSTONE_LAMP){
 			return false;
 		}else{
-			$this->getLevel()->setBlock($blockReplace, $this, true, false);
+			$this->getLevelNonNull()->setBlock($blockReplace, $this, true, false);
 			$this->calcSignal(15, self::PLACE);
 
 			return true;
@@ -479,7 +479,7 @@ class RedstoneWire extends RedstoneSource{
 		if($this->canCalc()){
 			$this->calcSignal(0, self::DESTROY);
 		}else{
-			$this->getLevel()->setBlock($this, new Air());
+			$this->getLevelNonNull()->setBlock($this, new Air());
 		}
 
 		return true;

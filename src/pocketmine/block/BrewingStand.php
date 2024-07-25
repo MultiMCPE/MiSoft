@@ -76,7 +76,7 @@ class BrewingStand extends Transparent{
 			if($item->hasCustomName()){
 				$nbt->setString("CustomName", $item->getCustomName());
 			}
-			new BrewingStandTile($this->getLevel(), $nbt);
+			new BrewingStandTile($this->getLevelNonNull(), $nbt);
 		}
 
 		return $parent;
@@ -84,7 +84,7 @@ class BrewingStand extends Transparent{
 
 	public function onActivate(Item $item, Player $player = null): bool{
 		$parent = parent::onActivate($item, $player);
-		$tile = $player->getLevel()->getTile($this);
+		$tile = $player->getLevelNonNull()->getTile($this);
 		if($tile instanceof BrewingStandTile){
 			$player->addWindow($tile->getInventory());
 		}else{
@@ -94,7 +94,7 @@ class BrewingStand extends Transparent{
 			if($item->hasCustomName()){
 				$nbt->setString("CustomName", $item->getCustomName());
 			}
-			$tile = new BrewingStandTile($this->getLevel(), $nbt);
+			$tile = new BrewingStandTile($this->getLevelNonNull(), $nbt);
 			$player->addWindow($tile->getInventory());
 		}
 

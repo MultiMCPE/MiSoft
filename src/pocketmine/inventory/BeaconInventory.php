@@ -52,7 +52,7 @@ class BeaconInventory extends ContainerInventory{
 	public function onClose(Player $who) : void{
 		parent::onClose($who);
 
-		$this->getHolder()->getLevel()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($this->getResultSlot()));
+		$this->getHolder()->getLevelNonNull()->dropItem($this->getHolder()->add(0.5, 0.5, 0.5), $this->getItem($this->getResultSlot()));
 		$this->clear($this->getResultSlot());
 	}
 

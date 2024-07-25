@@ -68,16 +68,16 @@ class DaylightSensor extends RedstoneSource{
 	}
 
 	protected function getTile() : DLDetector{
-		$t = $this->getLevel()->getTile($this);
+		$t = $this->getLevelNonNull()->getTile($this);
 		if($t instanceof DLDetector){
 			return $t;
 		}else{
-			return new DLDetector($this->getLevel(), DLDetector::createNBT($this, null));
+			return new DLDetector($this->getLevelNonNull(), DLDetector::createNBT($this, null));
 		}
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
-		$this->getLevel()->setBlock($this, new DaylightSensorInverted(), true, true);
+		$this->getLevelNonNull()->setBlock($this, new DaylightSensorInverted(), true, true);
 		$this->getTile()->onUpdate();
 
 		return true;
@@ -88,7 +88,7 @@ class DaylightSensor extends RedstoneSource{
 	}
 
 	public function onBreak(Item $item, Player $player = null) : bool{
-		$this->getLevel()->setBlock($this, new Air(), true, true);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, true);
 		if($this->isActivated()){
 			$this->deactivate();
 		}

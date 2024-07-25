@@ -83,7 +83,7 @@ class NPC extends Human {
      * Spawns the NPC to all players in the level
      */
     public function spawnToAll(): void {
-        foreach ($this->getLevel()->getPlayers() as $player) {
+        foreach ($this->getLevelNonNull()->getPlayers() as $player) {
             $this->spawnTo($player);
         }
     }
@@ -100,7 +100,7 @@ class NPC extends Human {
      * Despawns the NPC from all players in the level
      */
     public function despawnFromAll(): void {
-        foreach ($this->getLevel()->getPlayers() as $player) {
+        foreach ($this->getLevelNonNull()->getPlayers() as $player) {
             $this->despawnFrom($player, true);
         }
     }

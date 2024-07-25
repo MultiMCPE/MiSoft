@@ -46,6 +46,6 @@ class UnpoweredRepeater extends PoweredRepeater{
 	}
 
 	public function onBreak(Item $item, Player $player = null) : bool{
-		return $this->getLevel()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
+		return $this->getLevelNonNull()->setBlock($this, BlockFactory::get(Block::AIR), true, true);
 	}
 }

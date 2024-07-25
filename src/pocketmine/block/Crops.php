@@ -33,7 +33,7 @@ abstract class Crops extends Flowable{
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		if($blockReplace->getSide(Vector3::SIDE_DOWN)->getId() === Block::FARMLAND){
-			$this->getLevel()->setBlock($blockReplace, $this, true, true);
+			$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
 			return true;
 		}
@@ -53,7 +53,7 @@ abstract class Crops extends Flowable{
 			$ev = new BlockGrowEvent($this, $block);
 			$ev->call();
 			if(!$ev->isCancelled()){
-				$this->getLevel()->setBlock($this, $ev->getNewState(), true, true);
+				$this->getLevelNonNull()->setBlock($this, $ev->getNewState(), true, true);
 			}
 
 			$item->count--;
@@ -66,7 +66,7 @@ abstract class Crops extends Flowable{
 
 	public function onNearbyBlockChange() : void{
 		if($this->getSide(Vector3::SIDE_DOWN)->getId() !== Block::FARMLAND){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 		}
 	}
 
@@ -82,7 +82,7 @@ abstract class Crops extends Flowable{
 				$ev = new BlockGrowEvent($this, $block);
 				$ev->call();
 				if(!$ev->isCancelled()){
-					$this->getLevel()->setBlock($this, $ev->getNewState(), true, true);
+					$this->getLevelNonNull()->setBlock($this, $ev->getNewState(), true, true);
 				}
 			}
 		}

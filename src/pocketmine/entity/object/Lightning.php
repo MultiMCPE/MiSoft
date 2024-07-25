@@ -49,9 +49,9 @@ class Lightning extends Entity{
 	public function onUpdate(int $currentTick): bool{
 		if(!$this->doneDamage){
 			$this->doneDamage = true;
-			if($this->getLevel()->getServer()->lightningFire){
+			if($this->getLevelNonNull()->getServer()->lightningFire){
 				$fire = Item::get(Item::FIRE)->getBlock();
-				$oldBlock = $this->getLevel()->getBlock($this);
+				$oldBlock = $this->getLevelNonNull()->getBlock($this);
 				if($oldBlock instanceof Liquid){
 
 				}elseif($oldBlock->isSolid()){
@@ -62,7 +62,7 @@ class Lightning extends Entity{
 
 				$fire->setDamage(11); // Only one random tick away till a chance of despawn ;)
 
-				if(isset($v3)) $this->getLevel()->setBlock($v3, $fire);
+				if(isset($v3)) $this->getLevelNonNull()->setBlock($v3, $fire);
 
 				foreach($this->level->getNearbyEntities($this->growAxis($this->boundingBox, 6, 6, 6), $this) as $entity){
 					if($entity instanceof Living){

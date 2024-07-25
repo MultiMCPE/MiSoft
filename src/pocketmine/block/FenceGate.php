@@ -70,7 +70,7 @@ class FenceGate extends Transparent implements ElectricalAppliance{
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		$this->meta = ($player instanceof Player ? ($player->getDirection() - 1) & 0x03 : 0);
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
 		return true;
 	}
@@ -86,7 +86,7 @@ class FenceGate extends Transparent implements ElectricalAppliance{
 			$this->meta |= (($player->getDirection() - 1) & 0x02);
 		}
 
-		$this->getLevel()->setBlock($this, $this, true);
+		$this->getLevelNonNull()->setBlock($this, $this, true);
 		$this->level->addSound(new DoorSound($this));
 		return true;
 	}

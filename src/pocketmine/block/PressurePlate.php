@@ -44,22 +44,22 @@ class PressurePlate extends RedstoneSource{
 	}
 
 	public function onEntityCollide(Entity $entity) : void{
-		if($this->getLevel()->getServer()->redstoneEnabled and $this->canActivate){
-			$entities = $this->getLevel()->getNearbyEntities($this->getHitCollision());
+		if($this->getLevelNonNull()->getServer()->redstoneEnabled and $this->canActivate){
+			$entities = $this->getLevelNonNull()->getNearbyEntities($this->getHitCollision());
 			$entities = array_filter($entities, fn($entity) => $entity instanceof Living);
 			if(count($entities) === 0){
-				$this->getLevel()->scheduleDelayedBlockUpdate($this, 20);
+				$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 20);
 				return;
 			}
 
 			if(!$this->isActivated()){
 				$this->meta = 1;
-				$this->getLevel()->setBlock($this, $this, true, false);
-				$this->getLevel()->addSound(new GenericSound($this, 1000));
+				$this->getLevelNonNull()->setBlock($this, $this, true, false);
+				$this->getLevelNonNull()->addSound(new GenericSound($this, 1000));
 				$this->activate();
 			}
 
-			$this->getLevel()->scheduleDelayedBlockUpdate($this, 20);
+			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 20);
 		}
 	}
 
@@ -70,7 +70,7 @@ class PressurePlate extends RedstoneSource{
 	public function onNearbyBlockChange() : void{
 		$below = $this->getSide(Vector3::SIDE_DOWN);
 		if($below instanceof Transparent){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 		}
 	}
 
@@ -83,17 +83,17 @@ class PressurePlate extends RedstoneSource{
 			return;
 		}
 
-        $entities = $this->getLevel()->getNearbyEntities($this->getHitCollision());
+        $entities = $this->getLevelNonNull()->getNearbyEntities($this->getHitCollision());
         $entities = array_filter($entities, fn($entity) => $entity instanceof Living);
         if(count($entities) !== 0){
-			$this->getLevel()->scheduleDelayedBlockUpdate($this, 20);
+			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 20);
 			return;
 		}
 
-		if((($this->getLevel()->getServer()->getTick() - $this->activateTime)) >= 3){
+		if((($this->getLevelNonNull()->getServer()->getTick() - $this->activateTime)) >= 3){
 			$this->meta = 0;
-			$this->getLevel()->setBlock($this, $this, true, false);
-			$this->getLevel()->addSound(new GenericSound($this, 1000));
+			$this->getLevelNonNull()->setBlock($this, $this, true, false);
+			$this->getLevelNonNull()->addSound(new GenericSound($this, 1000));
 			$this->deactivate();
 		}
 	}
@@ -115,7 +115,7 @@ class PressurePlate extends RedstoneSource{
 		if($below instanceof Transparent){
 			return false;
 		}else{
-		    $this->getLevel()->setBlock($this, $this, true, true);
+		    $this->getLevelNonNull()->setBlock($this, $this, true, true);
 			return true;
 		}
 	}
@@ -127,7 +127,7 @@ class PressurePlate extends RedstoneSource{
 		}
 		$this->canActivate = false;
 
-		$this->getLevel()->setBlock($this, new Air(), true, true);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, true);
 
 		return true;
 	}

@@ -98,7 +98,7 @@ class Fireworks extends Item{
 	public function onActivate(Player $player, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector) : bool{
 		$nbt = Entity::createBaseNBT($blockReplace->add(0.5, 0, 0.5), new Vector3(0.001, 0.05, 0.001), lcg_value() * 360, 90);
 
-		$entity = Entity::createEntity("FireworksRocket", $player->getLevel(), $nbt, $this);
+		$entity = Entity::createEntity("FireworksRocket", $player->getLevelNonNull(), $nbt, $this);
 
 		if($entity instanceof Entity){
 			$this->pop();
@@ -114,13 +114,13 @@ class Fireworks extends Item{
 			$motion = new Vector3((-sin($player->yaw / 180 * M_PI) * cos($player->pitch / 180 * M_PI) * self::BOOST_POWER), (-sin($player->pitch / 180 * M_PI) * self::BOOST_POWER), (cos($player->yaw / 180 * M_PI) * cos($player->pitch / 180 * M_PI) * self::BOOST_POWER));
 
 			$nbt = Entity::createBaseNBT($player, $motion->subtract(0, 0.1, 0), lcg_value() * 360, 90);
-			$entity = Entity::createEntity("FireworksRocket", $player->getLevel(), $nbt, $this);
+			$entity = Entity::createEntity("FireworksRocket", $player->getLevelNonNull(), $nbt, $this);
 
 			if($entity instanceof Entity){
 				$this->pop();
 				$entity->spawnToAll();
 				$player->setMotion($motion);
-				$player->getLevel()->addSound(new BlazeShootSound($player));
+				$player->getLevelNonNull()->addSound(new BlazeShootSound($player));
 			}
 		}
 

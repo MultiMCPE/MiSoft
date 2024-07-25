@@ -50,7 +50,7 @@ class FlintSteel extends Tool{
 			$tx = $blockClicked->getX();
 			$ty = $blockClicked->getY();
 			$tz = $blockClicked->getZ();
-			$level = $blockClicked->getLevel();
+			$level = $blockClicked->getLevelNonNull();
 			//x方向
 			$x_max = $tx;//x最大值
 			$x_min = $tx;//x最小值
@@ -138,7 +138,7 @@ class FlintSteel extends Tool{
 		}
 
 		if($blockReplace->getId() === self::AIR){
-			$level = $player->getLevel();
+			$level = $player->getLevelNonNull();
 			assert($level !== null);
 			$level->setBlock($blockReplace, BlockFactory::get(Block::FIRE), true);
 			$level->broadcastLevelSoundEvent($blockReplace->add(0.5, 0.5, 0.5), LevelSoundEventPacket::SOUND_IGNITE);

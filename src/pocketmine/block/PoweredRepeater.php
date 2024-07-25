@@ -90,10 +90,10 @@ class PoweredRepeater extends RedstoneSource{
 		if($this->canCalc()){
 			if($this->id !== self::POWERED_REPEATER){
 				$this->id = self::POWERED_REPEATER;
-				$this->getLevel()->setBlock($this, $this, true, true);
+				$this->getLevelNonNull()->setBlock($this, $this, true, true);
 			}
-			$this->getLevel()->setBlockTempData($this, self::ACTION_ACTIVATE);
-			$this->getLevel()->scheduleDelayedBlockUpdate($this, (int) $this->getDelayLevel() * 2);
+			$this->getLevelNonNull()->setBlockTempData($this, self::ACTION_ACTIVATE);
+			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, (int) $this->getDelayLevel() * 2);
 		}
 	}
 
@@ -101,10 +101,10 @@ class PoweredRepeater extends RedstoneSource{
 		if($this->canCalc()){
 			if($this->id !== self::UNPOWERED_REPEATER){
 				$this->id = self::UNPOWERED_REPEATER;
-				$this->getLevel()->setBlock($this, $this, true, true);
+				$this->getLevelNonNull()->setBlock($this, $this, true, true);
 			}
-			$this->getLevel()->setBlockTempData($this, self::ACTION_DEACTIVATE);
-			$this->getLevel()->scheduleDelayedBlockUpdate($this, (int) $this->getDelayLevel() * 2);
+			$this->getLevelNonNull()->setBlockTempData($this, self::ACTION_DEACTIVATE);
+			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, (int) $this->getDelayLevel() * 2);
 		}
 	}
 
@@ -114,13 +114,13 @@ class PoweredRepeater extends RedstoneSource{
 	}
 
 	public function onScheduledUpdate() : void{
-		if($this->getLevel()->getBlockTempData($this) === self::ACTION_ACTIVATE){
+		if($this->getLevelNonNull()->getBlockTempData($this) === self::ACTION_ACTIVATE){
 			$this->activateBlock($this->getSide($this->getOppositeDirection()));
 			$this->activateBlock($this->getSide(Vector3::SIDE_DOWN, 2));
-		}elseif($this->getLevel()->getBlockTempData($this) === self::ACTION_DEACTIVATE){
+		}elseif($this->getLevelNonNull()->getBlockTempData($this) === self::ACTION_DEACTIVATE){
 			$this->deactivateImmediately();
 		}
-		$this->getLevel()->setBlockTempData($this);
+		$this->getLevelNonNull()->setBlockTempData($this);
 	}
 
 	public function onActivate(Item $item, Player $player = null) : bool{
@@ -130,7 +130,7 @@ class PoweredRepeater extends RedstoneSource{
 		}else{
 		    $this->meta = $meta;
 		}
-		$this->getLevel()->setBlock($this, $this, true, true);
+		$this->getLevelNonNull()->setBlock($this, $this, true, true);
 
 		return true;
 	}
@@ -140,7 +140,7 @@ class PoweredRepeater extends RedstoneSource{
 			$this->meta = ((int) $player->getDirection() + 5) % 4;
 		}
 
-		$this->getLevel()->setBlock($this, $this, true, true);
+		$this->getLevelNonNull()->setBlock($this, $this, true, true);
 		if($this->checkPower($this)){
 			$this->activate();
 		}
@@ -150,8 +150,8 @@ class PoweredRepeater extends RedstoneSource{
 
 	public function onBreak(Item $item, Player $player = null) : bool{
 		$this->deactivateImmediately();
-		$this->getLevel()->setBlock($this, new Air(), true, true);
-		$this->getLevel()->setBlockTempData($this);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, true);
+		$this->getLevelNonNull()->setBlockTempData($this);
 
 		return true;
 	}

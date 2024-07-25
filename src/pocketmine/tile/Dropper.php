@@ -124,7 +124,7 @@ class Dropper extends Spawnable implements InventoryHolder, Container, Nameable{
 
 			$motion = $this->getMotion();
 			$needItem = Item::get($item->getId(), $item->getDamage());
-			$block = $this->getLevel()->getBlock($this->add($motion[0], $motion[1], $motion[2]));
+			$block = $this->getLevelNonNull()->getBlock($this->add($motion[0], $motion[1], $motion[2]));
 
 			switch($block->getId()){
 				case Block::CHEST:
@@ -133,7 +133,7 @@ class Dropper extends Spawnable implements InventoryHolder, Container, Nameable{
 				case Block::DISPENSER:
 				case Block::BREWING_STAND_BLOCK:
 				case Block::FURNACE:
-					$t = $this->getLevel()->getTile($block);
+					$t = $this->getLevelNonNull()->getTile($block);
 					/** @var Chest|Dispenser|Dropper|BrewingStand|Furnace $t */
 					if($t instanceof Tile){
 						if($t->getInventory()->canAddItem($needItem)){
@@ -160,12 +160,12 @@ class Dropper extends Spawnable implements InventoryHolder, Container, Nameable{
 			$nbt->setShort("PickupDelay", 10);
 
 			$f = 0.3;
-			$itemEntity = new ItemEntity($this->getLevel(), $nbt);
+			$itemEntity = new ItemEntity($this->getLevelNonNUll(), $nbt);
 			$itemEntity->setMotion($itemEntity->getMotion()->multiply($f));
 			$itemEntity->spawnToAll();
 
 			for($i = 1; $i < 10; $i++){
-				$this->getLevel()->addParticle(new SmokeParticle($this->add($motion[0] * $i * 0.3 + 0.5, $motion[1] === 0 ? 0.5 : $motion[1] * $i * 0.3, $motion[2] * $i * 0.3 + 0.5)));
+				$this->getLevelNonNull()->addParticle(new SmokeParticle($this->add($motion[0] * $i * 0.3 + 0.5, $motion[1] === 0 ? 0.5 : $motion[1] * $i * 0.3, $motion[2] * $i * 0.3 + 0.5)));
 			}
 		}
 	}

@@ -149,21 +149,21 @@ class Dispenser extends Spawnable implements InventoryHolder, Container, Nameabl
 
 			switch($needItem->getId()){
 				case ItemIds::ARROW:
-					$entity = new Arrow($this->getLevel(), $nbt);
+					$entity = new Arrow($this->getLevelNonNull(), $nbt);
 					break;
 				case ItemIds::SNOWBALL:
-					$entity = new Snowball($this->getLevel(), $nbt);
+					$entity = new Snowball($this->getLevelNonNull(), $nbt);
 					break;
 				case ItemIds::EGG:
-					$entity = new Egg($this->getLevel(), $nbt);
+					$entity = new Egg($this->getLevelNonNull(), $nbt);
 					break;
 				case ItemIds::SPLASH_POTION:
 					$nbt->setShort("PotionId", $item->getDamage());
 
-					$entity = new SplashPotion($this->getLevel(), $nbt);
+					$entity = new SplashPotion($this->getLevelNonNull(), $nbt);
 					break;
 				case ItemIds::EXPERIENCE_BOTTLE:
-					$entity = new ExperienceBottle($this->getLevel(), $nbt);
+					$entity = new ExperienceBottle($this->getLevelNonNull(), $nbt);
 					break;
 				default:
 				    $f = 0.3;
@@ -172,7 +172,7 @@ class Dispenser extends Spawnable implements InventoryHolder, Container, Nameabl
 					$nbt->setTag($needItem->nbtSerialize(-1, "Item"));
 					$nbt->setShort("PickupDelay", 10);
 
-					$entity = new ItemEntity($this->getLevel(), $nbt);
+					$entity = new ItemEntity($this->getLevelNonNull(), $nbt);
 					break;
 			}
 
@@ -180,7 +180,7 @@ class Dispenser extends Spawnable implements InventoryHolder, Container, Nameabl
 			$entity->spawnToAll();
 
 			for($i = 1; $i < 10; $i++){
-				$this->getLevel()->addParticle(new SmokeParticle($this->add($motion[0] * $i * 0.3 + 0.5, $motion[1] === 0 ? 0.5 : $motion[1] * $i * 0.3, $motion[2] * $i * 0.3 + 0.5)));
+				$this->getLevelNonNull()->addParticle(new SmokeParticle($this->add($motion[0] * $i * 0.3 + 0.5, $motion[1] === 0 ? 0.5 : $motion[1] * $i * 0.3, $motion[2] * $i * 0.3 + 0.5)));
 			}
 		}
 	}

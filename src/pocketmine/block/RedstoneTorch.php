@@ -49,11 +49,11 @@ class RedstoneTorch extends RedstoneSource{
 	}
 
 	public function getLastUpdateTime() : int{
-		return $this->getLevel()->getBlockTempData($this);
+		return $this->getLevelNonNull()->getBlockTempData($this);
 	}
 
 	public function setLastUpdateTimeNow() : void{
-		$this->getLevel()->setBlockTempData($this, $this->getLevel()->getServer()->getTick());
+		$this->getLevelNonNull()->setBlockTempData($this, $this->getLevelNonNull()->getServer()->getTick());
 	}
 
 	public function canCalcTurn(){
@@ -61,7 +61,7 @@ class RedstoneTorch extends RedstoneSource{
 			return false;
 		}
 
-		if($this->getLevel()->getServer()->getTick() !== $this->getLastUpdateTime()){
+		if($this->getLevelNonNull()->getServer()->getTick() !== $this->getLastUpdateTime()){
 			return true;
 		}
 
@@ -69,11 +69,11 @@ class RedstoneTorch extends RedstoneSource{
 	}
 
 	public function canScheduleUpdate() : bool{
-		return $this->getLevel()->getServer()->allowFrequencyPulse;
+		return $this->getLevelNonNull()->getServer()->allowFrequencyPulse;
 	}
 
 	public function getFrequency() : int{
-		return $this->getLevel()->getServer()->pulseFrequency;
+		return $this->getLevelNonNull()->getServer()->pulseFrequency;
 	}
 
 	public function turnOn(string $ignore = "") : bool{
@@ -89,12 +89,12 @@ class RedstoneTorch extends RedstoneSource{
 				5 => Vector3::SIDE_DOWN
 			];
 			$this->id = self::REDSTONE_TORCH;
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
 			$this->activateTorch([$faces[$this->meta]], [$ignore]);
 			return true;
 		}elseif($result === 1){
 			$this->ignore = $ignore;
-			$this->getLevel()->scheduleUpdate($this, 20 * $this->getFrequency());
+			$this->getLevelNonNull()->scheduleUpdate($this, 20 * $this->getFrequency());
 			return true;
 		}
 		return false;
@@ -113,12 +113,12 @@ class RedstoneTorch extends RedstoneSource{
 				5 => Vector3::SIDE_DOWN
 			];
 			$this->id = self::UNLIT_REDSTONE_TORCH;
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
 			$this->deactivateTorch([$faces[$this->meta]], [$ignore]);
 			return true;
 		}elseif($result === 1){
 			$this->ignore = $ignore;
-			$this->getLevel()->scheduleUpdate($this, 20 * $this->getFrequency());
+			$this->getLevelNonNull()->scheduleUpdate($this, 20 * $this->getFrequency());
 			return true;
 		}
 		return false;
@@ -196,7 +196,7 @@ class RedstoneTorch extends RedstoneSource{
 	}
 
 	public function onBreak(Item $item, Player $player = null) : bool{
-		$this->getLevel()->setBlock($this, new Air(), true, false);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, false);
 
 		$faces = [
 			0 => Vector3::SIDE_DOWN,
@@ -208,7 +208,7 @@ class RedstoneTorch extends RedstoneSource{
 		];
 
 		$this->deactivate([$faces[$this->meta]]);
-		$this->getLevel()->setBlockTempData($this);
+		$this->getLevelNonNull()->setBlockTempData($this);
 
 		return true;
 	}
@@ -225,12 +225,12 @@ class RedstoneTorch extends RedstoneSource{
 				Vector3::SIDE_EAST => 1
 			];
 			$this->meta = $faces[$face];
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
 
 			return true;
 		}elseif(!$below->isTransparent() or $below->getId() === self::FENCE or $below->getId() === self::COBBLESTONE_WALL or $below->getId() === self::REDSTONE_LAMP or $below->getId() === self::LIT_REDSTONE_LAMP){
 			$this->meta = 0;
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
 
 			return true;
 		}
@@ -256,7 +256,7 @@ class RedstoneTorch extends RedstoneSource{
 		$face = $faces[$meta] ?? Vector3::SIDE_DOWN;
 
 		if($this->getSide($face)->isTransparent() and !($face === Vector3::SIDE_DOWN and ($below->getId() === self::FENCE or $below->getId() === self::COBBLESTONE_WALL))){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 
 			return;
 		}

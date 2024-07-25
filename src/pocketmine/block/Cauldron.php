@@ -101,9 +101,9 @@ class Cauldron extends Solid{
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$this->getLevel()->setBlock($blockReplace, $this, true, true);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
-		Tile::createTile(Tile::CAULDRON, $this->getLevel(), TileCauldron::createNBT($this, $face, $item, $player));
+		Tile::createTile(Tile::CAULDRON, $this->getLevelNonNull(), TileCauldron::createNBT($this, $face, $item, $player));
 
 		return true;
 	}
@@ -153,7 +153,7 @@ class Cauldron extends Solid{
 								$this->level->broadcastLevelEvent($this, LevelEventPacket::EVENT_CAULDRON_FILL_WATER);
 							}
 
-							$player->getLevel()->setBlock($this, $this, true, true);
+							$player->getLevelNonNull()->setBlock($this, $this, true, true);
 
 							if($player->isSurvival()){
 								$player->getInventory()->setItemInHand($ev->getItem());
@@ -264,7 +264,7 @@ class Cauldron extends Solid{
 								$tile->setCustomColor(null);
 							}
 
-							$this->getLevel()->setBlock($this, $this, true);
+							$this->getLevelNonNull()->setBlock($this, $this, true);
 
 							if($player->isSurvival()){
 								$item->pop();
@@ -280,7 +280,7 @@ class Cauldron extends Solid{
 							$this->level->broadcastLevelEvent($this, LevelEventPacket::EVENT_CAULDRON_TAKE_POTION);
 						}else{
 							$this->setDamage($this->getDamage() - 2);
-							$this->getLevel()->setBlock($this, $this, true);
+							$this->getLevelNonNull()->setBlock($this, $this, true);
 
 							if($player->isSurvival()){
 								$item->pop();
@@ -302,7 +302,7 @@ class Cauldron extends Solid{
 					if(!$this->isEmpty() and $this->getDamage() < 9){
 						if($tile->getCustomColor() !== null){
 							$this->setDamage($this->getDamage() - 1);
-							$this->getLevel()->setBlock($this, $this, true);
+							$this->getLevelNonNull()->setBlock($this, $this, true);
 
 							$newItem = clone $item;
 							$newItem->setCustomColor($tile->getCustomColor());
@@ -315,7 +315,7 @@ class Cauldron extends Solid{
 							}
 						}else{
 							$this->setDamage($this->getDamage() - 1);
-							$this->getLevel()->setBlock($this, $this, true);
+							$this->getLevelNonNull()->setBlock($this, $this, true);
 
 							$newItem = clone $item;
 							$newItem->clearCustomColor();

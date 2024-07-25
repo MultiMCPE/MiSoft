@@ -41,7 +41,7 @@ abstract class Button extends RedstoneSource{
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
 		if($blockClicked->isTransparent() === false){
 			$this->meta = $face;
-			$this->getLevel()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
 			return true;
 		}
 
@@ -51,10 +51,10 @@ abstract class Button extends RedstoneSource{
 	public function onBreak(Item $item, Player $player = null) : bool{
 		if($this->isActivated()){
 			$this->meta ^= 0x08;
-			$this->getLevel()->setBlock($this, $this, true, false);
+			$this->getLevelNonNull()->setBlock($this, $this, true, false);
 			$this->deactivate();
 		}
-		$this->getLevel()->setBlock($this, new Air(), true, false);
+		$this->getLevelNonNull()->setBlock($this, new Air(), true, false);
 
 		return true;
 	}
@@ -66,10 +66,10 @@ abstract class Button extends RedstoneSource{
 	public function onActivate(Item $item, Player $player = null) : bool{
 		if(!$this->isActivated()){
 			$this->meta ^= 0x08;
-			$this->getLevel()->setBlock($this, $this, true, false);
-			$this->getLevel()->addSound(new ButtonClickSound($this));
+			$this->getLevelNonNull()->setBlock($this, $this, true, false);
+			$this->getLevelNonNull()->addSound(new ButtonClickSound($this));
 			$this->activate();
-			$this->getLevel()->scheduleDelayedBlockUpdate($this, 30);
+			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 30);
 		}
 		return true;
 	}
@@ -77,8 +77,8 @@ abstract class Button extends RedstoneSource{
 	public function onScheduledUpdate() : void{
 		if($this->isActivated()){
 			$this->meta ^= 0x08;
-			$this->getLevel()->setBlock($this, $this, true, true);
-			$this->getLevel()->addSound(new ButtonClickSound($this));
+			$this->getLevelNonNull()->setBlock($this, $this, true, true);
+			$this->getLevelNonNull()->addSound(new ButtonClickSound($this));
 			$this->deactivate();
 		}
 	}
@@ -99,7 +99,7 @@ abstract class Button extends RedstoneSource{
 		];
 
 		if($this->getSide($faces[$side]) instanceof Transparent){
-			$this->getLevel()->useBreakOn($this);
+			$this->getLevelNonNull()->useBreakOn($this);
 		}
 	}
 }
