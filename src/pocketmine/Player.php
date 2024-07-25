@@ -3753,7 +3753,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                     $inventory->addItem($item);
                     $this->getInventory()->removeItem($item);
                 }else{
-                    throw new InvalidArgumentException("Recipe input is invalid: not founded $item in player inventory, contents: " . implode(",", $this->getInventory()->getContents()));
+					$this->inventory->sendContents($this);
+                    return false;
                 }
             }
         }
