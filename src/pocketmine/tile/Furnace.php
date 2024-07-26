@@ -209,7 +209,7 @@ class Furnace extends Spawnable implements InventoryHolder, Container, Nameable{
 			}
 			$ret = true;
 		}else{
-			if($this->getBlockNonNull()->getId() === Block::BURNING_FURNACE){
+			if($this->getBlock()->getId() === Block::BURNING_FURNACE){
 				$this->getLevelNonNull()->setBlock($this, BlockFactory::get(Block::FURNACE, $this->getBlock()->getDamage()), true);
 			}
 			$this->burnTime = $this->cookTime = $this->maxTime = 0;

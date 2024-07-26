@@ -43,9 +43,12 @@ use const ZLIB_ENCODING_RAW;
 class BatchPacket extends DataPacket{
 	public const NETWORK_ID = 0xfe;
 
-	public string $payload = "";
-	public bool $compressionEnabled = true;
-	protected int $compressionLevel = 7;
+	/** @var string */
+	public $payload = "";
+	/** @var bool */
+	public $compressionEnabled = true;
+	/** @var int */
+	protected $compressionLevel = 7;
 
 	public function canBeBatched() : bool{
 		return false;
