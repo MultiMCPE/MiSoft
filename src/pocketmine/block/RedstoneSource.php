@@ -347,7 +347,7 @@ class RedstoneSource extends Flowable{
 
 					if($block->getSide($faces[$block->meta])->equals($pos)){
 						$ignoreBlock = $this->getSide(static::getOppositeSide($faces[$block->meta]));
-						$block->turnOff(Level::chunkBlockHash($ignoreBlock->x, $ignoreBlock->y, $ignoreBlock->z));
+						$block->turnOff((string) Level::chunkBlockHash($ignoreBlock->x, $ignoreBlock->y, $ignoreBlock->z));
 					}
 				}
 			}
