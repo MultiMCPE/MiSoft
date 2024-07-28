@@ -590,7 +590,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\event\\entity\\EntityDamageEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDamageEvent.php',
         'pocketmine\\event\\entity\\EntityDeathEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDeathEvent.php',
         'pocketmine\\event\\entity\\EntityDespawnEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDespawnEvent.php',
-        'pocketmine\\event\\entity\\EntityDrinkPotionEvent' => __DIR__ . '/src/pocketmine/event/entity/EntityDrinkPotionEvent.php',
+        'pocketmine\\event\\entity\\EntityDrinkPotionEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityDrinkPotionEvent.php',
         'pocketmine\\event\\entity\\EntityEffectAddEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityEffectAddEvent.php',
         'pocketmine\\event\\entity\\EntityEffectEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityEffectEvent.php',
         'pocketmine\\event\\entity\\EntityEffectRemoveEvent' => __DIR__ . '/../..' . '/src/pocketmine/event/entity/EntityEffectRemoveEvent.php',
