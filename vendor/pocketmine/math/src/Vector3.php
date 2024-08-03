@@ -41,12 +41,9 @@ class Vector3{
 	public const SIDE_WEST = 4;
 	public const SIDE_EAST = 5;
 
-	/** @var float|int */
-	public $x;
-	/** @var float|int */
-	public $y;
-	/** @var float|int */
-	public $z;
+	public float|int $x;
+	public float|int $y;
+	public float|int $z;
 
 	/**
 	 * WARNING: THIS IS NOT TYPE SAFE!
@@ -59,21 +56,21 @@ class Vector3{
 	 * @param float|int $y
 	 * @param float|int $z
 	 */
-	public function __construct($x = 0, $y = 0, $z = 0){
+	public function __construct(float|int $x = 0, float|int $y = 0, float|int $z = 0){
 		$this->x = $x;
 		$this->y = $y;
 		$this->z = $z;
 	}
 
-	public function getX(){
+	public function getX(): float|int{
 		return $this->x;
 	}
 
-	public function getY(){
+	public function getY(): float|int{
 		return $this->y;
 	}
 
-	public function getZ(){
+	public function getZ(): float|int{
 		return $this->z;
 	}
 
