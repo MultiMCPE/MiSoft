@@ -317,80 +317,82 @@ class StartGamePacket extends DataPacket{
 		}
 		$this->commandsEnabled = $this->getBool();
 		$this->isTexturePacksRequired = $this->getBool();
-		$this->gameRules = $this->getGameRules($this->getProtocol());
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                $this->experiments = Experiments::read($this);
-            }
-	    	$this->hasBonusChestEnabled = $this->getBool();
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
-	        	$this->hasStartWithMapEnabled = $this->getBool();
-	    	}
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-		        $this->hasTrustPlayersEnabled = $this->getBool();
-	    	}
-	    	$this->defaultPlayerPermission = $this->getVarInt();
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-		        $this->xboxLiveBroadcastMode = $this->getVarInt();
-	    	}
-	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
-	        	$this->serverChunkTickRadius = $this->getLInt();
-	    	}
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-		        $this->hasPlatformBroadcast = $this->getBool();
-		        $this->platformBroadcastMode = $this->getVarInt();
-		        $this->xboxLiveBroadcastIntent = $this->getBool();
-	    	}
-            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
-	        	$this->hasLockedBehaviorPack = $this->getBool();
-	        	$this->hasLockedResourcePack = $this->getBool();
-	        	$this->isFromLockedWorldTemplate = $this->getBool();
-	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_290){
-	    	        $this->useMsaGamertagsOnly = $this->getBool();
-		            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_311){
-	                	$this->isFromWorldTemplate = $this->getBool();
-	                	$this->isWorldTemplateOptionLocked = $this->getBool();
-	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
-	                    	$this->onlySpawnV1Villagers = $this->getBool();
-	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
-	                    	    $this->disablePersona = $this->getBool();
-	                    	    $this->disableCustomSkins = $this->getBool();
-	                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
-	                    	        $this->muteEmoteAnnouncements = $this->getBool();
-	                    	    }
-	                    	}
-	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-	                        	$this->vanillaVersion = $this->getString();
-	                        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-	                            	$this->limitedWorldWidth = $this->getLInt();
-	                            	$this->limitedWorldLength = $this->getLInt();
-	                            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
-	                                	$this->isNewNether = $this->getBool();
-	                                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
-	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-	                                	        $this->eduSharedUriResource = EducationUriResource::read($this);
-	                                	    }
-	                                	    if($this->getBool()){
-	                                	    	$this->experimentalGameplayOverride = $this->getBool();
-	                                	    }else{
-	                                	    	$this->experimentalGameplayOverride = null;
-	                                	    }
-	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
-	                                	        $this->chatRestrictionLevel = ord($this->get(1));
-	                                	        $this->disablePlayerInteractions = $this->getBool();
-												if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
-													$this->serverIdentifier = $this->getString();
-													$this->worldIdentifier = $this->getString();
-													$this->scenarioIdentifier = $this->getString();
-												}
-	                                	    }
-	                                	}
-	                            	}
-	                        	}else{
-	                            	if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
-	        	                        $this->get(1);
-	        	                        $this->get(1);
-	        	                        $this->getLFloat();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+			$this->gameRules = $this->getGameRules($this->getProtocol());
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+         	   if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+             	   $this->experiments = Experiments::read($this);
+       		    }
+	    		$this->hasBonusChestEnabled = $this->getBool();
+	    		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
+	        		$this->hasStartWithMapEnabled = $this->getBool();
+	    		}
+	    		if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+			        $this->hasTrustPlayersEnabled = $this->getBool();
+	   		 	}
+	    		$this->defaultPlayerPermission = $this->getVarInt();
+	    		if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+		    	    $this->xboxLiveBroadcastMode = $this->getVarInt();
+	    		}
+	    		if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+	        		$this->serverChunkTickRadius = $this->getLInt();
+	    		}
+	    		if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+		    	    $this->hasPlatformBroadcast = $this->getBool();
+		   		    $this->platformBroadcastMode = $this->getVarInt();
+		    	    $this->xboxLiveBroadcastIntent = $this->getBool();
+	    		}
+            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
+	        		$this->hasLockedBehaviorPack = $this->getBool();
+	    	    	$this->hasLockedResourcePack = $this->getBool();
+	        		$this->isFromLockedWorldTemplate = $this->getBool();
+	        		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_290){
+	    	        	$this->useMsaGamertagsOnly = $this->getBool();
+		           		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_311){
+	                		$this->isFromWorldTemplate = $this->getBool();
+	                		$this->isWorldTemplateOptionLocked = $this->getBool();
+	                		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
+	                    		$this->onlySpawnV1Villagers = $this->getBool();
+	                    		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                    	    	$this->disablePersona = $this->getBool();
+	                    	    	$this->disableCustomSkins = $this->getBool();
+	                    	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+	                    	        	$this->muteEmoteAnnouncements = $this->getBool();
+	                    	    	}
+	                    		}
+	                    		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+	                        		$this->vanillaVersion = $this->getString();
+	                        		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+	                            		$this->limitedWorldWidth = $this->getLInt();
+	                            		$this->limitedWorldLength = $this->getLInt();
+	                            		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
+	                                		$this->isNewNether = $this->getBool();
+	                                		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
+	                                	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
+	                                	        	$this->eduSharedUriResource = EducationUriResource::read($this);
+	                                	    	}
+	                                	    	if($this->getBool()){
+	                                	    		$this->experimentalGameplayOverride = $this->getBool();
+	                                	    	}else{
+	                                	    		$this->experimentalGameplayOverride = null;
+	                                	    	}
+	                                	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+	                                	        	$this->chatRestrictionLevel = ord($this->get(1));
+	                                	        	$this->disablePlayerInteractions = $this->getBool();
+													if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+														$this->serverIdentifier = $this->getString();
+														$this->worldIdentifier = $this->getString();
+														$this->scenarioIdentifier = $this->getString();
+													}
+	                                	    	}
+	                                		}
+	                            		}
+	                        		}else{
+	                            		if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
+	        	                     	    $this->get(1);
+	        	                        	$this->get(1);
+	        	                        	$this->getLFloat();
+										}
 	                            	}
 	                        	}
 	                    	}
@@ -402,16 +404,18 @@ class StartGamePacket extends DataPacket{
 
 	    $this->levelId = $this->getString();
 	    $this->worldName = $this->getString();
-	    $this->premiumWorldTemplateId = $this->getString();
-	   	$this->isTrial = $this->getBool();
-	   	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
-	   	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	   	        $this->playerMovementSettings = PlayerMovementSettings::read($this);
-	   	    }else{
-	         	$this->isMovementServerAuthoritative = $this->getBool();
-	   	    }
-	   	}
-	    $this->currentTick = $this->getLLong();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	        $this->premiumWorldTemplateId = $this->getString();
+	     	$this->isTrial = $this->getBool();
+	   	 	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
+	   	     	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	   	         	$this->playerMovementSettings = PlayerMovementSettings::read($this);
+	   	     	}else{
+	         	 	$this->isMovementServerAuthoritative = $this->getBool();
+	   	     	}
+	   	 	}
+	    	 $this->currentTick = $this->getLLong();
+		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	        $this->enchantmentSeed = $this->getVarInt();
@@ -563,80 +567,82 @@ class StartGamePacket extends DataPacket{
 		}
         $this->putBool($this->commandsEnabled);
         $this->putBool($this->isTexturePacksRequired);
-		$this->putGameRules($this->gameRules, $this->getProtocol());
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        $this->experiments->write($this);
-		    }
-            $this->putBool($this->hasBonusChestEnabled);
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
-                $this->putBool($this->hasStartWithMapEnabled);
-	    	}
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-                $this->putBool($this->hasTrustPlayersEnabled);
-	    	}
-	    	$this->putVarInt($this->defaultPlayerPermission);
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-		        $this->putVarInt($this->xboxLiveBroadcastMode);
-	    	}
-	    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
-                $this->putLInt($this->serverChunkTickRadius);
-	    	}
-	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
-                $this->putBool($this->hasPlatformBroadcast);
-	        	$this->putVarInt($this->platformBroadcastMode);
-                $this->putBool($this->xboxLiveBroadcastIntent);
-	    	}
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
-                $this->putBool($this->hasLockedBehaviorPack);
-                $this->putBool($this->hasLockedResourcePack);
-                $this->putBool($this->isFromLockedWorldTemplate);
-	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_290){
-                    $this->putBool($this->useMsaGamertagsOnly);
-	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_311){
-                        $this->putBool($this->isFromWorldTemplate);
-                        $this->putBool($this->isWorldTemplateOptionLocked);
-	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
-                            $this->putBool($this->onlySpawnV1Villagers);
-	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
-                                $this->putBool($this->disablePersona);
-                                $this->putBool($this->disableCustomSkins);
-	                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
-                                    $this->putBool($this->muteEmoteAnnouncements);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    $this->putGameRules($this->gameRules, $this->getProtocol());
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+    		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+	    	        $this->experiments->write($this);
+		        }
+                $this->putBool($this->hasBonusChestEnabled);
+    	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
+                    $this->putBool($this->hasStartWithMapEnabled);
+	        	}
+    	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+                    $this->putBool($this->hasTrustPlayersEnabled);
+	        	}
+    	    	$this->putVarInt($this->defaultPlayerPermission);
+	        	if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+		            $this->putVarInt($this->xboxLiveBroadcastMode);
+	    	    }
+	    	    if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200){
+                    $this->putLInt($this->serverChunkTickRadius);
+	    	    }
+	    	    if($this->getProtocol() < ProtocolInfo::PROTOCOL_330){
+                    $this->putBool($this->hasPlatformBroadcast);
+	        	    $this->putVarInt($this->platformBroadcastMode);
+                    $this->putBool($this->xboxLiveBroadcastIntent);
+	    	    }
+	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
+                    $this->putBool($this->hasLockedBehaviorPack);
+                    $this->putBool($this->hasLockedResourcePack);
+                    $this->putBool($this->isFromLockedWorldTemplate);
+	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_290){
+                        $this->putBool($this->useMsaGamertagsOnly);
+	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_311){
+                            $this->putBool($this->isFromWorldTemplate);
+                            $this->putBool($this->isWorldTemplateOptionLocked);
+    	                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
+                                $this->putBool($this->onlySpawnV1Villagers);
+	                        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+                                    $this->putBool($this->disablePersona);
+                                    $this->putBool($this->disableCustomSkins);
+	                        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_567){
+                                        $this->putBool($this->muteEmoteAnnouncements);
+	                    	        }
 	                    	    }
-	                    	}
-	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
-	        	                $this->putString($this->vanillaVersion);
-                                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-                                    $this->putLInt($this->limitedWorldWidth);
-                                    $this->putLInt($this->limitedWorldLength);
-	                            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
-                                        $this->putBool($this->isNewNether);
-	                                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
-	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
-	                                	        ($this->eduSharedUriResource ?? new EducationUriResource("", ""))->write($this);
-	                                	    }
-                                            $this->putBool($this->experimentalGameplayOverride !== null);
-	                                	    if($this->experimentalGameplayOverride !== null){
-                                                $this->putBool($this->experimentalGameplayOverride);
-	                                	    }
-	                                	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
-                                                $this->putByte($this->chatRestrictionLevel);
-                                                $this->putBool($this->disablePlayerInteractions);
-												if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
-													$this->putString($this->serverIdentifier);
-													$this->putString($this->worldIdentifier);
-													$this->putString($this->scenarioIdentifier);
-												}
-	                                	    }
-	                                	}
-                                    }
-                                }else{
-	                            	if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
-                                        $this->putByte(0);
-                                        $this->putByte(1);
-			                        	$this->putLFloat(0);
-	                            	}
+    	                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_370){
+	            	                $this->putString($this->vanillaVersion);
+                                    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
+                                        $this->putLInt($this->limitedWorldWidth);
+                                        $this->putLInt($this->limitedWorldLength);
+	                                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_400){
+                                            $this->putBool($this->isNewNether);
+	                                    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_407){
+	                                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
+	                                    	        ($this->eduSharedUriResource ?? new EducationUriResource("", ""))->write($this);
+	                                	        }
+                                                $this->putBool($this->experimentalGameplayOverride !== null);
+    	                                	    if($this->experimentalGameplayOverride !== null){
+                                                    $this->putBool($this->experimentalGameplayOverride);
+	                                    	    }
+	                                    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
+                                                    $this->putByte($this->chatRestrictionLevel);
+                                                    $this->putBool($this->disablePlayerInteractions);
+						    						if($this->getProtocol() >= ProtocolInfo::PROTOCOL_685){
+							    						$this->putString($this->serverIdentifier);
+								    					$this->putString($this->worldIdentifier);
+									    				$this->putString($this->scenarioIdentifier);
+										    		}
+	                                	        }
+	                                    	}
+                                        }
+                                    }else{
+	                                	if($this->getProtocol() === ProtocolInfo::PROTOCOL_386 || $this->getProtocol() === ProtocolInfo::PROTOCOL_387){
+                                            $this->putByte(0);
+                                            $this->putByte(1);
+			                            	$this->putLFloat(0);
+	                            	    }
+									}
                                 }
 	                    	}
 	                	}
@@ -647,16 +653,18 @@ class StartGamePacket extends DataPacket{
 
 		$this->putString($this->levelId);
 		$this->putString($this->worldName);
-        $this->putString($this->premiumWorldTemplateId);
-        $this->putBool($this->isTrial);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
-		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		        $this->playerMovementSettings->write($this);
-		    }else{
-                $this->putBool($this->isMovementServerAuthoritative);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+            $this->putString($this->premiumWorldTemplateId);
+            $this->putBool($this->isTrial);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_388){
+		        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
+		            $this->playerMovementSettings->write($this);
+		        }else{
+                    $this->putBool($this->isMovementServerAuthoritative);
+				}
 		    }
+            $this->putLLong($this->currentTick);
 		}
-        $this->putLLong($this->currentTick);
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->putVarInt($this->enchantmentSeed);
