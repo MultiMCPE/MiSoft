@@ -1291,6 +1291,7 @@ class ComposerStaticInit82b4d11f66f86822eb7086c700823eb9
         'pocketmine\\network\\mcpe\\protocol\\ServerStatsPacket' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/ServerStatsPacket.php',
         'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketMagicNumbers' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketMagicNumbers.php',
         'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds100' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds100.php',
+        'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds102' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds102.php',
         'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds105' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds105.php',
         'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds110' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds110.php',
         'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds130' => __DIR__ . '/../..' . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds130.php',

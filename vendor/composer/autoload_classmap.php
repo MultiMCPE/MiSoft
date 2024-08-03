@@ -1223,6 +1223,7 @@ return array(
     'pocketmine\\network\\mcpe\\protocol\\OpenSignPacket' => $baseDir . '/src/pocketmine/network/mcpe/protocol/OpenSignPacket.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketMagicNumbers' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketMagicNumbers.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds100' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds100.php',
+    'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds102' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds102.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds105' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds105.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds110' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds110.php',
     'pocketmine\\network\\mcpe\\protocol\\PacketsIds\\PacketsIds130' => $baseDir . '/src/pocketmine/network/mcpe/protocol/PacketsIds/PacketsIds130.php',

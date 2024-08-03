@@ -105,6 +105,6 @@ final class PacketsIds100{
 	public const RESOURCE_PACK_DATA_INFO_PACKET = 0x4f;
 	public const RESOURCE_PACK_CHUNK_DATA_PACKET = 0x50;
 	public const RESOURCE_PACK_CHUNK_REQUEST_PACKET = 0x51;
-	public const TRANSFER_PACKET = 0x53;
+	public const TRANSFER_PACKET = 0x52;
 
 }
