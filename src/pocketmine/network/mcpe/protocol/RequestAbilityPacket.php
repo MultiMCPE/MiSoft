@@ -81,6 +81,10 @@ class RequestAbilityPacket extends DataPacket{
 		$this->putLFloat($floatValue);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleRequestAbility($this);
 	}

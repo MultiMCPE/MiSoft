@@ -60,6 +60,10 @@ class MobArmorEquipmentPacket extends DataPacket{
 		$this->putSlot($this->feet, $this->getProtocol());
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleMobArmorEquipment($this);
 	}

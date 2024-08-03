@@ -39,6 +39,10 @@ class SetLocalPlayerAsInitializedPacket extends DataPacket{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleSetLocalPlayerAsInitialized($this);
 	}

@@ -47,6 +47,10 @@ class ResourcePackChunkRequestPacket extends DataPacket{
         $this->putLInt($this->chunkIndex);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleResourcePackChunkRequest($this);
 	}

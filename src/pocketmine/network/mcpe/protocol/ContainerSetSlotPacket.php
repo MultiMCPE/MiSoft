@@ -54,6 +54,10 @@ class ContainerSetSlotPacket extends DataPacket{
         $this->putByte($this->selectSlot);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleContainerSetSlot($this);
 	}

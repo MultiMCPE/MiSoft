@@ -90,6 +90,10 @@ class OldBatchPacket extends DataPacket{
 		$this->compressionLevel = $level;
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		foreach($this->getPackets() as $buf){
 			$pk = PacketPool::getPacket($buf, $session->getProtocol());

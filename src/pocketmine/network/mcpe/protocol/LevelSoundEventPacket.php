@@ -641,6 +641,10 @@ class LevelSoundEventPacket extends DataPacket{
         $this->putBool($this->disableRelativeVolume);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleLevelSoundEvent($this);
 	}

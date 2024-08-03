@@ -41,6 +41,10 @@ class RiderJumpPacket extends DataPacket{
 		$this->putVarInt($this->jumpStrength);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleRiderJump($this);
 	}

@@ -40,6 +40,10 @@ class RemoveBlockPacket extends DataPacket{
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleRemoveBlock($this);
 	}

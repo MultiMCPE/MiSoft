@@ -40,6 +40,10 @@ class SetPlayerGameTypePacket extends DataPacket{
 		$this->putVarInt($this->gamemode);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleSetPlayerGameType($this);
 	}

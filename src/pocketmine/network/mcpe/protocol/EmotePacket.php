@@ -92,6 +92,10 @@ class EmotePacket extends DataPacket{
         $this->putByte($this->flags);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleEmote($this);
 	}

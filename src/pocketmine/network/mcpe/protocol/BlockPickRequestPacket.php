@@ -59,6 +59,10 @@ class BlockPickRequestPacket extends DataPacket{
         $this->putByte($this->hotbarSlot);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleBlockPickRequest($this);
 	}

@@ -67,6 +67,10 @@ class SetPlayerInventoryOptionsPacket extends DataPacket{
 		$this->putVarInt($this->craftingLayout->value);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleSetPlayerInventoryOptions($this);
 	}

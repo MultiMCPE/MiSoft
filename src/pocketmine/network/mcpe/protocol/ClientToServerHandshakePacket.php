@@ -41,6 +41,10 @@ class ClientToServerHandshakePacket extends DataPacket{
 		//No payload
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleClientToServerHandshake($this);
 	}

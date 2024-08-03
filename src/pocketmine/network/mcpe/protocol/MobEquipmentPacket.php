@@ -59,6 +59,10 @@ class MobEquipmentPacket extends DataPacket{
         $this->putByte($this->windowId);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleMobEquipment($this);
 	}

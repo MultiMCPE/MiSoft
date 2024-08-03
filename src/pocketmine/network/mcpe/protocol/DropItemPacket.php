@@ -43,6 +43,10 @@ class DropItemPacket extends DataPacket{
 		$this->putSlot($this->item, $this->getProtocol());
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleDropItem($this);
 	}

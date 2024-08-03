@@ -81,6 +81,7 @@ use pocketmine\network\mcpe\protocol\ServerSettingsRequestPacket;
 use pocketmine\network\mcpe\protocol\SetActorMotionPacket;
 use pocketmine\network\mcpe\protocol\SetLocalPlayerAsInitializedPacket;
 use pocketmine\network\mcpe\protocol\SetPlayerGameTypePacket;
+use pocketmine\network\mcpe\protocol\SetPlayerInventoryOptionsPacket;
 use pocketmine\network\mcpe\protocol\ShowCreditsPacket;
 use pocketmine\network\mcpe\protocol\SpawnExperienceOrbPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
@@ -137,15 +138,17 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 		$timings = Timings::getReceiveDataPacketTimings($packet);
 		$timings->startTiming();
 
-		$packet->decode();
-		if(!$packet->feof() and !$packet->mayHaveUnreadBytes()){
-			$remains = substr($packet->buffer, $packet->offset);
-			$this->server->getLogger()->debug("Still " . strlen($remains) . " bytes unread in " . $packet->getName() . ": 0x" . bin2hex($remains));
+		if(!$packet->wasDecoded and $packet->mustBeDecoded()){ //Allow plugins to decode it
+	    	$packet->decode();
+		    if(!$packet->feof() and !$packet->mayHaveUnreadBytes()){
+		    	$remains = substr($packet->buffer, $packet->offset);
+		    	$this->server->getLogger()->debug("Still " . strlen($remains) . " bytes unread in " . $packet->getName() . ": 0x" . bin2hex($remains));
+			}
 		}
 
 		$ev = new DataPacketReceiveEvent($this->player, $packet);
 		$ev->call();
-		if(!$ev->isCancelled() and !$packet->handle($this)){
+		if(!$ev->isCancelled() and $packet->mustBeDecoded() and !$packet->handle($this)){
 			$this->server->getLogger()->debug("Unhandled " . $packet->getName() . " received from " . $this->player->getName() . ": " . base64_encode($packet->buffer));
 		}
 
@@ -289,6 +292,10 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 
 	public function handleSetPlayerGameType(SetPlayerGameTypePacket $packet) : bool{
 		return $this->player->handleSetPlayerGameType($packet);
+	}
+
+	public function handleSetPlayerInventoryOptions(SetPlayerInventoryOptionsPacket $packet) : bool{
+		return true; //debug spam
 	}
 
 	public function handleSpawnExperienceOrb(SpawnExperienceOrbPacket $packet) : bool{

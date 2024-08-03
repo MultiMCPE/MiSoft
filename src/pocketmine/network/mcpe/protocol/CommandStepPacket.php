@@ -63,6 +63,10 @@ class CommandStepPacket extends DataPacket{
 		$this->put("\x00\x00\x00"); //TODO: command origin data
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleCommandStep($this);
 	}

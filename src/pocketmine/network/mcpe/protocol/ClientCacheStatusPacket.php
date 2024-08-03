@@ -52,6 +52,10 @@ class ClientCacheStatusPacket extends DataPacket{
         $this->putBool($this->enabled);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleClientCacheStatus($this);
 	}

@@ -51,6 +51,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 
 	/** @var bool */
 	public $isEncoded = false;
+	/** @var bool */
+	public $wasDecoded = false;
 	/** @var CachedEncapsulatedPacket */
 	public $__encapsulatedPacket = null;
 
@@ -139,6 +141,13 @@ abstract class DataPacket extends NetworkBinaryStream{
             $this->senderSubId = ($pid >> self::SENDER_SUBCLIENT_ID_SHIFT) & self::SUBCLIENT_ID_MASK;
             $this->recipientSubId = ($pid >> self::RECIPIENT_SUBCLIENT_ID_SHIFT) & self::SUBCLIENT_ID_MASK;
         }
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function mustBeDecoded() : bool{
+		return false;
 	}
 
 	/**

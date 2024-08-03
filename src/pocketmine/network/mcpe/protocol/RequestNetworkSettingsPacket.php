@@ -53,6 +53,10 @@ class RequestNetworkSettingsPacket extends DataPacket{
 		$this->putInt($this->protocolVersion);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleRequestNetworkSettings($this);
 	}

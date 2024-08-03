@@ -124,6 +124,10 @@ class BatchPacket extends DataPacket{
 		$this->compressionLevel = $level;
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 	    if($session->isCompressionEnabled()){
 	        try{

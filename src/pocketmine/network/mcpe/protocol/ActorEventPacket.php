@@ -110,6 +110,10 @@ class ActorEventPacket extends DataPacket{
 		$this->putVarInt($this->data);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleActorEvent($this);
 	}

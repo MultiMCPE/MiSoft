@@ -65,6 +65,10 @@ class TickSyncPacket extends DataPacket{
         $this->putLLong($this->serverReceiveTime);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleTickSync($this);
 	}

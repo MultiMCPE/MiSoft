@@ -48,6 +48,10 @@ class BlockActorDataPacket extends DataPacket{
         $this->put($this->namedtag);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleBlockActorData($this);
 	}

@@ -108,6 +108,10 @@ class PlayerActionPacket extends DataPacket{
 		$this->putVarInt($this->face);
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handlePlayerAction($this);
 	}

@@ -66,6 +66,10 @@ class CommandRequestPacket extends DataPacket{
 		}
 	}
 
+	public function mustBeDecoded() : bool{
+		return true;
+	}
+
 	public function handle(NetworkSession $session) : bool{
 		return $session->handleCommandRequest($this);
 	}
