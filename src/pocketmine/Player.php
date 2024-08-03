@@ -891,33 +891,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				continue;
 			}
 
-			$data = new CommandData();
-			//TODO: commands containing uppercase letters in the name crash 1.9.0 client
-			$data->commandName = strtolower($command->getName());
-			$data->commandDescription = $this->server->getLanguage()->translateString($command->getDescription());
-			$data->flags = 0;
-			$data->permission = 0;
-
-			$parameter = new CommandParameter();
-			$parameter->paramName = "args";
-			$parameter->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | AvailableCommandsPacket::ARG_TYPE_RAWTEXT;
-			$parameter->isOptional = true;
-			$data->overloads[] = new CommandOverload(false, [$parameter]);
-
-			$data->chainedSubCommandData = [];
-
-			$aliases = $command->getAliases();
-			if(!empty($aliases)){
-				if(!in_array($data->commandName, $aliases, true)){
-					//work around a client bug which makes the original name not show when aliases are used
-					$aliases[] = $data->commandName;
-				}
-				$data->aliases = new CommandEnum();
-				$data->aliases->enumName = ucfirst($command->getName()) . "Aliases";
-				$data->aliases->enumValues = $aliases;
-			}
-
-			$pk->commandData[$command->getName()] = $data;
+			$pk->commandData[$command->getName()] = $command->getCommandData();
 		}
 
 		$this->dataPacket($pk);

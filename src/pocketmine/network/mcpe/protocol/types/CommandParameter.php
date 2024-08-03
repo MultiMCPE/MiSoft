@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
+use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
+
 class CommandParameter{
 	public const FLAG_FORCE_COLLAPSE_ENUM = 0x1;
 	public const FLAG_HAS_ENUM_CONSTRAINT = 0x2;
@@ -39,4 +41,12 @@ class CommandParameter{
 	public $enum;
 	/** @var string|null */
 	public $postfix;
+
+    public function __construct(string $paramName = "args", int $paramType = AvailableCommandsPacket::ARG_TYPE_RAWTEXT, bool $isOptional = true, int $flags = 0, CommandEnum $enum = null){
+        $this->paramName = $paramName;
+        $this->paramType = AvailableCommandsPacket::ARG_FLAG_VALID | $paramType;
+        $this->isOptional = $isOptional;
+        $this->flags = $flags;
+        $this->enum = $enum;
+    }
 }
