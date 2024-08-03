@@ -52,7 +52,11 @@ class ResourcePackStackPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->mustAccept = $this->getBool();
-		$behaviorPackCount = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$behaviorPackCount = $this->getUnsignedVarInt();
+		}else{
+			$behaviorPackCount = $this->getLShort();
+		}
 		while($behaviorPackCount-- > 0){
 			$this->getString();
 			$this->getString();
@@ -61,7 +65,11 @@ class ResourcePackStackPacket extends DataPacket{
 			}
 		}
 
-		$resourcePackCount = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    $resourcePackCount = $this->getUnsignedVarInt();
+		}else{
+			$resourcePackCount = $this->getLShort();
+		}
 		while($resourcePackCount-- > 0){
 			$this->getString();
 			$this->getString();
@@ -89,7 +97,11 @@ class ResourcePackStackPacket extends DataPacket{
 	protected function encodePayload(){
         $this->putBool($this->mustAccept);
 
-		$this->putUnsignedVarInt(count($this->behaviorPackStack));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+			$this->putUnsignedVarInt(count($this->behaviorPackStack));
+		}else{
+	    	$this->putLShort(count($this->behaviorPackStack));
+		}
 		foreach($this->behaviorPackStack as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
@@ -98,7 +110,11 @@ class ResourcePackStackPacket extends DataPacket{
 			}
 		}
 
-		$this->putUnsignedVarInt(count($this->resourcePackStack));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+			$this->putUnsignedVarInt(count($this->resourcePackStack));
+		}else{
+		    $this->putLShort(count($this->resourcePackStack));
+		}
 		foreach($this->resourcePackStack as $entry){
 			$this->putString($entry->getPackId());
 			$this->putString($entry->getPackVersion());
