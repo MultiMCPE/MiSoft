@@ -120,6 +120,7 @@ abstract class DataPacket extends NetworkBinaryStream{
 		$this->checkProtocol();
 		$this->decodeHeader();
 		$this->decodePayload();
+		$this->wasDecoded = true;
 	}
 
 	/**
