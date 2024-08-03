@@ -3154,7 +3154,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
     }
 
 	public function handleCommandStep(CommandStepPacket $packet) : bool{
-		if($this->spawned === false or !$this->isAlive()){
+		if(!$this->spawned or !$this->isAlive()){
 			return true;
 		}
 
@@ -3212,6 +3212,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleLevelSoundEvent(LevelSoundEventPacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
+
 		if($packet->sound === LevelSoundEventPacket::SOUND_UNDEFINED){
 			return false;
 		}
@@ -3636,7 +3640,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleUseItem(UseItemPacket $packet) : bool{
-		if($this->spawned === false or !$this->isAlive()){
+		if(!$this->spawned or !$this->isAlive()){
 			return true;
 		}
 
@@ -3712,7 +3716,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleCraftingEvent(CraftingEventPacket $packet) : bool{
-		if($this->spawned === false or !$this->isAlive()){
+		if(!$this->spawned or !$this->isAlive()){
 			return true;
 		}
 
@@ -3982,6 +3986,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleEmote(EmotePacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
+
 		if($packet->entityRuntimeId !== $this->id){
 			return false;
 		}
@@ -4006,6 +4014,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleBlockPickRequest(BlockPickRequestPacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
+
 		$block = $this->level->getBlockAt($packet->blockX, $packet->blockY, $packet->blockZ);
 		if($block instanceof UnknownBlock){
 			return true;
@@ -4345,6 +4357,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleContainerSetSlot(ContainerSetSlotPacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
+
         if($packet->slot < 0){
             return false;
         }
@@ -4425,6 +4441,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleRequestAbility(RequestAbilityPacket $packet) : bool{
+		if(!$this->spawned){
+			return true;
+		}
+
 		if($packet->getAbilityId() === RequestAbilityPacket::ABILITY_FLYING){
 			$isFlying = $packet->getAbilityValue();
 			if(!is_bool($isFlying)){
@@ -4539,6 +4559,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleBookEdit(BookEditPacket $packet) : bool{
+		if(!$this->spawned or !$this->isAlive()){
+			return true;
+		}
+
 		/** @var WritableBook $oldBook */
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200){
 		    $packet->inventorySlot -= 9;
