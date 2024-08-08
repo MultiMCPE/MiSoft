@@ -3067,10 +3067,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * @return bool
      */
     public function attackEntity(Entity $target) : bool{
-		if($this->isSpectator()){
-			return true;
-		}
-
 		if(!$target->isAlive()){
 			return true;
 		}
@@ -3085,7 +3081,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$heldItem = $this->inventory->getItemInHand();
 
-		if(!$this->canInteract($target, 8)){
+		if($this->isSpectator()){
+			$cancelled = true;
+		}elseif(!$this->canInteract($target, 8)){
 			$cancelled = true;
 		}elseif($target instanceof Player){
 			if(!$this->server->getConfigBool("pvp")){
