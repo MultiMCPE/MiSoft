@@ -53,6 +53,7 @@ class SetTitlePacket extends DataPacket{
 	public $xuid = "";
 	/** @var string */
 	public $platformOnlineId = "";
+	public string $filteredTitleText = "";
 
 	protected function decodePayload(){
 		$this->type = $this->getVarInt();
@@ -67,6 +68,9 @@ class SetTitlePacket extends DataPacket{
 	    	$this->xuid = $this->getString();
 	    	$this->platformOnlineId = $this->getString();
 		}
+    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+      $this->filteredTitleText = $this->getString();
+    }
 	}
 
 	protected function encodePayload(){
@@ -82,6 +86,9 @@ class SetTitlePacket extends DataPacket{
 	    	$this->putString($this->xuid);
 	    	$this->putString($this->platformOnlineId);
 		}
+    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+      $this->putString($this->filteredTitleText);
+    }
 	}
 
 	public function handle(NetworkSession $session) : bool{
