@@ -23,6 +23,16 @@ test.php
 MySoft.yml
 crashdumps/*
 resource_packs/
+pw10_packs/
+players/
+timings/
+worlds/
+bedrock_packs/
+plugin_data/
+plugins/
+maps/
+crashdumps/
+bin/
 scripts/*/out
 server.lock
 

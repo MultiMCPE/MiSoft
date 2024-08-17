@@ -253,5 +253,4 @@ interface PacketMagicNumbers{
 	public const JIGSAW_STRUCTURE_DATA_PACKET = 0x139;
 	public const CURRENT_STRUCTURE_FEATURE_PACKET = 0x13a;
 	public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
-
 }

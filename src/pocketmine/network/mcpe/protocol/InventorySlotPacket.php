@@ -38,6 +38,8 @@ class InventorySlotPacket extends DataPacket{
 	/** @var Item */
 	public $item;
 
+  public int $dynamicContainerId = 0;
+
 	protected function decodePayload(){
 		$this->windowId = $this->getUnsignedVarInt();
 		$this->inventorySlot = $this->getUnsignedVarInt();
@@ -45,6 +47,10 @@ class InventorySlotPacket extends DataPacket{
 		    $this->isNullItem = $this->getVarInt();
 		}
 		$this->item = $this->getSlot($this->getProtocol());
+
+    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+      $this->dynamicContainerId = $this->getUnsignedVarInt();
+    }
 	}
 
 	protected function encodePayload(){
@@ -54,6 +60,10 @@ class InventorySlotPacket extends DataPacket{
 	    	$this->putVarInt($this->item->isNull() ? 0 : 1);
 		}
 		$this->putSlot($this->item, $this->getProtocol());
+    
+    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+      $this->putUnsignedVarInt($this->dynamicContainerId);
+    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

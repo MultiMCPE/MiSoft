@@ -34,6 +34,7 @@ class PlayerArmorDamagePacket extends DataPacket{
 	private const FLAG_CHEST = 1;
 	private const FLAG_LEGS = 2;
 	private const FLAG_FEET = 3;
+  private const FLAG_BODY = 4;
 
 	/** @var int|null */
 	private $headSlotDamage;
@@ -43,13 +44,15 @@ class PlayerArmorDamagePacket extends DataPacket{
 	private $legsSlotDamage;
 	/** @var int|null */
 	private $feetSlotDamage;
+	private $bodySlotDamage;
 
-	public static function create(?int $headSlotDamage, ?int $chestSlotDamage, ?int $legsSlotDamage, ?int $feetSlotDamage) : self{
+	public static function create(?int $headSlotDamage, ?int $chestSlotDamage, ?int $legsSlotDamage, ?int $feetSlotDamage, ?int $bodySlotDamage) : self{
 		$result = new self;
 		$result->headSlotDamage = $headSlotDamage;
 		$result->chestSlotDamage = $chestSlotDamage;
 		$result->legsSlotDamage = $legsSlotDamage;
 		$result->feetSlotDamage = $feetSlotDamage;
+		$result->bodySlotDamage = $bodySlotDamage;
 
 		return $result;
 	}
@@ -61,6 +64,8 @@ class PlayerArmorDamagePacket extends DataPacket{
 	public function getLegsSlotDamage() : ?int{ return $this->legsSlotDamage; }
 
 	public function getFeetSlotDamage() : ?int{ return $this->feetSlotDamage; }
+
+  public function getBodySlotDamage() : ?int{ return $this->bodySlotDamage; }
 
 	private function maybeReadDamage(int $flags, int $flag) : ?int{
 		if(($flags & (1 << $flag)) !== 0){
@@ -76,6 +81,7 @@ class PlayerArmorDamagePacket extends DataPacket{
 		$this->chestSlotDamage = $this->maybeReadDamage($flags, self::FLAG_CHEST);
 		$this->legsSlotDamage = $this->maybeReadDamage($flags, self::FLAG_LEGS);
 		$this->feetSlotDamage = $this->maybeReadDamage($flags, self::FLAG_FEET);
+		$this->bodySlotDamage = $this->maybeReadDamage($flags, self::FLAG_BODY);
 	}
 
 	private function composeFlag(?int $field, int $flag) : int{
@@ -93,13 +99,15 @@ class PlayerArmorDamagePacket extends DataPacket{
             $this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) |
             $this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) |
             $this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) |
-            $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET)
+            $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) |
+			      $this->composeFlag($this->bodySlotDamage, self::FLAG_BODY)
         );
 
 		$this->maybeWriteDamage($this->headSlotDamage);
 		$this->maybeWriteDamage($this->chestSlotDamage);
 		$this->maybeWriteDamage($this->legsSlotDamage);
 		$this->maybeWriteDamage($this->feetSlotDamage);
+		$this->maybeWriteDamage($this->bodySlotDamage);
 	}
 
 	public function handle(NetworkSession $session) : bool{
