@@ -1511,6 +1511,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->setSpawn($pos);
 
 		$this->level->setSleepTicks(60);
+		$this->updateBoundingBox(0.2, 0.2);
 
 		return true;
 	}
@@ -1524,6 +1525,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			(new PlayerBedLeaveEvent($this, $b))->call();
 
 			$this->sleeping = null;
+			$this->updateBoundingBox(1.8, 0.6);
 			$this->propertyManager->setBlockPos(self::DATA_PLAYER_BED_POSITION, null);
 			$this->setPlayerFlag(self::DATA_PLAYER_FLAG_SLEEP, false);
 
@@ -5575,5 +5577,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
     public function getVanillaVersion() : string{
         return $this->vanillaVersion;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBedrock() : bool{
+        return $this->getProtocol() >= ProtocolInfo::PROTOCOL_130;
     }
 }
