@@ -3454,9 +3454,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                             }
                         }
 
-                        if($this->inventory !== null){
-                            $this->inventory->sendHeldItem($this);
+                        if(!$this->isConnected()){
+                            return true;
                         }
+
+                        $this->inventory->sendHeldItem($this);
 
 						if($blockVector->distanceSquared($this) > 10000){
 							return true;
