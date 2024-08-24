@@ -3038,6 +3038,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		$ev->call();
+
+        if(!$this->isConnected()){
+            return true;
+        }
+
 		if($ev->isCancelled()){
 			$this->inventory->sendHeldItem($this);
 			return false;
