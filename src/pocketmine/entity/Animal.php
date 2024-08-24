@@ -36,6 +36,11 @@ abstract class Animal extends Mob implements Ageable{
 	protected $inLove = 0;
 	protected $spawnableBlock = Block::GRASS;
 
+    /** @var int|null */
+    protected $reproduceCooldown = null;
+
+    public const REPRODUCE_COOLDOWN = 20 * 60 * 300; // 5 minutes (in ticks)
+
 	public function getBlockPathWeight(Vector3 $pos) : float{
 		return $this->level->getBlock($pos->down()) instanceof Grass ? 10 : max($this->level->getBlockSkyLightAt($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ()), $this->level->getBlockLightAt($pos->getFloorX(), $pos->getFloorY(), $pos->getFloorZ())) - 0.5;
 	}
@@ -49,7 +54,7 @@ abstract class Animal extends Mob implements Ageable{
 	}
 
 	public function onInteract(Player $player, Item $item, Vector3 $clickPos) : bool{
-		if($this->isBreedingItem($item) and !$this->isImmobile()){
+		if($this->isBreedingItem($item) and !$this->isImmobile() and !$this->hasReproduceCooldown()){
 			if(!$this->isBaby() and !$this->isInLove()){
 				$this->setInLove(true);
 
@@ -73,6 +78,11 @@ abstract class Animal extends Mob implements Ageable{
 				$this->broadcastEntityEvent(ActorEventPacket::LOVE_PARTICLES);
 			}
 		}
+        if($this->reproduceCooldown !== null){
+            if($this->reproduceCooldown-- <= 0){
+                $this->reproduceCooldown = null;
+            }
+        }
 		return parent::entityBaseTick($diff);
 	}
 
@@ -82,6 +92,14 @@ abstract class Animal extends Mob implements Ageable{
 			$this->inLove = 10;
 		}
 	}
+
+    public function addReproduceCooldown(int $cooldown = self::REPRODUCE_COOLDOWN) : void{
+        $this->reproduceCooldown = $cooldown;
+    }
+
+    public function hasReproduceCooldown() : bool{
+        return $this->reproduceCooldown !== null;
+    }
 
 	public function eatItem(Item $item) : void{
 		$this->broadcastEntityEvent(ActorEventPacket::EATING_ITEM, $item->getId());

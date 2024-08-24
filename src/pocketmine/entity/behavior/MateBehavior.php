@@ -43,6 +43,9 @@ class MateBehavior extends Behavior{
 	}
 
 	public function canStart() : bool{
+        if($this->mob->hasReproduceCooldown()){
+            return false;
+        }
 		if($this->mob->isInLove()){
 			$mate = $this->getNearbyMate();
 			if($mate !== null){
@@ -80,7 +83,7 @@ class MateBehavior extends Behavior{
 		$animal = null;
 
 		foreach($list as $entity){
-			if($entity !== $this->mob and $entity instanceof Animal and $entity->isInLove() and !$entity->isBaby() and $entity->distance($this->mob) < $dist and $entity::NETWORK_ID === $this->mob::NETWORK_ID){
+			if($entity !== $this->mob and $entity instanceof Animal and $entity->isInLove() and !$entity->isBaby() and $entity->distance($this->mob) < $dist and $entity::NETWORK_ID === $this->mob::NETWORK_ID and !$entity->hasReproduceCooldown()){
 				$dist = $entity->distance($this->mob);
 				$animal = $entity;
 			}
@@ -98,7 +101,9 @@ class MateBehavior extends Behavior{
 			$baby->spawnToAll();
 
 			$this->targetMate->setInLove(false);
+            $this->targetMate->addReproduceCooldown();
 			$this->mob->setInLove(false);
+            $this->mob->addReproduceCooldown();
 		}
 	}
 }
