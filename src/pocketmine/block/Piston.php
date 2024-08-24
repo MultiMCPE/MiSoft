@@ -33,7 +33,7 @@ use pocketmine\tile\Tile;
 use function abs;
 use function in_array;
 
-class Piston extends RedstoneSource{
+class Piston extends Solid implements ElectricalAppliance{
 	protected $id = self::PISTON;
 
 	/** @var int */

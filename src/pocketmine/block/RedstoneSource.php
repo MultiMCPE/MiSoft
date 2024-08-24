@@ -114,14 +114,9 @@ class RedstoneSource extends Flowable{
 			$block->turnOn();
 		}
 
-		/** @var Dropper|Dispenser $block */
-		if($block->getId() === Block::DROPPER or $block->getId() === Block::DISPENSER){
+		/** @var Dropper|Dispenser|Piston|StickyPiston $block */
+		if($block->getId() === Block::DROPPER or $block->getId() === Block::DISPENSER or $block->getId() === Block::PISTON or $block->getId() === Block::STICKY_PISTON){
 			$block->activate();
-		}
-
-		/** @var Piston|StickyPiston $block */
-		if($block instanceof Piston){
-		    $block->activate();
 		}
 
 		/** @var UnoweredRepeater $block */
@@ -170,15 +165,15 @@ class RedstoneSource extends Flowable{
 				}
 			}
 
+	    	/** @var Piston|StickyPiston $block */
+	    	if($block->getId() === Block::PISTON or $block->getId() === Block::STICKY_PISTON){
+		    	$block->deactivate();
+	    	}
+
 			/** @var ActiveRedstoneLamp $block */
 			if($block->getId() === Block::LIT_REDSTONE_LAMP){
-				$block->turnOff();
-			}
-
-		    /** @var Piston|StickyPiston $block */
-	    	if($block instanceof Piston){
-				$block->deactivate();
-		    }
+                $block->turnOff();
+            }
 		}
 
 		/** @var PoweredRepeater $block */
@@ -384,7 +379,7 @@ class RedstoneSource extends Flowable{
 
 					if($block->getSide($faces[$block->meta])->equals($pos)){
 						$ignoreBlock = $this->getSide(static::getOppositeSide($faces[$block->meta]));
-						$block->turnOn(Level::chunkBlockHash($ignoreBlock->x, $ignoreBlock->y, $ignoreBlock->z));
+						$block->turnOn((string) Level::chunkBlockHash($ignoreBlock->x, $ignoreBlock->y, $ignoreBlock->z));
 					}
 				}
 			}
