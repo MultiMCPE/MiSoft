@@ -3412,49 +3412,51 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$face = $packet->trData->face;
 
 				$type = $packet->trData->actionType;
-				switch($type){
-					case InventoryTransactionPacket::USE_ITEM_ACTION_CLICK_BLOCK:
-						//TODO: start hack for client spam bug
-						$spamBug = ($this->lastRightClickData !== null and
-							microtime(true) - $this->lastRightClickTime < 0.1 and //100ms
-							$this->lastRightClickData->playerPos->distanceSquared($packet->trData->playerPos) < 0.00001 and
-							$this->lastRightClickData->x === $packet->trData->x and
-							$this->lastRightClickData->y === $packet->trData->y and
-							$this->lastRightClickData->z === $packet->trData->z and
-							$this->lastRightClickData->clickPos->distanceSquared($packet->trData->clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
-						);
-						//get rid of continued spam if the player clicks and holds right-click
-						$this->lastRightClickData = $packet->trData;
-						$this->lastRightClickTime = microtime(true);
-						if($spamBug){
-							return true;
-						}
-						//TODO: end hack for client spam bug
+				switch($type) {
+                    case InventoryTransactionPacket::USE_ITEM_ACTION_CLICK_BLOCK:
+                        //TODO: start hack for client spam bug
+                        $spamBug = ($this->lastRightClickData !== null and
+                            microtime(true) - $this->lastRightClickTime < 0.1 and //100ms
+                            $this->lastRightClickData->playerPos->distanceSquared($packet->trData->playerPos) < 0.00001 and
+                            $this->lastRightClickData->x === $packet->trData->x and
+                            $this->lastRightClickData->y === $packet->trData->y and
+                            $this->lastRightClickData->z === $packet->trData->z and
+                            $this->lastRightClickData->clickPos->distanceSquared($packet->trData->clickPos) < 0.00001 //signature spam bug has 0 distance, but allow some error
+                        );
+                        //get rid of continued spam if the player clicks and holds right-click
+                        $this->lastRightClickData = $packet->trData;
+                        $this->lastRightClickTime = microtime(true);
+                        if ($spamBug) {
+                            return true;
+                        }
+                        //TODO: end hack for client spam bug
 
-						$this->setUsingItem(false);
+                        $this->setUsingItem(false);
 
-						if(!$this->canInteract($blockVector->add(0.5, 0.5, 0.5), 13) or $this->isSpectator()){
-						}elseif($this->isCreative()){
-							$item = $this->inventory->getItemInHand();
-							if($this->level->useItemOn($blockVector, $item, $face, $packet->trData->clickPos, $this, true)){
-								return true;
-							}
-						}elseif(!$this->inventory->getItemInHand()->equals($packet->trData->itemInHand)){
-							$this->inventory->sendHeldItem($this);
-						}else{
-							$item = $this->inventory->getItemInHand();
-							$oldItem = clone $item;
-							if($this->level->useItemOn($blockVector, $item, $face, $packet->trData->clickPos, $this, true)){
-								if(!$item->equalsExact($oldItem)){
-									$this->inventory->setItemInHand($item);
-									$this->inventory->sendHeldItem($this->hasSpawned);
-								}
+                        if (!$this->canInteract($blockVector->add(0.5, 0.5, 0.5), 13) or $this->isSpectator()) {
+                        } elseif ($this->isCreative()) {
+                            $item = $this->inventory->getItemInHand();
+                            if ($this->level->useItemOn($blockVector, $item, $face, $packet->trData->clickPos, $this, true)) {
+                                return true;
+                            }
+                        } elseif (!$this->inventory->getItemInHand()->equals($packet->trData->itemInHand)) {
+                            $this->inventory->sendHeldItem($this);
+                        } else {
+                            $item = $this->inventory->getItemInHand();
+                            $oldItem = clone $item;
+                            if ($this->level->useItemOn($blockVector, $item, $face, $packet->trData->clickPos, $this, true)) {
+                                if (!$item->equalsExact($oldItem)) {
+                                    $this->inventory->setItemInHand($item);
+                                    $this->inventory->sendHeldItem($this->hasSpawned);
+                                }
 
-								return true;
-							}
-						}
+                                return true;
+                            }
+                        }
 
-						$this->inventory->sendHeldItem($this);
+                        if($this->inventory !== null){
+                            $this->inventory->sendHeldItem($this);
+                        }
 
 						if($blockVector->distanceSquared($this) > 10000){
 							return true;
