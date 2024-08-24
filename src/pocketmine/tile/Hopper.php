@@ -25,10 +25,12 @@ namespace pocketmine\tile;
 
 use pocketmine\inventory\ShulkerBoxInventory;
 use pocketmine\inventory\HopperInventory;
+use pocketmine\inventory\FurnaceInventory;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\item\Item;
 use pocketmine\entity\object\ItemEntity as DroppedItem;
 use pocketmine\inventory\InventoryHolder;
+use pocketmine\tile\Furnace;
 use pocketmine\math\Vector3;
 use pocketmine\math\AxisAlignedBB;
 
@@ -130,12 +132,12 @@ class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
 
         //дюперы, я ебал вашу маму.
         $source = $this->getLevel()->getTile($this->getBlock()->getSide(Vector3::SIDE_UP));
-        if($source instanceof ShulkerBox) {
+        if($source instanceof ShulkerBox){
             return true;
         }
 
         //Suck items from above tile inventories
-        if($source instanceof Tile and $source instanceof InventoryHolder){
+        if($source instanceof Tile and $source instanceof InventoryHolder and !($source instanceof Furnace)){
             $inventory = $source->getInventory();
             $item = clone $inventory->getItem($inventory->firstOccupied());
             $item->setCount(1);
@@ -164,6 +166,14 @@ class Hopper extends Spawnable implements InventoryHolder, Container, Nameable{
                     $targetItem->setCount(1);
 
                     if(!(($targetItem->getId() === Item::SHULKER_BOX or $targetItem->getId() === Item::UNDYED_SHULKER_BOX) && $inv instanceof ShulkerBoxInventory)){
+                        if($inv instanceof FurnaceInventory){
+                            $smelting = $inv->getSmelting();
+                            if(!$smelting->isNull()){
+                                if(!$smelting->equals($targetItem, true, false) or $smelting->getCount() >= $smelting->getMaxStackSize()){
+                                    break;
+                                }
+                            }
+                        }
                         if($inv->canAddItem($targetItem)){
                             $this->inventory->removeItem($targetItem);
                             $inv->addItem($targetItem);
