@@ -83,6 +83,9 @@ class InventoryTransactionPacket extends DataPacket{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
             if($this->getUnsignedVarInt() !== 0){
                 $inventoriesCount = $this->getUnsignedVarInt();
+                if($inventoriesCount > 128){
+                    throw new UnexpectedValueException("Too many inventories count in inventory transaction: " . $inventoriesCount);
+                }
                 while($inventoriesCount --> 0){
                     $inventoryId = $this->getUnsignedVarInt();
                     if(isset($this->knownInventories[$inventoryId])){
@@ -91,6 +94,9 @@ class InventoryTransactionPacket extends DataPacket{
 
                     $this->knownInventories[$inventoryId] = [];
                     $slotsCount = $this->getUnsignedVarInt();
+                    if($slotsCount > 128){
+                        throw new UnexpectedValueException("Too many slots count in inventory transaction: " . $slotsCount);
+                    }
                     while($slotsCount --> 0){
                         $this->knownInventories[$inventoryId][] = $this->getUnsignedVarInt();
                     }

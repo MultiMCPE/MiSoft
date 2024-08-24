@@ -3329,7 +3329,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		if(count($packet->actions) > 100){
+		if(count($packet->actions) > 50){
 		    throw new UnexpectedValueException("Too many actions in inventory transaction");
 		}
 
