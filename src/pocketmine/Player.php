@@ -253,6 +253,7 @@ use function sqrt;
 use function strlen;
 use function strpos;
 use function strtolower;
+use function str_replace;
 use function substr;
 use function trim;
 use function ucfirst;
@@ -2432,7 +2433,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         $this->craftingProtocol = ProtocolConvertor::convertCraftingProtocol($this->protocol);
 		BlockPalette::initPalette($this->protocol);
 
-		$this->username = TextFormat::clean($packet->username);
+		$this->username = str_replace(" ", "_", TextFormat::clean($packet->username));
 		$this->displayName = $this->username;
 		$this->iusername = strtolower($this->username);
 
