@@ -25,11 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\resourcepacks\ResourcePack;
-use pocketmine\utils\Binary;
 use function count;
-use function pack;
-use function unpack;
-
 
 class ResourcePacksInfoPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::RESOURCE_PACKS_INFO_PACKET;
@@ -72,6 +68,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		        	$this->getString();
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 		            	$this->getBool();
+                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                            $this->getBool();
+                        }
 		        	}
 		    	}
 			}
@@ -89,6 +88,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		    	    $this->getString();
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 		            	$this->getBool();
+                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                            $this->getBool();
+                        }
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
 		            	    $this->getBool();
 		            	}
@@ -131,6 +133,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		        	$this->putString($entry->getPackId()); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
                         $this->putBool(false); //TODO: has scripts (?)
+                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                            $this->putBool(false); //TODO: is addon pack
+                        }
 		        	}
 		    	}
 			}
@@ -147,6 +152,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 		        	$this->putString($entry->getPackId()); //TODO: content identity
 		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
                         $this->putBool(false); //TODO: seems useless for resource packs
+                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                            $this->putBool(false); //TODO: is addon pack
+                        }
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
 		            	    $this->putBool(false); //TODO: supports RTX
 		            	}

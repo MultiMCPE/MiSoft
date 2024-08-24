@@ -343,6 +343,10 @@ class PacketPool {
 		self::registerPacket(new SetHudPacket());
 		self::registerPacket(new AwardAchievementPacket());
 		self::registerPacket(new ClientboundCloseFormPacket());
+        self::registerPacket(new ServerboundLoadingScreenPacket());
+        self::registerPacket(new JigsawStructureDataPacket());
+        self::registerPacket(new CurrentStructureFeaturePacket());
+        self::registerPacket(new ServerboundDiagnosticsPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

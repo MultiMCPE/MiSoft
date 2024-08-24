@@ -99,7 +99,6 @@ class ServerboundDiagnosticsPacket extends DataPacket{
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		//return $session->handleServerboundDiagnostics($this);
-    return true;
+		return $session->handleServerboundDiagnostics($this);
 	}
 }

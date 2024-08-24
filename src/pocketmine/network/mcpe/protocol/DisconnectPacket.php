@@ -35,7 +35,8 @@ class DisconnectPacket extends DataPacket{
 	public $hideDisconnectionScreen = false;
 	/** @var string */
 	public $message = "";
-	public $filteredMessage = "";
+    /** @var ?string */
+	public $filteredMessage = null;
 
 	public function canBeSentBeforeLogin() : bool{
 		return true;
@@ -50,13 +51,13 @@ class DisconnectPacket extends DataPacket{
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
 			$this->message = $this->getString();
 		}elseif(!$this->hideDisconnectionScreen){
-      if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-        $this->message = $this->getString();
-			  $this->filteredMessage = $this->getString();
-      }else{
-        $this->message = $this->getString();
-      }
-    }
+           if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+               $this->message = $this->getString();
+			   $this->filteredMessage = $this->getString();
+           }else{
+               $this->message = $this->getString();
+           }
+        }
 	}
 
 	protected function encodePayload(){
@@ -64,16 +65,16 @@ class DisconnectPacket extends DataPacket{
 			$this->putVarInt($this->reason);
 		}
 
-    $this->putBool($this->hideDisconnectionScreen);
-    if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-      $this->putString($this->message);
-    }elseif(!$this->hideDisconnectionScreen){
-      if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-        $this->putString($this->message);
-        $this->putString($this->filteredMessage);
-      }else{
-        $this->putString($this->message);
-      }
+        $this->putBool($this->hideDisconnectionScreen);
+        if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
+            $this->putString($this->message);
+        }elseif(!$this->hideDisconnectionScreen){
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                $this->putString($this->message);
+                $this->putString($this->filteredMessage ?? "");
+            }else{
+                $this->putString($this->message);
+            }
 		}
 	}
 

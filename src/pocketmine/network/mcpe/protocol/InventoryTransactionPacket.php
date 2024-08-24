@@ -27,6 +27,8 @@ use InvalidArgumentException;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\network\mcpe\protocol\types\NetworkInventoryAction;
+use pocketmine\network\mcpe\protocol\types\TriggerType;
+use pocketmine\network\mcpe\protocol\types\PredictedResult;
 use stdClass;
 use UnexpectedValueException;
 use function count;
@@ -162,14 +164,20 @@ class InventoryTransactionPacket extends DataPacket{
 				break;
 			case self::TYPE_USE_ITEM:
 				$this->trData->actionType = $this->getUnsignedVarInt();
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                    $this->trData->triggerType = TriggerType::fromPacket($this->getUnsignedVarInt());
+                }
 				$this->getBlockPosition($this->trData->x, $this->trData->y, $this->trData->z);
 				$this->trData->face = $this->getVarInt();
 				$this->trData->hotbarSlot = $this->getVarInt();
 				$this->trData->itemInHand = $this->getSlot($this->getProtocol());
 				$this->trData->playerPos = $this->getVector3();
 				$this->trData->clickPos = $this->getVector3();
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_340) {
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_340){
 			    	$this->trData->blockRuntimeId = $this->getUnsignedVarInt();
+                    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                        $this->trData->clientInteractPrediction = PredictedResult::fromPacket($this->getUnsignedVarInt());
+                    }
 				}
 				break;
 			case self::TYPE_USE_ITEM_ON_ENTITY:
@@ -208,14 +216,20 @@ class InventoryTransactionPacket extends DataPacket{
 				break;
 			case self::TYPE_USE_ITEM:
 				$this->putUnsignedVarInt($this->trData->actionType);
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                    $this->putUnsignedVarInt($this->trData->triggerType->value);
+                }
 				$this->putBlockPosition($this->trData->x, $this->trData->y, $this->trData->z);
 				$this->putVarInt($this->trData->face);
 				$this->putVarInt($this->trData->hotbarSlot);
 				$this->putSlot($this->trData->itemInHand, $this->getProtocol());
 				$this->putVector3($this->trData->playerPos);
 				$this->putVector3($this->trData->clickPos);
-				if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_340) {
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_340){
 			    	$this->putUnsignedVarInt($this->trData->blockRuntimeId);
+                    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                        $this->putUnsignedVarInt($this->trData->clientInteractPrediction->value);
+                    }
 				}
 				break;
 			case self::TYPE_USE_ITEM_ON_ENTITY:

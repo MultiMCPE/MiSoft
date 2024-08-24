@@ -23,10 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
 
 class ContainerClosePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CONTAINER_CLOSE_PACKET;

@@ -103,6 +103,7 @@ class HorseInventory extends AbstractHorseInventory{
 		$pk->chest = $this->getItem(1);
 		$pk->legs = $air;
 		$pk->feet = $air;
+        $pk->body = $air;
 
 		$player->sendDataPacket($pk);
 	}

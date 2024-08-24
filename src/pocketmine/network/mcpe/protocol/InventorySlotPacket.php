@@ -35,10 +35,10 @@ class InventorySlotPacket extends DataPacket{
 	public $inventorySlot;
 	/** @var int */
 	public $isNullItem;
+    /** @var int */
+    public $dynamicContainerId = 0;
 	/** @var Item */
 	public $item;
-
-  public int $dynamicContainerId = 0;
 
 	protected function decodePayload(){
 		$this->windowId = $this->getUnsignedVarInt();
@@ -46,11 +46,10 @@ class InventorySlotPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() <= ProtocolInfo::PROTOCOL_428){
 		    $this->isNullItem = $this->getVarInt();
 		}
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->dynamicContainerId = $this->getUnsignedVarInt();
+        }
 		$this->item = $this->getSlot($this->getProtocol());
-
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->dynamicContainerId = $this->getUnsignedVarInt();
-    }
 	}
 
 	protected function encodePayload(){
@@ -59,11 +58,10 @@ class InventorySlotPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392 && $this->getProtocol() <= ProtocolInfo::PROTOCOL_428){
 	    	$this->putVarInt($this->item->isNull() ? 0 : 1);
 		}
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->putUnsignedVarInt($this->dynamicContainerId);
+        }
 		$this->putSlot($this->item, $this->getProtocol());
-    
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->putUnsignedVarInt($this->dynamicContainerId);
-    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

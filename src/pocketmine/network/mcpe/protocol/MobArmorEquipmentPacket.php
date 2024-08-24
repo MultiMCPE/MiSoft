@@ -43,6 +43,7 @@ class MobArmorEquipmentPacket extends DataPacket{
 	public $legs;
 	/** @var Item */
 	public $feet;
+    /** @var Item */
 	public $body;
 
 	protected function decodePayload(){
@@ -51,10 +52,9 @@ class MobArmorEquipmentPacket extends DataPacket{
 		$this->chest = $this->getSlot($this->getProtocol());
 		$this->legs = $this->getSlot($this->getProtocol());
 		$this->feet = $this->getSlot($this->getProtocol());
-		
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->body = $this->getSlot($this->getProtocol());
-    }
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->body = $this->getSlot($this->getProtocol());
+        }
 	}
 
 	protected function encodePayload(){
@@ -63,10 +63,9 @@ class MobArmorEquipmentPacket extends DataPacket{
 		$this->putSlot($this->chest, $this->getProtocol());
 		$this->putSlot($this->legs, $this->getProtocol());
 		$this->putSlot($this->feet, $this->getProtocol());
-
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->putSlot(Item::get(Item::AIR), $this->getProtocol());
-    }
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->putSlot($this->body, $this->getProtocol());
+        }
 	}
 
 	public function mustBeDecoded() : bool{

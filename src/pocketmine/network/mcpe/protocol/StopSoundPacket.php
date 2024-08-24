@@ -34,18 +34,23 @@ class StopSoundPacket extends DataPacket{
 	public $soundName;
 	/** @var bool */
 	public $stopAll;
+    /** @var bool */
 	public $stopLegacyMusic = false;
 
 	protected function decodePayload(){
 		$this->soundName = $this->getString();
-    $this->stopAll = $this->getBool();
-    $this->stopLegacyMusic = $this->getBool();
+        $this->stopAll = $this->getBool();
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->stopLegacyMusic = $this->getBool();
+        }
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->soundName);
-    $this->putBool($this->stopAll);
-    $this->putBool($this->stopLegacyMusic);
+        $this->putBool($this->stopAll);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->putBool($this->stopLegacyMusic);
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

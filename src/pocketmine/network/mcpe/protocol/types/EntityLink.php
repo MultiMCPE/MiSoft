@@ -39,12 +39,15 @@ class EntityLink{
 	public $immediate; //for dismounting on mount death
 	/** @var bool */
 	public $causedByRider;
+    /** @var float */
+    public $vehicleAngularVelocity;
 
-	public function __construct(int $fromEntityUniqueId = null, int $toEntityUniqueId = null, int $type = null, bool $immediate = false, bool $causedByRider = false){
+	public function __construct(int $fromEntityUniqueId = null, int $toEntityUniqueId = null, int $type = null, bool $immediate = false, bool $causedByRider = false, float $vehicleAngularVelocity = 0.0){
 		$this->fromEntityUniqueId = $fromEntityUniqueId;
 		$this->toEntityUniqueId = $toEntityUniqueId;
 		$this->type = $type;
 		$this->immediate = $immediate;
 		$this->causedByRider = $causedByRider;
+        $this->vehicleAngularVelocity = $vehicleAngularVelocity;
 	}
 }

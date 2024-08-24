@@ -508,7 +508,7 @@ final class LevelSoundIds{
 			"SOUND_VAULT_DEACTIVATE" => 507,
 			"SOUND_HURT_REDUCED" => 508,
 			"SOUND_WIND_CHARGE_BURST" => 509,
-
+            "SOUND_IMITATE_BOGGED" => 510,
 		    "SOUND_ARMOR_CRACK_WOLF" => 511,
 			"SOUND_ARMOR_BREAK_WOLF" => 512,
 			"SOUND_ARMOR_REPAIR_WOLF" => 513,
@@ -528,6 +528,7 @@ final class LevelSoundIds{
 			"SOUND_RECORD_CREATOR" => 527,
 			"SOUND_RECORD_CREATOR_MUSIC_BOX" => 528,
 			"SOUND_RECORD_PRECIPICE" => 529,
+            "SOUND_VAULT_REJECT_REWARDED_PLAYER" => 530,
 
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
@@ -551,7 +552,7 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
             "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
-            "SOUND_UNDEFINED" => 530
+            "SOUND_UNDEFINED" => 531
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,

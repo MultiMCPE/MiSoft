@@ -24,8 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use function chr;
-use function ord;
 
 class PlayerArmorDamagePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_ARMOR_DAMAGE_PACKET;
@@ -34,7 +32,7 @@ class PlayerArmorDamagePacket extends DataPacket{
 	private const FLAG_CHEST = 1;
 	private const FLAG_LEGS = 2;
 	private const FLAG_FEET = 3;
-  private const FLAG_BODY = 4;
+    private const FLAG_BODY = 4;
 
 	/** @var int|null */
 	private $headSlotDamage;
@@ -44,6 +42,7 @@ class PlayerArmorDamagePacket extends DataPacket{
 	private $legsSlotDamage;
 	/** @var int|null */
 	private $feetSlotDamage;
+    /** @var int|null */
 	private $bodySlotDamage;
 
 	public static function create(?int $headSlotDamage, ?int $chestSlotDamage, ?int $legsSlotDamage, ?int $feetSlotDamage, ?int $bodySlotDamage) : self{
@@ -65,7 +64,7 @@ class PlayerArmorDamagePacket extends DataPacket{
 
 	public function getFeetSlotDamage() : ?int{ return $this->feetSlotDamage; }
 
-  public function getBodySlotDamage() : ?int{ return $this->bodySlotDamage; }
+    public function getBodySlotDamage() : ?int{ return $this->bodySlotDamage; }
 
 	private function maybeReadDamage(int $flags, int $flag) : ?int{
 		if(($flags & (1 << $flag)) !== 0){
@@ -81,7 +80,9 @@ class PlayerArmorDamagePacket extends DataPacket{
 		$this->chestSlotDamage = $this->maybeReadDamage($flags, self::FLAG_CHEST);
 		$this->legsSlotDamage = $this->maybeReadDamage($flags, self::FLAG_LEGS);
 		$this->feetSlotDamage = $this->maybeReadDamage($flags, self::FLAG_FEET);
-		$this->bodySlotDamage = $this->maybeReadDamage($flags, self::FLAG_BODY);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->bodySlotDamage = $this->maybeReadDamage($flags, self::FLAG_BODY);
+        }
 	}
 
 	private function composeFlag(?int $field, int $flag) : int{
@@ -95,19 +96,30 @@ class PlayerArmorDamagePacket extends DataPacket{
 	}
 
 	protected function encodePayload() : void{
-        $this->putByte(
-            $this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) |
-            $this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) |
-            $this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) |
-            $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) |
-			      $this->composeFlag($this->bodySlotDamage, self::FLAG_BODY)
-        );
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712) {
+            $this->putByte(
+                $this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) |
+                $this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) |
+                $this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) |
+                $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET) |
+                $this->composeFlag($this->bodySlotDamage, self::FLAG_BODY)
+            );
+        }else{
+            $this->putByte(
+                $this->composeFlag($this->headSlotDamage, self::FLAG_HEAD) |
+                $this->composeFlag($this->chestSlotDamage, self::FLAG_CHEST) |
+                $this->composeFlag($this->legsSlotDamage, self::FLAG_LEGS) |
+                $this->composeFlag($this->feetSlotDamage, self::FLAG_FEET)
+            );
+        }
 
 		$this->maybeWriteDamage($this->headSlotDamage);
 		$this->maybeWriteDamage($this->chestSlotDamage);
 		$this->maybeWriteDamage($this->legsSlotDamage);
 		$this->maybeWriteDamage($this->feetSlotDamage);
-		$this->maybeWriteDamage($this->bodySlotDamage);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->maybeWriteDamage($this->bodySlotDamage);
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

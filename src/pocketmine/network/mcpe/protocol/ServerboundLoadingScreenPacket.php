@@ -46,7 +46,6 @@ class ServerboundLoadingScreenPacket extends DataPacket{
 	}
 
 	public function handle(NetworkSession $session): bool{
-		//return $handler->handleServerboundLoadingScreen($this);
-    return true;
+		return $session->handleServerboundLoadingScreen($this);
 	}
 }

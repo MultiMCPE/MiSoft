@@ -235,6 +235,10 @@ interface PacketMagicNumbers{
 	public const SET_HUD_PACKET = 0x134;
 	public const AWARD_ACHIEVEMENT_PACKET = 0x135;
     public const CLIENTBOUND_CLOSE_FORM_PACKET = 0x136;
+    public const SERVERBOUND_LOADING_SCREEN_PACKET = 0x138;
+    public const JIGSAW_STRUCTURE_DATA_PACKET = 0x139;
+    public const CURRENT_STRUCTURE_FEATURE_PACKET = 0x13a;
+    public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1
@@ -249,8 +253,4 @@ interface PacketMagicNumbers{
 	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x109;
 	public const ADD_ITEM_PACKET = 0x110;
 	public const BATCH_PACKET = 0x111;
-  public const SERVERBOUND_LOADING_SCREEN_PACKET = 0x138;
-	public const JIGSAW_STRUCTURE_DATA_PACKET = 0x139;
-	public const CURRENT_STRUCTURE_FEATURE_PACKET = 0x13a;
-	public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
 }

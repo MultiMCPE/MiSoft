@@ -237,6 +237,10 @@ use pocketmine\network\mcpe\protocol\UpdateSubChunkBlocksPacket;
 use pocketmine\network\mcpe\protocol\UpdateTradePacket;
 use pocketmine\network\mcpe\protocol\UseItemPacket;
 use pocketmine\network\mcpe\protocol\VideoStreamConnectPacket;
+use pocketmine\network\mcpe\protocol\ServerboundLoadingScreenPacket;
+use pocketmine\network\mcpe\protocol\JigsawStructureDataPacket;
+use pocketmine\network\mcpe\protocol\CurrentStructureFeaturePacket;
+use pocketmine\network\mcpe\protocol\ServerboundDiagnosticsPacket;
 
 abstract class NetworkSession{
 
@@ -1094,7 +1098,23 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleCloseForm(ClientboundCloseFormPacket $packet) : bool{
+	public function handleClientboundCloseForm(ClientboundCloseFormPacket $packet) : bool{
 		return false;
 	}
+
+    public function handleServerboundLoadingScreen(ServerboundLoadingScreenPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleJigsawStructureData(JigsawStructureDataPacket $packet) : bool{
+        return false;
+    }
+
+    public function handleCurrentStructureFeature(CurrentStructureFeaturePacket $packet) : bool{
+        return false;
+    }
+
+    public function handleServerboundDiagnostics(ServerboundDiagnosticsPacket $packet) : bool{
+        return false;
+    }
 }

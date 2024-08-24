@@ -1700,10 +1700,11 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	 * @param int      $type
 	 * @param bool     $immediate
 	 * @param bool     $causedByRider
+     * @param float    $vehicleAngularVelocity
 	 */
-	public function sendLink(array $targets, int $entityId, int $type = EntityLink::TYPE_RIDER, bool $immediate = false, bool $causedByRider = true) : void{
+	public function sendLink(array $targets, int $entityId, int $type = EntityLink::TYPE_RIDER, bool $immediate = false, bool $causedByRider = true, float $vehicleAngularVelocity = 0.0) : void{
 		$pk = new SetActorLinkPacket();
-		$pk->link = new EntityLink($this->id, $entityId, $type, $immediate, $causedByRider);
+		$pk->link = new EntityLink($this->id, $entityId, $type, $immediate, $causedByRider, $vehicleAngularVelocity);
 
 		$this->server->broadcastPacket($targets, $pk);
 	}

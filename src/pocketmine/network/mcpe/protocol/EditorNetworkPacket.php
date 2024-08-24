@@ -24,6 +24,7 @@ use pocketmine\network\mcpe\NetworkSession;
 class EditorNetworkPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::EDITOR_NETWORK_PACKET;
 
+    private bool $isRouteToManager;
 	/** @phpstan-var CompoundTag */
 	private CompoundTag $payload;
 
@@ -31,20 +32,29 @@ class EditorNetworkPacket extends DataPacket{
 	 * @generate-create-func
 	 * @phpstan-param CompoundTag $payload
 	 */
-	public static function create(CompoundTag $payload) : self{
+	public static function create(bool $isRouteToManager, CompoundTag $payload) : self{
 		$result = new self;
-		$result->payload = $payload;
+        $result->isRouteToManager = $isRouteToManager;
+        $result->payload = $payload;
 		return $result;
 	}
 
 	/** @phpstan-return CompoundTag */
 	public function getPayload() : CompoundTag{ return $this->payload; }
 
+    public function isRouteToManager() : bool{ return $this->isRouteToManager; }
+
 	protected function decodePayload(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->isRouteToManager = $this->getBool();
+        }
 		$this->payload = $this->getNbtCompoundRoot();
 	}
 
 	protected function encodePayload(){
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+            $this->putBool($this->isRouteToManager);
+        }
 		$this->put((new NetworkLittleEndianNBTStream())->write($this->payload));
 	}
 

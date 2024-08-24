@@ -53,12 +53,13 @@ class SetTitlePacket extends DataPacket{
 	public $xuid = "";
 	/** @var string */
 	public $platformOnlineId = "";
+    /** @var string */
 	public string $filteredTitleText = "";
 
 	protected function decodePayload(){
 		$this->type = $this->getVarInt();
 		$this->text = $this->getString();
-		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224) {
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224){
 		    $this->authorXUID = $this->getString();
 		}
 		$this->fadeInTime = $this->getVarInt();
@@ -67,16 +68,16 @@ class SetTitlePacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	$this->xuid = $this->getString();
 	    	$this->platformOnlineId = $this->getString();
-		}
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->filteredTitleText = $this->getString();
-    }
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                $this->filteredTitleText = $this->getString();
+            }
+        }
 	}
 
 	protected function encodePayload(){
 		$this->putVarInt($this->type);
 		$this->putString($this->text);
-		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224) {
+		if($this->getProtocol() === ProtocolInfo::PROTOCOL_221 || $this->getProtocol() === ProtocolInfo::PROTOCOL_224){
 		    $this->putString($this->authorXUID);
 		}
 		$this->putVarInt($this->fadeInTime);
@@ -85,10 +86,10 @@ class SetTitlePacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
 	    	$this->putString($this->xuid);
 	    	$this->putString($this->platformOnlineId);
-		}
-    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-      $this->putString($this->filteredTitleText);
-    }
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                $this->putString($this->filteredTitleText);
+            }
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

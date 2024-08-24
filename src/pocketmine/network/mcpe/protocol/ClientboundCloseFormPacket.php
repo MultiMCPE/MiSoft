@@ -35,6 +35,6 @@ class ClientboundCloseFormPacket extends DataPacket{
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		return $session->handleCloseForm($this);
+		return $session->handleClientboundCloseForm($this);
 	}
 }

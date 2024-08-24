@@ -33,6 +33,7 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\math\Vector3;
+use pocketmine\math\Vector2;
 use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
@@ -64,6 +65,7 @@ use function chr;
 use function count;
 use function ord;
 use function strlen;
+use Closure;
 
 class NetworkBinaryStream extends BinaryStream{
 
@@ -1066,6 +1068,23 @@ class NetworkBinaryStream extends BinaryStream{
         $this->putLFloat($vector->z);
 	}
 
+    /**
+     * Reads a floating-point Vector2 object with coordinates rounded to 4 decimal places.
+     */
+    public function getVector2() : Vector2{
+        $x = $this->getLFloat();
+        $y = $this->getLFloat();
+        return new Vector2($x, $y);
+    }
+
+    /**
+     * Writes a floating-point Vector2 object
+     */
+    public function putVector2(Vector2 $vector2) : void{
+        $this->putLFloat($vector2->x);
+        $this->putLFloat($vector2->y);
+    }
+
 	public function getByteRotation() : float{
 		return (float) ((ord($this->get(1))) * (360 / 256));
 	}
@@ -1151,6 +1170,9 @@ class NetworkBinaryStream extends BinaryStream{
 	    	$link->immediate = $this->getBool();
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
 		        $link->causedByRider = $this->getBool();
+                if($playerProtocol >= ProtocolInfo::PROTOCOL_712){
+                    $link->vehicleAngularVelocity = $this->getLFloat();
+                }
 	    	}
 		}
 
@@ -1169,6 +1191,9 @@ class NetworkBinaryStream extends BinaryStream{
             $this->putBool($link->immediate);
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
                 $this->putBool($link->causedByRider);
+                if($playerProtocol >= ProtocolInfo::PROTOCOL_712){
+                    $this->putLFloat($link->vehicleAngularVelocity);
+                }
 	    	}
 		}
 	}
@@ -1298,4 +1323,28 @@ class NetworkBinaryStream extends BinaryStream{
 
 		return $skinGeometryData;
 	}
+
+    /**
+     * @param Closure $reader
+     * @return mixed
+     */
+    public function readOptional(Closure $reader) : mixed{
+        if($this->getBool()){
+            return $reader();
+        }
+        return null;
+    }
+
+    /**
+     * @param mixed $value
+     * @param Closure $writer
+     */
+    public function writeOptional(mixed $value, Closure $writer) : void{
+        if($value !== null){
+            $this->putBool(true);
+            $writer($value);
+        }else{
+            $this->putBool(false);
+        }
+    }
 }
