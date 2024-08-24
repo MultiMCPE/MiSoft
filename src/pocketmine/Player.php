@@ -4387,7 +4387,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                     return false;
                 }
 
-                if($packet->slot > $inventory->getSize()){
+                if($packet->slot >= $inventory->getSize()){
                     return false;
                 }
 

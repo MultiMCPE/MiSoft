@@ -38,7 +38,7 @@ final class ItemPalette712 extends Palette{
 		$itemMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/items/712/r16_to_current_item_map.json"), true);
 
 		/** @var int[] $itemPalette */
-		$stringToIntMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/item_id_map.json"), true);
+		$stringToIntMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/item_id_map712.json"), true);
 
 		$simpleMappings = [];
 		foreach($itemMap["simple"] as $oldId => $newId){
@@ -49,13 +49,11 @@ final class ItemPalette712 extends Palette{
 			$simpleMappings[$newId] = $stringToIntMap[$oldId];
 		}
 		foreach($stringToIntMap as $stringId => $intId){
-			if(isset($simpleMappings[$stringId])){
-				throw new InvalidStateException("Old ID $stringId collides with new ID");
-			}
-			$simpleMappings[$stringId] = $intId;
-		}
-
-		$stringToIntMap["minecraft:stone_block_slab"] = 44;
+            if(isset($simpleMappings[$stringId])){
+                throw new InvalidStateException("Old ID $stringId collides with new ID");
+            }
+            $simpleMappings[$stringId] = $intId;
+        }
 
 		$complexMappings = [];
 		foreach($itemMap["complex"] as $oldId => $map){
