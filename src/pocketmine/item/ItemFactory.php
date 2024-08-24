@@ -302,66 +302,6 @@ class ItemFactory{
 	}
 
 	/**
-	 * @param int $id
-	 * 
-	 * @return int
-	 */
-	public static function getValidMeta(int $id) : int{
-		$ids = [
-			1 => 6,
-			5 => 5,
-			6 => 5,
-			12 => 1,
-			17 => 3,
-			18 => 3,
-			19 => 1,
-			24 => 2,
-			31 => 2,
-			35 => 15,
-			38 => 8,
-			43 => 7,
-			44 => 7,
-			85 => 5,
-			97 => 5,
-			98 => 4,
-			157 => 5,
-			158 => 5,
-			159 => 15,
-			161 => 1,
-			162 => 1,
-			168 => 2,
-			171 => 15,
-			175 => 5,
-			179 => 2,
-			181 => 1,
-			182 => 1,
-			201 => 2,
-			218 => 15,
-			236 => 15,
-			237 => 15,
-			247 => 2,
-			263 => 1,
-			444 => 430,
-			325 => 10,
-			262 => 26,
-			333 => 5,
-			351 => 15,
-			355 => 15,
-			358 => 4,
-			262 => 37,
-			373 => 36,
-			383 => 105,
-			395 => 2,
-			397 => 5,
-			438 => 36,
-			441 => 36,
-			454 => 2
-		];
-
-		return $ids[$id] ?? PHP_INT_MAX;
-	}
-
-	/**
 	 * Returns an instance of the Item with the specified id, meta, count and NBT.
 	 *
 	 * @param int                     $id
@@ -375,10 +315,6 @@ class ItemFactory{
 	public static function get(int $id, int $meta = 0, int $count = 1, $tags = null) : Item{
 		if(!is_string($tags) and !($tags instanceof CompoundTag) and $tags !== null){
 			throw new TypeError("`tags` argument must be a string or CompoundTag instance, " . (is_object($tags) ? "instance of " . get_class($tags) : gettype($tags)) . " given");
-		}
-
-		if($meta > self::getValidMeta($id)){
-			$meta = 0;
 		}
 
 		try{
