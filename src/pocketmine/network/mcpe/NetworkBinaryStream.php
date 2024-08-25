@@ -390,23 +390,15 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-		if($id === ItemIds::PUMPKIN && $playerProtocol >= ProtocolInfo::PROTOCOL_260){
-		    if($nbt === null){
-		    	$nbt = new CompoundTag();
-	    	}
-	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
-	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
-
-			$id = ItemIds::CARVED_PUMPKIN;
-		}elseif($id === ItemIds::BANNER && $playerProtocol < ProtocolInfo::PROTOCOL_130){
+        $protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
+        if($protocolIdMeta !== null){
 			if($nbt === null){
 		    	$nbt = new CompoundTag();
 	    	}
 	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
 	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 
-			$id = ItemIds::INFO_UPDATE;
-			$damage = 0;
+            [$id, $damage] = $protocolIdMeta;
 		}
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
@@ -602,14 +594,15 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-		if($id === ItemIds::PUMPKIN){
+		$protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
+        if($protocolIdMeta !== null){
 		    if($nbt === null){
 		    	$nbt = new CompoundTag();
 	    	}
 	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
 	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 
-			$id = ItemIds::CARVED_PUMPKIN;
+            [$id, $coreData] = $protocolIdMeta;
 		}
 
         $palette = ItemPalette::getPalette($playerProtocol);
@@ -621,8 +614,8 @@ class NetworkBinaryStream extends BinaryStream{
 			if($nbt === null){
 				$nbt = new CompoundTag();
 			}
-			$nbt->setInt(self::PM_ID_TAG, $id);
-			$nbt->setInt(self::PM_META_TAG, $coreData);
+			$nbt->setInt(self::PM_ID_TAG, $item->getId());
+			$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 		}else{
 	    	[$netId, $netData] = $idMeta;
 

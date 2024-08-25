@@ -1147,4 +1147,11 @@ class Item implements ItemIds, JsonSerializable{
 	public function setOnItemFrame(bool $onItemFrame) : void{
 		$this->onItemFrame = $onItemFrame;
 	}
+
+    /**
+     * @return [int, int]|null
+     */
+    public function getProtocolIdMeta(int $protocol) : ?array{
+        return null;
+    }
 }

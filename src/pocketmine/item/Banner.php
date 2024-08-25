@@ -30,6 +30,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Banner as TileBanner;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function assert;
 
 class Banner extends Item{
@@ -218,6 +219,14 @@ class Banner extends Item{
 		}
 		$this->setNamedTag($tag);
 	}
+
+    public function getProtocolIdMeta(int $protocol) : ?array{
+        if($protocol < ProtocolInfo::PROTOCOL_130){
+            return [ItemIds::INFO_UPDATE, 0];
+        }
+
+        return null;
+    }
 
 	public function getFuelTime() : int{
 		return 300;
