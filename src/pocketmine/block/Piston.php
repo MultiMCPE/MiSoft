@@ -23,15 +23,17 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-use pocketmine\item\Item;
 use pocketmine\level\sound\PistonInSound;
 use pocketmine\level\sound\PistonOutSound;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 use pocketmine\tile\PistonHead as PistonHeadTile;
 use pocketmine\tile\Tile;
+use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use function abs;
 use function in_array;
+use function count;
 
 class Piston extends Solid implements ElectricalAppliance{
 	protected $id = self::PISTON;
@@ -46,6 +48,8 @@ class Piston extends Solid implements ElectricalAppliance{
 		BlockIds::BEDROCK,
 		BlockIds::COMMAND_BLOCK
 	];
+
+    protected $activated = false;
 
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
@@ -76,7 +80,11 @@ class Piston extends Solid implements ElectricalAppliance{
     }
 
 	public function activate(array $ignore = []){
+        if($this->activated){
+            return;
+        }
 		if($this->moveNextBlocks()){
+            $this->activated = true;
 			$this->getLevelNonNull()->addSound(new PistonInSound($this));
 
 			$tile = $this->getLevelNonNull()->getTile($this);
@@ -95,6 +103,10 @@ class Piston extends Solid implements ElectricalAppliance{
 	}
 
 	public function deactivate(array $ignore = []){
+        if(!$this->activated){
+            return;
+        }
+        $this->activated = false;
 		$this->getLevelNonNull()->addSound(new PistonOutSound($this));
 
 		if($this->isSticky()){
@@ -115,45 +127,90 @@ class Piston extends Solid implements ElectricalAppliance{
 		$tile->spawnToAll();
 	}
 
-	public function moveNextBlocks() : bool{
-		$oldBlock = $this->getSide($this->getExtendSide());
-		for($i = 1; $i <= $this->maxMoveBlocks; $i++){
-			$nextBlock = $this->getSide($this->getExtendSide(), $i);
-			if(in_array($nextBlock->getId(), $this->noMoveBlocks) or !$nextBlock->isSolid()){
-				if(!$nextBlock->isSolid() and !$nextBlock->isTransparent()){
-					$drops = $nextBlock->getDrops(); //Fixes tile entities being deleted before getting drops
+    public function moveNextBlocks() : bool{
+        $extendSide = $this->getExtendSide();
+        $blocksToMove = [];
+
+        for ($i = 1; $i <= $this->maxMoveBlocks; $i++) {
+            $currentBlock = $this->getSide($extendSide, $i);
+
+            if (in_array($currentBlock->getId(), $this->noMoveBlocks) || !$currentBlock->isSolid()) {
+                if (!$currentBlock->isSolid() && !$currentBlock->isTransparent()) {
+                    $drops = $currentBlock->getDrops(ItemFactory::get(Item::AIR));
+                    foreach ($drops as $item) {
+                        if ($item->getCount() > 0) {
+                            $this->getLevelNonNull()->dropItem($currentBlock->add(0.5, 0.5, 0.5), $item);
+                        }
+                    }
+                    $currentBlock->onBreak(ItemFactory::get(Item::AIR));
+                    return true;
+                } elseif ($currentBlock->getId() !== 0) {
+                    return false;
+                }
+                break;
+            }
+
+            $blocksToMove[] = $currentBlock;
+
+            if (count($blocksToMove) >= $this->maxMoveBlocks) {
+                return false;
+            }
+        }
+
+        for ($i = count($blocksToMove) - 1; $i >= 0; $i--) {
+            $currentBlock = $blocksToMove[$i];
+            $nextBlock = $this->getSide($extendSide, $i + 2);
+
+            $this->getLevelNonNull()->setBlock($nextBlock, $currentBlock);
+        }
+
+        if (!empty($blocksToMove)) {
+            $this->getLevelNonNull()->setBlock($this->getSide($extendSide), new Air());
+        }
+
+        return true;
+    }
+
+
+    /*public function moveNextBlocks() : bool{
+        $oldBlock = $this->getSide($this->getExtendSide());
+        for($i = 1; $i <= $this->maxMoveBlocks; $i++){
+            $nextBlock = $this->getSide($this->getExtendSide(), $i);
+            if(in_array($nextBlock->getId(), $this->noMoveBlocks) or !$nextBlock->isSolid()){
+                if(!$nextBlock->isSolid() and !$nextBlock->isTransparent()){
+                    $drops = $nextBlock->getDrops(); //Fixes tile entities being deleted before getting drops
                     foreach($drops as $item){
-						if($item->getCount() > 0) {
-							$this->getLevelNonNull()->dropItem($nextBlock->add(0.5, 0.5, 0.5), $item);
-						}
+                        if($item->getCount() > 0) {
+                            $this->getLevelNonNull()->dropItem($nextBlock->add(0.5, 0.5, 0.5), $item);
+                        }
                     }
 
-					$nextBlock->onBreak();
-					return true;
-				}elseif($nextBlock->getId() !== 0){
-					return false;
-				}
+                    $nextBlock->onBreak();
+                    return true;
+                }elseif($nextBlock->getId() !== 0){
+                    return false;
+                }
 
-				$this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
-				break;
-			}
+                $this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
+                break;
+            }
 
-			$this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
-			$oldBlock = $nextBlock;
-		}
+            $this->getLevelNonNull()->setBlock($nextBlock, $oldBlock);
+            $oldBlock = $nextBlock;
+        }
 
-		if($i > 1 and $i < $this->maxMoveBlocks + 1){
-			$this->getLevelNonNull()->setBlock($this->getSide($this->getExtendSide()), new Air());
-		}
+        if($i > 1 and $i < $this->maxMoveBlocks + 1){
+            $this->getLevelNonNull()->setBlock($this->getSide($this->getExtendSide()), new Air());
+        }
 
-		if($i === $this->maxMoveBlocks + 1){
-			return false;
-		}
+        if($i === $this->maxMoveBlocks + 1){
+            return false;
+        }
 
-		return true;
-	}
+        return true;
+    }*/
 
-	public function moveBlockBackwards(): void{
+    public function moveBlockBackwards(): void{
 		$nextBlock = $this->getSide($this->getExtendSide(), 2);
 		if(!in_array($nextBlock->getId(), $this->noMoveBlocks) and $nextBlock->isSolid()){
 			$this->getLevelNonNull()->setBlock($this->getSide($this->getExtendSide()), $nextBlock);
