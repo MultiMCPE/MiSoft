@@ -134,12 +134,20 @@ class Ocelot extends Tamable{
 		];
 	}
 
+    public function saveNBT() : void{
+        parent::saveNBT();
+
+        $catType = $this->propertyManager->getInt(self::DATA_VARIANT);
+        if($catType !== null){
+            $this->namedtag->setInt("CatType", $catType);
+        }
+    }
+
 	public function setSittingFromBehavior(bool $value) : void{
 		$this->behaviorSitting->setSitting($value);
 	}
 
 	public function setType(int $type) : void{
-		$this->namedtag->setInt("CatType", $type);
 		$this->propertyManager->setInt(self::DATA_VARIANT, $type);
 	}
 

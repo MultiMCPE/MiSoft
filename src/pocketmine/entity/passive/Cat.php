@@ -45,6 +45,7 @@ use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\Player;
 use function mt_rand;
 use function is_array;
+use function intval;
 
 class Cat extends Tamable{
 	public const NETWORK_ID = self::CAT;
@@ -141,6 +142,12 @@ class Cat extends Tamable{
 			ItemFactory::get(Item::STRING, 0, rand(0, 2)),
 		];
 	}
+
+    public function saveNBT() : void{
+        parent::saveNBT();
+
+        $this->namedtag->setInt("CatType", intval($this->propertyManager->getInt(self::DATA_VARIANT)));
+    }
 
 	public function setSittingFromBehavior(bool $value) : void{
 		$this->behaviorSitting->setSitting($value);
