@@ -26,6 +26,7 @@ namespace pocketmine\item;
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
 use pocketmine\level\sound\BlazeShootSound;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
@@ -126,4 +127,12 @@ class Fireworks extends Item{
 
 		return true;
 	}
+
+    public function getProtocolidMeta(int $protocol) : ?array{
+        if($protocol < ProtocolInfo::PROTOCOL_130){
+            return [ItemIds::NETHER_STAR, $this->getDamage()];
+        }
+
+        return null;
+    }
 }
