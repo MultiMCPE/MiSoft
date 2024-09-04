@@ -63,9 +63,13 @@ final class MetadataConvertor{
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol))($flags, $flags2);
         if($flags !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;
+        }wlse{
+            unset($metadata[EntityMetadataProperties::FLAGS]);
         }
         if($flags2 !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS2][1] = $flags2;
+        }else{
+            unset($metadata[EntityMetadataProperties::FLAGS2]);
         }
         if($playerProtocol < ProtocolInfo::PROTOCOL_370 && isset($metadata[EntityMetadataProperties::DATA_TARGET_EID]) && $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] === 0){
             $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] = -1;
@@ -95,13 +99,17 @@ final class MetadataConvertor{
 
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol, true))($flags, $flags2);
         if($flags !== null){
-            $metadata[EntityMetadataProperties::FLAGS][1] = $flags;
+            $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;
+        }else{
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS]);
         }
         if($flags2 !== null){
-            $metadata[EntityMetadataProperties::FLAGS2][1] = $flags2;
+            $metadata[EntityMetadataProperties::DATA_FLAGS2][1] = $flags2;
+        }else{
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS2]);
         }
-        if($playerProtocol < ProtocolInfo::PROTOCOL_370 && isset($metadata[EntityMetadataProperties::TARGET_EID]) && $metadata[EntityMetadataProperties::TARGET_EID][1] === -1){
-            $metadata[EntityMetadataProperties::TARGET_EID][1] = 0;
+        if($playerProtocol < ProtocolInfo::PROTOCOL_370 && isset($metadata[EntityMetadataProperties::DATA_TARGET_EID]) && $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] === -1){
+            $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] = 0;
         }
 
         return $metadata;

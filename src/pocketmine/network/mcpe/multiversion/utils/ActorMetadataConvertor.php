@@ -186,19 +186,23 @@ final class ActorMetadataConvertor{
 				}
 
 				if($flags2 !== null){
-					$flagsBinary = strrev(decbin($flags2));
+                    if($flags2 == 0){
+                        $newFlags2 |= 0;
+                    }else{
+						$flagsBinary = strrev(decbin($flags2));
 
-					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
-						if($flagsBinary[$i] === "1"){
-                            $i += 64;
-							$flag = array_search($i, $protocolMetadataFlags, true);
-							if($flag === false){
-							    $flag = $i;
-							}
-							if($flag >= 64){
-								$newFlags2 |= (1 << ($flag % 64));
-							}else{
-								$newFlags |= (1 << $flag);
+						for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
+							if($flagsBinary[$i] === "1"){
+                                $i += 64;
+								$flag = array_search($i, $protocolMetadataFlags, true);
+								if($flag === false){
+							    	$flag = $i;
+								}
+								if($flag >= 64){
+									$newFlags2 |= (1 << ($flag % 64));
+								}else{
+                                    $newFlags |= (1 << $flag);
+                                }
 							}
 						}
 					}
@@ -227,16 +231,20 @@ final class ActorMetadataConvertor{
 				}
 
 				if($flags2 !== null){
-					$flagsBinary = strrev(decbin($flags2));
+                    if($flags2 == 0){
+                        $newFlags2 |= 0;
+                    }else{
+					    $flagsBinary = strrev(decbin($flags2));
 
-					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
-						if($flagsBinary[$i] === "1"){
-                            $i += 64;
-							$flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
-							if($flag >= 64){
-								$newFlags2 |= (1 << ($flag % 64));
-							}else{
-								$newFlags |= (1 << $flag);
+					    for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
+							if($flagsBinary[$i] === "1"){
+                            	$i += 64;
+								$flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
+								if($flag >= 64){
+									$newFlags2 |= (1 << ($flag % 64));
+								}else{
+                                    $newFlags |= (1 << $flag);
+                                }
 							}
 						}
 					}
