@@ -64,12 +64,12 @@ final class MetadataConvertor{
         if($flags !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;
         }wlse{
-            unset($metadata[EntityMetadataProperties::FLAGS]);
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS]);
         }
         if($flags2 !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS2][1] = $flags2;
         }else{
-            unset($metadata[EntityMetadataProperties::FLAGS2]);
+            unset($metadata[EntityMetadataProperties::DATA_FLAGS2]);
         }
         if($playerProtocol < ProtocolInfo::PROTOCOL_370 && isset($metadata[EntityMetadataProperties::DATA_TARGET_EID]) && $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] === 0){
             $metadata[EntityMetadataProperties::DATA_TARGET_EID][1] = -1;
