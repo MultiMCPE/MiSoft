@@ -63,7 +63,7 @@ final class MetadataConvertor{
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol))($flags, $flags2);
         if($flags !== null){
             $metadata[EntityMetadataProperties::DATA_FLAGS][1] = $flags;
-        }wlse{
+        }else{
             unset($metadata[EntityMetadataProperties::DATA_FLAGS]);
         }
         if($flags2 !== null){
