@@ -275,6 +275,9 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$auxValue = $this->getVarInt();
 		$data = $auxValue >> 8;
+		if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $data === 0x7fff){
+		    $data = -1;
+		}
 		$cnt = $auxValue & 0xff;
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
