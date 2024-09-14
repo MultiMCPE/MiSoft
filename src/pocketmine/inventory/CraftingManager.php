@@ -84,12 +84,26 @@ class CraftingManager{
 					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
 						break;
 					}
-					$this->registerRecipe(new ShapedRecipe(
-						$recipe["shape"],
-						array_map($itemDeserializerFunc, $recipe["input"]),
-						array_map($itemDeserializerFunc, $recipe["output"])
-					));
-					break;
+					foreach ($recipe["input"] as $key => $inputItem) {
+                    if (isset($inputItem["damage"]) && $inputItem["damage"] == -1) {
+                        $newRecipes = [];
+                        for ($i = 0; $i <= 5; $i++) {
+                            $newRecipe = $recipe;
+                            $newRecipe["input"][$key]["damage"] = $i;
+                            $newRecipes[] = $newRecipe;
+                        }
+                                break;
+                    }
+                }
+
+                foreach ($newRecipes as $newRecipe) {
+                    $this->registerRecipe(new ShapedRecipe( 
+                        $newRecipe["shape"], 
+                        array_map($itemDeserializerFunc, $newRecipe["input"]), 
+                        array_map($itemDeserializerFunc, $newRecipe["output"])
+                    ));
+                }
+                                       break; 
 				case "smelting":
 					if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
 						break;
