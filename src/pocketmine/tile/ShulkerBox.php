@@ -14,7 +14,10 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\Player;
 
 class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameable{
-    use NameableTrait, ContainerTrait;
+    use NameableTrait {
+        addAdditionalSpawnData as addNameSpawnData;
+    }
+    use ContainerTrait;
 
     protected $facing = self::SIDE_UP;
     protected $inventory;
@@ -24,6 +27,9 @@ class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameab
     }
 
     protected static function createAdditionalNBT(CompoundTag $nbt, Vector3 $pos, ?int $face = null, ?Item $item = null, ?Player $player = null) : void{
+        if($item !== null and $item->hasCustomName()){
+            $nbt->setString(Nameable::TAG_CUSTOM_NAME, $item->getCustomName());
+        }
         if($face === null){
             $face = 1;
         }
@@ -63,6 +69,7 @@ class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameab
 
     protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
         $nbt->setByte("facing", $this->facing);
+        $this->addNameSpawnData($nbt);
     }
 
     protected function readSaveData(CompoundTag $nbt) : void{

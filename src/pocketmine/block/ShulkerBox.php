@@ -28,7 +28,9 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Container;
+use pocketmine\tile\Nameable;
 use pocketmine\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\tile\Tile;
 
@@ -70,8 +72,12 @@ class ShulkerBox extends Transparent{
         $t = $this->getLevelNonNull()->getTile($this);
         if($t instanceof TileShulkerBox){
             $item = ItemFactory::get($this->id, $this instanceof UndyedShulkerBox ? 0 : $this->meta);
+            $cleanedNBT = $t->getCleanedNBT();
+            if($cleanedNBT->hasTag(Nameable::TAG_CUSTOM_NAME, StringTag::class)){
+                $item->setCustomName($cleanedNBT->getTag(Nameable::TAG_CUSTOM_NAME)->getValue());
+            }
             $nbt = clone $item->getNamedTag();
-            $nbt->setTag($t->getCleanedNBT()->getTag(Container::TAG_ITEMS));
+            $nbt->setTag($cleanedNBT->getTag(Container::TAG_ITEMS));
             $item->setNamedTag($nbt);
             $this->getLevelNonNull()->dropItem($this->add(0.5, 0.5, 0.5), $item);
             $t->getInventory()->clearAll();
