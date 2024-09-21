@@ -239,6 +239,8 @@ interface PacketMagicNumbers{
     public const JIGSAW_STRUCTURE_DATA_PACKET = 0x139;
     public const CURRENT_STRUCTURE_FEATURE_PACKET = 0x13a;
     public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
+	public const CAMERA_AIM_ASSIST_PACKET = 0x13c;
+	public const CONTAINER_REGISTRY_CLEANUP_PACKET = 0x13d;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
 	// 1.1

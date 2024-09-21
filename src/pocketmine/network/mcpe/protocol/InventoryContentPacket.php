@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\FullContainerName;
+use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use function count;
 
 class InventoryContentPacket extends DataPacket{
@@ -36,6 +38,10 @@ class InventoryContentPacket extends DataPacket{
 	public $items = [];
     /** @var int[] */
     public $index = [];
+	/** @var FullContainerName */
+	public $containerName;
+	/** @var int */
+	public $dynamicContainerSize = 0;
     /** @var int */
     public $dynamicContainerId = 0;
 
@@ -48,7 +54,12 @@ class InventoryContentPacket extends DataPacket{
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-            $this->dynamicContainerId = $this->getUnsignedVarInt();
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->containerName = FullContainerName::read($this, $this->getProtocol());
+				$this->dynamicContainerSize = $this->getUnsignedVarInt();
+			}else{
+                $this->dynamicContainerId = $this->getUnsignedVarInt();
+			}
         }
 	}
 
@@ -68,7 +79,12 @@ class InventoryContentPacket extends DataPacket{
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-            $this->putUnsignedVarInt($this->dynamicContainerId);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this, $this->getProtocol());
+				$this->putUnsignedVarInt($this->dynamicContainerSize);
+			}else{
+                $this->putUnsignedVarInt($this->dynamicContainerId);
+			}
         }
 	}
 

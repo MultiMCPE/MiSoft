@@ -886,6 +886,10 @@ class NetworkBinaryStream extends BinaryStream{
 			$min = $this->getLFloat();
 			$max = $this->getLFloat();
 			$current = $this->getLFloat();
+			if($playerProtocol >= ProtocolInfo::PROTOCOL_729){
+				$this->getLFloat(); //default min value
+                $this->getLFloat(); //default max value
+			}
 			$default = $this->getLFloat();
 			$name = $this->getString();
 			$modifiers = [];
@@ -923,6 +927,10 @@ class NetworkBinaryStream extends BinaryStream{
             $this->putLFloat($attribute->getMinValue());
             $this->putLFloat($attribute->getMaxValue());
             $this->putLFloat($attribute->getValue());
+			if($playerProtocol >= ProtocolInfo::PROTOCOL_729){
+				$this->putLFloat($attribute->getMinValue()); //default min value
+                $this->putLFloat($attribute->getMaxValue()); //default max value
+			}
             $this->putLFloat($attribute->getDefaultValue());
 			$this->putString($attribute->getName());
 			if($playerProtocol >= ProtocolInfo::PROTOCOL_544){

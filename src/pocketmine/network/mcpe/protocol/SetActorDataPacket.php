@@ -54,7 +54,7 @@ class SetActorDataPacket extends DataPacket{
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
-		        $this->syncedProperties->write($this);
+		        ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
 		    }
 		    $this->putUnsignedVarLong($this->tick);
 		}

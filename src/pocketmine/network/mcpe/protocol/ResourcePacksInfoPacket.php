@@ -52,24 +52,26 @@ class ResourcePacksInfoPacket extends DataPacket{
 				$this->hasAddons = $this->getBool();
 			}
 	    	$this->hasScripts = $this->getBool();
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->forceServerPacks = $this->getBool();
 	    	}
 		}
-		$behaviorPackCount = $this->getLShort();
-		while($behaviorPackCount-- > 0){
-			$this->getString();
-			$this->getString();
-			$this->getLLong();
-			$this->getString();
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_729){
+	    	$behaviorPackCount = $this->getLShort();
+	    	while($behaviorPackCount-- > 0){
 		    	$this->getString();
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		    	$this->getString();
+		    	$this->getLLong();
+		    	$this->getString();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		        	$this->getString();
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	$this->getBool();
-                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                            $this->getBool();
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		            	$this->getString();
+		        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		                	$this->getBool();
+                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                $this->getBool();
+							}
                         }
 		        	}
 		    	}
@@ -116,25 +118,27 @@ class ResourcePacksInfoPacket extends DataPacket{
                 $this->putBool($this->hasAddons);
 			}
             $this->putBool($this->hasScripts);
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448){
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->putBool($this->forceServerPacks);
 	    	}
 		}
 
-        $this->putLShort(count($this->behaviorPackEntries));
-		foreach($this->behaviorPackEntries as $entry){
-			$this->putString($entry->getPackId());
-			$this->putString($entry->getPackVersion());
-            $this->putLLong($entry->getPackSize());
-			$this->putString(""); //TODO: encryption key
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-		    	$this->putString(""); //TODO: subpack name
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		        	$this->putString($entry->getPackId()); //TODO: content identity
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-                        $this->putBool(false); //TODO: has scripts (?)
-                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                            $this->putBool(false); //TODO: is addon pack
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_729){
+            $this->putLShort(count($this->behaviorPackEntries));
+		    foreach($this->behaviorPackEntries as $entry){
+		    	$this->putString($entry->getPackId());
+		    	$this->putString($entry->getPackVersion());
+                $this->putLLong($entry->getPackSize());
+		    	$this->putString(""); //TODO: encryption key
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        	$this->putString(""); //TODO: subpack name
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		            	$this->putString($entry->getPackId()); //TODO: content identity
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+                            $this->putBool(false); //TODO: has scripts (?)
+                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                $this->putBool(false); //TODO: is addon pack
+							}
                         }
 		        	}
 		    	}

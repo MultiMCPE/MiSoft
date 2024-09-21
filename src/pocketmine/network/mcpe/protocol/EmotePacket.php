@@ -33,6 +33,8 @@ class EmotePacket extends DataPacket{
 
 	/** @var int */
 	public $entityRuntimeId;
+	/** @var int */
+	public $emoteLengthTicks = 0;
 	/** @var string */
 	public $emoteId;
 	/** @var string */
@@ -42,10 +44,11 @@ class EmotePacket extends DataPacket{
 	/** @var int */
 	public $flags;
 
-	public static function create(int $entityRuntimeId, string $emoteId, string $xboxUserId, string $platformChatId, int $flags) : self{
+	public static function create(int $entityRuntimeId, string $emoteId, int $emoteLengthTicks, string $xboxUserId, string $platformChatId, int $flags) : self{
 		$result = new self;
 		$result->entityRuntimeId = $entityRuntimeId;
 		$result->emoteId = $emoteId;
+		$result->emoteLengthTicks = $emoteLengthTicks;
 		$result->xboxUserId = $xboxUserId;
 		$result->platformChatId = $platformChatId;
 		$result->flags = $flags;
@@ -64,6 +67,8 @@ class EmotePacket extends DataPacket{
 		return $this->emoteId;
 	}
 
+	public function getEmoteLengthTicks() : int{ return $this->emoteLengthTicks; }
+
 	public function getXboxUserId() : string{ return $this->xboxUserId; }
 
 	public function getPlatformChatId() : string{ return $this->platformChatId; }
@@ -76,6 +81,9 @@ class EmotePacket extends DataPacket{
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->emoteId = $this->getString();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->emoteLengthTicks = $this->getUnsignedVarInt();
+			}
 		    $this->xboxUserId = $this->getString();
 		    $this->platformChatId = $this->getString();
 		}
@@ -86,6 +94,9 @@ class EmotePacket extends DataPacket{
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putString($this->emoteId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->putUnsignedVarInt($this->emoteLengthTicks);
+			}
 		    $this->putString($this->xboxUserId);
 		    $this->putString($this->platformChatId);
 		}

@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\FullContainerName;
+use pocketmine\network\mcpe\protocol\types\ContainerIds;
 
 class InventorySlotPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::INVENTORY_SLOT_PACKET;
@@ -35,6 +37,10 @@ class InventorySlotPacket extends DataPacket{
 	public $inventorySlot;
 	/** @var int */
 	public $isNullItem;
+	/** @var FullContainerName */
+	public $containerName;
+	/** @var int */
+	public $dynamicContainerSize = 0;
     /** @var int */
     public $dynamicContainerId = 0;
 	/** @var Item */
@@ -47,7 +53,12 @@ class InventorySlotPacket extends DataPacket{
 		    $this->isNullItem = $this->getVarInt();
 		}
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-            $this->dynamicContainerId = $this->getUnsignedVarInt();
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				$this->containerName = FullContainerName::read($this, $this->getProtocol());
+				$this->dynamicContainerSize = $this->getUnsignedVarInt();
+			}else{
+                $this->dynamicContainerId = $this->getUnsignedVarInt();
+			}
         }
 		$this->item = $this->getSlot($this->getProtocol());
 	}
@@ -59,7 +70,12 @@ class InventorySlotPacket extends DataPacket{
 	    	$this->putVarInt($this->item->isNull() ? 0 : 1);
 		}
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-            $this->putUnsignedVarInt($this->dynamicContainerId);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this, $this->getProtocol());
+				$this->putUnsignedVarInt($this->dynamicContainerSize);
+			}else{
+                $this->putUnsignedVarInt($this->dynamicContainerId);
+			}
         }
 		$this->putSlot($this->item, $this->getProtocol());
 	}

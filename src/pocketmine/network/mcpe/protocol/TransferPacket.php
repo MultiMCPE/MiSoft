@@ -32,15 +32,23 @@ class TransferPacket extends DataPacket{
 	public $address;
 	/** @var int */
 	public $port = 19132;
+	/** @var bool */
+	public $reloadWorld = false;
 
 	protected function decodePayload(){
 		$this->address = $this->getString();
 		$this->port = $this->getLShort();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->reloadWorld = $this->getBool();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putString($this->address);
         $this->putLShort($this->port);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			$this->putBool($this->reloadWorld);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

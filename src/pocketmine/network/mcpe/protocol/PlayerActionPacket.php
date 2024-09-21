@@ -54,7 +54,7 @@ class PlayerActionPacket extends DataPacket{
     public const ACTION_SET_ENCHANTMENT_SEED = 20;
     public const ACTION_START_SWIMMING = 21;
     public const ACTION_STOP_SWIMMING = 22;
-    public const ACTION_START_SPIN_ATTACK = 23;
+    public const ACTION_START_SPIN_ATTACK = 23; //no longer used
     public const ACTION_STOP_SPIN_ATTACK = 24;
     public const ACTION_INTERACT_BLOCK = 25;
     public const ACTION_PREDICT_DESTROY_BLOCK = 26;

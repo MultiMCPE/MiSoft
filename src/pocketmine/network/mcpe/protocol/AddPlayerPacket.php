@@ -176,7 +176,7 @@ class AddPlayerPacket extends DataPacket{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
-                    $this->syncedProperties->write($this);
+                    ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
                 }
                 $this->abilitiesData->encode($this);
             }else{

@@ -4007,6 +4007,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new EmotePacket();
 		$pk->entityRuntimeId = $this->id;
 		$pk->emoteId = $packet->emoteId;
+		$pk->emoteLengthTicks = $packet->emoteLengthTicks;
 		$pk->xboxUserId = "";
 		$pk->platformChatId = "";
 		$pk->flags = EmotePacket::FLAG_SERVER | EmotePacket::FLAG_MUTE_ANNOUNCEMENT;

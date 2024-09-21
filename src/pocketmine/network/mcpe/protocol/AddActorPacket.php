@@ -249,7 +249,7 @@ class AddActorPacket extends DataPacket{
 
 		$this->putEntityMetadata($this->metadata, $this->getProtocol());
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
-		    $this->syncedProperties->write($this);
+		    ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
 		}
 		$this->putUnsignedVarInt(count($this->links));
 		foreach($this->links as $link){

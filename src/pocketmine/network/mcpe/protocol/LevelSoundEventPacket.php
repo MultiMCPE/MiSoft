@@ -340,7 +340,7 @@ class LevelSoundEventPacket extends DataPacket{
     public const SOUND_AMBIENT_WARPED_FOREST_MOOD = 303;
     public const SOUND_AMBIENT_SOULSAND_VALLEY_MOOD = 304;
     public const SOUND_AMBIENT_NETHER_WASTES_MOOD = 305;
-    public const SOUND_RESPAWN_ANCHOR_BASALT_DELTAS_MOOD = 306;
+    public const SOUND_AMBIENT_BASALT_DELTAS_MOOD = 306;
     public const SOUND_AMBIENT_CRIMSON_FOREST_MOOD = 307;
     public const SOUND_RESPAWN_ANCHOR_CHARGE = 308;
     public const SOUND_RESPAWN_ANCHOR_DEPLETE = 309;
@@ -531,7 +531,10 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_RECORD_CREATOR_MUSIC_BOX = 528;
 	public const SOUND_RECORD_PRECIPICE = 529;
     public const SOUND_VAULT_REJECT_REWARDED_PLAYER = 530;
-    public const SOUND_UNDEFINED = 531;
+    public const SOUND_IMITATE_DROWNED = 531;
+
+	public const SOUND_BUNDLE_INSERT_FAIL = 533;
+    public const SOUND_UNDEFINED = 534;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

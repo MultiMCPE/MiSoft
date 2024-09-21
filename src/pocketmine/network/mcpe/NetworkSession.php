@@ -241,6 +241,8 @@ use pocketmine\network\mcpe\protocol\ServerboundLoadingScreenPacket;
 use pocketmine\network\mcpe\protocol\JigsawStructureDataPacket;
 use pocketmine\network\mcpe\protocol\CurrentStructureFeaturePacket;
 use pocketmine\network\mcpe\protocol\ServerboundDiagnosticsPacket;
+use pocketmine\network\mcpe\protocol\CameraAimAssistPacket;
+use pocketmine\network\mcpe\protocol\ContainerRegistryCleanupPacket;
 
 abstract class NetworkSession{
 
@@ -1117,4 +1119,12 @@ abstract class NetworkSession{
     public function handleServerboundDiagnostics(ServerboundDiagnosticsPacket $packet) : bool{
         return false;
     }
+
+	public function handleCameraAimAssist(CameraAimAssistPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleContainerRegistryCleanup(ContainerRegistryCleanupPacket $packet) : bool{
+		return false;
+	}
 }
