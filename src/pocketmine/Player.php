@@ -2935,7 +2935,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		$this->doCloseInventory();
+		$this->doCloseInventory(false);
 
 		//Fast length check, to make sure we don't get hung trying to explode MBs of string ...
 		$maxTotalLength = $this->messageCounter * (self::MAX_CHAT_BYTE_LENGTH + 1);
@@ -2980,10 +2980,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
      * @return bool
      */
   public function removeBlock(Vector3 $blockVector) : bool{
-    if($this->isSpectator()){
-      return true;
-    }
-		$this->doCloseInventory();
+        if($this->isSpectator()){
+            return true;
+        }
+		$this->doCloseInventory(false);
 
 		$item = $this->inventory->getItemInHand();
 		$oldItem = clone $item;
@@ -3236,7 +3236,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$this->doCloseInventory();
+		$this->doCloseInventory(false);
 
 		switch($packet->event){
 			case ActorEventPacket::USE_ITEM: //Eating
@@ -3915,7 +3915,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$this->doCloseInventory();
+		$this->doCloseInventory(false);
 
 		$target = $this->level->getEntity($packet->target);
 		if($target === null){
@@ -4317,10 +4317,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        if($this->transactionQueue instanceof TransactionQueue){
-            $this->transactionQueue->onCloseWindow();
-        }
-
 		$this->doCloseInventory();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
@@ -4483,7 +4479,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		$this->doCloseInventory();
+		$this->doCloseInventory(false);
 
 		$pos = new Vector3($packet->x, $packet->y, $packet->z);
 		if($pos->distanceSquared($this) > 10000 or $this->level->checkSpawnProtection($this, $pos)){
@@ -5367,9 +5363,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->craftingGrid = $grid;
 	}
 
-	public function doCloseInventory() : void{
-        if($this->transactionQueue instanceof TransactionQueue){
-            $this->transactionQueue->onCloseWindow();
+	public function doCloseInventory(bool $closeTransactionQueue = true) : void{
+		if($closeTransactionQueue){
+            if($this->transactionQueue instanceof TransactionQueue){
+                $this->transactionQueue->onCloseWindow();
+		    }
         }
 
 		/** @var Inventory[] $inventories */
