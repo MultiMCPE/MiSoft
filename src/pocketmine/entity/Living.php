@@ -1189,6 +1189,13 @@ abstract class Living extends Entity implements Damageable{
 	}
 
 	/**
+	 * @return int
+	 */
+	public function getMaxSpawnedInChunk() : int{
+		return 4;
+	}
+
+	/**
 	 * @return float
 	 */
 	public function getMoveForward() : float{

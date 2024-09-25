@@ -32,6 +32,7 @@ use pocketmine\block\Air;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\Liquid;
+use pocketmine\entity\CreatureType;
 use pocketmine\entity\Entity;
 use pocketmine\entity\object\ExperienceOrb;
 use pocketmine\entity\object\ItemEntity;
@@ -48,6 +49,7 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\level\biome\Biome;
+use pocketmine\level\biome\SpawnListEntry;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\ChunkException;
 use pocketmine\level\format\EmptySubChunk;
@@ -94,6 +96,7 @@ use pocketmine\tile\Tile;
 use pocketmine\timings\Timings;
 use pocketmine\utils\Random;
 use pocketmine\utils\ReversePriorityQueue;
+use pocketmine\utils\WeightedRandomItem;
 use SplFixedArray;
 use SplPriorityQueue;
 use SplQueue;
@@ -112,6 +115,7 @@ use function gettype;
 use function is_a;
 use function is_array;
 use function is_object;
+use function in_array;
 use function lcg_value;
 use function max;
 use function microtime;
@@ -304,6 +308,11 @@ class Level implements ChunkManager, Metadatable{
 	/** @var int */
 	private $dimensionId = DimensionIds::OVERWORLD;
 
+	/** @var AnimalSpawner */
+	private $mobSpawner;
+	/** @var GameRules */
+	private $gameRules;
+
 	private $spawnPeacefulMobs = true;
 	private $spawnHostileMobs = true;
 
@@ -463,6 +472,7 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->timings = new LevelTimings($this);
 		$this->random = new Random();
+		$this->mobSpawner = new AnimalSpawner();
 		$this->temporalPosition = new Position(0, 0, 0, $this);
 		$this->temporalVector = new Vector3(0, 0, 0);
 
@@ -963,6 +973,27 @@ class Level implements ChunkManager, Metadatable{
 		$this->timings->doTickTiles->startTiming();
 		$this->tickChunks();
 		$this->timings->doTickTiles->stopTiming();
+
+		if($this->server->getAdvancedProperty("mobs.generic-auto-mob-spawning", false) and $currentTick % 400 === 0){
+			$eligibleChunks = [];
+			foreach($this->players as $player){
+				if($player->chunk !== null){
+					$cX = $player->chunk->getX();
+					$cZ = $player->chunk->getZ();
+					foreach($player->usedChunks as $chunkHash => $v){
+						Level::getXZ($chunkHash, $x, $z);
+
+						if(abs($cX - $x) <= 8 and abs($cZ - $z) <= 8 and $x !== $cX and $z !== $cZ){
+							if(!isset($eligibleChunks[$chunkHash])){
+								$eligibleChunks[$chunkHash] = $chunkHash;
+							}
+						}
+					}
+				}
+			}
+
+			$this->mobSpawner->findChunksForSpawning($this, $this->spawnHostileMobs, $this->spawnPeacefulMobs, $eligibleChunks);
+		}
 
 		$this->executeQueuedLightUpdates();
 
@@ -3341,6 +3372,68 @@ class Level implements ChunkManager, Metadatable{
 		}
 
 		return false;
+	}
+
+	/**
+	 * @param CreatureType $creatureType
+	 * @param Vector3      $pos
+	 *
+	 * @return null|SpawnListEntry
+	 */
+	public function getSpawnListEntryForTypeAt(CreatureType $creatureType, Vector3 $pos) : ?SpawnListEntry{
+		// TODO: get level provider's possible creatures
+		$possibleCreatures = $this->getBiome($pos->x, $pos->z)->getSpawnableList($creatureType);
+
+		if(empty($possibleCreatures)){
+			return null;
+		}
+
+		/** @var SpawnListEntry|null $possible */
+		$possible = WeightedRandomItem::getRandomItem($this->random, $possibleCreatures, WeightedRandomItem::getTotalWeight($possibleCreatures));
+
+		return $possible;
+	}
+
+	/**
+	 * @param CreatureType   $creatureType
+	 * @param SpawnListEntry $entry
+	 * @param Vector3        $pos
+	 *
+	 * @return bool
+	 */
+	public function canCreatureTypeSpawnHere(CreatureType $creatureType, SpawnListEntry $entry, Vector3 $pos) : bool{
+		// TODO: get level provider's possible creatures
+		$possibleCreatures = $this->getBiome($pos->x, $pos->z)->getSpawnableList($creatureType);
+
+		return empty($possibleCreatures) ? false : in_array($entry, $possibleCreatures);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getSpawnPeacefulMobs() : bool{
+		return $this->spawnPeacefulMobs;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function getSpawnHostileMobs() : bool{
+		return $this->spawnHostileMobs;
+	}
+
+	/**
+	 * @param bool $spawnPeacefulMobs
+	 */
+	public function setSpawnPeacefulMobs(bool $spawnPeacefulMobs) : void{
+		$this->spawnPeacefulMobs = $spawnPeacefulMobs;
+	}
+
+	/**
+	 * @param bool $spawnHostileMobs
+	 */
+	public function setSpawnHostileMobs(bool $spawnHostileMobs) : void{
+		$this->spawnHostileMobs = $spawnHostileMobs;
 	}
 
 	/**

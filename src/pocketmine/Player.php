@@ -4938,6 +4938,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk = new TextPacket();
 		$pk->type = TextPacket::TYPE_TIP;
 		$pk->message = $message;
+		$pk->sourceName = "";
 		$this->dataPacket($pk);
 	}
 

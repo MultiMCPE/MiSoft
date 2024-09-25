@@ -36,5 +36,7 @@ abstract class SnowyBiome extends Biome{
 			BlockFactory::get(Block::DIRT),
 			BlockFactory::get(Block::DIRT)
 		]);
+
+		$this->spawnableCreatureList = [];
 	}
 }

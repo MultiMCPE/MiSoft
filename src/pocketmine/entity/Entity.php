@@ -160,6 +160,8 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 	public const DATA_PLAYER_FLAG_SLEEP = 1;
 	public const DATA_PLAYER_FLAG_DEAD = 2; //TODO: CHECK
 
+	public const SPAWN_PLACEMENT_TYPE = SpawnPlacementTypes::PLACEMENT_TYPE_ON_GROUND;
+
 	public static $entityCount = 1;
 	/** @var string[] */
 	private static $knownEntities = [];
