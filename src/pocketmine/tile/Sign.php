@@ -221,7 +221,7 @@ class Sign extends Spawnable{
 
 		if($player->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 			if(!(($nbt = $nbt->getCompoundTag(self::TAG_FRONT_TEXT)) instanceof CompoundTag)){
-				throw new InvalidArgumentException("Expected " . CompoundTag::class . " in block entity NBT, got " . (is_object($compound) ? get_class($compound) : gettype($compound)));
+				throw new InvalidArgumentException("Expected " . CompoundTag::class . " in block entity NBT, got " . (is_object($nbt) ? get_class($nbt) : gettype($nbt)));
 			}
 		}
 
