@@ -1,0 +1,77 @@
+{
+   "name": "pocketmine/pocketmine-mp",
+   "description": "A server software for Minecraft: Pocket Edition written in PHP",
+   "type": "project",
+   "homepage": "https://pmmp.io",
+   "license": "LGPL-3.0",
+   "require": {
+      "php": ">=8.2.0",
+      "php-64bit": "*",
+      "ext-bcmath": "*",
+      "ext-curl": "*",
+      "ext-ctype": "*",
+      "ext-date": "*",
+      "ext-hash": "*",
+      "ext-json": "*",
+      "ext-mbstring": "*",
+      "ext-openssl": "*",
+      "ext-pcre": "*",
+      "ext-phar": "*",
+      "ext-pthreads": ">=4.2.2",
+      "ext-reflection": "*",
+      "ext-sockets": "*",
+      "ext-spl": "*",
+      "ext-yaml": ">=2.0.0",
+      "ext-zip": "*",
+      "ext-zlib": ">=1.2.11",
+      "fgrosse/phpasn1": "^2.3",
+      "multimcpe/raklib": "^0.12.5",
+      "multimcpe/spl": "^0.3.0",
+      "multimcpe/binaryutils": "^0.1.9",
+      "multimcpe/nbt": "^0.2.10",
+      "multimcpe/math": "^0.2.0",
+      "multimcpe/snooze": "^0.1.0",
+      "daverandom/callback-validator": "dev-master",
+      "adhocore/json-comment": "^0.0.7"
+   },
+   "autoload": {
+      "psr-4": {
+         "": ["src"]
+      },
+      "files": [
+         "src/pocketmine/GlobalConstants.php",
+         "src/pocketmine/VersionInfo.php"
+      ]
+   },
+   "autoload-dev": {
+      "psr-4": {
+         "pocketmine\\": "tests/phpunit/"
+      }
+   },
+   "repositories": [
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/RakLib"
+      },
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/SPL"
+      },
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/BinaryUtils"
+      },
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/NBT"
+      },
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/Math"
+      },
+      {
+         "type": "git",
+         "url": "https://github.com/multimcpe/Snooze"
+      }
+   ]
+}
