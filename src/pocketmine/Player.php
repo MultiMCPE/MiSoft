@@ -88,6 +88,8 @@ use pocketmine\inventory\PETransaction\DropItemTransaction;
 use pocketmine\inventory\PETransaction\Transaction;
 use pocketmine\inventory\PETransaction\TransactionQueue;
 use pocketmine\inventory\PlayerCursorInventory;
+use pocketmine\inventory\AnvilInventory;
+use pocketmine\inventory\EnchantInventory;
 use pocketmine\inventory\transaction\action\InventoryAction;
 use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\inventory\transaction\CraftingTransaction;
@@ -3239,6 +3241,32 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->doCloseInventory(false);
 
 		switch($packet->event){
+			case ActorEventPacket::PLAYER_ADD_XP_LEVELS:
+				if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+					if($this->currentWindowType === WindowTypes::ENCHANTMENT){
+						$inventory = null;
+						foreach($this->windowIndex as $window){
+							if($window instanceof EnchantInventory){
+								$inventory = $window;
+								break;
+							}
+						}
+
+						$inventory?->onResolve($this, abs($packet->data));
+					}elseif($this->currentWindowType === WindowTypes::ANVIL){
+						$inventory = null;
+						foreach($this->windowIndex as $window){
+							if($window instanceof AnvilInventory){
+								$inventory = $window;
+								break;
+							}
+						}
+
+						$inventory?->onResolve($this, abs($packet->data));
+					}
+				}
+
+				break;
 			case ActorEventPacket::USE_ITEM: //Eating
 			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 			    	$slot = $this->inventory->getItemInHand();
@@ -4405,6 +4433,28 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         }
 
         $this->transactionQueue->addTransaction($transaction);
+
+		if($this->currentWindowType === WindowTypes::ANVIL){
+			$inventory = null;
+			foreach($this->windowIndex as $window){
+				if($window instanceof AnvilInventory){
+					$inventory = $window;
+					break;
+				}
+			}
+
+			$inventory?->handleChange($this, $this->getInventory()->getItem($packet->slot), $packet->item, $packet->slot);
+		}elseif($this->currentWindowType === WindowTypes::ENCHANTMENT){
+			$inventory = null;
+			foreach($this->windowIndex as $window){
+				if($window instanceof EnchantInventory){
+					$inventory = $window;
+					break;
+				}
+			}
+
+			$inventory?->handleChange($this, $this->getInventory()->getItem($packet->slot), $packet->item, $packet->slot);
+		}
 
 		return true;
 	}
