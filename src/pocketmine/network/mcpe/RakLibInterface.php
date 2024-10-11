@@ -26,9 +26,11 @@ namespace pocketmine\network\mcpe;
 use Exception;
 use pocketmine\event\player\PlayerCreationEvent;
 use pocketmine\network\AdvancedSourceInterface;
+use pocketmine\network\mcpe\encryption\DecryptionException;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\utils\BinaryDataException;
 use pocketmine\network\Network;
 use pocketmine\Player;
 use pocketmine\Server;
@@ -183,8 +185,12 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 
 					$cipher = $player->getCipher();
 					$buffer = substr($packet->buffer, 1);
-					if($cipher !== null) {
-						$buffer = $cipher->decrypt($buffer);
+					if($cipher !== null){
+						try{
+					    	$buffer = $cipher->decrypt($buffer);
+						}catch(DecryptionException $e){
+							throw new BinaryDataException("Packet decryption error");
+						}
 					}
 
 				    $buffer = self::MCPE_RAKNET_PACKET_ID . $buffer;
