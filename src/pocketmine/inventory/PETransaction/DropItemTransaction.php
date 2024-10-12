@@ -69,6 +69,7 @@ class DropItemTransaction extends Transaction{
 
         $player->dropItem($item);
         $player->getInventory()->sendHeldItem($player);
+        $player->getInventory()->sendHeldItem($player->getViewers());
 
         return true;
     }
