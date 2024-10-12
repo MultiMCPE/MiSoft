@@ -97,6 +97,7 @@ use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionValidationException;
 use pocketmine\item\Consumable;
 use pocketmine\item\Durable;
+use pocketmine\item\Elytra;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\enchantment\MeleeWeaponEnchantment;
 use pocketmine\item\Item;
@@ -4159,6 +4160,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->toggleSneak(false);
 				return true;
 			case PlayerActionPacket::ACTION_START_GLIDE:
+				if(!($this->armorInventory->getChestplate() instanceof Elytra)){
+					$this->server->getLogger()->debug("Player " . $this->username . " tried to start glide without elytra");
+					$this->sendData($this);
+					$this->armorInventory->sendContents($this);
+					return false;
+				}
 				$this->toggleGlide(true);
 				break;
 			case PlayerActionPacket::ACTION_STOP_GLIDE:
