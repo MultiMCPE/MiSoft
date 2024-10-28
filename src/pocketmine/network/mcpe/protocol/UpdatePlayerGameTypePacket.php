@@ -58,13 +58,21 @@ class UpdatePlayerGameTypePacket extends DataPacket{
 	protected function decodePayload() : void{
 		$this->gameMode = $this->getVarInt();
 		$this->playerEntityUniqueId = $this->getEntityUniqueId();
-		$this->tick = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+			$this->tick = $this->getUnsignedVarLong();
+		}else{
+		    $this->tick = $this->getUnsignedVarInt();
+		}
 	}
 
 	protected function encodePayload() : void{
 		$this->putVarInt($this->gameMode);
 		$this->putEntityUniqueId($this->playerEntityUniqueId);
-		$this->putUnsignedVarInt($this->tick);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+			$this->putUnsignedVarLong($this->tick);
+		}else{
+	    	$this->putUnsignedVarInt($this->tick);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

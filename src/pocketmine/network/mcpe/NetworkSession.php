@@ -243,6 +243,8 @@ use pocketmine\network\mcpe\protocol\CurrentStructureFeaturePacket;
 use pocketmine\network\mcpe\protocol\ServerboundDiagnosticsPacket;
 use pocketmine\network\mcpe\protocol\CameraAimAssistPacket;
 use pocketmine\network\mcpe\protocol\ContainerRegistryCleanupPacket;
+use pocketmine\network\mcpe\protocol\MovementEffectPacket;
+use pocketmine\network\mcpe\protocol\SetMovementAuthorityPacket;
 
 abstract class NetworkSession{
 
@@ -1125,6 +1127,14 @@ abstract class NetworkSession{
 	}
 
 	public function handleContainerRegistryCleanup(ContainerRegistryCleanupPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleMovementEffect(MovementEffectPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleSetMovementAuthority(SetMovementAuthorityPacket $packet) : bool{
 		return false;
 	}
 }

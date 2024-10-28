@@ -63,6 +63,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds685;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds686;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds712;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds729;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds748;
 use pocketmine\utils\Binary;
 use ReflectionClass;
 use SplFixedArray;
@@ -70,6 +71,7 @@ use function array_key_last;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_748 => PacketsIds748::class,
 		ProtocolInfo::PROTOCOL_729 => PacketsIds729::class,
 		ProtocolInfo::PROTOCOL_712 => PacketsIds712::class,
 		ProtocolInfo::PROTOCOL_686 => PacketsIds686::class,
@@ -351,6 +353,8 @@ class PacketPool {
         self::registerPacket(new ServerboundDiagnosticsPacket());
 	    self::registerPacket(new CameraAimAssistPacket());
 		self::registerPacket(new ContainerRegistryCleanupPacket());
+		self::registerPacket(new MovementEffectPacket());
+		self::registerPacket(new SetMovementAuthorityPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// 1.1

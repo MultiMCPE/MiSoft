@@ -95,13 +95,16 @@ class ResourcePacksInfoPacket extends DataPacket{
                         }
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
 		            	    $this->getBool();
+							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+								$this->getString();
+							}
 		            	}
 		        	}
 		    	}
 			}
 		}
 
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618 && $this->getProtocol() < ProtocolInfo::PROTOCOL_748){
 	    	$this->cdnUrls = [];
 	    	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; $i++){
 		    	$packId = $this->getString();
@@ -161,13 +164,16 @@ class ResourcePacksInfoPacket extends DataPacket{
                         }
 		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
 		            	    $this->putBool(false); //TODO: supports RTX
+							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+								$this->putString(""); //TODO: cdn url
+							}
 		            	}
 		        	}
 		    	}
 			}
 		}
 
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_618 && $this->getProtocol() < ProtocolInfo::PROTOCOL_748){
 		    $this->putUnsignedVarInt(count($this->cdnUrls));
 		    foreach($this->cdnUrls as $packId => $cdnUrl){
 		    	$this->putString($packId);

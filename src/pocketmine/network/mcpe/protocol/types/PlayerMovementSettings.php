@@ -27,28 +27,28 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 final class PlayerMovementSettings{
-	/** @var int */
+	/** @var ServerAuthMovementMode */
 	private $movementType;
 	/** @var int */
 	private $rewindHistorySize;
 	/** @var bool */
 	private $serverAuthoritativeBlockBreaking;
 
-	public function __construct(int $movementType, int $rewindHistorySize, bool $serverAuthoritativeBlockBreaking){
+	public function __construct(ServerAuthMovementMode $movementType, int $rewindHistorySize, bool $serverAuthoritativeBlockBreaking){
 		$this->movementType = $movementType;
 		$this->rewindHistorySize = $rewindHistorySize;
 		//do not ask me what the F this is doing here
 		$this->serverAuthoritativeBlockBreaking = $serverAuthoritativeBlockBreaking;
 	}
 
-	public function getMovementType() : int{ return $this->movementType; }
+	public function getMovementType() : ServerAuthMovementMode{ return $this->movementType; }
 
 	public function getRewindHistorySize() : int{ return $this->rewindHistorySize; }
 
 	public function isServerAuthoritativeBlockBreaking() : bool{ return $this->serverAuthoritativeBlockBreaking; }
 
 	public static function read(DataPacket $in) : self{
-		$movementType = $in->getVarInt();
+		$movementType = ServerAuthMovementMode::fromPacket($in->getVarInt());
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$rewindHistorySize = $in->getVarInt();
 	    	$serverAuthBlockBreaking = $in->getBool();
@@ -57,7 +57,7 @@ final class PlayerMovementSettings{
 	}
 
 	public function write(DataPacket $out) : void{
-		$out->putVarInt($this->movementType);
+		$out->putVarInt($this->movementType->value);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$out->putVarInt($this->rewindHistorySize);
 	    	$out->putBool($this->serverAuthoritativeBlockBreaking);
