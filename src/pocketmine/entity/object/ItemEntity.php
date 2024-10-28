@@ -211,7 +211,7 @@ class ItemEntity extends Entity{
 		$item = $this->getItem();
 
         if($player->isSurvival()){
-            if($player->getOffHandInventory()->getItem(0)->canStackWith($item)){
+            if($player->getOffHandInventory()->getItem(0)->canStackWith($item) && $player->getOffHandInventory()->canAddItem($item)){
                 $playerInventory = $player->getOffHandInventory();
 	    	}elseif($player->getInventory()->canAddItem($item)){
 		    	$playerInventory = $player->getInventory();

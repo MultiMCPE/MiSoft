@@ -233,7 +233,7 @@ class Arrow extends Projectile{
 		$item = ItemFactory::get(Item::ARROW, $this->potionId, 1);
 
         if($player->isSurvival()){
-            if($player->getOffHandInventory()->getItem(0)->canStackWith($item)){
+            if($player->getOffHandInventory()->getItem(0)->canStackWith($item) && $player->getOffHandInventory()->canAddItem($item)){
                 $playerInventory = $player->getOffHandInventory();
 	    	}elseif($player->getInventory()->canAddItem($item)){
 		    	$playerInventory = $player->getInventory();
