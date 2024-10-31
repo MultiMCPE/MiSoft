@@ -83,8 +83,8 @@ class FlowerPot extends Flowable{
 		}
 
 		$this->setDamage(self::STATE_FULL); //specific damage value is unnecessary, it just needs to be non-zero to show an item.
-		$this->getLevelNonNull()->setBlock($this, $this, true, false);
 		$pot->setItem($item->pop());
+		$this->getLevelNonNull()->setBlock($this, $this, false, false);
 
 		return true;
 	}
