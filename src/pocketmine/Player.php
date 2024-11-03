@@ -43,6 +43,7 @@ use pocketmine\entity\projectile\Arrow;
 use pocketmine\entity\projectile\FishingHook;
 use pocketmine\entity\Skin;
 use pocketmine\entity\vehicle\Boat;
+use pocketmine\event\block\ItemFrameDropItemEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\inventory\InventoryCloseEvent;
@@ -1203,9 +1204,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$pk->position = $this->asVector3();
 				$this->dataPacket($pk);
 				if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+					// fast world loading
 			    	$pk1 = new PlayStatusPacket();
 			    	$pk1->status = PlayStatusPacket::PLAYER_SPAWN;
 			    	$this->dataPacket($pk1);
+				}else{
+					// fast world loading
+					$pk1 = new PlayerActionPacket();
+					$pk1->entityRuntimeId = $this->getId();
+					$pk1->action = PlayerActionPacket::ACTION_DIMENSION_CHANGE_ACK;
+					[$pk1->x, $pk1->y, $pk1->z] = [(int) $this->x, (int) $this->y, (int) $this->z];
+					[$pk1->rx, $pk1->ry, $pk1->rz] = [(int) $this->x, (int) $this->y, (int) $this->z];
+					$pk1->face = 0;
+					$this->dataPacket($pk1);
 				}
 			}
 
@@ -4205,6 +4216,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         	case PlayerActionPacket::ACTION_START_FLYING:
         	case PlayerActionPacket::ACTION_STOP_FLYING:
         	case PlayerActionPacket::ACTION_ACK_ACTOR_DATA:
+			case PlayerActionPacket::ACTION_START_USING_ITEM:
 			    break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());
@@ -4582,6 +4594,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$ev->setCancelled();
 			}
 
+			$ev->call();
+			if($ev->isCancelled()){
+				$tile->spawnTo($this);
+				return true;
+			}
+
+			$ev = new ItemFrameDropItemEvent($this, $tile->getBlock(), $tile, $tile->getItem());
 			$ev->call();
 			if($ev->isCancelled()){
 				$tile->spawnTo($this);
