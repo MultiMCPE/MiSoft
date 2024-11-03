@@ -307,6 +307,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
     private const MAX_INPUT_JSON = 15;
 
+	private const DEFAULT_FX_INTERVAL_TICKS = 5;
+
 	/**
 	 * Validates the given username.
 	 *
@@ -530,6 +532,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $packetBatchLimiter;
 	/** @var PacketRateLimiter */
 	protected $gamePacketLimiter;
+
+	/** @var int */
+	private $fxTicker = 0;
+	/** @var int */
+	private $fxTickInterval = self::DEFAULT_FX_INTERVAL_TICKS;
 
 	/**
 	 * @return TranslationContainer|string
@@ -4185,7 +4192,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case PlayerActionPacket::ACTION_CONTINUE_BREAK:
 				$block = $this->level->getBlock($pos);
 				$data = $block->getId() | ($block->getDamage() << 8);
-				$this->level->broadcastLevelSoundEvent($pos, LevelSoundEventPacket::SOUND_HIT, $block->getId());
+				if(($this->fxTicker++ % $this->fxTickInterval) === 0){
+			    	$this->level->broadcastLevelSoundEvent($pos, LevelSoundEventPacket::SOUND_HIT, $block->getId());
+				}
 
 				
 				//TODO: destroy-progress level event
