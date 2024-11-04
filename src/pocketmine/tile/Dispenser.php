@@ -130,7 +130,8 @@ class Dispenser extends Spawnable implements InventoryHolder, Container, Nameabl
 			$this->getInventory()->setItem($itemArr[0], $item->getCount() > 0 ? $item : Item::get(ItemIds::AIR));
 
 			$motion = $this->getMotion();
-			$needItem = Item::get($item->getId(), $item->getDamage());
+			$needItem = clone $item;
+			$needItem->setCount(1);
 
 			$f = 1.5;
 			$nbt = Entity::createBaseNBT(

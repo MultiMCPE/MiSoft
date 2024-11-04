@@ -123,7 +123,8 @@ class Dropper extends Spawnable implements InventoryHolder, Container, Nameable{
 			$this->getInventory()->setItem($itemArr[0], $item->getCount() > 0 ? $item : Item::get(Item::AIR));
 
 			$motion = $this->getMotion();
-			$needItem = Item::get($item->getId(), $item->getDamage());
+			$needItem = clone $item;
+			$needItem->setCount(1);
 			$block = $this->getLevelNonNull()->getBlock($this->add($motion[0], $motion[1], $motion[2]));
 
 			switch($block->getId()){
@@ -160,7 +161,7 @@ class Dropper extends Spawnable implements InventoryHolder, Container, Nameable{
 			$nbt->setShort("PickupDelay", 10);
 
 			$f = 0.3;
-			$itemEntity = new ItemEntity($this->getLevelNonNUll(), $nbt);
+			$itemEntity = new ItemEntity($this->getLevelNonNull(), $nbt);
 			$itemEntity->setMotion($itemEntity->getMotion()->multiply($f));
 			$itemEntity->spawnToAll();
 
