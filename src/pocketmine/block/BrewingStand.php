@@ -68,18 +68,18 @@ class BrewingStand extends Transparent{
 	}
 
 	public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null) : bool{
-		$parent = parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
-		if(!$blockReplace->getSide(Vector3::SIDE_DOWN)->isTransparent()){
-			$nbt = BrewingStandTile::createNBT($this, $face, $item, $player);
-			$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
+		$this->getLevelNonNull()->setBlock($blockReplace, $this, true, true);
 
-			if($item->hasCustomName()){
-				$nbt->setString("CustomName", $item->getCustomName());
-			}
-			new BrewingStandTile($this->getLevelNonNull(), $nbt);
+		$nbt = BrewingStandTile::createNBT($this, $face, $item, $player);
+		$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
+
+		if($item->hasCustomName()){
+			$nbt->setString("CustomName", $item->getCustomName());
 		}
 
-		return $parent;
+		new BrewingStandTile($this->getLevelNonNull(), $nbt);
+
+		return true;
 	}
 
 	public function onActivate(Item $item, Player $player = null): bool{
