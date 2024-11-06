@@ -83,21 +83,22 @@ class BrewingStand extends Transparent{
 	}
 
 	public function onActivate(Item $item, Player $player = null): bool{
-		$parent = parent::onActivate($item, $player);
-		$tile = $player->getLevelNonNull()->getTile($this);
-		if($tile instanceof BrewingStandTile){
-			$player->addWindow($tile->getInventory());
-		}else{
-			$nbt = BrewingStandTile::createNBT($this, null, $item, $player);
-			$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
+	    if($player instanceof Player){
+	    	$tile = $player->getLevelNonNull()->getTile($this);
+	    	if($tile instanceof BrewingStandTile){
+		    	$player->addWindow($tile->getInventory());
+	    	}else{
+		    	$nbt = BrewingStandTile::createNBT($this, null, $item, $player);
+		    	$nbt->setInt(BrewingStandTile::TAG_BREW_TIME, BrewingStandTile::MAX_BREW_TIME);
 
-			if($item->hasCustomName()){
-				$nbt->setString("CustomName", $item->getCustomName());
-			}
-			$tile = new BrewingStandTile($this->getLevelNonNull(), $nbt);
-			$player->addWindow($tile->getInventory());
+		    	if($item->hasCustomName()){
+			    	$nbt->setString("CustomName", $item->getCustomName());
+		    	}
+		    	$tile = new BrewingStandTile($this->getLevelNonNull(), $nbt);
+		    	$player->addWindow($tile->getInventory());
+	    	}
 		}
 
-		return $parent;
+		return true;
 	}
 }
