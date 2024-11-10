@@ -50,8 +50,9 @@ abstract class ActorMetadataList{
 			"DATA_MINECART_DISPLAY_OFFSET" => 17,
 			"DATA_SHOOTER_ID" => 17,
 			"DATA_MINECART_HAS_DISPLAY" => 18,
-			"DATA_HORSE_TYPE" => 19,
-
+			"DATA_SWELL" => 19,
+			"DATA_OLD_SWELL" => 20,
+			"DATA_SWELL_DIRECTION" => 21,
 			"DATA_CHARGE_AMOUNT" => 22,
 			"DATA_ENDERMAN_HELD_ITEM_ID" => 23,
 			"DATA_ENDERMAN_HELD_ITEM_DAMAGE" => 24,
@@ -83,6 +84,10 @@ abstract class ActorMetadataList{
 			"DATA_RIDER_MIN_ROTATION" => 60
 		],
 		ProtocolInfo::PROTOCOL_110 => [
+			"DATA_SWELL" => 19,
+			"DATA_OLD_SWELL" => 20,
+            "DATA_SWELL_DIRECTION" => 21,
+
 		    "DATA_ENDERMAN_HELD_ITEM_ID" => 23,
 		    "DATA_ENDERMAN_HELD_ITEM_DAMAGE" => 24,
 		    "DATA_ENTITY_AGE" => 25,

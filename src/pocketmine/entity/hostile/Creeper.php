@@ -159,13 +159,16 @@ class Creeper extends Monster implements Ageable{
 				$this->level->broadcastLevelEvent($this, LevelEventPacket::EVENT_SOUND_IGNITE);
 			}
 
-			if($this->timeSinceIgnited % 5 == 0){
-				$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuseTime - $this->timeSinceIgnited);
-			}
+			$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuseTime - $this->timeSinceIgnited);
 
 			if($this->timeSinceIgnited++ >= $this->fuseTime){
 				$this->timeSinceIgnited = $this->fuseTime;
 				$this->explode();
+			}
+
+			$this->propertyManager->setInt(self::DATA_SWELL, $this->timeSinceIgnited);
+			if($this->timeSinceIgnited > 1){
+		    	$this->propertyManager->setInt(self::DATA_OLD_SWELL, $this->timeSinceIgnited - 1);
 			}
 		}else{
 			$this->timeSinceIgnited = 0;
