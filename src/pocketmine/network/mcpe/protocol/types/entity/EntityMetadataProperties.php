@@ -129,8 +129,8 @@ interface EntityMetadataProperties{
 	public const DATA_IS_BUOYANT = 119; //byte
 	public const DATA_BUOYANCY = 121; //string
 
-    public const DATA_SWELL = 197; //int
-    public const DATA_OLD_SWELL = 198; //int
-    public const DATA_SWELL_DIRECTION = 199; //int
+    public const DATA_SWELL = 197; //bype
+    public const DATA_OLD_SWELL = 198; //bype
+    public const DATA_SWELL_DIRECTION = 199; //byte
     public const DATA_RIDER_SEAT_ROTATION_OFFSET = 200; //float
 }

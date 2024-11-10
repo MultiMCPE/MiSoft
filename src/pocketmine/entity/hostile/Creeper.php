@@ -73,6 +73,7 @@ class Creeper extends Monster implements Ageable{
 		$this->setIgnited(boolval($this->namedtag->getByte("ignited", 0)));
 		$this->setPowered(boolval($this->namedtag->getByte("powered", 0)));
 		$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuseTime);
+		$this->propertyManager->setByte(self::DATA_SWELL_DIRECTION, -1);
 
 		parent::initEntity();
 	}
@@ -157,6 +158,7 @@ class Creeper extends Monster implements Ageable{
 		if($this->isIgnited()){
 			if($this->timeSinceIgnited === 0){
 				$this->level->broadcastLevelEvent($this, LevelEventPacket::EVENT_SOUND_IGNITE);
+				$this->propertyManager->setByte(self::DATA_SWELL_DIRECTION, 1);
 			}
 
 			$this->propertyManager->setInt(self::DATA_FUSE_LENGTH, $this->fuseTime - $this->timeSinceIgnited);
@@ -166,12 +168,17 @@ class Creeper extends Monster implements Ageable{
 				$this->explode();
 			}
 
-			$this->propertyManager->setInt(self::DATA_SWELL, $this->timeSinceIgnited);
+			$this->propertyManager->setByte(self::DATA_SWELL, $this->timeSinceIgnited);
 			if($this->timeSinceIgnited > 1){
-		    	$this->propertyManager->setInt(self::DATA_OLD_SWELL, $this->timeSinceIgnited - 1);
+		    	$this->propertyManager->setByte(self::DATA_OLD_SWELL, $this->timeSinceIgnited - 1);
 			}
 		}else{
-			$this->timeSinceIgnited = 0;
+			if($this->timeSinceIgnited > 0){
+		    	$this->timeSinceIgnited = 0;
+		    	$this->propertyManager->setByte(self::DATA_SWELL_DIRECTION, -1);
+		    	$this->propertyManager->setByte(self::DATA_SWELL, 0);
+		    	$this->propertyManager->setByte(self::DATA_OLD_SWELL, 0);
+			}
 		}
 
 		return $hasUpdate;
