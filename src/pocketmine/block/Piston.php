@@ -94,7 +94,7 @@ class Piston extends Solid implements ElectricalAppliance{
 
 			$nbt = PistonHeadTile::createNBT($this);
 			$nbt->setFloat(PistonHeadTile::TAG_PROGRESS, 1.0);
-			$nbt->setByte(PistonHeadTile::TAG_STATE, 0);
+			$nbt->setByte(PistonHeadTile::TAG_STATE, 1);
 			$nbt->setByte(PistonHeadTile::TAG_STICKY, $this->isSticky() ? 1 : 0);
 
 			$tile = Tile::createTile(Tile::PISTON_HEAD, $this->getLevelNonNull(), $nbt);
