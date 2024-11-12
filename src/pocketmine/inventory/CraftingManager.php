@@ -27,6 +27,7 @@ use Closure;
 use Generator;
 use pocketmine\crafting\CraftingDataBuildTask;
 use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\item\Potion;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\protocol\BatchPacket;
@@ -80,30 +81,98 @@ class CraftingManager{
 						array_map($itemDeserializerFunc, $recipe["output"])
 					));
 					break;
-				case "shaped":
-					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
-						break;
-					}
-					foreach ($recipe["input"] as $key => $inputItem) {
-                    if (isset($inputItem["damage"]) && $inputItem["damage"] == -1) {
-                        $newRecipes = [];
-                        for ($i = 0; $i <= 5; $i++) {
-                            $newRecipe = $recipe;
-                            $newRecipe["input"][$key]["damage"] = $i;
-                            $newRecipes[] = $newRecipe;
-                        }
-                                break;
+				/*case "shaped":
+                   if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
+                        break;
                     }
-                }
 
-                foreach ($newRecipes as $newRecipe) {
-                    $this->registerRecipe(new ShapedRecipe( 
-                        $newRecipe["shape"], 
-                        array_map($itemDeserializerFunc, $newRecipe["input"]), 
-                        array_map($itemDeserializerFunc, $newRecipe["output"])
+                    $output = array_map($itemDeserializerFunc, $recipe["output"]);
+                    /** @var Item[] $output */
+
+                    /*$ingredients = array_map($itemDeserializerFunc, $recipe["input"]);
+                    /** @var Item[] $ingredients */
+                    /*foreach($ingredients as $ingredient){
+                        if($ingredient->getId() === ItemIds::PLANKS && $ingredient->getDamage() === -1){
+
+                            //TODO: crutch planks > 1.20.50
+
+                            for($meta = 0; $meta <= 5; ++$meta){
+                                $fixIngredients = array_map($itemDeserializerFunc, $recipe["input"]);
+                                foreach($ingredients as $key => $fixIngredient){
+                                    if($fixIngredient->getId() === ItemIds::PLANKS && $fixIngredient->getDamage() === -1){
+                                        $fixIngredients[$key]->setDamage($meta);
+                                    }
+                                }
+
+                                $this->registerRecipe(new ShapedRecipe(
+                                    $recipe["shape"],
+                                    $fixIngredients,
+                                    $output
+                                ));
+                            }
+
+                            //TODO: end crutch
+
+                            break 2;
+                        }
+                    }
+
+                    $this->registerRecipe(new ShapedRecipe(
+                        $recipe["shape"],
+                        $ingredients,
+                        $output
                     ));
-                }
-                                       break; 
+                    break;*/
+case "shaped":
+    if ($recipe["block"] !== "crafting_table") { // фильтруем другие блоки
+        break;
+    }
+
+    $output = array_map($itemDeserializerFunc, $recipe["output"]);
+    /** @var Item[] $output */
+
+    $ingredients = array_map($itemDeserializerFunc, $recipe["input"]);
+    /** @var Item[] $ingredients */
+
+    // Находим все индексы ингредиентов, где используется ItemIds::PLANKS с неопределенным метаданным
+    $planksIndices = [];
+    foreach ($ingredients as $key => $ingredient) {
+        if ($ingredient->getId() === ItemIds::PLANKS && $ingredient->getDamage() === -1) {
+            $planksIndices[] = $key;
+        }
+    }
+
+    // Если нет ингредиентов с неопределенным метаданным, регистрируем рецепт как есть
+    if (empty($planksIndices)) {
+        $this->registerRecipe(new ShapedRecipe(
+            $recipe["shape"],
+            $ingredients,
+            $output
+        ));
+        break;
+    }
+
+    // Генерация всех возможных комбинаций метаданных и регистрация рецептов
+    $combinationCount = 6 ** count($planksIndices); // Общее количество комбинаций (6 вариантов для каждого PLANKS)
+    for ($i = 0; $i < $combinationCount; ++$i) {
+        $fixIngredients = array_map($itemDeserializerFunc, $recipe["input"]);
+        $currentCombination = $i;
+        
+        // Перебираем все индексы и назначаем метаданные
+        foreach ($planksIndices as $index) {
+            $meta = $currentCombination % 6; // Получаем мета (0-5)
+            $currentCombination = intdiv($currentCombination, 6);
+            $fixIngredients[$index]->setDamage($meta);
+        }
+
+        $this->registerRecipe(new ShapedRecipe(
+            $recipe["shape"],
+            $fixIngredients,
+            $output
+        ));
+    }
+    break;
+
 				case "smelting":
 					if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
 						break;
