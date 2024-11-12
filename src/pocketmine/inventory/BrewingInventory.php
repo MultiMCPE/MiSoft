@@ -25,7 +25,6 @@ namespace pocketmine\inventory;
 
 use pocketmine\item\Item;
 use pocketmine\network\mcpe\protocol\types\WindowTypes;
-use pocketmine\Player;
 use pocketmine\tile\BrewingStand;
 
 class BrewingInventory extends ContainerInventory{
@@ -38,25 +37,28 @@ class BrewingInventory extends ContainerInventory{
 	/** @var BrewingStand */
 	protected $holder;
 
-	public function __construct(BrewingStand $holder, array $items = [], int $size = null, string $title = null){
-		parent::__construct($holder, $items, $size, $title);
-	}
-
-	public function getDefaultSize() : int{
-		return 5;
-	}
-
-	public function getName() : string{
-		return "Brewing";
+	public function __construct(BrewingStand $holder){
+		parent::__construct($holder);
 	}
 
 	public function getNetworkType() : int{
 		return WindowTypes::BREWING_STAND;
 	}
 
-	public function onSlotChange(int $index, Item $before, bool $send) : void{
-		$this->holder->scheduleUpdate();
-		parent::onSlotChange($index, $before, $send);
+	public function getName() : string{
+		return "Brewing";
+	}
+
+	public function getDefaultSize() : int{
+		return 5; //1 input, 3 output, 1 fuel
+	}
+
+	/**
+	 * This override is here for documentation and code completion purposes only.
+	 * @return BrewingStand
+	 */
+	public function getHolder(){
+		return $this->holder;
 	}
 
 	/**
@@ -83,16 +85,6 @@ class BrewingInventory extends ContainerInventory{
 		}
 
 		return $return;
-	}
-
-	public function onClose(Player $who) : void{
-		parent::onClose($who);
-		$this->holder->saveNBT();
-	}
-
-	public function onOpen(Player $who) : void{
-		parent::onOpen($who);
-		$this->holder->loadBottles();
 	}
 
 	/**
