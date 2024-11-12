@@ -737,19 +737,26 @@ class NetworkBinaryStream extends BinaryStream{
 				$this->putByte(0); // internal item descriptor type
 			    $this->putVarInt(0);
 			}else{
-				$this->putByte(1); // internal item descriptor type
+			    //TODO: crutch planks > 1.20.50
+			    if($item->getId() === ItemIds::PLANKS && $item->getDamage() === -1){
+			        $this->putByte(3); // tag item descriptor type
+			        $this->putString("minecraft:planks");
+			        $this->putVarInt($item->getCount());
+			    }else{
+			    	$this->putByte(1); // internal item descriptor type
 
-		        $palette = ItemPalette::getPalette($playerProtocol);
-		        if($item->hasAnyDamageValue()){
-		            [$netId, ] = $palette::getRuntimeFromLegacyId($item->getId(), 0);
-		            $netData = 0x7fff;
-		        }else{
-		            [$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $item->getDamage());
-		        }
+		            $palette = ItemPalette::getPalette($playerProtocol);
+		            if($item->hasAnyDamageValue()){
+		                [$netId, ] = $palette::getRuntimeFromLegacyId($item->getId(), 0);
+		                $netData = 0x7fff;
+		            }else{
+		                [$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $item->getDamage());
+		            }
 
-			    $this->putLShort($netId);
-				$this->putLShort($netData);
-				$this->putVarInt($item->getCount());
+			        $this->putLShort($netId);
+			    	$this->putLShort($netData);
+			    	$this->putVarInt($item->getCount());
+			    }
 			}
 		}
 	}
