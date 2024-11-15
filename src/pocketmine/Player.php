@@ -3597,6 +3597,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				switch($type){
 					case InventoryTransactionPacket::USE_ITEM_ON_ENTITY_ACTION_INTERACT:
+	                    if($this->isSpectator()){
+	                        return true;
+	                    }
 						if(!$target->isAlive()){
 							return true;
 						}
@@ -3630,6 +3633,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				break;
 			case InventoryTransactionPacket::TYPE_RELEASE_ITEM:
+	            if($this->isSpectator()){
+	                return true;
+	            }
+
 				try{
 					$type = $packet->trData->actionType;
 					switch($type){
@@ -4000,6 +4007,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 					return true;
 				}
+	            if($this->isSpectator()){
+	                return true;
+	            }
 				if(!$target->isAlive()){
 					return true;
 				}
@@ -4118,6 +4128,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		switch($packet->action){
 		    case PlayerActionPacket::ACTION_RELEASE_ITEM:
+	            if($this->isSpectator()){
+	                return true;
+	            }
+
 		        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 		            try{
 				    	if($this->isUsingItem()){

@@ -46,7 +46,7 @@ class PressurePlate extends RedstoneSource{
 	public function onEntityCollide(Entity $entity) : void{
 		if($this->getLevelNonNull()->getServer()->redstoneEnabled and $this->canActivate){
 			$entities = $this->getLevelNonNull()->getNearbyEntities($this->getHitCollision());
-			$entities = array_filter($entities, fn($entity) => $entity instanceof Living);
+			$entities = array_filter($entities, fn($entity) => $entity instanceof Living && !($entity instanceof Player && $entity->isSpectator()));
 			if(count($entities) === 0){
 				$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 20);
 				return;
@@ -84,7 +84,7 @@ class PressurePlate extends RedstoneSource{
 		}
 
         $entities = $this->getLevelNonNull()->getNearbyEntities($this->getHitCollision());
-        $entities = array_filter($entities, fn($entity) => $entity instanceof Living);
+        $entities = array_filter($entities, fn($entity) => $entity instanceof Living && !($entity instanceof Player && $entity->isSpectator()));
         if(count($entities) !== 0){
 			$this->getLevelNonNull()->scheduleDelayedBlockUpdate($this, 20);
 			return;
