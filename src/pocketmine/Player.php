@@ -3263,24 +3263,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case ActorEventPacket::PLAYER_ADD_XP_LEVELS:
 				if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
 					if($this->currentWindowType === WindowTypes::ENCHANTMENT){
-						$inventory = null;
-						foreach($this->windowIndex as $window){
-							if($window instanceof EnchantInventory){
-								$inventory = $window;
-								break;
-							}
-						}
-
+						$inventory = $this->findEnchantInventory();
 						$inventory?->onResolve($this, abs($packet->data));
 					}elseif($this->currentWindowType === WindowTypes::ANVIL){
-						$inventory = null;
-						foreach($this->windowIndex as $window){
-							if($window instanceof AnvilInventory){
-								$inventory = $window;
-								break;
-							}
-						}
-
+						$inventory = $this->findAnvilInventory();
 						$inventory?->onResolve($this, abs($packet->data));
 					}
 				}
@@ -4477,24 +4463,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         $this->transactionQueue->addTransaction($transaction);
 
 		if($this->currentWindowType === WindowTypes::ANVIL){
-			$inventory = null;
-			foreach($this->windowIndex as $window){
-				if($window instanceof AnvilInventory){
-					$inventory = $window;
-					break;
-				}
-			}
-
+			$inventory = $this->findAnvilInventory();
 			$inventory?->handleChange($this, $this->getInventory()->getItem($packet->slot), $packet->item, $packet->slot);
 		}elseif($this->currentWindowType === WindowTypes::ENCHANTMENT){
-			$inventory = null;
-			foreach($this->windowIndex as $window){
-				if($window instanceof EnchantInventory){
-					$inventory = $window;
-					break;
-				}
-			}
-
+			$inventory = $this->findEnchantInventory();
 			$inventory?->handleChange($this, $this->getInventory()->getItem($packet->slot), $packet->item, $packet->slot);
 		}
 
@@ -5694,4 +5666,34 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
     public function isBedrock() : bool{
         return $this->getProtocol() >= ProtocolInfo::PROTOCOL_130;
     }
+
+	/**
+	 * @return ?EnchantInventory
+	 */
+	public function findEnchantInventory() : ?EnchantInventory{
+		$inventory = null;
+		foreach($this->windowIndex as $window){
+			if($window instanceof EnchantInventory){
+				$inventory = $window;
+				break;
+			}
+		}
+
+		return $inventory;
+	}
+
+	/**
+	 * @return ?AnvilInventory
+	 */
+	public function findAnvilInventory() : ?AnvilInventory{
+		$inventory = null;
+		foreach($this->windowIndex as $window){
+			if($window instanceof AnvilInventory){
+				$inventory = $window;
+				break;
+			}
+		}
+
+		return $inventory;
+	}
 }

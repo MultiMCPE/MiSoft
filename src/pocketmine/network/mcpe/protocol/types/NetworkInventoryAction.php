@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\protocol\types;
 use InvalidArgumentException;
 use InvalidStateException;
 use pocketmine\inventory\BeaconInventory;
+use pocketmine\inventory\EnchantInventory;
+use pocketmine\inventory\AnvilInventory;
 use pocketmine\inventory\CraftingGrid;
 use pocketmine\inventory\transaction\action\CreativeInventoryAction;
 use pocketmine\inventory\transaction\action\DropItemAction;
@@ -191,6 +193,9 @@ class NetworkInventoryAction{
 				if($this->inventorySlot === 27 && ($player->getWindow(Player::BEACON_WINDOW_ID) instanceof BeaconInventory)){
 					$window = $player->getWindow(Player::BEACON_WINDOW_ID);
 					$slot = 0;
+				}elseif(($this->inventorySlot === 14 or $this->inventorySlot === 15) && ($player->findEnchantInventory() instanceof EnchantInventory)){
+					$window = $player->findEnchantInventory();
+					$slot = ($this->inventorySlot === 14 ? 0 : 1);
 		    	}elseif($this->windowId === ContainerIds::UI and $this->inventorySlot > 0){
 					if($this->inventorySlot === 50){
 						return null; //useless noise
