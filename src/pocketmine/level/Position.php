@@ -25,8 +25,8 @@ namespace pocketmine\level;
 
 use InvalidArgumentException;
 use pocketmine\math\Vector3;
-use pocketmine\utils\MainLogger;
 use pocketmine\utils\AssumptionFailedError;
+use GlobalLogger;
 use function assert;
 
 class Position extends Vector3{
@@ -66,7 +66,7 @@ class Position extends Vector3{
 	 */
 	public function getLevel(){
 		if($this->level !== null and $this->level->isClosed()){
-			MainLogger::getLogger()->debug("Position was holding a reference to an unloaded world");
+			GlobalLogger::get()->debug("Position was holding a reference to an unloaded world");
 			$this->level = null;
 		}
 

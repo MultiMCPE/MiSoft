@@ -49,12 +49,12 @@ class GeneratorRegisterTask extends AsyncTask{
 		$this->worldHeight = $level->getWorldHeight();
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 		BlockFactory::init();
 		ItemFactory::init();
 		Biome::init();
 		$manager = new SimpleChunkManager($this->seed, $this->worldHeight);
-		$this->saveToThreadStore("generation.level{$this->levelId}.manager", $manager);
+		ThreadLocalManagerContext::register(new ThreadLocalManagerContext($manager), $this->levelId);
 
 		/**
 		 * @var Generator $generator
@@ -62,6 +62,6 @@ class GeneratorRegisterTask extends AsyncTask{
 		 */
 		$generator = new $this->generatorClass(unserialize($this->settings));
 		$generator->init($manager, new Random($manager->getSeed()));
-		$this->saveToThreadStore("generation.level{$this->levelId}.generator", $generator);
+		ThreadLocalGeneratorContext::register(new ThreadLocalGeneratorContext($generator), $this->levelId);
 	}
 }

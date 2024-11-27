@@ -17,23 +17,36 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 declare(strict_types=1);
 
-namespace pocketmine;
+namespace pocketmine\scheduler;
 
-use Threaded;
+use function time;
 
-abstract class Collectable extends Threaded{
+/**
+ * @internal
+ */
+final class AsyncPoolWorkerEntry{
 
-	private $isGarbage = false;
+	public int $lastUsed;
+	/**
+	 * @var \SplQueue|AsyncTask[]
+	 * @phpstan-var \SplQueue<AsyncTask>
+	 */
+	public \SplQueue $tasks;
 
-	public function isGarbage() : bool{
-		return $this->isGarbage;
+	public function __construct(
+		public readonly AsyncWorker $worker
+	){
+		$this->lastUsed = time();
+		$this->tasks = new \SplQueue();
 	}
 
-	public function setGarbage(){
-		$this->isGarbage = true;
+	public function submit(AsyncTask $task) : void{
+		$this->tasks->enqueue($task);
+		$this->lastUsed = time();
+		$this->worker->stack($task);
 	}
 }

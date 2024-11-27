@@ -24,57 +24,59 @@ declare(strict_types=1);
 namespace pocketmine\scheduler;
 
 use BadMethodCallException;
-use InvalidStateException;
-use pocketmine\Collectable;
+use pmmp\thread\Runnable;
+use pmmp\thread\ThreadSafe;
+use pmmp\thread\ThreadSafeArray;
 use pocketmine\Server;
-use RuntimeException;
-use SplObjectStorage;
-use Thread;
-use Threaded;
+use pocketmine\thread\NonThreadSafeValue;
 use Throwable;
 use function is_scalar;
-use function serialize;
-use function unserialize;
 
 /**
  * Class used to run async tasks in other threads.
  *
- * An AsyncTask does not have its own thread. It is queued into an AsyncPool and executed if there is an async worker
- * with no AsyncTask running. Therefore, an AsyncTask SHOULD NOT execute for more than a few seconds. For tasks that
- * run for a long time or infinitely, start another thread instead.
+ * An AsyncTask is run by a thread pool of reusable threads, and doesn't have its own dedicated thread. A thread is
+ * usually chosen from the pool at random to run the task (though a specific thread in the pool may be selected
+ * manually, if needed).
+ * Reusing threads this way has a much lower performance cost than starting an entirely new thread for every operation.
+ * AsyncTasks are therefore suitable for brief CPU-bound tasks, such as world generation, compression/decompression of
+ * data, etc.
  *
- * WARNING: Any non-Threaded objects WILL BE SERIALIZED when assigned to members of AsyncTasks or other Threaded object.
- * If later accessed from said Threaded object, you will be operating on a COPY OF THE OBJECT, NOT THE ORIGINAL OBJECT.
- * If you want to store non-serializable objects to access when the task completes, store them using
+ * AsyncTask SHOULD NOT be used for I/O-bound tasks, such as network I/O, file I/O, database I/O, etc. The server's
+ * central AsyncPool is used for things like compressing network packets for sending, so using AsyncTask for I/O will
+ * slow the whole server down, stall chunk loading, etc.
+ *
+ * An AsyncTask SHOULD NOT run for more than a few seconds. For tasks that run for a long time or indefinitely, create
+ * a dedicated thread instead.
+ *
+ * The Server instance is not accessible inside {@link AsyncTask::onRun()}. It can only be accessed in the main server
+ * thread, e.g. during {@link AsyncTask::onCompletion()} or {@link AsyncTask::onProgressUpdate()}. This means that
+ * whatever you do in onRun() must be able to work without the Server instance.
+ *
+ * If you want to store non-thread-safe objects to access when the task completes, store them using
  * {@link AsyncTask::storeLocal}.
- *
- * WARNING: As of pthreads v3.1.6, arrays are converted to Volatile objects when assigned as members of Threaded objects.
- * Keep this in mind when using arrays stored as members of your AsyncTask.
- *
- * WARNING: Do not call PocketMine-MP API methods from other Threads!!
  */
-abstract class AsyncTask extends Collectable{
-	/**
-	 * @var SplObjectStorage|null
-	 * Used to store objects on the main thread which should not be serialized.
-	 */
-	private static $localObjectStorage;
+abstract class AsyncTask extends Runnable{
+    /**
+     * @var mixed[][] object hash => mixed data
+     * @phpstan-var array<int, array<string, mixed>>
+     *
+     * Used to store thread-local data to be used by onCompletion().
+     */
+    private static array $threadLocalStorage = [];
 
-	/** @var AsyncWorker $worker */
-	public $worker = null;
+    /** @phpstan-var ThreadSafeArray<int, string>|null */
+    private ?ThreadSafeArray $progressUpdates = null;
 
-	/** @var Threaded */
-	public $progressUpdates;
+    private ThreadSafe|string|int|bool|null|float $result = null;
 
-	private $result = null;
-	private $serialized = false;
-	private $cancelRun = false;
-	/** @var int|null */
-	private $taskId = null;
+    private bool $submitted = false;
+    private bool $finished = false;
+    private bool $cancelRun = false;
+    private bool $crashed = false;
+    private bool $isGarbage = false;
 
-	private $crashed = false;
-
-	public function run(){
+    public function run() : void{
 		$this->result = null;
 
 		if(!$this->cancelRun){
@@ -82,25 +84,49 @@ abstract class AsyncTask extends Collectable{
 				$this->onRun();
 			}catch(Throwable $e){
 				$this->crashed = true;
-				$this->worker->handleException($e);
+
+                \GlobalLogger::get()->logException($e);
 			}
 		}
 
-		$this->setGarbage();
+        $this->finished = true;
+        $this->setGarbage();
 	}
 
+    /**
+     * @deprecated
+     */
 	public function isCrashed() : bool{
 		return $this->crashed or $this->isTerminated();
 	}
 
-	/**
-	 * @return mixed
-	 */
-	public function getResult(){
-		return $this->serialized ? unserialize($this->result) : $this->result;
-	}
+    /**
+     * Returns whether this task has finished executing, whether successfully or not. This differs from isRunning()
+     * because it is not true prior to task execution.
+     */
+    public function isFinished() : bool{
+        return $this->finished || $this->isTerminated();
+    }
 
-	public function cancelRun(){
+    public function hasResult() : bool{
+        return $this->result !== null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResult(){
+        if($this->result instanceof NonThreadSafeValue){
+            return $this->result->deserialize();
+        }
+        return $this->result;
+    }
+
+    public function setResult(mixed $result) : void{
+        $this->result = is_scalar($result) || is_null($result) || $result instanceof ThreadSafe ? $result : new NonThreadSafeValue($result);
+    }
+
+	public function cancelRun() : void{
 		$this->cancelRun = true;
 	}
 
@@ -108,221 +134,126 @@ abstract class AsyncTask extends Collectable{
 		return $this->cancelRun;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function hasResult() : bool{
-		return $this->result !== null;
-	}
+    public function setSubmitted() : void{
+        $this->submitted = true;
+    }
 
-	/**
-	 * @param mixed $result
-	 */
-	public function setResult($result){
-		$this->result = ($this->serialized = !is_scalar($result)) ? serialize($result) : $result;
-	}
+    public function isSubmitted() : bool{
+        return $this->submitted;
+    }
 
-	public function setTaskId(int $taskId){
-		$this->taskId = $taskId;
-	}
+    /**
+     * Actions to execute when run
+     */
+    abstract public function onRun() : void;
 
-	/**
-	 * @return int|null
-	 */
-	public function getTaskId(){
-		return $this->taskId;
-	}
+    /**
+     * Actions to execute when completed (on main thread)
+     * Implement this if you want to handle the data in your AsyncTask after it has been processed
+     */
+    public function onCompletion(Server $server){
 
-	/**
-	 * @see AsyncWorker::getFromThreadStore()
-	 *
-	 * @param string $identifier
-	 *
-	 * @return mixed
-	 */
-	public function getFromThreadStore(string $identifier){
-		if($this->worker === null or $this->isGarbage()){
-			throw new BadMethodCallException("Objects stored in AsyncWorker thread-local storage can only be retrieved during task execution");
-		}
-		return $this->worker->getFromThreadStore($identifier);
-	}
+    }
 
-	/**
-	 * @see AsyncWorker::saveToThreadStore()
-	 *
-	 * @param string $identifier
-	 * @param mixed  $value
-	 */
-	public function saveToThreadStore(string $identifier, $value){
-		if($this->worker === null or $this->isGarbage()){
-			throw new BadMethodCallException("Objects can only be added to AsyncWorker thread-local storage during task execution");
-		}
-		$this->worker->saveToThreadStore($identifier, $value);
-	}
+    /**
+     * Call this method from {@link AsyncTask::onRun} (AsyncTask execution thread) to schedule a call to
+     * {@link AsyncTask::onProgressUpdate} from the main thread with the given progress parameter.
+     *
+     * @param mixed $progress A value that can be safely serialize()'ed.
+     */
+    public function publishProgress(mixed $progress) : void{
+        $progressUpdates = $this->progressUpdates;
+        if($progressUpdates === null){
+            $progressUpdates = $this->progressUpdates = new ThreadSafeArray();
+        }
+        $progressUpdates[] = igbinary_serialize($progress) ?? throw new \InvalidArgumentException("Progress must be serializable");
+    }
 
-	/**
-	 * @see AsyncWorker::removeFromThreadStore()
-	 *
-	 * @param string $identifier
-	 */
-	public function removeFromThreadStore(string $identifier) : void{
-		if($this->worker === null or $this->isGarbage()){
-			throw new BadMethodCallException("Objects can only be removed from AsyncWorker thread-local storage during task execution");
-		}
-		$this->worker->removeFromThreadStore($identifier);
-	}
+    /**
+     * @internal Only call from AsyncPool.php on the main thread
+     */
+    public function checkProgressUpdates(Server $server) : void{
+        $progressUpdates = $this->progressUpdates;
+        if($progressUpdates !== null){
+            while(($progress = $progressUpdates->shift()) !== null){
+                $this->onProgressUpdate(igbinary_unserialize($progress));
+            }
+        }
+    }
 
-	/**
-	 * Actions to execute when run
-	 *
-	 * @return void
-	 */
-	abstract public function onRun();
+    /**
+     * Called from the main thread after {@link AsyncTask::publishProgress} is called.
+     * All {@link AsyncTask::publishProgress} calls should result in {@link AsyncTask::onProgressUpdate} calls before
+     * {@link AsyncTask::onCompletion} is called.
+     *
+     * @param mixed $progress The parameter passed to {@link AsyncTask#publishProgress}. It is serialize()'ed
+     *                        and then unserialize()'ed, as if it has been cloned.
+     */
+    public function onProgressUpdate(Server $server, $progress) : void{
 
-	/**
-	 * Actions to execute when completed (on main thread)
-	 * Implement this if you want to handle the data in your AsyncTask after it has been processed
-	 *
-	 * @param Server $server
-	 *
-	 * @return void
-	 */
-	public function onCompletion(Server $server){
+    }
 
-	}
+    /**
+     * @deprecated No longer used
+     */
+    public function onError() : void{
 
-	/**
-	 * Call this method from {@link AsyncTask::onRun} (AsyncTask execution thread) to schedule a call to
-	 * {@link AsyncTask::onProgressUpdate} from the main thread with the given progress parameter.
-	 *
-	 * @param mixed $progress A value that can be safely serialize()'ed.
-	 */
-	public function publishProgress($progress){
-		$this->progressUpdates[] = serialize($progress);
-	}
+    }
 
-	/**
-	 * @internal Only call from AsyncPool.php on the main thread
-	 *
-	 * @param Server $server
-	 */
-	public function checkProgressUpdates(Server $server){
-		while($this->progressUpdates->count() !== 0){
-			$progress = $this->progressUpdates->shift();
-			$this->onProgressUpdate($server, unserialize($progress));
-		}
-	}
+    /**
+     * Saves mixed data in thread-local storage. Data stored using this storage is **only accessible from the thread it
+     * was stored on**. Data stored using this method will **not** be serialized.
+     * This can be used to store references to variables which you need later on on the same thread, but not others.
+     *
+     * For example, plugin references could be stored in the constructor of the async task (which is called on the main
+     * thread) using this, and then fetched in onCompletion() (which is also called on the main thread), without them
+     * becoming serialized.
+     *
+     * Scalar types can be stored directly in class properties instead of using this storage.
+     *
+     * Objects stored in this storage can be retrieved using fetchLocal() on the same thread that this method was called
+     * from.
+     */
+    protected function storeLocal(mixed $complexData) : void{
+        self::$threadLocalStorage[spl_object_id($this)] = $complexData;
+    }
 
-	/**
-	 * Called from the main thread after {@link AsyncTask::publishProgress} is called.
-	 * All {@link AsyncTask::publishProgress} calls should result in {@link AsyncTask::onProgressUpdate} calls before
-	 * {@link AsyncTask::onCompletion} is called.
-	 *
-	 * @param Server $server
-	 * @param mixed  $progress The parameter passed to {@link AsyncTask::publishProgress}. It is serialize()'ed
-	 *                         and then unserialize()'ed, as if it has been cloned.
-	 */
-	public function onProgressUpdate(Server $server, $progress){
+    /**
+     * Retrieves data stored in thread-local storage.
+     *
+     * If you used storeLocal(), you can use this on the same thread to fetch data stored. This should be used during
+     * onProgressUpdate() and onCompletion() to fetch thread-local data stored on the parent thread.
+     *
+     * @return mixed
+     *
+     * @throws \InvalidArgumentException if no data were stored by this AsyncTask instance.
+     */
+    protected function fetchLocal(){
+        $id = spl_object_id($this);
+        if(!isset(self::$threadLocalStorage[$id])){
+            throw new \InvalidArgumentException("No matching thread-local data found on this thread");
+        }
 
-	}
+        return self::$threadLocalStorage[$id];
+    }
 
-	/**
-	 * Saves mixed data in thread-local storage on the parent thread. You may use this to retain references to objects
-	 * or arrays which you need to access in {@link AsyncTask::onCompletion} which cannot be stored as a property of
-	 * your task (due to them becoming serialized).
-	 *
-	 * Scalar types can be stored directly in class properties instead of using this storage.
-	 *
-	 * Objects stored in this storage MUST be retrieved through {@link AsyncTask::fetchLocal} when {@link AsyncTask::onCompletion} is called.
-	 * Otherwise, a NOTICE level message will be raised and the reference will be removed after onCompletion exits.
-	 *
-	 * WARNING: THIS METHOD SHOULD ONLY BE CALLED FROM THE MAIN THREAD!
-	 *
-	 * @param mixed $complexData the data to store
-	 *
-	 * @throws BadMethodCallException if called from any thread except the main thread
-	 */
-	protected function storeLocal($complexData){
-		if($this->worker !== null and $this->worker === Thread::getCurrentThread()){
-			throw new BadMethodCallException("Objects can only be stored from the parent thread");
-		}
+    final public function __destruct(){
+        $this->reallyDestruct();
+        unset(self::$threadLocalStorage[spl_object_id($this)]);
+    }
 
-		if(self::$localObjectStorage === null){
-			self::$localObjectStorage = new SplObjectStorage(); //lazy init
-		}
+    /**
+     * Override this to do normal __destruct() cleanup from a child class.
+     */
+    protected function reallyDestruct() : void{
 
-		if(isset(self::$localObjectStorage[$this])){
-			throw new InvalidStateException("Already storing complex data for this async task");
-		}
-		self::$localObjectStorage[$this] = $complexData;
-	}
+    }
 
-	/**
-	 * Returns and removes mixed data in thread-local storage on the parent thread. Call this method from
-	 * {@link AsyncTask::onCompletion} to fetch the data stored in the object store, if any.
-	 *
-	 * If no data was stored in the local store, or if the data was already retrieved by a previous call to fetchLocal,
-	 * do NOT call this method, or an exception will be thrown.
-	 *
-	 * Do not call this method from {@link AsyncTask::onProgressUpdate}, because this method deletes stored data, which
-	 * means that you will not be able to retrieve it again afterwards. Use {@link AsyncTask::peekLocal} instead to
-	 * retrieve stored data without removing it from the store.
-	 *
-	 * WARNING: THIS METHOD SHOULD ONLY BE CALLED FROM THE MAIN THREAD!
-	 *
-	 * @return mixed
-	 *
-	 * @throws RuntimeException if no data were stored by this AsyncTask instance.
-	 * @throws BadMethodCallException if called from any thread except the main thread
-	 */
-	protected function fetchLocal(){
-		try{
-			return $this->peekLocal();
-		}finally{
-			if(self::$localObjectStorage !== null){
-				unset(self::$localObjectStorage[$this]);
-			}
-		}
-	}
+    public function isGarbage() : bool{
+        return $this->isGarbage;
+    }
 
-	/**
-	 * Returns mixed data in thread-local storage on the parent thread **without clearing** it. Call this method from
-	 * {@link AsyncTask::onProgressUpdate} to fetch the data stored if you need to be able to access the data later on,
-	 * such as in another progress update.
-	 *
-	 * Use {@link AsyncTask::fetchLocal} instead from {@link AsyncTask::onCompletion}, because this method does not delete
-	 * the data, and not clearing the data will result in a warning for memory leak after {@link AsyncTask::onCompletion}
-	 * finished executing.
-	 *
-	 * WARNING: THIS METHOD SHOULD ONLY BE CALLED FROM THE MAIN THREAD!
-	 *
-	 * @return mixed
-	 *
-	 * @throws RuntimeException if no data were stored by this AsyncTask instance
-	 * @throws BadMethodCallException if called from any thread except the main thread
-	 */
-	protected function peekLocal(){
-		if($this->worker !== null and $this->worker === Thread::getCurrentThread()){
-			throw new BadMethodCallException("Objects can only be retrieved from the parent thread");
-		}
-
-		if(self::$localObjectStorage === null or !isset(self::$localObjectStorage[$this])){
-			throw new InvalidStateException("No complex data stored for this async task");
-		}
-
-		return self::$localObjectStorage[$this];
-	}
-
-	/**
-	 * @internal Called by the AsyncPool to destroy any leftover stored objects that this task failed to retrieve.
-	 * @return bool
-	 */
-	public function removeDanglingStoredObjects() : bool{
-		if(self::$localObjectStorage !== null and isset(self::$localObjectStorage[$this])){
-			unset(self::$localObjectStorage[$this]);
-			return true;
-		}
-
-		return false;
-	}
+    public function setGarbage() : void{
+        $this->isGarbage = true;
+    }
 }

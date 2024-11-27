@@ -23,10 +23,12 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator;
 
+use pmmp\thread\Thread as NativeThread;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\SimpleChunkManager;
 use pocketmine\scheduler\AsyncTask;
+use pocketmine\scheduler\AsyncWorker;
 use pocketmine\Server;
 
 class PopulationTask extends AsyncTask{
@@ -55,15 +57,16 @@ class PopulationTask extends AsyncTask{
 		}
 	}
 
-	public function onRun(){
-		/** @var SimpleChunkManager $manager */
-		$manager = $this->getFromThreadStore("generation.level{$this->levelId}.manager");
-		/** @var Generator $generator */
-		$generator = $this->getFromThreadStore("generation.level{$this->levelId}.generator");
-		if($manager === null or $generator === null){
-			$this->state = false;
-			return;
-		}
+	public function onRun() : void{
+        $managerContext = ThreadLocalGeneratorContext::fetch($this->levelId);
+        $generatorContext = ThreadLocalManagerContext::fetch($this->levelId);
+        if($managerContext === null or $generatorContext === null){
+            $this->state = false;
+            return;
+        }
+
+        $manager = $generatorContext->getManager();
+        $generator = $managerContext->getGenerator();
 
 		/** @var Chunk[] $chunks */
 		$chunks = [];
@@ -139,7 +142,9 @@ class PopulationTask extends AsyncTask{
 		$level = $server->getLevel($this->levelId);
 		if($level !== null){
 			if(!$this->state){
-				$level->registerGeneratorToWorker($this->worker->getAsyncWorkerId());
+                $worker = NativeThread::getCurrentThread();
+                assert($worker instanceof AsyncWorker);
+				$level->registerGeneratorToWorker($worker->getAsyncWorkerId());
 			}
 
 			$chunk = Chunk::fastDeserialize($this->chunk);

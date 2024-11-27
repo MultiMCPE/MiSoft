@@ -157,7 +157,7 @@ class SendUsageTask extends AsyncTask{
 		$this->data = json_encode($data/*, JSON_PRETTY_PRINT*/);
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 		Internet::postURL($this->endpoint, $this->data, 5, [
 			"Content-Type: application/json",
 			"Content-Length: " . strlen($this->data)

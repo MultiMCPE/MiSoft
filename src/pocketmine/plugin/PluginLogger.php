@@ -24,25 +24,25 @@ declare(strict_types=1);
 namespace pocketmine\plugin;
 
 use AttachableLogger;
-use LoggerAttachment;
 use LogLevel;
 use pocketmine\Server;
 use Throwable;
-use function spl_object_hash;
+use Closure;
+use function spl_object_id;
 
 class PluginLogger implements AttachableLogger{
 
 	private $pluginName;
 
-	/** @var LoggerAttachment[] */
+	/** @var Closure[] */
 	private $attachments = [];
 
-	public function addAttachment(LoggerAttachment $attachment){
-		$this->attachments[spl_object_hash($attachment)] = $attachment;
+	public function addAttachment(Closure $attachment){
+		$this->attachments[spl_object_id($attachment)] = $attachment;
 	}
 
-	public function removeAttachment(LoggerAttachment $attachment){
-		unset($this->attachments[spl_object_hash($attachment)]);
+	public function removeAttachment(Closure $attachment){
+		unset($this->attachments[spl_object_id($attachment)]);
 	}
 
 	public function removeAttachments(){

@@ -46,7 +46,7 @@ class CompressBatchedTask extends AsyncTask{
 		$this->storeLocal($targets);
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 		$batch = new BatchPacket();
 		$batch->payload = $this->data;
 		$this->data = null;

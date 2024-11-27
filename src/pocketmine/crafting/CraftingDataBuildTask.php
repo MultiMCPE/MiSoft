@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\crafting;
 
+use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
@@ -37,55 +38,55 @@ use function assert;
 use function strlen;
 
 class CraftingDataBuildTask extends AsyncTask{
-    /** @var array */
+    /** @phpstan-var NonThreadSafeValue<array> */
     protected $shapelessRecipes;
-    /** @var array */
+    /** @phpstan-var NonThreadSafeValue<array> */
     protected $shapedRecipes;
-    /** @var array */
+    /** @phpstan-var NonThreadSafeValue<array> */
     protected $furnaceRecipes;
-    /** @var array */
+    /** @phpstan-var NonThreadSafeValue<array> */
 	protected $brewingRecipes;
     /** @var int */
     protected $protocol;
-    /** @var ?Palette */
+    /** @phpstan-var NonThreadSafeValue<null|Palette> */
     protected $palette;
     /** @var int */
     protected $compressionLevel;
 
 	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, array $brewingRecipes, int $protocol, ?Palette $palette, int $networkCompressionLevel){
-	    $this->shapelessRecipes = $shapelessRecipes;
-	    $this->shapedRecipes = $shapedRecipes;
-	    $this->furnaceRecipes = $furnaceRecipes;
-		$this->brewingRecipes = $brewingRecipes;
+	    $this->shapelessRecipes = new NonThreadSafeValue($shapelessRecipes);
+	    $this->shapedRecipes = new NonThreadSafeValue($shapedRecipes);
+	    $this->furnaceRecipes = new NonThreadSafeValue($furnaceRecipes);
+		$this->brewingRecipes = new NonThreadSafeValue($brewingRecipes);
 	    $this->protocol = $protocol;
-	    $this->palette = $palette;
+	    $this->palette = new NonThreadSafeValue($palette);
 		$this->compressionLevel = $networkCompressionLevel;
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 	    ItemPalette::init();
-	    if($this->palette !== null){
-	        BlockPalette::addPalette($this->palette, $this->protocol);
+	    if(($palette = $this->palette->deserialize()) !== null){
+	        BlockPalette::addPalette($palette, $this->protocol);
 	    }
 	    PacketPool::init();
 	    ItemFactory::init();
 
 	    $pk = new CraftingDataPacket();
 	    $pk->cleanRecipes = true;
-	    foreach($this->shapelessRecipes as $list){
+	    foreach($this->shapelessRecipes->deserialize() as $list){
 		    foreach($list as $recipe){
 			    $pk->addShapelessRecipe($recipe);
 		    }
 	    }
-	    foreach($this->shapedRecipes as $list){
+	    foreach($this->shapedRecipes->deserialize() as $list){
 		    foreach($list as $recipe){
 			    $pk->addShapedRecipe($recipe);
 		    }
 	    }
-	    foreach($this->furnaceRecipes as $recipe){
+	    foreach($this->furnaceRecipes->deserialize() as $recipe){
 		    $pk->addFurnaceRecipe($recipe);
 	    }
-		foreach($this->brewingRecipes as $recipe){
+		foreach($this->brewingRecipes->deserialize() as $recipe){
 			$input = $recipe->getPotion();
 			$ingredient = $recipe->getInput();
 			$output = $recipe->getResult();

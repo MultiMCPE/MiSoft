@@ -23,9 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine {
 
-    use BaseClassLoader;
+	use GlobalLogger;
     use Logger;
     use Phar;
+	use DateTimeZone;
+	use pmmp\thread\Thread as NativeThread;
+	use pocketmine\thread\ThreadManager;
+	use pocketmine\thread\ThreadSafeClassLoader;
     use pocketmine\utils\MainLogger;
     use pocketmine\utils\ServerKiller;
     use pocketmine\utils\Terminal;
@@ -36,7 +40,7 @@ namespace pocketmine {
 
     require_once __DIR__ . '/VersionInfo.php';
 
-	const MIN_PHP_VERSION = "8.1.0";
+	const MIN_PHP_VERSION = "8.2.0";
 
 	function critical_error($message){
 		echo "[ERROR] $message" . PHP_EOL;
@@ -81,7 +85,7 @@ namespace pocketmine {
 			"openssl" => "OpenSSL",
 			"pcre" => "PCRE",
 			"phar" => "Phar",
-			"pthreads" => "pthreads",
+			"pmmpthread" => "pmmpthread",
 			"reflection" => "Reflection",
 			"sockets" => "Sockets",
 			"spl" => "SPL",
@@ -96,13 +100,13 @@ namespace pocketmine {
 			}
 		}
 
-		if(extension_loaded("pthreads")){
-			$pthreads_version = phpversion("pthreads");
-			if(substr_count($pthreads_version, ".") < 2){
-				$pthreads_version = "0.$pthreads_version";
+		if(extension_loaded("pmmpthread")){
+			$pmmpthread_version = phpversion("pmmpthread");
+			if(substr_count($pmmpthread_version, ".") < 2){
+				$pmmpthread_version = "0.$pmmpthread_version";
 			}
-			if(version_compare($pthreads_version, "3.2.0") < 0){
-				$messages[] = "pthreads >= 3.2.0 is required, while you have $pthreads_version.";
+			if(version_compare($pmmpthread_version, "6.0.4") < 0 || version_compare($pmmpthread_version, "7.0.0") > 0){
+				$messages[] = "pmmpthread ^6.0.7 is required, while you have $pmmpthread_version.";
 			}
 		}
 
@@ -253,8 +257,17 @@ namespace pocketmine {
 			Terminal::init();
 		}
 
-		$logger = new MainLogger(DATA . "server.log");
-		$logger->registerStatic();
+		$logsPath = DATA . 'logs' . DIRECTORY_SEPARATOR;
+
+		if (!is_dir($logsPath)) {
+			if (!mkdir($logsPath)) {
+				critical_error("an error occurred when creating the logs directory");
+				exit(1);
+			}
+		}
+
+		$logger = new MainLogger($logsPath . "server" . date("d-y-m") . ".log", new DateTimeZone('UTC'));
+		GlobalLogger::set($logger);
 
 		foreach($tzError as $e){
 			$logger->warning($e);
@@ -280,7 +293,7 @@ namespace pocketmine {
 			/*
 			 * We now use the Composer autoloader, but this autoloader is still for loading plugins.
 			 */
-			$autoloader = new BaseClassLoader();
+			$autoloader = new ThreadSafeClassLoader();
 			$autoloader->register(false);
 
 			new Server($autoloader, $logger, DATA, PLUGIN_PATH);
@@ -288,7 +301,7 @@ namespace pocketmine {
 			$logger->info("Stopping other threads");
 
 			$killer = new ServerKiller(8);
-			$killer->start(PTHREADS_INHERIT_NONE);
+			$killer->start(NativeThread::INHERIT_NONE);
 			usleep(10000); //Fixes ServerKiller not being able to start on single-core machines
 
 			if(ThreadManager::getInstance()->stopAll() > 0){
@@ -298,7 +311,6 @@ namespace pocketmine {
 		}while(false);
 
 		$logger->shutdown();
-		$logger->join();
 
 		echo Terminal::$FORMAT_RESET . PHP_EOL;
 

@@ -32,6 +32,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\utils\BinaryDataException;
 use pocketmine\network\Network;
+use pmmp\thread\Thread as NativeThread;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\snooze\SleeperNotifier;
@@ -52,7 +53,6 @@ use function rtrim;
 use function spl_object_hash;
 use function unserialize;
 use const pocketmine\COMPOSER_AUTOLOADER_PATH;
-use const PTHREADS_INHERIT_CONSTANTS;
 
 class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	/**
@@ -96,7 +96,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->sleeper = new SleeperNotifier();
 		$this->rakLib = new RakLibServer(
 			$this->server->getLogger(),
-			COMPOSER_AUTOLOADER_PATH,
+			$this->server->getLoader(),
 			new InternetAddress($this->server->getIp(), $this->server->getPort(), 4),
 			(int) $this->server->getProperty("network.max-mtu-size", 1492),
 			[
@@ -114,7 +114,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 		$this->server->getTickSleeper()->addNotifier($this->sleeper, function() : void{
 			$this->process();
 		});
-		$this->rakLib->start(PTHREADS_INHERIT_CONSTANTS); //HACK: MainLogger needs constants for exception logging
+		$this->rakLib->start(NativeThread::INHERIT_CONSTANTS); //HACK: MainLogger needs constants for exception logging
 	}
 
 	public function setNetwork(Network $network){

@@ -24,8 +24,9 @@ declare(strict_types=1);
 namespace pocketmine\network\rcon;
 
 use pocketmine\snooze\SleeperNotifier;
-use pocketmine\Thread;
-use ThreadedLogger;
+use pocketmine\thread\Thread;
+use pocketmine\thread\log\AttachableThreadSafeLogger;
+use pmmp\thread\Thread as NativeThread;
 use function count;
 use function ltrim;
 use function microtime;
@@ -47,7 +48,6 @@ use function strlen;
 use function substr;
 use function trim;
 use function unpack;
-use const PTHREADS_INHERIT_NONE;
 use const SO_KEEPALIVE;
 use const SO_LINGER;
 use const SOCKET_ECONNRESET;
@@ -68,7 +68,7 @@ class RCONInstance extends Thread{
 	private $password;
 	/** @var int */
 	private $maxClients;
-	/** @var ThreadedLogger */
+	/** @var AttachableThreadSafeLogger */
 	private $logger;
 	/** @var resource */
 	private $ipcSocket;
@@ -76,14 +76,14 @@ class RCONInstance extends Thread{
 	private $notifier;
 
 	/**
-	 * @param resource             $socket
-	 * @param string               $password
-	 * @param ThreadedLogger       $logger
-	 * @param resource             $ipcSocket
-	 * @param null|SleeperNotifier $notifier
-	 * @param int                  $maxClients
+	 * @param resource                         $socket
+	 * @param string                           $password
+	 * @param AttachableThreadSafeLogger       $logger
+	 * @param resource                         $ipcSocket
+	 * @param null|SleeperNotifier             $notifier
+	 * @param int                              $maxClients
 	 */
-	public function __construct($socket, string $password, ThreadedLogger $logger, $ipcSocket, ?SleeperNotifier $notifier, int $maxClients = 50){
+	public function __construct($socket, string $password, AttachableThreadSafeLogger $logger, $ipcSocket, ?SleeperNotifier $notifier, int $maxClients = 50){
 		$this->stop = false;
 		$this->cmd = "";
 		$this->response = "";
@@ -94,7 +94,7 @@ class RCONInstance extends Thread{
 		$this->ipcSocket = $ipcSocket;
 		$this->notifier = $notifier;
 
-		$this->start(PTHREADS_INHERIT_NONE);
+		$this->start(NativeThread::INHERIT_NONE);
 	}
 
 	private function writePacket($client, int $requestID, int $packetType, string $payload){

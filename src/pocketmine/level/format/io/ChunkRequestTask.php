@@ -79,7 +79,7 @@ class ChunkRequestTask extends AsyncTask{
 		$this->levelChunkPacketId = PacketPool::getPacketMagicById(LevelChunkPacket::NETWORK_ID, $protocol);
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 		$dimensionId = $this->dimensionId;
 

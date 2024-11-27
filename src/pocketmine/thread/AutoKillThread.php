@@ -21,9 +21,9 @@
 
 declare(strict_types=1);
 
-namespace pocketmine;
+namespace pocketmine\thread;
 
-use AttachableThreadedLogger;
+use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\snooze\SleeperNotifier;
 use pocketmine\utils\Utils;
 use function getmypid;
@@ -44,16 +44,16 @@ class AutoKillThread extends Thread{
     /** @var int */
 	private $timeout;
 
-    /** @var AttachableThreadedLogger */
+    /** @var ThreadSafeLogger */
 	private $logger;
 
-	public function __construct(SleeperNotifier $notifier, int $timeout, AttachableThreadedLogger $logger){
+	public function __construct(SleeperNotifier $notifier, int $timeout, ThreadSafeLogger $logger){
 	    $this->notifier = $notifier;
 	    $this->timeout = $timeout;
 	    $this->logger = $logger;
 	}
 
-	public function run() : void{
+	public function onRun() : void{
 		$this->registerClassLoader();
 		$unit = 1000000;
 		while($this->running){
@@ -87,7 +87,7 @@ class AutoKillThread extends Thread{
 		}
 	}
 
-	public function quit(){
+	public function quit() : void{
 		$this->running = false;
 		parent::quit();
 	}

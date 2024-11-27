@@ -45,7 +45,7 @@ class UpdateCheckTask extends AsyncTask{
 		$this->channel = $channel;
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 		$error = "";
 		$response = Internet::getURL($this->endpoint . "?channel=" . $this->channel, 4, [], $error);
 		$this->error = $error;

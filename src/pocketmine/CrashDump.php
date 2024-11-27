@@ -28,6 +28,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\plugin\PluginLoadOrder;
 use pocketmine\plugin\PluginManager;
 use pocketmine\utils\Utils;
+use pocketmine\utils\Filesystem;
 use pocketmine\utils\VersionString;
 use raklib\RakLib;
 use ReflectionClass;
@@ -237,7 +238,7 @@ class CrashDump{
 				E_USER_DEPRECATED => "E_USER_DEPRECATED"
 			];
 			$error["fullFile"] = $error["file"];
-			$error["file"] = Utils::cleanPath($error["file"]);
+			$error["file"] = Filesystem::cleanPath($error["file"] ?? "");
 			$error["type"] = $errorConversion[$error["type"]] ?? $error["type"];
 			if(($pos = strpos($error["message"], "\n")) !== false){
 				$error["message"] = substr($error["message"], 0, $pos);
@@ -292,7 +293,7 @@ class CrashDump{
 	}
 
 	private function determinePluginFromFile(string $filePath, bool $crashFrame) : bool{
-		$frameCleanPath = Utils::cleanPath($filePath); //this will be empty in phar stub
+		$frameCleanPath = Filesystem::cleanPath($filePath); //this will be empty in phar stub
 		if(strpos($frameCleanPath, "plugins") === 0 and file_exists($filePath)){
 			$this->addLine();
 			if($crashFrame){
@@ -307,7 +308,7 @@ class CrashDump{
 			$file = $reflection->getProperty("file");
 			$file->setAccessible(true);
 			foreach($this->server->getPluginManager()->getPlugins() as $plugin){
-				$filePath = Utils::cleanPath($file->getValue($plugin));
+				$filePath = Filesystem::cleanPath($file->getValue($plugin));
 				if(strpos($frameCleanPath, $filePath) === 0){
 					$this->data["plugin"] = $plugin->getName();
 					$this->addLine("BAD PLUGIN: " . $plugin->getDescription()->getFullName());

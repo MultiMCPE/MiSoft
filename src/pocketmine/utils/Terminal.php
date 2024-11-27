@@ -1,35 +1,8 @@
 <?php
 
-/*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
- *
-*/
-
 declare(strict_types=1);
 
 namespace pocketmine\utils;
-
-use InvalidStateException;
-use function fclose;
-use function fopen;
-use function function_exists;
-use function getenv;
-use function is_array;
-use function stream_isatty;
 
 abstract class Terminal{
 	public static $FORMAT_BOLD = "";
@@ -57,27 +30,64 @@ abstract class Terminal{
 	public static $COLOR_YELLOW = "";
 	public static $COLOR_WHITE = "";
 
-	/** @var bool|null */
 	private static $formattingCodes = null;
 
-	public static function hasFormattingCodes() : bool{
+	public static function hasFormattingCodes(){
 		if(self::$formattingCodes === null){
-			throw new InvalidStateException("Formatting codes have not been initialized");
+			$opts = getopt("", ["enable-ansi", "disable-ansi"]);
+			if(isset($opts["disable-ansi"])){
+				self::$formattingCodes = false;
+			}else{
+				$stdout = fopen("php://stdout", "w");
+				self::$formattingCodes = (isset($opts["enable-ansi"]) or ( //user explicitly told us to enable ANSI
+					stream_isatty($stdout) and //STDOUT isn't being piped
+					(
+						getenv('TERM') !== false or //Console says it supports colours
+						(function_exists('sapi_windows_vt100_support') and sapi_windows_vt100_support($stdout)) //we're on windows and have vt100 support
+					)
+				));
+				fclose($stdout);
+			}
 		}
+
 		return self::$formattingCodes;
 	}
 
-	private static function detectFormattingCodesSupport() : bool{
-		$stdout = fopen("php://stdout", "w");
-		$result = (
-			stream_isatty($stdout) and //STDOUT isn't being piped
-			(
-				getenv('TERM') !== false or //Console says it supports colours
-				(function_exists('sapi_windows_vt100_support') and sapi_windows_vt100_support($stdout)) //we're on windows and have vt100 support
-			)
-		);
-		fclose($stdout);
-		return $result;
+	/**
+	 * Returns a string with colorized ANSI Escape codes for the current terminal
+	 * Note that this is platform-dependent and might produce different results depending on the terminal type and/or OS.
+	 */
+	public static function toANSI(string $string) : string{
+		$newString = "";
+		foreach(TextFormat::tokenize($string) as $token){
+			$newString .= match($token){
+				TextFormat::BOLD => Terminal::$FORMAT_BOLD,
+				TextFormat::OBFUSCATED => Terminal::$FORMAT_OBFUSCATED,
+				TextFormat::ITALIC => Terminal::$FORMAT_ITALIC,
+				TextFormat::UNDERLINE => Terminal::$FORMAT_UNDERLINE,
+				TextFormat::STRIKETHROUGH => Terminal::$FORMAT_STRIKETHROUGH,
+				TextFormat::RESET => Terminal::$FORMAT_RESET,
+				TextFormat::BLACK => Terminal::$COLOR_BLACK,
+				TextFormat::DARK_BLUE => Terminal::$COLOR_DARK_BLUE,
+				TextFormat::DARK_GREEN => Terminal::$COLOR_DARK_GREEN,
+				TextFormat::DARK_AQUA => Terminal::$COLOR_DARK_AQUA,
+				TextFormat::DARK_RED => Terminal::$COLOR_DARK_RED,
+				TextFormat::DARK_PURPLE => Terminal::$COLOR_PURPLE,
+				TextFormat::GOLD => Terminal::$COLOR_GOLD,
+				TextFormat::GRAY => Terminal::$COLOR_GRAY,
+				TextFormat::DARK_GRAY => Terminal::$COLOR_DARK_GRAY,
+				TextFormat::BLUE => Terminal::$COLOR_BLUE,
+				TextFormat::GREEN => Terminal::$COLOR_GREEN,
+				TextFormat::AQUA => Terminal::$COLOR_AQUA,
+				TextFormat::RED => Terminal::$COLOR_RED,
+				TextFormat::LIGHT_PURPLE => Terminal::$COLOR_LIGHT_PURPLE,
+				TextFormat::YELLOW => Terminal::$COLOR_YELLOW,
+				TextFormat::WHITE => Terminal::$COLOR_WHITE,
+				default => $token,
+			};
+		}
+
+		return $newString;
 	}
 
 	protected static function getFallbackEscapeCodes(){
@@ -146,122 +156,27 @@ abstract class Terminal{
 		}
 	}
 
-	public static function init(?bool $enableFormatting = null) : void{
-		self::$formattingCodes = $enableFormatting ?? self::detectFormattingCodesSupport();
-		if(!self::$formattingCodes){
-			return;
-		}
-
-		switch(Utils::getOS()){
-			case "linux":
-			case "mac":
-			case "bsd":
-				self::getEscapeCodes();
-				return;
-
-			case "win":
-			case "android":
-				self::getFallbackEscapeCodes();
-				return;
-		}
-
-		//TODO: iOS
-	}
-
 	public static function isInit() : bool{
 		return self::$formattingCodes !== null;
 	}
 
-	/**
-	 * Returns a string with colorized ANSI Escape codes for the current terminal
-	 * Note that this is platform-dependent and might produce different results depending on the terminal type and/or OS.
-	 *
-	 * @param string|array $string
-	 *
-	 * @return string
-	 */
-	public static function toANSI($string) : string{
-		if(!is_array($string)){
-			$string = TextFormat::tokenize($string);
+	public static function init(){
+		if(!self::hasFormattingCodes()){
+			return;
 		}
 
-		$newString = "";
-		foreach($string as $token){
-			switch($token){
-				case TextFormat::BOLD:
-					$newString .= Terminal::$FORMAT_BOLD;
-					break;
-				case TextFormat::OBFUSCATED:
-					$newString .= Terminal::$FORMAT_OBFUSCATED;
-					break;
-				case TextFormat::ITALIC:
-					$newString .= Terminal::$FORMAT_ITALIC;
-					break;
-				case TextFormat::UNDERLINE:
-					$newString .= Terminal::$FORMAT_UNDERLINE;
-					break;
-				case TextFormat::STRIKETHROUGH:
-					$newString .= Terminal::$FORMAT_STRIKETHROUGH;
-					break;
-				case TextFormat::RESET:
-					$newString .= Terminal::$FORMAT_RESET;
-					break;
-
-				//Colors
-				case TextFormat::BLACK:
-					$newString .= Terminal::$COLOR_BLACK;
-					break;
-				case TextFormat::DARK_BLUE:
-					$newString .= Terminal::$COLOR_DARK_BLUE;
-					break;
-				case TextFormat::DARK_GREEN:
-					$newString .= Terminal::$COLOR_DARK_GREEN;
-					break;
-				case TextFormat::DARK_AQUA:
-					$newString .= Terminal::$COLOR_DARK_AQUA;
-					break;
-				case TextFormat::DARK_RED:
-					$newString .= Terminal::$COLOR_DARK_RED;
-					break;
-				case TextFormat::DARK_PURPLE:
-					$newString .= Terminal::$COLOR_PURPLE;
-					break;
-				case TextFormat::GOLD:
-					$newString .= Terminal::$COLOR_GOLD;
-					break;
-				case TextFormat::GRAY:
-					$newString .= Terminal::$COLOR_GRAY;
-					break;
-				case TextFormat::DARK_GRAY:
-					$newString .= Terminal::$COLOR_DARK_GRAY;
-					break;
-				case TextFormat::BLUE:
-					$newString .= Terminal::$COLOR_BLUE;
-					break;
-				case TextFormat::GREEN:
-					$newString .= Terminal::$COLOR_GREEN;
-					break;
-				case TextFormat::AQUA:
-					$newString .= Terminal::$COLOR_AQUA;
-					break;
-				case TextFormat::RED:
-					$newString .= Terminal::$COLOR_RED;
-					break;
-				case TextFormat::LIGHT_PURPLE:
-					$newString .= Terminal::$COLOR_LIGHT_PURPLE;
-					break;
-				case TextFormat::YELLOW:
-					$newString .= Terminal::$COLOR_YELLOW;
-					break;
-				case TextFormat::WHITE:
-					$newString .= Terminal::$COLOR_WHITE;
-					break;
-				default:
-					$newString .= $token;
-					break;
-			}
-		}
-
-		return $newString;
+		return match (OS::from(Utils::getOS())) {
+			OS::LINUX, OS::MACOS, OS::BSD => self::getEscapeCodes(),
+			OS::WINDOWS, OS::ANDROID => self::getFallbackEscapeCodes()
+		};
 	}
+
+	/**
+	 * Emits a string containing Minecraft colour codes to the console formatted with native colours, followed by a
+	 * newline character.
+	 */
+	public static function writeLine(string $line) : void{
+		echo self::toANSI($line) . self::$FORMAT_RESET . PHP_EOL;
+	}
+
 }

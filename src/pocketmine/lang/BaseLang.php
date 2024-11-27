@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\lang;
 
-use pocketmine\utils\MainLogger;
+use GlobalLogger;
 use function array_filter;
 use function array_map;
 use function file_exists;
@@ -91,10 +91,10 @@ class BaseLang{
 		}
 
 		if(!self::loadLang($file = $path . $this->langName . ".ini", $this->lang)){
-			MainLogger::getLogger()->error("Missing required language file $file");
+			GlobalLogger::get()->error("Missing required language file $file");
 		}
 		if(!self::loadLang($file = $path . $fallback . ".ini", $this->fallbackLang)){
-			MainLogger::getLogger()->error("Missing required language file $file");
+			GlobalLogger::get()->error("Missing required language file $file");
 		}
 	}
 

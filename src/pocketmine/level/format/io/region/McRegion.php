@@ -40,7 +40,7 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\utils\MainLogger;
+use GlobalLogger;
 use function array_filter;
 use function array_values;
 use function assert;
@@ -348,7 +348,7 @@ class McRegion extends BaseLevelProvider{
 			try{
 				$region->open();
 			}catch(CorruptedRegionException $e){
-				$logger = MainLogger::getLogger();
+				$logger = GlobalLogger::get();
 				$logger->error("Corrupted region file detected: " . $e->getMessage());
 
 				$region->close(false); //Do not write anything to the file

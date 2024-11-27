@@ -26,22 +26,23 @@ namespace pocketmine\network\mcpe\multiversion\block;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use pocketmine\thread\NonThreadSafeValue;
 use Closure;
 
 class BlockPaletteInitTask extends AsyncTask{
-    /** @var Palette */
+    /** @phpstan-var NonThreadSafeValue<Palette> */
     private $pool;
     /** @var int */
     private $poolProtocol;
 
     public function __construct(Palette $pool, int $poolProtocol, Closure $onCompletion){
-        $this->pool = $pool;
+        $this->pool = new NonThreadSafeValue($pool);
         $this->poolProtocol = $poolProtocol;
         $this->storeLocal($onCompletion);
     }
 
 	public function onRun() : void{
-	    $pool = $this->pool;
+	    $pool = $this->pool->deserialize();
 	    $pool::init();
 		$this->setResult($pool);
 	}

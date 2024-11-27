@@ -17,81 +17,81 @@
  * @link http://www.pocketmine.net/
  *
  *
-*/
+ */
 
 declare(strict_types=1);
 
-namespace pocketmine;
+namespace pocketmine\thread;
 
-use pocketmine\utils\MainLogger;
-use ThreadException;
-use Volatile;
-use function spl_object_hash;
+use pmmp\thread\ThreadSafe;
+use pmmp\thread\ThreadSafeArray;
+use function spl_object_id;
+use GlobalLogger;
 
-class ThreadManager extends Volatile
-{
+class ThreadManager extends ThreadSafe{
 
-	/** @var ThreadManager */
-	private static $instance = null;
+	private static ?self $instance = null;
 
-	public static function init()
-	{
+	/**
+	* @phpstan-var ThreadSafeArray<int, Thread|Worker>
+	*/
+	private ThreadSafeArray $threads;
+
+	private function __construct(){
+		$this->threads = new ThreadSafeArray();
+	}
+
+	public static function init() : void{
 		self::$instance = new ThreadManager();
 	}
 
-	/**
-	 * @return ThreadManager
-	 */
-	public static function getInstance()
-	{
+	public static function getInstance() : ThreadManager{
+		if(self::$instance === null){
+			self::$instance = new ThreadManager();
+		}
 		return self::$instance;
 	}
 
 	/**
 	 * @param Worker|Thread $thread
 	 */
-	public function add($thread)
-	{
-		if ($thread instanceof Thread or $thread instanceof Worker) {
-			$this->{spl_object_hash($thread)} = $thread;
-		}
+	public function add(Worker|Thread $thread) : void{
+		$this->threads[spl_object_id($thread)] = $thread;
 	}
 
 	/**
 	 * @param Worker|Thread $thread
 	 */
-	public function remove($thread)
-	{
-		if ($thread instanceof Thread or $thread instanceof Worker) {
-			unset($this->{spl_object_hash($thread)});
-		}
+	public function remove(Worker|Thread $thread) : void{
+		unset($this->threads[spl_object_id($thread)]);
 	}
 
 	/**
 	 * @return Worker[]|Thread[]
 	 */
-	public function getAll(): array
-	{
+	public function getAll() : array{
 		$array = [];
-		foreach ($this as $key => $thread) {
+		/**
+		 * @var Worker|Thread $thread
+		 */
+		foreach($this->threads as $key => $thread){
 			$array[$key] = $thread;
 		}
 
 		return $array;
 	}
 
-	public function stopAll(): int
-	{
-		$logger = MainLogger::getLogger();
+	public function stopAll() : int{
+		$logger = GlobalLogger::get();
 
 		$erroredThreads = 0;
 
-		foreach ($this->getAll() as $thread) {
+		foreach($this->getAll() as $thread){
 			$logger->debug("Stopping " . $thread->getThreadName() . " thread");
-			try {
+			try{
 				$thread->quit();
 				$logger->debug($thread->getThreadName() . " thread stopped successfully.");
-			} catch (ThreadException $e) {
+			}catch(ThreadException $e){
 				++$erroredThreads;
 				$logger->debug("Could not stop " . $thread->getThreadName() . " thread: " . $e->getMessage());
 			}

@@ -26,7 +26,7 @@ namespace pocketmine\level\format\io\region;
 use InvalidArgumentException;
 use pocketmine\level\format\ChunkException;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
-use pocketmine\utils\MainLogger;
+use GlobalLogger;
 use function ceil;
 use function chr;
 use function fclose;
@@ -152,7 +152,7 @@ class RegionLoader{
 		}
 
 		if($length > ($this->locationTable[$index]->getSectorCount() << 12)){ //Invalid chunk, bigger than defined number of sectors
-			MainLogger::getLogger()->error("Chunk x=$x,z=$z length mismatch (expected " . ($this->locationTable[$index]->getSectorCount() << 12) . " sectors, got $length sectors)");
+			GlobalLogger::get()->error("Chunk x=$x,z=$z length mismatch (expected " . ($this->locationTable[$index]->getSectorCount() << 12) . " sectors, got $length sectors)");
 			$old = $this->locationTable[$index];
 			$this->locationTable[$index] = new RegionLocationTableEntry($old->getFirstSector(), $length >> 12, time());
 			$this->writeLocationIndex($index);

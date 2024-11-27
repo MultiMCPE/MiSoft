@@ -30,10 +30,12 @@ namespace pocketmine\utils;
 use Closure;
 use DaveRandom\CallbackValidator\CallbackType;
 use DaveRandom\CallbackValidator\InvalidCallbackException;
+use pocketmine\errorhandler\ErrorTypeToStringMap;
+use pocketmine\log\MainLogger;
 use ErrorException;
 use Exception;
 use InvalidArgumentException;
-use pocketmine\ThreadManager;
+use pocketmine\thread\ThreadManager;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
@@ -153,7 +155,7 @@ class Utils{
 			//non-class function
 			return $func->getName();
 		}
-		return "closure@" . self::cleanPath($func->getFileName()) . "#L" . $func->getStartLine();
+		return "closure@" . Filesystem::cleanPath($func->getFileName()) . "#L" . $func->getStartLine();
 	}
 
 	/**
@@ -167,7 +169,7 @@ class Utils{
 	public static function getNiceClassName(object $obj) : string{
 		$reflect = new ReflectionClass($obj);
 		if($reflect->isAnonymous()){
-			return "anonymous@" . self::cleanPath($reflect->getFileName()) . "#L" . $reflect->getStartLine();
+			return "anonymous@" . Filesystem::cleanPath($reflect->getFileName()) . "#L" . $reflect->getStartLine();
 		}
 
 		return $reflect->getName();
@@ -563,8 +565,8 @@ class Utils{
 	}
 
 	public static function kill($pid) : void{
-		if(MainLogger::isRegisteredStatic()){
-			MainLogger::getLogger()->syncFlushBuffer();
+		if (($logger = \GlobalLogger::get()) instanceof MainLogger) {
+			$logger->syncFlushBuffer();
 		}
 		switch(Utils::getOS()){
 			case "win":
@@ -600,40 +602,35 @@ class Utils{
 	}
 
 	/**
-	 * @param array $trace
-	 * @param int   $maxStringLength
+	 * @param mixed[][] $trace
+	 * @phpstan-param list<array<string, mixed>> $trace
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public static function printableTrace(array $trace, int $maxStringLength = 80) : array{
 		$messages = [];
 		for($i = 0; isset($trace[$i]); ++$i){
 			$params = "";
-			if(isset($trace[$i]["args"]) or isset($trace[$i]["params"])){
+			if(isset($trace[$i]["args"]) || isset($trace[$i]["params"])){
 				if(isset($trace[$i]["args"])){
 					$args = $trace[$i]["args"];
 				}else{
 					$args = $trace[$i]["params"];
 				}
+				/** @var mixed[] $args */
 
-				$params = implode(", ", array_map(function($value) use($maxStringLength){
-					if(is_object($value)){
-						return "object " . self::getNiceClassName($value);
-					}
-					if(is_array($value)){
-						return "array[" . count($value) . "]";
-					}
-					if(is_string($value)){
-						return "string[" . strlen($value) . "] " . substr(Utils::printable($value), 0, $maxStringLength);
-					}
-					return gettype($value) . " " . Utils::printable((string) $value);
-				}, $args));
+				$paramsList = [];
+				$offset = 0;
+				foreach($args as $argId => $value){
+					$paramsList[] = ($argId === $offset ? "" : "$argId: ") . self::stringifyValueForTrace($value, $maxStringLength);
+					$offset++;
+				}
+				$params = implode(", ", $paramsList);
 			}
-			$messages[] = "#$i " . (isset($trace[$i]["file"]) ? self::cleanPath($trace[$i]["file"]) : "") . "(" . (isset($trace[$i]["line"]) ? $trace[$i]["line"] : "") . "): " . (isset($trace[$i]["class"]) ? $trace[$i]["class"] . (($trace[$i]["type"] === "dynamic" or $trace[$i]["type"] === "->") ? "->" : "::") : "") . $trace[$i]["function"] . "(" . Utils::printable($params) . ")";
+			$messages[] = "#$i " . (isset($trace[$i]["file"]) ? Filesystem::cleanPath($trace[$i]["file"]) : "") . "(" . (isset($trace[$i]["line"]) ? $trace[$i]["line"] : "") . "):" . (isset($trace[$i]["class"]) ? $trace[$i]["class"] . (($trace[$i]["type"] === "dynamic" || $trace[$i]["type"] === "->") ? "->" : "::") : "") . (is_array($trace[$i]) ? ($trace[$i]["function"] . "(" . Utils::printable($params) . ")") : "");
 		}
 		return $messages;
 	}
-
 	/**
 	 * @param int $skipFrames
 	 *
@@ -662,22 +659,76 @@ class Utils{
 		return self::printableTrace(self::currentTrace(++$skipFrames));
 	}
 
-	public static function cleanPath($path){
-		$result = str_replace(["\\", ".php", "phar://"], ["/", "", ""], $path);
+	/**
+	 * @param mixed[] $trace
+	 * @return string[]
+	 */
+	public static function printableExceptionInfo(\Throwable $e, $trace = null) : array{
+		if($trace === null){
+			$trace = $e->getTrace();
+		}
 
-		//remove relative paths
-		//TODO: make these paths dynamic so they can be unit-tested against
-		static $cleanPaths = [
-			PLUGIN_PATH => "plugins", //this has to come BEFORE \pocketmine\PATH because it's inside that by default on src installations
-			PATH => ""
-		];
-		foreach($cleanPaths as $cleanPath => $replacement){
-			$cleanPath = rtrim(str_replace(["\\", "phar://"], ["/", ""], $cleanPath), "/");
-			if(strpos($result, $cleanPath) === 0){
-				$result = ltrim(str_replace($cleanPath, $replacement, $result), "/");
+		$lines = [self::printableExceptionMessage($e)];
+		$lines[] = "--- Stack trace ---";
+		foreach(Utils::printableTrace($trace) as $line){
+			$lines[] = "  " . $line;
+		}
+		for($prev = $e->getPrevious(); $prev !== null; $prev = $prev->getPrevious()){
+			$lines[] = "--- Previous ---";
+			$lines[] = self::printableExceptionMessage($prev);
+			foreach(Utils::printableTrace($prev->getTrace()) as $line){
+				$lines[] = "  " . $line;
 			}
 		}
-		return $result;
+		$lines[] = "--- End of exception information ---";
+		return $lines;
+	}
+
+	private static function printableExceptionMessage(\Throwable $e) : string{
+		$errstr = preg_replace('/\s+/', ' ', trim($e->getMessage()));
+
+		$errno = $e->getCode();
+		if(is_int($errno)){
+			try{
+				$errno = ErrorTypeToStringMap::get($errno);
+			}catch(\InvalidArgumentException $ex){
+				//pass
+			}
+		}
+
+		$errfile = $e->getFile();
+		$errline = $e->getLine();
+
+		return get_class($e) . ": \"$errstr\" ($errno) in \"$errfile\" at line $errline";
+	}
+
+	private static function stringifyValueForTrace(mixed $value, int $maxStringLength) : string{
+		return match(true){
+			is_object($value) => "object " . self::getNiceClassName($value) . "#" . spl_object_id($value),
+			is_array($value) => "array[" . count($value) . "]",
+			is_string($value) => "string[" . strlen($value) . "] " . substr(Utils::printable($value), 0, $maxStringLength),
+			is_bool($value) => $value ? "true" : "false",
+			is_int($value) => "int " . $value,
+			is_float($value) => "float " . $value,
+			$value === null => "null",
+			default => gettype($value) . " " . Utils::printable((string) $value)
+		};
+	}
+
+	/**
+	 * Generator which forces array keys to string during iteration.
+	 * This is necessary because PHP has an anti-feature where it casts numeric string keys to integers, leading to
+	 * various crashes.
+	 *
+	 * @phpstan-template TKeyType of string
+	 * @phpstan-template TValueType
+	 * @phpstan-param array<TKeyType, TValueType> $array
+	 * @phpstan-return \Generator<TKeyType, TValueType, void, void>
+	 */
+	public static function stringifyKeys(array $array) : \Generator{
+		foreach($array as $key => $value){ // @phpstan-ignore-line - this is where we fix the stupid bullshit with array keys :)
+			yield (string) $key => $value;
+		}
 	}
 
 	/**

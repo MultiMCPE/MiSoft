@@ -103,12 +103,18 @@ use pocketmine\timings\TimingsHandler;
 use pocketmine\updater\AutoUpdater;
 use pocketmine\utils\Color;
 use pocketmine\utils\Config;
+use pocketmine\utils\FileSystem;
 use pocketmine\utils\Internet;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\Terminal;
 use pocketmine\utils\TextFormat;
 use pocketmine\utils\Utils;
 use pocketmine\utils\UUID;
+use pocketmine\thread\AutoKillThread;
+use pocketmine\thread\ThreadSafeClassLoader;
+use pocketmine\thread\log\ThreadSafeLogger;
+use pmmp\thread\ThreadSafeArray;
+use pmmp\thread\Thread as NativeThread;
 use function array_filter;
 use function array_key_exists;
 use function array_shift;
@@ -172,7 +178,6 @@ use const INT32_MAX;
 use const INT32_MIN;
 use const PHP_EOL;
 use const PHP_INT_MAX;
-use const PTHREADS_INHERIT_NONE;
 use const SCANDIR_SORT_NONE;
 use const SIGHUP;
 use const SIGINT;
@@ -188,7 +193,7 @@ class Server{
 	/** @var Server */
 	private static $instance = null;
 
-	/** @var \Threaded */
+	/** @var ThreadSafeArray */
 	private static $sleeper = null;
 
 	/** @var SleeperHandler */
@@ -314,7 +319,7 @@ class Server{
 	/** @var UUID */
 	private $serverID;
 
-	/** @var \ClassLoader */
+	/** @var ThreadSafeClassLoader */
 	private $autoloader;
 	/** @var string */
 	private $dataPath;
@@ -703,14 +708,14 @@ class Server{
 	}
 
 	/**
-	 * @return \ClassLoader
+	 * @return ThreadSafeClassLoader
 	 */
 	public function getLoader(){
 		return $this->autoloader;
 	}
 
 	/**
-	 * @return \AttachableThreadedLogger
+	 * @return ThreadSafeLogger
 	 */
 	public function getLogger(){
 		return $this->logger;
@@ -1595,17 +1600,17 @@ class Server{
 	}
 
 	/**
-	 * @param \ClassLoader              $autoloader
-	 * @param \AttachableThreadedLogger $logger
+	 * @param ThreadSafeClassLoader     $autoloader
+	 * @param ThreadSafeLogger          $logger
 	 * @param string                    $dataPath
 	 * @param string                    $pluginPath
 	 */
-	public function __construct(\ClassLoader $autoloader, \AttachableThreadedLogger $logger, string $dataPath, string $pluginPath){
+	public function __construct(ThreadSafeClassLoader $autoloader, ThreadSafeLogger $logger, string $dataPath, string $pluginPath){
 		if(self::$instance !== null){
 			throw new \InvalidStateException("Only one server instance can exist at once");
 		}
 		self::$instance = $this;
-		self::$sleeper = new \Threaded;
+		self::$sleeper = new ThreadSafeArray;
 		$this->tickSleeper = new SleeperHandler();
 		$this->autoloader = $autoloader;
 		$this->logger = $logger;
@@ -1745,7 +1750,7 @@ class Server{
 				}
 				Timings::$serverCommandTimer->stopTiming();
 			});
-			$this->console->start(PTHREADS_INHERIT_NONE);
+			$this->console->start(NativeThread::INHERIT_NONE);
 
 			if($this->getConfigBool("enable-rcon", false)){
 				try{
@@ -1857,7 +1862,7 @@ class Server{
 	        	$this->tickSleeper->addNotifier($this->autoKillNotifier, function() : void{
 		        	$this->handleNotifications();
 	        	});
-	        	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(PTHREADS_INHERIT_NONE);
+	        	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(NativeThread::INHERIT_CONSTANTS);
 			}
 
 			$this->pluginManager = new PluginManager($this, $this->commandMap, ((bool) $this->getProperty("plugins.legacy-data-dir", true)) ? null : $this->getDataPath() . "plugin_data" . DIRECTORY_SEPARATOR);
@@ -2279,7 +2284,7 @@ class Server{
 		    	$this->tickSleeper->addNotifier($this->autoKillNotifier, function() : void{
 			    	$this->handleNotifications();
 		    	});
-		    	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(PTHREADS_INHERIT_NONE);
+		    	($this->autoKillThread = new AutoKillThread($this->autoKillNotifier, $this->autoKillTimeout, $this->logger))->start(NativeThread::INHERIT_CONSTANTS);
 			}
 		}elseif($this->autoKillThread !== null){
 			$this->tickSleeper->removeNotifier($this->autoKillNotifier);
@@ -2462,7 +2467,7 @@ class Server{
 
 		$errstr = preg_replace('/\s+/', ' ', trim($errstr));
 
-		$errfile = Utils::cleanPath($errfile);
+		$errfile = Filesystem::cleanPath($errfile);
 
 		$this->logger->logException($e, $trace);
 

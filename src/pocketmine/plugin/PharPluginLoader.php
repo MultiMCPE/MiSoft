@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\plugin;
 
-use ClassLoader;
+use pocketmine\thread\ThreadSafeClassLoader;
 use Phar;
 use PharFileInfo;
 use function is_file;
@@ -35,10 +35,10 @@ use function substr;
  */
 class PharPluginLoader implements PluginLoader{
 
-	/** @var ClassLoader */
+	/** @var ThreadSafeClassLoader */
 	private $loader;
 
-	public function __construct(ClassLoader $loader){
+	public function __construct(ThreadSafeClassLoader $loader){
 		$this->loader = $loader;
 	}
 
@@ -53,7 +53,7 @@ class PharPluginLoader implements PluginLoader{
 	 * @param string $file
 	 */
 	public function loadPlugin(string $file) : void{
-		$this->loader->addPath("$file/src");
+		$this->loader->addPath("", "$file/src");
 	}
 
 	/**

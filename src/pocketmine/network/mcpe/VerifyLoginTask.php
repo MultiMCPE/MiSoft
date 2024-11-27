@@ -27,6 +27,7 @@ use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\Player;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
+use pocketmine\thread\NonThreadSafeValue;
 use function assert;
 use function base64_decode;
 use function chr;
@@ -62,7 +63,7 @@ class VerifyLoginTask extends AsyncTask{
 
 	private const CLOCK_DRIFT_MAX = 60 * 60 * 24 * 7;
 
-	/** @var LoginPacket */
+	/** @phpstan-var NonThreadSafeValue<LoginPacket> */
 	private $packet;
 
 	/**
@@ -82,11 +83,11 @@ class VerifyLoginTask extends AsyncTask{
 
 	public function __construct(Player $player, LoginPacket $packet){
 		$this->storeLocal($player);
-		$this->packet = $packet;
+		$this->packet = new NonThreadSafeValue($packet);
 	}
 
-	public function onRun(){
-		$packet = $this->packet; //Get it in a local variable to make sure it stays unserialized
+	public function onRun() : void{
+		$packet = $this->packet->deserialize(); //Get it in a local variable to make sure it stays unserialized
 
 		try{
 			$currentKey = null;
@@ -178,7 +179,7 @@ class VerifyLoginTask extends AsyncTask{
 		if(!$player->isConnected()){
 			$server->getLogger()->error("Player " . $player->getName() . " was disconnected before their login could be verified");
 		}else{
-			$player->onVerifyCompleted($this->packet, $this->error, $this->authenticated);
+			$player->onVerifyCompleted($this->packet->deserialize(), $this->error, $this->authenticated);
 		}
 	}
 }

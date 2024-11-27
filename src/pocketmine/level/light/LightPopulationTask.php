@@ -39,7 +39,7 @@ class LightPopulationTask extends AsyncTask{
 		$this->chunk = $chunk->fastSerialize();
 	}
 
-	public function onRun(){
+	public function onRun() : void{
 		if(!BlockFactory::isInit()){
 			BlockFactory::init();
 		}

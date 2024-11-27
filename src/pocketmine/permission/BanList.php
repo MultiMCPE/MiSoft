@@ -25,7 +25,7 @@ namespace pocketmine\permission;
 
 use DateTime;
 use pocketmine\Server;
-use pocketmine\utils\MainLogger;
+use GlobalLogger;
 use Throwable;
 use function date;
 use function fclose;
@@ -162,7 +162,7 @@ class BanList{
 							$this->list[$entry->getName()] = $entry;
 						}
 					}catch(Throwable $e){
-						$logger = MainLogger::getLogger();
+						$logger = GlobalLogger::get();
 						$logger->critical("Failed to parse ban entry from string \"$line\": " . $e->getMessage());
 						$logger->logException($e);
 					}
@@ -170,7 +170,7 @@ class BanList{
 			}
 			fclose($fp);
 		}else{
-			MainLogger::getLogger()->error("Could not load ban list");
+			GlobalLogger::get()->error("Could not load ban list");
 		}
 	}
 
@@ -191,7 +191,7 @@ class BanList{
 			}
 			fclose($fp);
 		}else{
-			MainLogger::getLogger()->error("Could not save ban list");
+			GlobalLogger::get()->error("Could not save ban list");
 		}
 	}
 }
