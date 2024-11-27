@@ -38,7 +38,7 @@ class SleeperHandler{
 	private $notifiers = [];
 	/**
 	 * @var callable[]
-	 * this is stored separately from notifiers otherwise pthreads would break closures referencing variables
+	 * this is stored separately from notifiers otherwise pmmpthread would break closures referencing variables
 	 */
 	private $handlers = [];
 

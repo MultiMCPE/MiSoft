@@ -23,13 +23,13 @@ declare(strict_types=1);
 
 namespace pocketmine\snooze;
 
-use Threaded;
+use pmmp\thread\ThreadSafe;
 use function assert;
 
 /**
  * Notifiable Threaded class which tracks counts of notifications it receives.
  */
-class ThreadedSleeper extends Threaded{
+class ThreadedSleeper extends ThreadSafe{
 	/**
 	 * @var int
 	 */
@@ -78,7 +78,6 @@ class ThreadedSleeper extends Threaded{
 	}
 
 	public function hasNotifications() : bool{
-		//don't need to synchronize here, pthreads automatically locks/unlocks
 		return $this->notifCount > 0;
 	}
 }
