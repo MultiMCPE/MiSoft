@@ -538,6 +538,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	/** @var int */
 	private $fxTickInterval = self::DEFAULT_FX_INTERVAL_TICKS;
 
+	/** @var int */
+	protected $chunkHack = 0;
+
 	/**
 	 * @return TranslationContainer|string
 	 */
@@ -1254,6 +1257,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public function sendChunk(int $x, int $z, BatchPacket $payload){
 		if(!$this->isConnected()){
 			return;
+		}
+
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+			$this->chunkHack = 2;
 		}
 
 		$this->usedChunks[Level::chunkHash($x, $z)] = true;
@@ -2261,6 +2268,19 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             if($this->getTransactionQueue() !== null){
                 $this->getTransactionQueue()->execute();
             }
+
+			if(!$this->getProtocol() < ProtocolInfo::PROTOCOL_130 and $this->chunkHack > 0){
+				--$this->chunkHack;
+				if($this->chunkHack === 0){
+					$pk = new ChunkRadiusUpdatedPacket();
+					$pk->radius = $this->viewDistance;
+					$this->sendDataPacket($pk);
+				}elseif($this->chunkHack === 1){
+					$pk = new ChunkRadiusUpdatedPacket();
+					$pk->radius = $this->viewDistance + 1;
+					$this->sendDataPacket($pk);
+				}
+			}
 		}
 
 		$this->timings->stopTiming();
