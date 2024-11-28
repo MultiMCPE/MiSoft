@@ -149,7 +149,7 @@ class RCONInstance extends Thread{
 		$this->stop = true;
 	}
 
-	public function run(){
+	public function onRun() : void{
 		$this->registerClassLoader();
 
 		/** @var resource[] $clients */
