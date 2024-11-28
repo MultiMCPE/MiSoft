@@ -28,8 +28,8 @@ use pocketmine\entity\hostile\Slime;
 class SlimeRandomDirectionBehavior extends Behavior{
 	/** @var Slime */
 	protected $mob;
-	protected $randomYaw;
-	protected $directionTimer;
+	protected $randomYaw = 0;
+	protected $directionTimer = 0;
 
 	public function __construct(Slime $slime){
 		parent::__construct($slime);
