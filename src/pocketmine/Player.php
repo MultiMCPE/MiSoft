@@ -4238,6 +4238,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			case PlayerActionPacket::ACTION_STOP_ITEM_USE_ON:
 				//TODO: this has no obvious use and seems only used for analytics in vanilla - ignore it
 				break;
+			case PlayerActionPacket::ACTION_START_USING_ITEM:
+				return true;
 			case PlayerActionPacket::ACTION_HANDLED_TELEPORT:
         	case PlayerActionPacket::ACTION_MISSED_SWING:
         	case PlayerActionPacket::ACTION_START_CRAWLING:
@@ -4245,7 +4247,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         	case PlayerActionPacket::ACTION_START_FLYING:
         	case PlayerActionPacket::ACTION_STOP_FLYING:
         	case PlayerActionPacket::ACTION_ACK_ACTOR_DATA:
-			case PlayerActionPacket::ACTION_START_USING_ITEM:
 			    break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown player action type " . $packet->action . " from " . $this->getName());
