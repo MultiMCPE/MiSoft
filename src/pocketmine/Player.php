@@ -39,6 +39,9 @@ use pocketmine\entity\Human;
 use pocketmine\entity\Living;
 use pocketmine\entity\object\ItemEntity;
 use pocketmine\entity\passive\AbstractHorse;
+use pocketmine\entity\passive\Cow;
+use pocketmine\entity\passive\Sheep;
+use pocketmine\entity\hostile\Creeper;
 use pocketmine\entity\projectile\Arrow;
 use pocketmine\entity\projectile\FishingHook;
 use pocketmine\entity\Skin;
@@ -4048,7 +4051,45 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		        break;
 			case InteractPacket::ACTION_MOUSEOVER:
-				break; //TODO: handle these
+	            if($this->isSpectator()){
+	                return true;
+	            }
+
+				if(!$target->isAlive()){
+					return true;
+				}
+
+                if($target->distance($this) <= 4){
+                    $item = $this->inventory->getItemInHand();
+                    $isSneaking = $this->isSneaking();
+
+                    match(true){
+                        $item->getId() === Item::NAMETAG && $target instanceof Entity && !$target instanceof Human && $item->hasCustomName() =>
+							$this->setInteractiveTag(new TextContainer("action.interact.name")),
+
+                        $target instanceof AbstractHorse => match(true){
+                            //$target->isBreedingItem($item) => $this->setInteractiveTag(new TextContainer("action.interact.feed")),
+                            $isSneaking && $target->isTamed() => $this->setInteractiveTag(new TextContainer("action.interact.opencontainer")),
+                            !$isSneaking => $this->setInteractiveTag(new TextContainer("action.interact.ride.horse")),
+                            default => $this->removeInteractiveTag()
+                        },
+
+                        $target instanceof Creeper && $item->getId() === Item::FLINT_AND_STEEL && !$isSneaking =>
+						    $this->setInteractiveTag(new TextContainer("action.interact.creeper")),
+
+                        $target instanceof Cow && !$target->hasMilkingCooldown() && $item->getId() === Item::BUCKET && $item->getDamage() === 0 =>
+                            $this->setInteractiveTag(new TextContainer("action.interact.milk")),
+
+                        $target instanceof Sheep && !$target->isSheared() && $item->getId() === Item::SHEARS =>
+						    $this->setInteractiveTag(new TextContainer("action.interact.shear")),
+
+                        default => $this->removeInteractiveTag()
+                    };
+                }else{
+                    $this->removeInteractiveTag();
+                }
+
+				break;
 			default:
 				$this->server->getLogger()->debug("Unhandled/unknown interaction type " . $packet->action . "received from " . $this->getName());
 
@@ -5716,5 +5757,30 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		return $inventory;
+	}
+
+	/**
+	 * @return ?string
+	 */
+	public function getInteractiveTag() : ?string{
+		return $this->propertyManager->getString(self::DATA_INTERACTIVE_TAG);
+	}
+
+	/**
+	 * @param TextContainer|string $tag
+	 */
+	public function setInteractiveTag(TextContainer|string $tag) : void{
+		if($tag instanceof TextContainer){
+			$tag = $tag->getText();
+		}
+
+		$translate = $this->server->getLanguage()->translateString($tag);
+		$this->propertyManager->setString(self::DATA_INTERACTIVE_TAG, $translate);
+	}
+
+	public function removeInteractiveTag() : void{
+		if($this->getInteractiveTag() !== null){
+			$this->propertyManager->removeProperty(self::DATA_INTERACTIVE_TAG);
+		}
 	}
 }

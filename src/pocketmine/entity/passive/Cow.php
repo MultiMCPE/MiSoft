@@ -92,6 +92,10 @@ class Cow extends Animal{
 		return parent::onInteract($player, $item, $clickPos);
 	}
 
+	public function hasMilkingCooldown() : bool{
+		return $this->milkingTicks > 0;
+	}
+
 	public function entityBaseTick(int $diff = 1) : bool{
 		if($this->milkingTicks > 0){
 			$this->milkingTicks--;
