@@ -103,7 +103,7 @@ use pocketmine\timings\TimingsHandler;
 use pocketmine\updater\AutoUpdater;
 use pocketmine\utils\Color;
 use pocketmine\utils\Config;
-use pocketmine\utils\FileSystem;
+use pocketmine\utils\Filesystem;
 use pocketmine\utils\Internet;
 use pocketmine\utils\MainLogger;
 use pocketmine\utils\Terminal;
