@@ -143,8 +143,9 @@ class PopulationTask extends AsyncTask{
 		if($level !== null){
 			if(!$this->state){
                 $worker = NativeThread::getCurrentThread();
-                assert($worker instanceof AsyncWorker);
-				$level->registerGeneratorToWorker($worker->getAsyncWorkerId());
+				if($worker instanceof AsyncWorker){
+				    $level->registerGeneratorToWorker($worker->getAsyncWorkerId());
+				}
 			}
 
 			$chunk = Chunk::fastDeserialize($this->chunk);
