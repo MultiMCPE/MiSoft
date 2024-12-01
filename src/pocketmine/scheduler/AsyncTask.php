@@ -76,6 +76,8 @@ abstract class AsyncTask extends Runnable{
     private bool $crashed = false;
     private bool $isGarbage = false;
 
+    public int $workerId = 0;
+
     public function run() : void{
 		$this->result = null;
 

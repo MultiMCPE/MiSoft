@@ -23,12 +23,10 @@ declare(strict_types=1);
 
 namespace pocketmine\level\generator;
 
-use pmmp\thread\Thread as NativeThread;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\level\SimpleChunkManager;
 use pocketmine\scheduler\AsyncTask;
-use pocketmine\scheduler\AsyncWorker;
 use pocketmine\Server;
 
 class PopulationTask extends AsyncTask{
@@ -142,10 +140,7 @@ class PopulationTask extends AsyncTask{
 		$level = $server->getLevel($this->levelId);
 		if($level !== null){
 			if(!$this->state){
-                $worker = NativeThread::getCurrentThread();
-				if($worker instanceof AsyncWorker){
-				    $level->registerGeneratorToWorker($worker->getAsyncWorkerId());
-				}
+				$level->registerGeneratorToWorker($this->workerId);
 			}
 
 			$chunk = Chunk::fastDeserialize($this->chunk);

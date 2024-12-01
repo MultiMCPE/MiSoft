@@ -145,6 +145,7 @@ class AsyncPool{
         }
 
         $task->setSubmitted();
+        $task->workerId = $worker;
 
         $this->getWorker($worker)->submit($task);
 	}
