@@ -25,6 +25,7 @@ namespace pocketmine\entity\projectile;
 
 use pocketmine\block\Block;
 use pocketmine\entity\Entity;
+use pocketmine\entity\Living;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\item\Item;
@@ -180,9 +181,11 @@ class Arrow extends Projectile{
 
 	protected function onHitEntity(Entity $entityHit, RayTraceResult $hitResult) : bool{
 		if(($hit = parent::onHitEntity($entityHit, $hitResult))){
-	    	if($this->potionId !== 0){
-		    	foreach(Potion::getPotionEffectsById($this->potionId - 1) as $effect){
-			    	$entityHit->addEffect($effect->setDuration((int) ($effect->getDuration() / 8)));
+			if($entityHit instanceof Living){
+	        	if($this->potionId !== 0){
+		        	foreach(Potion::getPotionEffectsById($this->potionId - 1) as $effect){
+			        	$entityHit->addEffect($effect->setDuration((int) ($effect->getDuration() / 8)));
+					}
 		    	}
 	    	}
 	    	if($this->punchKnockback > 0){
