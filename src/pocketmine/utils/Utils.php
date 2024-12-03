@@ -31,6 +31,7 @@ use Closure;
 use DaveRandom\CallbackValidator\CallbackType;
 use DaveRandom\CallbackValidator\InvalidCallbackException;
 use pocketmine\errorhandler\ErrorTypeToStringMap;
+use pocketmine\thread\crash\ThreadCrashInfoFrame;
 use pocketmine\log\MainLogger;
 use ErrorException;
 use Exception;
@@ -114,6 +115,19 @@ class Utils{
 	public static $os;
 	/** @var UUID|null */
 	private static $serverUniqueId = null;
+
+	/**
+	 * @phpstan-template TValue
+	 * @phpstan-param TValue|false $value
+	 * @phpstan-param string|\Closure() : string $context
+	 * @phpstan-return TValue
+	 */
+	public static function assumeNotFalse(mixed $value, \Closure|string $context = "This should never be false") : mixed{
+		if($value === false){
+			throw new AssumptionFailedError("Assumption failure: " . (is_string($context) ? $context : $context()) . " (THIS IS A BUG)");
+		}
+		return $value;
+	}
 
 	/**
 	 * Generates an unique identifier to a callable
@@ -657,6 +671,21 @@ class Utils{
 	 */
 	public static function printableCurrentTrace(int $skipFrames = 0) : array{
 		return self::printableTrace(self::currentTrace(++$skipFrames));
+	}
+
+	public static function printableTraceWithMetadata(array $rawTrace, int $maxStringLength = 80) : array{
+		$printableTrace = self::printableTrace($rawTrace, $maxStringLength);
+		$safeTrace = [];
+		foreach($printableTrace as $frameId => $printableFrame){
+			$rawFrame = $rawTrace[$frameId];
+			$safeTrace[$frameId] = new ThreadCrashInfoFrame(
+				$printableFrame,
+				$rawFrame["file"] ?? "unknown",
+				$rawFrame["line"] ?? 0
+			);
+		}
+
+		return $safeTrace;
 	}
 
 	/**
