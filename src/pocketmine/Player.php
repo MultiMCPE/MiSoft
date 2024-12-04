@@ -2787,6 +2787,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
 		$pk->resourcePackEntries = $manager->getResourceStack();
 		$pk->mustAccept = $manager->resourcePacksRequired();
+		$pk->worldTemplateId = UUID::fromBinary(str_repeat("\x00", 16), 0);
+		$pk->worldTemplateVersion = "";
 		$this->dataPacket($pk);
 	}
 

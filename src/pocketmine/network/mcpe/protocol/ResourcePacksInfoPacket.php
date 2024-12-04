@@ -25,6 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\resourcepacks\ResourcePack;
+use pocketmine\utils\UUID;
 use function count;
 
 class ResourcePacksInfoPacket extends DataPacket{
@@ -36,6 +37,10 @@ class ResourcePacksInfoPacket extends DataPacket{
 	public $hasAddons = false;
 	/** @var bool */
 	public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
+	/** @var UUID */
+	public $worldTemplateId;
+	/** @var string */
+	public $worldTemplateVersion;
 	/** @var bool */
 	public $forceServerPacks = false;
 	/** @var ResourcePack[] */
@@ -54,7 +59,10 @@ class ResourcePacksInfoPacket extends DataPacket{
 	    	$this->hasScripts = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->forceServerPacks = $this->getBool();
-	    	}
+	    	}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				$this->worldTemplateId = $this->getUUID();
+				$this->worldTemplateVersion = $this->getString();
+			}
 		}
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	$behaviorPackCount = $this->getLShort();
@@ -80,7 +88,11 @@ class ResourcePacksInfoPacket extends DataPacket{
 
 		$resourcePackCount = $this->getLShort();
 		while($resourcePackCount-- > 0){
-			$this->getString();
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				$this->getUUID();
+			}else{
+				$this->getString();
+			}
 			$this->getString();
             $this->getLLong();
 			$this->getString();
@@ -123,7 +135,10 @@ class ResourcePacksInfoPacket extends DataPacket{
             $this->putBool($this->hasScripts);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->putBool($this->forceServerPacks);
-	    	}
+	    	}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				$this->putUUID($this->worldTemplateId);
+				$this->putString($this->worldTemplateVersion);
+			}
 		}
 
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_729){
@@ -149,7 +164,11 @@ class ResourcePacksInfoPacket extends DataPacket{
 		}
         $this->putLShort(count($this->resourcePackEntries));
 		foreach($this->resourcePackEntries as $entry){
-			$this->putString($entry->getPackId());
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				$this->putUUID(UUID::fromString($entry->getPackId()));
+			}else{
+			    $this->putString($entry->getPackId());
+			}
 			$this->putString($entry->getPackVersion());
             $this->putLLong($entry->getPackSize());
 			$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key

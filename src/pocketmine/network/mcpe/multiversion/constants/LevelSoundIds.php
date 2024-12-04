@@ -530,8 +530,20 @@ final class LevelSoundIds{
 			"SOUND_RECORD_PRECIPICE" => 529,
             "SOUND_VAULT_REJECT_REWARDED_PLAYER" => 530,
 			"SOUND_IMITATE_DROWNED" => 531,
-
+			"SOUND_IMITATE_CREAKING" => 532,
 			"SOUND_BUNDLE_INSERT_FAIL" => 533,
+			"SOUND_SPONGE_ABSORB" => 534,
+
+		    "SOUND_BLOCK_CREAKING_HEART_TRAIL" => 536,
+			"SOUND_CREAKING_HEART_SPAWN" => 537,
+			"SOUND_ACTIVATE" => 538,
+			"SOUND_DEACTIVATE" => 539,
+			"SOUND_FREEZE" => 540,
+			"SOUND_UNFREEZE" => 541,
+			"SOUND_OPEN" => 542,
+			"SOUND_OPEN_LONG" => 543,
+			"SOUND_CLOSE" => 544,
+			"SOUND_CLOSE_LONG" => 545,
 
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
@@ -555,7 +567,7 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
             "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
-            "SOUND_UNDEFINED" => 534
+            "SOUND_UNDEFINED" => 546
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,

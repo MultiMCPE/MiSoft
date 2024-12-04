@@ -179,7 +179,8 @@ final class ProtocolInfo implements PacketMagicNumbers{
 		ProtocolInfo::PROTOCOL_686,
 		ProtocolInfo::PROTOCOL_712,
 		ProtocolInfo::PROTOCOL_729,
-		ProtocolInfo::PROTOCOL_748
+		ProtocolInfo::PROTOCOL_748,
+		ProtocolInfo::PROTOCOL_766
 	];
 
     public const PROTOCOL_100 = 100; // 1.0.0.2, 1.0.0.7, 1.0.0, 1.0.1, 1.0.2
@@ -338,6 +339,7 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	public const PROTOCOL_712 = 712; // 1.21.20
 	public const PROTOCOL_729 = 729; // 1.21.30
 	public const PROTOCOL_748 = 748; // 1.21.40
+	public const PROTOCOL_766 = 766; // 1.21.50
     /**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
@@ -345,6 +347,6 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	/**
 	 * Version number sent to clients in ping responses.
 	 */
-	public const MINECRAFT_VERSION_NETWORK = '1.21.40';
+	public const MINECRAFT_VERSION_NETWORK = '1.21.50';
 
 }
