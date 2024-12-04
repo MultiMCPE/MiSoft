@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\item\enchantment\Enchantment;
+use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\TieredTool;
@@ -70,8 +71,8 @@ class RedstoneOre extends Solid{
 
 	public function getDropsForCompatibleTool(Item $item) : array
     {
-        if ($fortune = $item->getEnchantmentLevel(Enchantment::FORTUNE)) {
-            $fortune = min($fortune, 3);
+        if(($enchantment = $item->getEnchantment(Enchantment::FORTUNE)) instanceof EnchantmentInstance){
+            $fortune = min($enchantment->getLevel(), 3);
             return [
                 Item::get(Item::REDSTONE_DUST, 0, mt_rand(4, 5 + $fortune)),
             ];
