@@ -23,8 +23,20 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class Arrow extends Item{
 	public function __construct(int $meta = 0){
 		parent::__construct(self::ARROW, $meta, "Arrow");
 	}
+
+    public function getProtocolIdMeta(int $protocol) : ?array{
+        if($protocol < ProtocolInfo::PROTOCOL_280){
+			if($this->getDamage() >= 38){
+                return [ItemIds::ARROW, 0];
+			}
+        }
+
+        return null;
+    }
 }
