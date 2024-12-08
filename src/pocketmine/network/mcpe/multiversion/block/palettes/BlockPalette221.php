@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
+use pocketmine\block\BlockIds;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use function count;
 use function file_get_contents;
 use function json_decode;
-use function max;
 use const pocketmine\RESOURCE_PATH;
 
 /**
@@ -39,8 +39,6 @@ final class BlockPalette221 extends Palette{
 	private static $staticRuntimeIdMap = [];
 	/** @var int[] */
 	private static $legacyIdMap = [];
-	/** @var int */
-	private static $lastRuntimeId = 0;
     /** @var string|null */
     private static $encodedPalette = null;
 
@@ -78,13 +76,12 @@ final class BlockPalette221 extends Palette{
 	 */
 	public static function toStaticRuntimeId(int $id, int $meta = 0) : int{
 	    self::lazyInit();
-		$index = ($id << 4) | $meta;
-		if(!isset(self::$staticRuntimeIdMap[$index])){
-			self::registerMapping($rtId = ++self::$lastRuntimeId, $id, $meta);
-			return $rtId;
-		}
-
-		return self::$staticRuntimeIdMap[$index];
+		/*
+		 * try id+meta first
+		 * if not found, try id+0 (strip meta)
+		 * if still not found, return update! block
+		 */
+		return self::$staticRuntimeIdMap[($id << 4) | $meta] ?? self::$staticRuntimeIdMap[$id << 4] ?? self::$staticRuntimeIdMap[BlockIds::INFO_UPDATE << 4];
 	}
 
 	/**
@@ -105,7 +102,6 @@ final class BlockPalette221 extends Palette{
 	private static function registerMapping(int $staticRuntimeId, int $legacyId, int $legacyMeta) : void{
 		self::$staticRuntimeIdMap[($legacyId << 4) | $legacyMeta] = $staticRuntimeId;
 		self::$legacyIdMap[$staticRuntimeId] = ($legacyId << 4) | $legacyMeta;
-		self::$lastRuntimeId = max(self::$lastRuntimeId, $staticRuntimeId);
 	}
 
 	/**

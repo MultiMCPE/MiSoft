@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io;
 
+use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\network\mcpe\protocol\BatchPacket;
@@ -31,6 +32,8 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
+use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\tile\Spawnable;
@@ -50,6 +53,8 @@ class ChunkRequestTask extends AsyncTask{
 	protected $dimensionId;
 	/** @var string */
     protected $tiles;
+	/** @var NonThreadSafeValue */
+	protected $palette;
     /** @var int */
 	protected $compressionLevel;
 	/** @var int */
@@ -74,6 +79,8 @@ class ChunkRequestTask extends AsyncTask{
 		}
         $this->tiles = $tiles;
 
+		$this->palette = new NonThreadSafeValue(BlockPalette::getPalette($protocol));
+
 		$this->protocol = $protocol;
 
 		$this->levelChunkPacketId = PacketPool::getPacketMagicById(LevelChunkPacket::NETWORK_ID, $protocol);
@@ -85,7 +92,14 @@ class ChunkRequestTask extends AsyncTask{
 
         $protocol = $this->protocol;
 
-        $extraPayload = $chunk->networkSerialize($protocol, $dimensionId);
+		if(($palette = $this->palette->deserialize()) !== null){
+			BlockPalette::addPalette($palette, $protocol);
+		    $legacyToRuntime = function(int $blockId, int $meta) use ($palette) : int{
+			    return $palette::toStaticRuntimeId($blockId, $meta);
+		    };
+		}
+
+        $extraPayload = $chunk->networkSerialize($protocol, $dimensionId, $legacyToRuntime ?? null);
 		if($protocol >= ProtocolInfo::PROTOCOL_475){
 			if($dimensionId !== DimensionIds::OVERWORLD){
 				$extraPayload = substr($extraPayload, 4 * 2);

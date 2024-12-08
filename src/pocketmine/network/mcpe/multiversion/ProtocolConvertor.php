@@ -269,69 +269,102 @@ abstract class ProtocolConvertor{
 	public static function convertChunkProtocol(int $playerProtocol) : int{
 		switch($playerProtocol){
 			case ProtocolInfo::PROTOCOL_766:
+				return ProtocolInfo::PROTOCOL_766;
 			case ProtocolInfo::PROTOCOL_748:
+				return ProtocolInfo::PROTOCOL_748;
 			case ProtocolInfo::PROTOCOL_729:
+				return ProtocolInfo::PROTOCOL_729;
 			case ProtocolInfo::PROTOCOL_712:
+				return ProtocolInfo::PROTOCOL_712;
 			case ProtocolInfo::PROTOCOL_686:
 			case ProtocolInfo::PROTOCOL_685:
+				return ProtocolInfo::PROTOCOL_685;
 			case ProtocolInfo::PROTOCOL_671:
+				return ProtocolInfo::PROTOCOL_671;
 			case ProtocolInfo::PROTOCOL_662:
+				return ProtocolInfo::PROTOCOL_662;
 			case ProtocolInfo::PROTOCOL_649:
 				return ProtocolInfo::PROTOCOL_649;
 			case ProtocolInfo::PROTOCOL_630:
+				return ProtocolInfo::PROTOCOL_630;
 			case ProtocolInfo::PROTOCOL_622:
+				return ProtocolInfo::PROTOCOL_622;
 			case ProtocolInfo::PROTOCOL_618:
+				return ProtocolInfo::PROTOCOL_618;
 			case ProtocolInfo::PROTOCOL_594:
+				return ProtocolInfo::PROTOCOL_594;
 			case ProtocolInfo::PROTOCOL_589:
+				return ProtocolInfo::PROTOCOL_589;
 			case ProtocolInfo::PROTOCOL_582:
+				return ProtocolInfo::PROTOCOL_582;
 			case ProtocolInfo::PROTOCOL_575:
+				return ProtocolInfo::PROTOCOL_575;
 			case ProtocolInfo::PROTOCOL_568:
 			case ProtocolInfo::PROTOCOL_567:
+				return ProtocolInfo::PROTOCOL_567;
 			case ProtocolInfo::PROTOCOL_560:
+				return ProtocolInfo::PROTOCOL_560;
 			case ProtocolInfo::PROTOCOL_557:
 			case ProtocolInfo::PROTOCOL_553:
 			case ProtocolInfo::PROTOCOL_544:
+				return ProtocolInfo::PROTOCOL_544;
 			case ProtocolInfo::PROTOCOL_534:
+				return ProtocolInfo::PROTOCOL_534;
 			case ProtocolInfo::PROTOCOL_526:
+				return ProtocolInfo::PROTOCOL_526;
 			case ProtocolInfo::PROTOCOL_503:
 				return ProtocolInfo::PROTOCOL_503;
 			case ProtocolInfo::PROTOCOL_486:
+				return ProtocolInfo::PROTOCOL_486;
 			case ProtocolInfo::PROTOCOL_475:
 				return ProtocolInfo::PROTOCOL_475;
 			case ProtocolInfo::PROTOCOL_471:
+				return ProtocolInfo::PROTOCOL_471;
 			case ProtocolInfo::PROTOCOL_465:
+				return ProtocolInfo::PROTOCOL_465;
 			case ProtocolInfo::PROTOCOL_448:
+				return ProtocolInfo::PROTOCOL_448;
 			case ProtocolInfo::PROTOCOL_440:
+				return ProtocolInfo::PROTOCOL_440;
 			case ProtocolInfo::PROTOCOL_429:
 		    case ProtocolInfo::PROTOCOL_428:
+				return ProtocolInfo::PROTOCOL_428;
 		    case ProtocolInfo::PROTOCOL_425:
             case ProtocolInfo::PROTOCOL_422:
 			case ProtocolInfo::PROTOCOL_419:
+				return ProtocolInfo::PROTOCOL_419;
 			case ProtocolInfo::PROTOCOL_408:
+				return ProtocolInfo::PROTOCOL_408;
 			case ProtocolInfo::PROTOCOL_407:
+				return ProtocolInfo::PROTOCOL_407;
 			case ProtocolInfo::PROTOCOL_406:
 			    return ProtocolInfo::PROTOCOL_406;
 			case ProtocolInfo::PROTOCOL_400:
 			case ProtocolInfo::PROTOCOL_393:
 			case ProtocolInfo::PROTOCOL_392:
 			case ProtocolInfo::PROTOCOL_390:
+				return ProtocolInfo::PROTOCOL_389;
 			case ProtocolInfo::PROTOCOL_388:
 			case ProtocolInfo::PROTOCOL_387:
 			case ProtocolInfo::PROTOCOL_386:
 			case ProtocolInfo::PROTOCOL_385:
 			case ProtocolInfo::PROTOCOL_370:
+				return ProtocolInfo::PROTOCOL_370;
 		    case ProtocolInfo::PROTOCOL_361:
 			case ProtocolInfo::PROTOCOL_360:
 				return ProtocolInfo::PROTOCOL_360;
 			case ProtocolInfo::PROTOCOL_354:
+				return ProtocolInfo::PROTOCOL_354;
 			case ProtocolInfo::PROTOCOL_351:
 			case ProtocolInfo::PROTOCOL_350:
 			case ProtocolInfo::PROTOCOL_342:
 			case ProtocolInfo::PROTOCOL_340:
+				return ProtocolInfo::PROTOCOL_340;
 			case ProtocolInfo::PROTOCOL_332:
 			case ProtocolInfo::PROTOCOL_331:
 			    return ProtocolInfo::PROTOCOL_331;
 			case ProtocolInfo::PROTOCOL_330:
+				return ProtocolInfo::PROTOCOL_330;
 			case ProtocolInfo::PROTOCOL_311:
 			case ProtocolInfo::PROTOCOL_310:
 			    return ProtocolInfo::PROTOCOL_310;
@@ -340,12 +373,15 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_280:
 			    return ProtocolInfo::PROTOCOL_280;
 			case ProtocolInfo::PROTOCOL_274:
+				return ProtocolInfo::PROTOCOL_274;
 			case ProtocolInfo::PROTOCOL_273:
 			case ProtocolInfo::PROTOCOL_271:
 			case ProtocolInfo::PROTOCOL_270:
 			    return ProtocolInfo::PROTOCOL_270;
 			case ProtocolInfo::PROTOCOL_260:
+				return ProtocolInfo::PROTOCOL_260;
 			case ProtocolInfo::PROTOCOL_240:
+				return ProtocolInfo::PROTOCOL_240;
 			case ProtocolInfo::PROTOCOL_224:
 			case ProtocolInfo::PROTOCOL_221:
 			case ProtocolInfo::PROTOCOL_220:

@@ -41,7 +41,10 @@ use pocketmine\tile\Tile;
 use pocketmine\utils\AssumptionFailedError;
 use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
+use pocketmine\utils\Utils;
 use pocketmine\world\format\PalettedBlockArray;
+use pocketmine\world\format\io\SubChunkConverter;
+use Closure;
 use SplFixedArray;
 use Throwable;
 use function array_fill;
@@ -899,10 +902,11 @@ class Chunk{
 	 * 
 	 * @param int $playerProtocol
 	 * @param int $dimensionId
+	 * @param ?Closure $legacyToRuntime
 	 * 
 	 * @return string
 	 */
-	public function networkSerialize(int $playerProtocol, int $dimensionId) : string{
+	public function networkSerialize(int $playerProtocol, int $dimensionId, ?Closure $legacyToRuntime) : string{
 		$result = "";
 		$subChunkCount = $this->getSubChunkSendCount();
 		if($playerProtocol < ProtocolInfo::PROTOCOL_360){
@@ -915,7 +919,7 @@ class Chunk{
 	    	}
 		}
 		for($y = 0; $y < $subChunkCount; ++$y){
-			$result .= $this->networkSerializeSubChunk($this->subChunks[$y], $playerProtocol);
+			$result .= $this->networkSerializeSubChunk($this->subChunks[$y], $playerProtocol, $legacyToRuntime);
 		}
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
@@ -942,16 +946,47 @@ class Chunk{
 		return $result;
 	}
 
-	public function networkSerializeSubChunk(SubChunkInterface $subChunk, int $playerProtocol) : string{
+	public function networkSerializeSubChunk(SubChunkInterface $subChunk, int $playerProtocol, ?Closure $legacyToRuntime) : string{
 	    $result = new NetworkBinaryStream();
 
-		$result->put(chr(0)); //subchunk version 0
+		if($legacyToRuntime === null){
+		    $result->putByte(0); // storage version
 
-		$result->put($subChunk->getBlockIdArray());
-		$result->put($subChunk->getBlockDataArray());
-		if($playerProtocol < ProtocolInfo::PROTOCOL_130){
-			$result->put($subChunk->getBlockSkyLightArray());
-			$result->put($subChunk->getBlockLightArray());
+		    $result->put($subChunk->getBlockIdArray());
+		    $result->put($subChunk->getBlockDataArray());
+		    if($playerProtocol < ProtocolInfo::PROTOCOL_130){
+			    $result->put($subChunk->getBlockSkyLightArray());
+			    $result->put($subChunk->getBlockLightArray());
+		    }
+	    }else{
+			Utils::validateCallableSignature(function(int $blockId, int $meta) : int{}, $legacyToRuntime);
+
+			$blocks = SubChunkConverter::convertSubChunkXZY($subChunk->getBlockIdArray(), $subChunk->getBlockDataArray());
+
+			$result->putByte(8); // storage version
+			$result->putByte(1); // layer count
+            // 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
+            if($blocks->getBitsPerBlock() === 0){
+                //TODO: we use these in memory, but the game doesn't support them yet
+                //polyfill them with 1-bpb instead
+                $bitsPerBlock = 1;
+                $words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
+            }else{
+                $bitsPerBlock = $blocks->getBitsPerBlock();
+                $words = $blocks->getWordArray();
+            }
+            $result->putByte(($bitsPerBlock << 1) | 1);
+            $result->put($words);
+            $palette = $blocks->getPalette();
+
+            //these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
+            //but since we know they are always unsigned, we can avoid the extra fcall overhead of
+            //zigzag and just shift directly.
+            $result->putUnsignedVarInt(count($palette) << 1);
+			foreach($palette as $fullBlock){
+				$runtimeId = $legacyToRuntime($fullBlock >> 4, $fullBlock & 0x0f);
+				$result->putUnsignedVarInt($runtimeId << 1);
+			}
 		}
 
 		return $result->buffer;
