@@ -73,7 +73,6 @@ abstract class Mob extends Living{
 	protected $lookHelper;
 
 	public $yawOffset = 0.0;
-	public $headYaw = 0.0;
 
 	/**
 	 * @return Vector3
@@ -182,7 +181,7 @@ abstract class Mob extends Living{
 		return parent::hasMovementUpdate()
 			or abs($this->yaw - $this->lastYaw) > 0
 			or abs($this->pitch - $this->lastPitch) > 0
-			or abs($this->headYaw - $this->lastHeadYaw) > 0;
+			or abs(($this->headYaw ?? 0.0) - $this->lastHeadYaw) > 0;
 	}
 
 	protected function onBehaviorUpdate() : bool{
@@ -466,8 +465,8 @@ abstract class Mob extends Living{
 	public function getLookVector() : Vector3{
 		$y = -sin(deg2rad($this->pitch));
 		$xz = cos(deg2rad($this->pitch));
-		$x = -$xz * sin(deg2rad($this->headYaw));
-		$z = $xz * cos(deg2rad($this->headYaw));
+		$x = -$xz * sin(deg2rad($this->headYaw ?? 0.0));
+		$z = $xz * cos(deg2rad($this->headYaw ?? 0.0));
 
 		return $this->temporalVector->setComponents($x, $y, $z)->normalize();
 	}

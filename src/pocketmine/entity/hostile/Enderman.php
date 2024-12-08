@@ -346,7 +346,7 @@ class Enderman extends Monster{
 	    	$pk->position = $this->asVector3();
 	    	$pk->motion = $this->getMotion();
 	    	$pk->yaw = $this->yaw;
-	    	$pk->headYaw = $this->yaw; //TODO
+	    	$pk->headYaw = $this->headYaw ?? $this->yaw;
 	    	$pk->pitch = $this->pitch;
 	    	$pk->attributes = $this->attributeMap->getAll();
 	    	$pk->metadata = $this->propertyManager->getAll();

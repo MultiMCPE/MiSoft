@@ -1248,7 +1248,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$diffRotation = ($this->yaw - $this->lastYaw) ** 2 + ($this->pitch - $this->lastPitch) ** 2;
 
 		if($this->headYaw !== null){
-			$diffRotation += ($this->headYaw - $this->lastHeadYaw) ** 2;
+			$diffRotation += (($this->headYaw ?? 0.0) - $this->lastHeadYaw) ** 2;
 		}
 
 		$diffMotion = $this->motion->subtract($this->lastMotion)->lengthSquared();
@@ -1267,7 +1267,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 			$this->lastYaw = $this->yaw;
 			$this->lastPitch = $this->pitch;
-			$this->lastHeadYaw = $this->headYaw ?? 0;
+			$this->lastHeadYaw = $this->headYaw ?? 0.0;
 
 			$this->broadcastMovement($teleport);
 		}

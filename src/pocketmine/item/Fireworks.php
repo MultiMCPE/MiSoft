@@ -128,7 +128,7 @@ class Fireworks extends Item{
 		return true;
 	}
 
-    public function getProtocolidMeta(int $protocol) : ?array{
+    public function getProtocolIdMeta(int $protocol) : ?array{
         if($protocol < ProtocolInfo::PROTOCOL_130){
             return [ItemIds::NETHER_STAR, $this->getDamage()];
         }

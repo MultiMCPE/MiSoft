@@ -42,15 +42,15 @@ class EntityBodyHelper{
 	public function onUpdate() : void{
 		if($this->entity->getMotion()->lengthSquared() > 0.0025){
 			$this->entity->yawOffset = $this->entity->yaw;
-			$this->entity->headYaw = $this->computeAngleWithBound($this->entity->yawOffset, $this->entity->headYaw, 75);
-			$this->prevRenderYawHead = $this->entity->headYaw;
+			$this->entity->headYaw = $this->computeAngleWithBound($this->entity->yawOffset, $this->entity->headYaw ?? 0.0, 75);
+			$this->prevRenderYawHead = $this->entity->headYaw ?? 0.0;
 			$this->rotationTickCounter = 0;
 		}else{
 			$f = 75;
 
-			if(abs($this->entity->headYaw - $this->prevRenderYawHead) > 15){
+			if(abs(($this->entity->headYaw ?? 0.0) - $this->prevRenderYawHead) > 15){
 				$this->rotationTickCounter = 0;
-				$this->prevRenderYawHead = $this->entity->headYaw;
+				$this->prevRenderYawHead = $this->entity->headYaw ?? 0.0;
 			}else{
 				$this->rotationTickCounter++;
 
@@ -59,7 +59,7 @@ class EntityBodyHelper{
 				}
 			}
 
-			$this->entity->yawOffset = $this->computeAngleWithBound($this->entity->headYaw, $this->entity->yawOffset, $f);
+			$this->entity->yawOffset = $this->computeAngleWithBound($this->entity->headYaw ?? 0.0, $this->entity->yawOffset, $f);
 		}
 	}
 
