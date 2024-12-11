@@ -124,8 +124,6 @@ final class ActorMetadataConvertor{
 				foreach($metadataProperties as $magic => $value){
 					if(($newIndex = array_search($magic, $protocolMetadataProperties, true)) !== false){
 						$newMetadataProperties[$newIndex] = $value;
-					}else{
-					    $newMetadataProperties[$magic] = $value;
 					}
 				}
 
@@ -139,8 +137,6 @@ final class ActorMetadataConvertor{
 				foreach($metadataProperties as $magic => $value){
 					if(isset($protocolMetadataProperties[$magic])){
 						$newMetadataProperties[$protocolMetadataProperties[$magic]] = $value;
-					}else{
-					    $newMetadataProperties[$magic] = $value;
 					}
 				}
 
@@ -173,13 +169,12 @@ final class ActorMetadataConvertor{
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
 						if($flagsBinary[$i] === "1"){
 							$flag = array_search($i, $protocolMetadataFlags, true);
-							if($flag === false){
-							    $flag = $i;
-							}
-							if($flag >= 64){
-								$newFlags2 |= (1 << ($flag % 64));
-							}else{
-								$newFlags |= (1 << $flag);
+							if($flag !== false){
+							    if($flag >= 64){
+								    $newFlags2 |= (1 << ($flag % 64));
+						    	}else{
+							    	$newFlags |= (1 << $flag);
+								}
 							}
 						}
 					}
@@ -195,13 +190,12 @@ final class ActorMetadataConvertor{
 							if($flagsBinary[$i] === "1"){
                                 $i += 64;
 								$flag = array_search($i, $protocolMetadataFlags, true);
-								if($flag === false){
-							    	$flag = $i;
-								}
-								if($flag >= 64){
-									$newFlags2 |= (1 << ($flag % 64));
-								}else{
-                                    $newFlags |= (1 << $flag);
+								if($flag !== false){
+							    	if($flag >= 64){
+								    	$newFlags2 |= (1 << ($flag % 64));
+							    	}else{
+                                        $newFlags |= (1 << $flag);
+									}
                                 }
 							}
 						}
@@ -219,8 +213,8 @@ final class ActorMetadataConvertor{
 					$flagsBinary = strrev(decbin($flags));
 
 					for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
-						if($flagsBinary[$i] === "1"){
-							$flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
+						if($flagsBinary[$i] === "1" and isset($protocolMetadataFlags[$i])){
+							$flag = $protocolMetadataFlags[$i];
 							if($flag >= 64){
 								$newFlags2 |= (1 << ($flag % 64));
 							}else{
@@ -237,9 +231,9 @@ final class ActorMetadataConvertor{
 					    $flagsBinary = strrev(decbin($flags2));
 
 					    for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
-							if($flagsBinary[$i] === "1"){
+							if($flagsBinary[$i] === "1" and isset($protocolMetadataFlags[$i])){
                             	$i += 64;
-								$flag = (isset($protocolMetadataFlags[$i]) ? $protocolMetadataFlags[$i] : $i);
+								$flag = $protocolMetadataFlags[$i];
 								if($flag >= 64){
 									$newFlags2 |= (1 << ($flag % 64));
 								}else{
