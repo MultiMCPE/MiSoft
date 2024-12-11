@@ -24,18 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\block\BlockIds;
-use pocketmine\nbt\NBT;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
-use pocketmine\network\mcpe\multiversion\block\R12ToCurrentBlockMapEntry;
-use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\utils\AssumptionFailedError;
 use function file_get_contents;
-use function getmypid;
-use function json_decode;
-use function mt_rand;
-use function mt_srand;
-use function shuffle;
 use const pocketmine\RESOURCE_PATH;
 
 /**
@@ -57,72 +51,27 @@ final class BlockPalette407 extends Palette{
 	}
 
 	public static function init() : void{
-		$tag = (new NetworkLittleEndianNBTStream())->read(file_get_contents(RESOURCE_PATH . "/vanilla/palette/407/required_block_states.nbt"));
-		if(!($tag instanceof ListTag) or $tag->getTagType() !== NBT::TAG_Compound){ //this is a little redundant currently, but good for auto complete and makes phpstan happy
-			throw new \RuntimeException("Invalid blockstates table, expected TAG_List<TAG_Compound> root");
+		$runtimeBlockStatesFile = file_get_contents(RESOURCE_PATH . "/vanilla/palette/407/runtime_block_states.dat");
+		if($runtimeBlockStatesFile === false){
+			throw new AssumptionFailedError("Missing required resource file");
 		}
 
-		/** @var CompoundTag[] $list */
-		$list = $tag->getValue();
-		self::$bedrockKnownStates = self::randomizeTable($list);
+		$stream = (new LittleEndianNBTStream())->read($runtimeBlockStatesFile)->getValue();
+		self::$bedrockKnownStates = $stream;
 		self::$encodedPalette = (new NetworkLittleEndianNBTStream())->write(new ListTag("", self::$bedrockKnownStates));
 
-		self::setupLegacyMappings();
-	}
-
-	private static function setupLegacyMappings() : void{
-		$legacyIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block_id_map407.json"), true);
-
-		/** @var R12ToCurrentBlockMapEntry[] $legacyStateMap */
-		$legacyStateMap = [];
-		$legacyStateMapReader = new NetworkBinaryStream(file_get_contents(RESOURCE_PATH . "/vanilla/palette/407/r12_to_current_block_map.bin"));
-		$nbtReader = new NetworkLittleEndianNBTStream();
-		while(!$legacyStateMapReader->feof()){
-			$id = $legacyStateMapReader->getString();
-			$meta = $legacyStateMapReader->getLShort();
-
-			$offset = $legacyStateMapReader->getOffset();
-			$state = $nbtReader->read($legacyStateMapReader->getBuffer(), false, $offset);
-			$legacyStateMapReader->setOffset($offset);
-			if(!($state instanceof CompoundTag)){
-				throw new \RuntimeException("Blockstate should be a TAG_Compound");
-			}
-			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($id, $meta, $state);
-		}
-
-		/**
-		 * @var int[][] $idToStatesMap string id -> int[] list of candidate state indices
-		 */
-		$idToStatesMap = [];
-		foreach(self::$bedrockKnownStates as $k => $state){
-			$idToStatesMap[$state->getCompoundTag("block")->getString("name")][] = $k;
-		}
-		foreach($legacyStateMap as $pair){
-			$id = $legacyIdMap[$pair->getId()] ?? null;
-			if($id === null){
-				throw new \RuntimeException("No legacy ID matches " . $pair->getId());
-			}
-			$data = $pair->getMeta();
-			if($data > 15){
-				//we can't handle metadata with more than 4 bits
+		foreach($stream as $runtimeId => $tag){
+			/** @var CompoundTag $tag */
+			if(!$tag->hasTag("LegacyStates")){
 				continue;
 			}
-			$mappedState = $pair->getBlockState();
 
-			//TODO HACK: idiotic NBT compare behaviour on 3.x compares keys which are stored by values
-			$mappedState->setName("block");
-			$mappedName = $mappedState->getString("name");
-			if(!isset($idToStatesMap[$mappedName])){
-				throw new \RuntimeException("Mapped new state does not appear in network table");
-			}
-			foreach($idToStatesMap[$mappedName] as $k){
-				$networkState = self::$bedrockKnownStates[$k];
-				if($mappedState->equals($networkState->getCompoundTag("block"))){
-					self::registerMapping($k, $id, $data);
-					continue 2;
-				}
-			}
-			throw new \RuntimeException("Mapped new state does not appear in network table");
+			$legacyStates = $tag->getListTag("LegacyStates")->getValue()[0];
+			/** @var CompoundTag $legacyStates */
+			$id = $legacyStates->getInt("id");
+			$meta = $legacyStates->getShort("val");
+
+			self::registerMapping($runtimeId, $id, $meta);
 		}
 	}
 
@@ -130,23 +79,6 @@ final class BlockPalette407 extends Palette{
 		if(self::$bedrockKnownStates === null){
 			self::init();
 		}
-	}
-
-	/**
-	 * Randomizes the order of the runtimeID table to prevent plugins relying on them.
-	 * Plugins shouldn't use this stuff anyway, but plugin devs have an irritating habit of ignoring what they
-	 * aren't supposed to do, so we have to deliberately break it to make them stop.
-	 *
-	 * @param CompoundTag[] $table
-	 *
-	 * @return CompoundTag[]
-	 */
-	private static function randomizeTable(array $table) : array{
-		$postSeed = mt_rand(); //save a seed to set afterwards, to avoid poor quality randoms
-		mt_srand(getmypid()); //Use a seed which is the same on all threads. This isn't a secure seed, but we don't care.
-		shuffle($table);
-		mt_srand($postSeed); //restore a good quality seed that isn't dependent on PID
-		return $table;
 	}
 
 	public static function toStaticRuntimeId(int $id, int $meta = 0) : int{

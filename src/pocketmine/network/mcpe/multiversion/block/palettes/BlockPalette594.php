@@ -24,13 +24,10 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\block\BlockIds;
-use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\BigEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\NetworkBinaryStream;
-use pocketmine\network\mcpe\multiversion\block\R12ToCurrentBlockMapEntry;
 use pocketmine\utils\AssumptionFailedError;
 use function file_get_contents;
-use function json_decode;
 use const pocketmine\RESOURCE_PATH;
 
 /**
@@ -50,73 +47,23 @@ final class BlockPalette594 extends Palette{
 	}
 
 	public static function init() : void{
-		$canonicalBlockStatesFile = file_get_contents(RESOURCE_PATH . "/vanilla/palette/594/canonical_block_states.nbt");
-		if($canonicalBlockStatesFile === false){
+		$runtimeBlockStatesFile = file_get_contents(RESOURCE_PATH . "/vanilla/palette/594/runtime_block_states.dat");
+		if($runtimeBlockStatesFile === false){
 			throw new AssumptionFailedError("Missing required resource file");
 		}
-		$stream = new NetworkBinaryStream($canonicalBlockStatesFile);
-		$list = [];
-		while(!$stream->feof()){
-			$list[] = $stream->getNbtCompoundRoot();
-		}
-		self::$bedrockKnownStates = $list;
 
-		self::setupLegacyMappings();
-	}
+		$stream = (new BigEndianNBTStream())->readCompressed($runtimeBlockStatesFile)->getValue();
+		self::$bedrockKnownStates = $stream;
 
-	private static function setupLegacyMappings() : void{
-		$legacyIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block_id_map407.json"), true);
-
-		/** @var R12ToCurrentBlockMapEntry[] $legacyStateMap */
-		$legacyStateMap = [];
-		$legacyStateMapReader = new NetworkBinaryStream(file_get_contents(RESOURCE_PATH . "/vanilla/palette/594/r12_to_current_block_map.bin"));
-		$nbtReader = new NetworkLittleEndianNBTStream();
-		while(!$legacyStateMapReader->feof()){
-			$id = $legacyStateMapReader->getString();
-			$meta = $legacyStateMapReader->getLShort();
-
-			$offset = $legacyStateMapReader->getOffset();
-			$state = $nbtReader->read($legacyStateMapReader->getBuffer(), false, $offset);
-			$legacyStateMapReader->setOffset($offset);
-			if(!($state instanceof CompoundTag)){
-				throw new \RuntimeException("Blockstate should be a TAG_Compound");
-			}
-			$legacyStateMap[] = new R12ToCurrentBlockMapEntry($id, $meta, $state);
-		}
-
-		/**
-		 * @var int[][] $idToStatesMap string id -> int[] list of candidate state indices
-		 */
-		$idToStatesMap = [];
-		foreach(self::$bedrockKnownStates as $k => $state){
-			$idToStatesMap[$state->getString("name")][] = $k;
-		}
-		foreach($legacyStateMap as $pair){
-			$id = $legacyIdMap[$pair->getId()] ?? null;
-			if($id === null){
-				throw new \RuntimeException("No legacy ID matches " . $pair->getId());
-			}
-			$data = $pair->getMeta();
-			if($data > 15){
-				//we can't handle metadata with more than 4 bits
+		foreach($stream as $tag){
+			$id = $tag->getInt("id");
+			$meta = $tag->getShort("data");
+			if($meta > 15){
 				continue;
 			}
-			$mappedState = $pair->getBlockState();
+			$runtimeId = $tag->getInt("runtimeId");
 
-			//TODO HACK: idiotic NBT compare behaviour on 3.x compares keys which are stored by values
-			$mappedState->setName("");
-			$mappedName = $mappedState->getString("name");
-			if(!isset($idToStatesMap[$mappedName])){
-				throw new \RuntimeException("Mapped new state does not appear in network table");
-			}
-			foreach($idToStatesMap[$mappedName] as $k){
-				$networkState = self::$bedrockKnownStates[$k];
-				if($mappedState->equals($networkState)){
-					self::registerMapping($k, $id, $data);
-					continue 2;
-				}
-			}
-			throw new \RuntimeException("Mapped new state does not appear in network table");
+			self::registerMapping($runtimeId, $id, $meta);
 		}
 	}
 
