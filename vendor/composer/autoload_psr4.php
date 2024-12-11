@@ -11,6 +11,7 @@ return array(
     'pocketmine\\snooze\\' => array($vendorDir . '/multimcpe/snooze/src'),
     'pocketmine\\nbt\\' => array($vendorDir . '/multimcpe/nbt/src'),
     'pocketmine\\math\\' => array($vendorDir . '/multimcpe/math/src'),
+    'pocketmine\\errorhandler\\' => array($vendorDir . '/pocketmine/errorhandler/src'),
     'pocketmine\\' => array($baseDir . '/src/pocketmine', $baseDir . '/tests/phpunit'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'PHPStan\\' => array($vendorDir . '/phpstan/phpstan-phpunit/src', $vendorDir . '/phpstan/phpstan-strict-rules/src'),

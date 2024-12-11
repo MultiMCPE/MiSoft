@@ -1,22 +1,18 @@
 <?php
 
 /*
- *
- *  ____            _        _   __  __ _                  __  __ ____
- * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
- * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
- * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
- * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ * PocketMine Standard PHP Library
+ * Copyright (C) 2019 PocketMine Team <https://github.com/pmmp/PocketMine-SPL>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * @author PocketMine Team
- * @link http://www.pocketmine.net/
- *
- *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 */
 
 declare(strict_types=1);
@@ -70,8 +66,8 @@ final class ErrorToExceptionHandler{
 	/**
 	 * Shorthand method to set the error-to-exception error handler.
 	 */
-	public static function set() : void{
-		set_error_handler([self::class, 'handle']);
+	public static function set(int $levels = E_WARNING | E_NOTICE) : void{
+		set_error_handler([self::class, 'handle'], $levels);
 	}
 
 	/**
@@ -81,13 +77,9 @@ final class ErrorToExceptionHandler{
 	 *
 	 * @phpstan-return \Closure(int, string, string, int) : bool
 	 */
-	private static function handleNoticeAndWarning(int $severities) : \Closure{
-		return function(int $severity, string $message, string $file, int $line) use ($severities) : bool{
-			if(($severities & $severity) !== 0){
-				throw new \ErrorException($message, 0, $severity, $file, $line);
-			}
-
-			return false;
+	private static function throwAll() : \Closure{
+		return function(int $severity, string $message, string $file, int $line): bool{
+			throw new \ErrorException($message, 0, $severity, $file, $line);
 		};
 	}
 
@@ -102,7 +94,7 @@ final class ErrorToExceptionHandler{
 	 * @throws \ErrorException
 	 */
 	public static function trap(\Closure $closure, int $levels = E_WARNING | E_NOTICE){
-		set_error_handler(self::handleNoticeAndWarning($levels));
+		set_error_handler(self::throwAll(), $levels);
 		try{
 			return $closure();
 		}finally{
@@ -121,7 +113,7 @@ final class ErrorToExceptionHandler{
 	 * @throws \ErrorException
 	 */
 	public static function trapAndRemoveFalse(\Closure $closure, int $levels = E_WARNING | E_NOTICE){
-		set_error_handler(self::handleNoticeAndWarning($levels));
+		set_error_handler(self::throwAll(), $levels);
 		try{
 			$result = $closure();
 			if($result === false){

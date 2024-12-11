@@ -31,6 +31,7 @@
       "multimcpe/nbt": "^0.2.10",
       "multimcpe/math": "^0.2.0",
       "multimcpe/snooze": "^0.1.0",
+      "pocketmine/errorhandler": "^0.7.0",
       "daverandom/callback-validator": "dev-master",
       "adhocore/json-comment": "^0.0.7"
    },

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitfb929412818d173682395fbcd41be12e
+class ComposerStaticInit7484194506a5afb13f6892b2384c13b8
 {
     public static $files = array (
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
@@ -25,6 +25,7 @@ class ComposerStaticInitfb929412818d173682395fbcd41be12e
             'pocketmine\\snooze\\' => 18,
             'pocketmine\\nbt\\' => 15,
             'pocketmine\\math\\' => 16,
+            'pocketmine\\errorhandler\\' => 24,
             'pocketmine\\' => 11,
         ),
         'P' => 
@@ -68,6 +69,10 @@ class ComposerStaticInitfb929412818d173682395fbcd41be12e
         'pocketmine\\math\\' => 
         array (
             0 => __DIR__ . '/..' . '/multimcpe/math/src',
+        ),
+        'pocketmine\\errorhandler\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/pocketmine/errorhandler/src',
         ),
         'pocketmine\\' => 
         array (
@@ -749,9 +754,9 @@ class ComposerStaticInitfb929412818d173682395fbcd41be12e
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitfb929412818d173682395fbcd41be12e::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitfb929412818d173682395fbcd41be12e::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitfb929412818d173682395fbcd41be12e::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit7484194506a5afb13f6892b2384c13b8::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit7484194506a5afb13f6892b2384c13b8::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit7484194506a5afb13f6892b2384c13b8::$classMap;
 
         }, null, ClassLoader::class);
     }
