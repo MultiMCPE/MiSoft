@@ -24,18 +24,29 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
+use pocketmine\network\mcpe\protocol\types\pocketedition\CommandOriginData;
 
 class CommandStepPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::COMMAND_STEP_PACKET;
 
+	/** @var string */
 	public $command;
+	/** @var string */
 	public $overload;
+	/** @var int */
 	public $uvarint1;
+	/** @var int */
 	public $currentStep;
+	/** @var bool */
 	public $done;
+	/** @var int */
 	public $clientId;
+	/** @var array|null */
 	public $inputJson;
+	/** @var array|null */
 	public $outputJson;
+	/** @var CommandOriginData */
+	public $originData;
 
 	public function decodePayload(){
 		$this->command = $this->getString();
@@ -46,8 +57,7 @@ class CommandStepPacket extends DataPacket{
 		$this->clientId = $this->getUnsignedVarLong();
 		$this->inputJson = json_decode($this->getString());
 		$this->outputJson = json_decode($this->getString());
-
-		$this->getRemaining(); //TODO: read command origin data
+		$this->originData = CommandOriginData::read($this);
 	}
 
 	public function encodePayload(){
@@ -59,8 +69,7 @@ class CommandStepPacket extends DataPacket{
 		$this->putUnsignedVarLong($this->clientId);
 		$this->putString(json_encode($this->inputJson));
 		$this->putString(json_encode($this->outputJson));
-
-		$this->put("\x00\x00\x00"); //TODO: command origin data
+		$this->originData->write($this);
 	}
 
 	public function mustBeDecoded() : bool{
