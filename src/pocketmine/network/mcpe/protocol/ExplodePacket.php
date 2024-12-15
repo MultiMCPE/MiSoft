@@ -45,7 +45,11 @@ class ExplodePacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->position = $this->getVector3();
-		$this->radius = (float) ($this->getVarInt() / 32);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->radius = (float) ($this->getVarInt() / 32);
+		}else{
+			$this->radius = $this->getLFloat();
+		}
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
 			$x = $y = $z = 0;
@@ -56,7 +60,11 @@ class ExplodePacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putVector3($this->position);
-		$this->putVarInt((int) ($this->radius * 32));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	    	$this->putVarInt((int) ($this->radius * 32));
+		}else{
+			$this->putLFloat($this->radius);
+		}
 		$this->putUnsignedVarInt(count($this->records));
 		if(count($this->records) > 0){
 			foreach($this->records as $record){
