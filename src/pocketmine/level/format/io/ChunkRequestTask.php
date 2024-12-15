@@ -83,7 +83,7 @@ class ChunkRequestTask extends AsyncTask{
 
 		$this->protocol = $protocol;
 
-		$this->levelChunkPacketId = PacketPool::getPacketMagicById(LevelChunkPacket::NETWORK_ID, $protocol);
+		$this->levelChunkPacketId = PacketPool::getPacketIdByMagic(LevelChunkPacket::NETWORK_ID, $protocol);
 	}
 
 	public function onRun() : void{
