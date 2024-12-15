@@ -76,7 +76,7 @@ class BatchPacket extends DataPacket{
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 				$payload = chr(0x00) . zlib_encode($this->payload, ZLIB_ENCODING_RAW, $this->compressionLevel);
 			}else{
-	        	$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_406 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
+	        	$payload = zlib_encode($this->payload, ($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 ? ZLIB_ENCODING_RAW : ZLIB_ENCODING_DEFLATE), $this->compressionLevel);
 			}
 	    }else{
 	        $payload = $this->payload;

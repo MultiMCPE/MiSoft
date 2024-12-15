@@ -36,7 +36,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds331;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds360;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds385;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds387;
-use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds406;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds401;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds419;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds422;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds428;
@@ -98,7 +98,7 @@ class PacketPool {
         ProtocolInfo::PROTOCOL_428 => PacketsIds428::class,
         ProtocolInfo::PROTOCOL_422 => PacketsIds422::class,
         ProtocolInfo::PROTOCOL_419 => PacketsIds419::class,
-        ProtocolInfo::PROTOCOL_406 => PacketsIds406::class,
+        ProtocolInfo::PROTOCOL_401 => PacketsIds401::class,
         ProtocolInfo::PROTOCOL_387 => PacketsIds387::class,
         ProtocolInfo::PROTOCOL_385 => PacketsIds385::class,
         ProtocolInfo::PROTOCOL_360 => PacketsIds360::class,

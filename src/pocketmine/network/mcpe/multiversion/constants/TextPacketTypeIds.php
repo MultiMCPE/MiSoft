@@ -45,7 +45,7 @@ final class TextPacketTypeIds{
             "TYPE_JSON" => 10,
             "TYPE_JSON_ANNOUNCEMENT" => 11
         ],
-        ProtocolInfo::PROTOCOL_406 => [
+        ProtocolInfo::PROTOCOL_401 => [
             "TYPE_RAW" => 0,
             "TYPE_CHAT" => 1,
             "TYPE_TRANSLATION" => 2,

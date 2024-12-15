@@ -216,15 +216,15 @@ class CraftingDataPacket extends DataPacket{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
             for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
                 $input = $this->getVarInt();
-                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
                     $inputMeta = $this->getVarInt();
                 }
                 $ingredient = $this->getVarInt();
-                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
                     $ingredientMeta = $this->getVarInt();
                 }
                 $output = $this->getVarInt();
-                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
                     $outputMeta = $this->getVarInt();
                 }
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
@@ -431,15 +431,15 @@ class CraftingDataPacket extends DataPacket{
 	    	        [$output, $outputMeta] = $palette::getRuntimeFromLegacyId($output, $outputMeta);
 	    	    }
 		    	$this->putVarInt($input);
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
 		        	$this->putVarInt($inputMeta);
 		    	}
 		    	$this->putVarInt($ingredient);
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
 		        	$this->putVarInt($ingredientMeta);
 		    	}
 		    	$this->putVarInt($output);
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
 		        	$this->putVarInt($outputMeta);
 		    	}
 	    	}

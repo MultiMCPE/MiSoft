@@ -2514,7 +2514,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		    	);
 	    	}
 
-	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	        	$personaPieces = [];
 	        	foreach($packet->clientData["PersonaPieces"] as $piece){
 		        	$personaPieces[] = new PersonaSkinPiece(

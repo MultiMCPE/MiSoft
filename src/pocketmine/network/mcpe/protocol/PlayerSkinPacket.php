@@ -73,7 +73,7 @@ class PlayerSkinPacket extends DataPacket{
             $this->skin = $this->getSkin($this->getProtocol());
 	    	$this->newSkinName = $this->getString();
 	    	$this->oldSkinName = $this->getString();
-	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402)){
                 $this->getBool(); //TODO: trustedSkin
 	    	}
         }
@@ -109,7 +109,7 @@ class PlayerSkinPacket extends DataPacket{
             $this->putSkin($this->skin, $this->getProtocol());
 	    	$this->putString($this->newSkinName);
 	    	$this->putString($this->oldSkinName);
-	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402)){
                 $this->putBool($this->skin->getSerializedSkin()->isTrustedSkin());
 	    	}
         }

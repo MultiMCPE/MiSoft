@@ -293,7 +293,7 @@ class StartGamePacket extends DataPacket{
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
             $this->hasEduFeaturesEnabled = $this->getBool();
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	        	$this->eduProductUUID = $this->getString();
 	    	}
 		}
@@ -543,7 +543,7 @@ class StartGamePacket extends DataPacket{
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_260 && $this->vanillaVersion != '1.2.20.1'){
             $this->putBool($this->hasEduFeaturesEnabled);
-	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	    $this->putString($this->eduProductUUID);
 	    	}
 		}

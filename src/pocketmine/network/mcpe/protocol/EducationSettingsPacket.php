@@ -109,7 +109,7 @@ class EducationSettingsPacket extends DataPacket{
 
 	protected function decodePayload() : void{
 		$this->codeBuilderDefaultUri = $this->getString();
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$this->codeBuilderTitle = $this->getString();
 	    	$this->canResizeCodeBuilder = $this->getBool();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
@@ -134,7 +134,7 @@ class EducationSettingsPacket extends DataPacket{
 
 	protected function encodePayload() : void{
 		$this->putString($this->codeBuilderDefaultUri);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$this->putString($this->codeBuilderTitle);
             $this->putBool($this->canResizeCodeBuilder);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){

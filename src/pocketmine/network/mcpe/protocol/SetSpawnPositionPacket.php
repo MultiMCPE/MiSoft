@@ -54,7 +54,7 @@ class SetSpawnPositionPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->spawnType = $this->getVarInt();
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$this->dimension = $this->getVarInt();
 	    	$this->getBlockPosition($this->x2, $this->y2, $this->z2);
 		}else{
@@ -65,7 +65,7 @@ class SetSpawnPositionPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putVarInt($this->spawnType);
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$this->putVarInt($this->dimension);
 	    	$this->putBlockPosition($this->x2, $this->y2, $this->z2);
 		}else{

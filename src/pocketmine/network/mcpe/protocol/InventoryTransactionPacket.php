@@ -113,7 +113,7 @@ class InventoryTransactionPacket extends DataPacket{
 			$this->actions[] = $action = (new NetworkInventoryAction())->read($this, $this->hasItemStackIds ?? false);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
-                if($this->getProtocol() < ProtocolInfo::PROTOCOL_406){
+                if($this->getProtocol() < ProtocolInfo::PROTOCOL_401){
 		        	if(
 			        	$action->sourceType === NetworkInventoryAction::SOURCE_CONTAINER and
 			        	$action->windowId === ContainerIds::UI and

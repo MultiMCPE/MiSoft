@@ -134,7 +134,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$capeId = $this->getString();
 		$fullSkinId = $this->getString();
 
-		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_401){
 	    	$armSize = $this->getString();
 	    	$skinColor = Color::fromHexString($this->getString());
 	    	$personaPieceCount = $this->getLInt();
@@ -219,7 +219,7 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$this->putString($skin->getCapeId());
 		$this->putString($skin->getFullSkinId());
-		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_406){
+		if($playerProtocol === ProtocolInfo::PROTOCOL_390 || $playerProtocol >= ProtocolInfo::PROTOCOL_401){
 	    	$this->putString($skin->getArmSize());
 	    	$this->putString($skin->getSkinColor()->toHexString());
             $this->putLInt(count($skin->getPersonaPieces()));
@@ -1179,7 +1179,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$link->type = $this->getByte();
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
 	    	$link->immediate = $this->getBool();
-	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_401){
 		        $link->causedByRider = $this->getBool();
                 if($playerProtocol >= ProtocolInfo::PROTOCOL_712){
                     $link->vehicleAngularVelocity = $this->getLFloat();
@@ -1200,7 +1200,7 @@ class NetworkBinaryStream extends BinaryStream{
         $this->putByte($link->type);
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_130){
             $this->putBool($link->immediate);
-	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_406){
+	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_401){
                 $this->putBool($link->causedByRider);
                 if($playerProtocol >= ProtocolInfo::PROTOCOL_712){
                     $this->putLFloat($link->vehicleAngularVelocity);

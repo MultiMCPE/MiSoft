@@ -59,7 +59,7 @@ final class SpawnSettings{
 	}
 
 	public static function read(DataPacket $in) : self{
-	    if($in->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    if($in->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$biomeType = $in->getLShort();
 	    	$biomeName = $in->getString();
 	    }
@@ -69,7 +69,7 @@ final class SpawnSettings{
 	}
 
 	public function write(DataPacket $out) : void{
-	    if($out->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    if($out->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$out->putLShort($this->biomeType);
 	    	$out->putString($this->biomeName);
 	    }

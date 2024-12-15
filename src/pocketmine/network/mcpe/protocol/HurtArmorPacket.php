@@ -36,7 +36,7 @@ class HurtArmorPacket extends DataPacket{
     public $armorSlotFlags;
 
 	protected function decodePayload(){
-	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 			$this->cause = $this->getVarInt();
 	    }
 		$this->health = $this->getVarInt();
@@ -46,7 +46,7 @@ class HurtArmorPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_406){
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 			$this->putVarInt($this->cause);
 	    }
 		$this->putVarInt($this->health);
