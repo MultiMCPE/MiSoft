@@ -91,9 +91,7 @@ class Anvil extends McRegion{
 
 	protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
 		return new CompoundTag("", [
-			new ByteArrayTag("Blocks", self::serializeBlockLayers($subChunk)),
-			new ByteArrayTag("SkyLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockSkyLightArray(), "\xff")),
-			new ByteArrayTag("BlockLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockLightArray()))
+			new ByteArrayTag("Blocks", self::serializeBlockLayers($subChunk))
 		]);
 	}
 
