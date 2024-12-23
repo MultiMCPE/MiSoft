@@ -1047,9 +1047,6 @@ class Chunk{
 			$count = 0;
 			$subChunks = "";
 			foreach($this->subChunks as $y => $subChunk){
-				if($subChunk instanceof EmptySubChunk){
-					continue;
-				}
 				++$count;
 				$subChunks .= chr($y);
 				$newStream = new BinaryStream();
