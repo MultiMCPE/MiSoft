@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io\region;
 
+use pocketmine\block\Block;
 use pocketmine\utils\BinaryStream;
 use pocketmine\world\format\io\SubChunkConverter;
 use pocketmine\level\format\SubChunk;
