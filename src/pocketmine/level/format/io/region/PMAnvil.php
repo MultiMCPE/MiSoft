@@ -40,9 +40,7 @@ class PMAnvil extends Anvil{
 
 	protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
 		return new CompoundTag("", [
-			new ByteArrayTag("Blocks",     self::serializeBlockLayers($subChunk)),
-			new ByteArrayTag("SkyLight",   $subChunk->getBlockSkyLightArray()),
-			new ByteArrayTag("BlockLight", $subChunk->getBlockLightArray())
+			new ByteArrayTag("Blocks",     self::serializeBlockLayers($subChunk))
 		]);
 	}
 
