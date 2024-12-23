@@ -57,15 +57,15 @@ class BlockFactory{
 	 * this if you need to reset the block factory back to its original defaults for whatever reason.
 	 */
 	public static function init() : void{
-		self::$fullList = new SplFixedArray(4096);
+		self::$fullList = new SplFixedArray(16384);
 
-		self::$light = new SplFixedArray(256);
-		self::$lightFilter = new SplFixedArray(256);
-		self::$solid = new SplFixedArray(256);
-		self::$hardness = new SplFixedArray(256);
-		self::$transparent = new SplFixedArray(256);
-		self::$diffusesSkyLight = new SplFixedArray(256);
-		self::$blastResistance = new SplFixedArray(256);
+		self::$light = new SplFixedArray(1024);
+		self::$lightFilter = new SplFixedArray(1024);
+		self::$solid = new SplFixedArray(1024);
+		self::$hardness = new SplFixedArray(1024);
+		self::$transparent = new SplFixedArray(1024);
+		self::$diffusesSkyLight = new SplFixedArray(1024);
+		self::$blastResistance = new SplFixedArray(1024);
 
 		self::registerBlock(new Air());
 		self::registerBlock(new Stone());
@@ -317,6 +317,7 @@ class BlockFactory{
 		//TODO: STRUCTURE_BLOCK
 
 		self::registerBlock(new Reserved6(Block::RESERVED6, 0, "reserved6"));
+		self::registerBlock(new Netherite(Block::NETHERITE_BLOCK, 0, "Netherite Block"));
 
 		for($id = 0, $size = self::$fullList->getSize() >> 4; $id < $size; ++$id){
 			if(self::$fullList[$id << 4] === null){

@@ -627,7 +627,7 @@ class LevelSoundEventPacket extends DataPacket{
 	    }
 		$this->putVector3($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
-            if ($this->sound === self::SOUND_HIT || $this->sound === self::SOUND_PLACE) {
+            if ($this->sound === self::SOUND_HIT || $this->sound === self::SOUND_PLACE || $this->sound === self::SOUND_BREAK) {
                 $palette = BlockPalette::getPalette($this->getProtocol());
                 $runtimeId = $palette::toStaticRuntimeId($this->extraData);
                 $this->putVarInt($runtimeId);

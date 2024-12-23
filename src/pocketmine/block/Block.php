@@ -44,6 +44,8 @@ use function get_class;
 use const PHP_INT_MAX;
 
 class Block extends Position implements BlockIds, Metadatable{
+	public const INTERNAL_METADATA_BITS = 4;
+	public const INTERNAL_METADATA_MASK = ~(~0 << self::INTERNAL_METADATA_BITS);
 
 	/**
 	 * Returns a new Block instance with the specified ID, meta and position.
@@ -110,7 +112,7 @@ class Block extends Position implements BlockIds, Metadatable{
 	 * @return int
 	 */
 	public function getItemId() : int{
-		return $this->itemId ?? $this->getId();
+		return $this->itemId ?? ($this->getId() > 255 ? 255 - $this->getId() : $this->getId());
 	}
 
 	/**

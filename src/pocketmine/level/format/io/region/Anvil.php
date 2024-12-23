@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io\region;
 
+use pocketmine\block\Block;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\format\io\ChunkUtils;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
@@ -33,6 +34,8 @@ use pocketmine\nbt\tag\ByteArrayTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntArrayTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\world\format\io\SubChunkConverter;
+use pocketmine\utils\BinaryStream;
 
 class Anvil extends McRegion{
 
@@ -88,8 +91,7 @@ class Anvil extends McRegion{
 
 	protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
 		return new CompoundTag("", [
-			new ByteArrayTag("Blocks", ChunkUtils::reorderByteArray($subChunk->getBlockIdArray())), //Generic in-memory chunks are currently always XZY
-			new ByteArrayTag("Data", ChunkUtils::reorderNibbleArray($subChunk->getBlockDataArray())),
+			new ByteArrayTag("Blocks", self::serializeBlockLayers($subChunk)),
 			new ByteArrayTag("SkyLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockSkyLightArray(), "\xff")),
 			new ByteArrayTag("BlockLight", ChunkUtils::reorderNibbleArray($subChunk->getBlockLightArray()))
 		]);
@@ -134,11 +136,20 @@ class Anvil extends McRegion{
 	}
 
 	protected function deserializeSubChunk(CompoundTag $subChunk) : SubChunk{
+		if($subChunk->hasTag("Data")){
+			$emptyBlockId = Block::AIR << Block::INTERNAL_METADATA_BITS;
+			$blockLayers = [SubChunkConverter::convertSubChunkYZX(
+				self::readFixedSizeByteArray($subChunk, "Blocks", 4096),
+				self::readFixedSizeByteArray($subChunk, "Data", 2048)
+			)];
+		}else{
+			$stream = new BinaryStream($subChunk->getByteArray("Blocks"));
+			[$emptyBlockId, $blockLayers] = self::deserializeBlockLayers($stream);
+		}
+
 		return new SubChunk(
-			ChunkUtils::reorderByteArray($subChunk->getByteArray("Blocks")),
-			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("Data")),
-			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("SkyLight"), "\xff"),
-			ChunkUtils::reorderNibbleArray($subChunk->getByteArray("BlockLight"))
+			$emptyBlockId,
+			$blockLayers
 		);
 	}
 

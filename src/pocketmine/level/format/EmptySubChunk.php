@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
+use pocketmine\block\Block;
 use function str_repeat;
 
 class EmptySubChunk implements SubChunkInterface{
@@ -39,6 +40,10 @@ class EmptySubChunk implements SubChunkInterface{
 
 	public function isEmpty(bool $checkLight = true) : bool{
 		return true;
+	}
+
+	public function getEmptyBlockId() : int{
+		return Block::AIR;
 	}
 
 	public function getBlockId(int $x, int $y, int $z) : int{
@@ -59,6 +64,10 @@ class EmptySubChunk implements SubChunkInterface{
 
 	public function getFullBlock(int $x, int $y, int $z) : int{
 		return 0;
+	}
+
+	public function setFullBlock(int $x, int $y, int $z, int $block) : void{
+
 	}
 
 	public function setBlock(int $x, int $y, int $z, ?int $id = null, ?int $data = null) : bool{
@@ -85,14 +94,6 @@ class EmptySubChunk implements SubChunkInterface{
 		return -1;
 	}
 
-	public function getBlockIdColumn(int $x, int $z) : string{
-		return "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-	}
-
-	public function getBlockDataColumn(int $x, int $z) : string{
-		return "\x00\x00\x00\x00\x00\x00\x00\x00";
-	}
-
 	public function getBlockLightColumn(int $x, int $z) : string{
 		return "\x00\x00\x00\x00\x00\x00\x00\x00";
 	}
@@ -101,12 +102,8 @@ class EmptySubChunk implements SubChunkInterface{
 		return "\xff\xff\xff\xff\xff\xff\xff\xff";
 	}
 
-	public function getBlockIdArray() : string{
-		return str_repeat("\x00", 4096);
-	}
-
-	public function getBlockDataArray() : string{
-		return str_repeat("\x00", 2048);
+	public function getBlockLayers() : array{
+		return [];
 	}
 
 	public function getBlockLightArray() : string{

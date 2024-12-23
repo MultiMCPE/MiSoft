@@ -659,12 +659,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$blockRuntimeId = 0;
 		if($isBlockItem){
-			if($id === ItemIds::CARVED_PUMPKIN){
-				$block = BlockFactory::get(ItemIds::PUMPKIN);
-			}else{
-		    	$block = $item->getBlock();
-			}
-
+		    $block = $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
 			    $palette = BlockPalette::getPalette($playerProtocol);
 			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());

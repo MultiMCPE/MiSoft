@@ -27,6 +27,7 @@ declare(strict_types=1);
 namespace pocketmine\level\format;
 
 use InvalidArgumentException;
+use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\entity\Entity;
 use pocketmine\level\biome\Biome;
@@ -43,7 +44,6 @@ use pocketmine\utils\Binary;
 use pocketmine\utils\BinaryStream;
 use pocketmine\utils\Utils;
 use pocketmine\world\format\PalettedBlockArray;
-use pocketmine\world\format\io\SubChunkConverter;
 use Closure;
 use SplFixedArray;
 use Throwable;
@@ -214,7 +214,7 @@ class Chunk{
 	 * @return bool
 	 */
 	public function setBlock(int $x, int $y, int $z, ?int $blockId = null, ?int $meta = null) : bool{
-		if($this->getSubChunk($y >> 4, true)->setBlock($x, $y & 0x0f, $z, $blockId !== null ? ($blockId & 0xff) : null, $meta !== null ? ($meta & 0x0f) : null)){
+		if($this->getSubChunk($y >> 4, true)->setBlock($x, $y & 0x0f, $z, $blockId, $meta)){
 			$this->hasChanged = true;
 			return true;
 		}
@@ -492,39 +492,6 @@ class Chunk{
 	}
 
 	/**
-	 * Returns a column of block IDs from bottom to top at the specified X/Z chunk block coordinates.
-	 *
-	 * @param int $x 0-15
-	 * @param int $z 0-15
-	 *
-	 * @return string
-	 */
-	public function getBlockIdColumn(int $x, int $z) : string{
-		$result = "";
-		foreach($this->subChunks as $subChunk){
-			$result .= $subChunk->getBlockIdColumn($x, $z);
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Returns a column of block meta values from bottom to top at the specified X/Z chunk block coordinates.
-	 *
-	 * @param int $x 0-15
-	 * @param int $z 0-15
-	 *
-	 * @return string
-	 */
-	public function getBlockDataColumn(int $x, int $z) : string{
-		$result = "";
-		foreach($this->subChunks as $subChunk){
-			$result .= $subChunk->getBlockDataColumn($x, $z);
-		}
-		return $result;
-	}
-
-	/**
 	 * Returns a column of sky light values from bottom to top at the specified X/Z chunk block coordinates.
 	 *
 	 * @param int $x 0-15
@@ -799,7 +766,7 @@ class Chunk{
 		if($y < 0 or $y >= $this->height){
 			return $this->emptySubChunk;
 		}elseif($generateNew and $this->subChunks[$y] instanceof EmptySubChunk){
-			$this->subChunks[$y] = new SubChunk();
+			$this->subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, []);
 		}
 
 		return $this->subChunks[$y];
@@ -952,8 +919,34 @@ class Chunk{
 		if($legacyToRuntime === null){
 		    $result->putByte(0); // storage version
 
-		    $result->put($subChunk->getBlockIdArray());
-		    $result->put($subChunk->getBlockDataArray());
+			$palettedBlockArray = $subChunk->getBlockLayers()[0] ?? new PalettedBlockArray(Block::AIR);
+
+			// thx Submarine :)
+			$blockIdArray = "";
+			$blockDataArray = "";
+			for($x = 0; $x < 16; ++$x){
+				for($z = 0; $z < 16; ++$z){
+					for($y = 0; $y < 16; ++$y){
+						$fullBlock = $palettedBlockArray->get($x, $y, $z);
+						[$legacyId, $legacyMeta] = [$fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK];
+						if($legacyId > 255){
+							$legacyId = 248; //minecraft:info_update
+							$legacyMeta = 0;
+						}
+
+						$blockIdArray[($x << 8) | ($z << 4) | $y] = chr($legacyId);
+						$indexData = ($x << 7) | ($z << 3) | ($y >> 1);
+						if(($y & 1) === 0){
+							$blockDataArray[$indexData] = chr((ord($blockDataArray[$indexData] ?? chr(0)) & 0xf0) | ($legacyMeta & 0x0f));
+						}else{
+							$blockDataArray[$indexData] = chr((($legacyMeta & 0x0f) << 4) | (ord($blockDataArray[$indexData] ?? chr(0)) & 0x0f));
+						}
+					}
+				}
+			}
+
+		    $result->put($blockIdArray);
+		    $result->put($blockDataArray);
 		    if($playerProtocol < ProtocolInfo::PROTOCOL_130){
 			    $result->put($subChunk->getBlockSkyLightArray());
 			    $result->put($subChunk->getBlockLightArray());
@@ -961,31 +954,34 @@ class Chunk{
 	    }else{
 			Utils::validateCallableSignature(function(int $blockId, int $meta) : int{}, $legacyToRuntime);
 
-			$blocks = SubChunkConverter::convertSubChunkXZY($subChunk->getBlockIdArray(), $subChunk->getBlockDataArray());
+			$blockLayers = $subChunk->getBlockLayers();
 
 			$result->putByte(8); // storage version
-			$result->putByte(1); // layer count
-            // 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
-            if($blocks->getBitsPerBlock() === 0){
-                //TODO: we use these in memory, but the game doesn't support them yet
-                //polyfill them with 1-bpb instead
-                $bitsPerBlock = 1;
-                $words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
-            }else{
-                $bitsPerBlock = $blocks->getBitsPerBlock();
-                $words = $blocks->getWordArray();
-            }
-            $result->putByte(($bitsPerBlock << 1) | 1);
-            $result->put($words);
-            $palette = $blocks->getPalette();
+			$result->putByte(count($blockLayers)); // layer count
 
-            //these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
-            //but since we know they are always unsigned, we can avoid the extra fcall overhead of
-            //zigzag and just shift directly.
-            $result->putUnsignedVarInt(count($palette) << 1);
-			foreach($palette as $fullBlock){
-				$runtimeId = $legacyToRuntime($fullBlock >> 4, $fullBlock & 0x0f);
-				$result->putUnsignedVarInt($runtimeId << 1);
+			foreach($blockLayers as $blocks){
+                // 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
+                if($blocks->getBitsPerBlock() === 0){
+                    //TODO: we use these in memory, but the game doesn't support them yet
+                    //polyfill them with 1-bpb instead
+                    $bitsPerBlock = 1;
+                    $words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
+                }else{
+                    $bitsPerBlock = $blocks->getBitsPerBlock();
+                    $words = $blocks->getWordArray();
+                }
+                $result->putByte(($bitsPerBlock << 1) | 1);
+                $result->put($words);
+                $palette = $blocks->getPalette();
+
+                //these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
+                //but since we know they are always unsigned, we can avoid the extra fcall overhead of
+                //zigzag and just shift directly.
+                $result->putUnsignedVarInt(count($palette) << 1);
+			    foreach($palette as $fullBlock){
+			    	$runtimeId = $legacyToRuntime($fullBlock >> 4, $fullBlock & 0x0f);
+			    	$result->putUnsignedVarInt($runtimeId << 1);
+				}
 			}
 		}
 
@@ -1055,7 +1051,22 @@ class Chunk{
 					continue;
 				}
 				++$count;
-				$subChunks .= chr($y) . $subChunk->getBlockIdArray() . $subChunk->getBlockDataArray();
+				$subChunks .= chr($y);
+				$newStream = new BinaryStream();
+				$newStream->putInt($subChunk->getEmptyBlockId());
+				$layers = $subChunk->getBlockLayers();
+				$newStream->putByte(count($layers));
+				foreach($layers as $blocks){
+					$wordArray = $blocks->getWordArray();
+					$palette = $blocks->getPalette();
+		
+					$newStream->putByte($blocks->getBitsPerBlock());
+					$newStream->put($wordArray);
+					$serialPalette = pack("L*", ...$palette);
+					$newStream->putInt(strlen($serialPalette));
+					$newStream->put($serialPalette);
+				}
+				$subChunks .= $newStream->getBuffer();
 				if($this->lightPopulated){
 					$subChunks .= $subChunk->getBlockSkyLightArray() . $subChunk->getBlockLightArray();
 				}
@@ -1096,9 +1107,25 @@ class Chunk{
 		if($terrainGenerated){
 			$count = $stream->getByte();
 			for($y = 0; $y < $count; ++$y){
-				$subChunks[$stream->getByte()] = new SubChunk(
-					$stream->get(4096), //blockids
-					$stream->get(2048), //blockdata
+				$y = $stream->getByte();
+
+				$airBlockId = $stream->getInt();
+
+				/** @var PalettedBlockArray[] $layers */
+				$layers = [];
+				for($i = 0, $layerCount = $stream->getByte(); $i < $layerCount; ++$i){
+					$bitsPerBlock = $stream->getByte();
+					$words = $stream->get(PalettedBlockArray::getExpectedWordArraySize($bitsPerBlock));
+					/** @var int[] $unpackedPalette */
+					$unpackedPalette = unpack("L*", $stream->get($stream->getInt())); //unpack() will never fail here
+					$palette = array_values($unpackedPalette);
+
+					$layers[] = PalettedBlockArray::fromData($bitsPerBlock, $words, $palette);
+				}
+
+				$subChunks[$y] = new SubChunk(
+					$airBlockId,
+					$layers,
 					$lightPopulated ? $stream->get(2048) : "", //skylight
 					$lightPopulated ? $stream->get(2048) : "" //blocklight
 				);

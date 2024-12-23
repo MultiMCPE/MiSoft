@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\block\Block;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
@@ -191,8 +192,8 @@ class LevelEventPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	switch($this->evid){
 		    	case self::EVENT_PARTICLE_DESTROY:
-			    	$id = $this->data & 0xff;
-			    	$meta = $this->data >> 8;
+			    	$id = $this->data >> Block::INTERNAL_METADATA_BITS;
+			    	$meta = $this->data & Block::INTERNAL_METADATA_MASK;
 			    	$palette = BlockPalette::getPalette($this->getProtocol());
 			    	$runtimeId = $palette::toStaticRuntimeId($id, $meta);
 			    	$this->putVarInt($runtimeId);
@@ -210,6 +211,11 @@ class LevelEventPacket extends DataPacket{
 			    	break;
 	    	}
     	}else{
+            if($this->evid === self::EVENT_PARTICLE_DESTROY){
+                $id = $this->data >> Block::INTERNAL_METADATA_BITS;
+                $meta = $this->data & Block::INTERNAL_METADATA_MASK;
+                $this->data = $id + ($meta << 8);
+            }
     	    $this->putVarInt($this->data);
     	}
 	}

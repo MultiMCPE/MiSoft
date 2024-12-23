@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format;
 
+use pocketmine\world\format\PalettedBlockArray;
+
 interface SubChunkInterface{
 
 	/**
@@ -31,6 +33,11 @@ interface SubChunkInterface{
 	 * @return bool
 	 */
 	public function isEmpty(bool $checkLight = true) : bool;
+
+	/**
+	 * @return int
+	 */
+	public function getEmptyBlockId() : int;
 
 	/**
 	 * @param int $x
@@ -78,6 +85,14 @@ interface SubChunkInterface{
 	 * @return int
 	 */
 	public function getFullBlock(int $x, int $y, int $z) : int;
+
+	/**
+	 * @param int $x
+	 * @param int $y
+	 * @param int $z
+	 * @param int $block
+	 */
+	public function setFullBlock(int $x, int $y, int $z, int $block) : void;
 
 	/**
 	 * @param int      $x
@@ -142,22 +157,6 @@ interface SubChunkInterface{
 	 *
 	 * @return string
 	 */
-	public function getBlockIdColumn(int $x, int $z) : string;
-
-	/**
-	 * @param int $x
-	 * @param int $z
-	 *
-	 * @return string
-	 */
-	public function getBlockDataColumn(int $x, int $z) : string;
-
-	/**
-	 * @param int $x
-	 * @param int $z
-	 *
-	 * @return string
-	 */
 	public function getBlockLightColumn(int $x, int $z) : string;
 
 	/**
@@ -169,14 +168,9 @@ interface SubChunkInterface{
 	public function getBlockSkyLightColumn(int $x, int $z) : string;
 
 	/**
-	 * @return string
+	 * @return PalettedBlockArray[]
 	 */
-	public function getBlockIdArray() : string;
-
-	/**
-	 * @return string
-	 */
-	public function getBlockDataArray() : string;
+	public function getBlockLayers() : array;
 
 	/**
 	 * @return string

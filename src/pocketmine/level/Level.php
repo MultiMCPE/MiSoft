@@ -462,7 +462,7 @@ class Level implements ChunkManager, Metadatable{
 
 		$dontTickBlocks = array_fill_keys($this->server->getProperty("chunk-ticking.disable-block-ticking", []), true);
 
-		$this->randomTickBlocks = new SplFixedArray(256);
+		$this->randomTickBlocks = new SplFixedArray(1024);
 		foreach($this->randomTickBlocks as $id => $null){
 			$block = BlockFactory::get($id); //Make sure it's a copy
 			if(!isset($dontTickBlocks[$id]) and $block->ticksRandomly()){
@@ -1108,8 +1108,8 @@ class Level implements ChunkManager, Metadatable{
 					$pk->blockMeta = $b->getDamage();
 				}else{
 					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->blockId = $fullBlock >> 4;
-					$pk->blockMeta = $fullBlock & 0xf;
+					$pk->blockId = $fullBlock >> Block::INTERNAL_METADATA_BITS;
+					$pk->blockMeta = $fullBlock & Block::INTERNAL_METADATA_MASK;
 				}
 
 				$pk->flags = $first ? $flags : UpdateBlockPacket::FLAG_NONE;
@@ -1132,8 +1132,8 @@ class Level implements ChunkManager, Metadatable{
 					$pk->blockMeta = $b->getDamage();
 				}else{
 					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->blockId = $fullBlock >> 4;
-					$pk->blockMeta = $fullBlock & 0xf;
+					$pk->blockId = $fullBlock >> Block::INTERNAL_METADATA_BITS;
+					$pk->blockMeta = $fullBlock & Block::INTERNAL_METADATA_MASK;
 				}
 
 				$pk->flags = $flags;
@@ -1635,7 +1635,7 @@ class Level implements ChunkManager, Metadatable{
 			}
 		}
 
-		$block = clone $this->blockStates[$fullState & 0xfff];
+		$block = clone $this->blockStates[$fullState];
 
 		$block->x = $x;
 		$block->y = $y;

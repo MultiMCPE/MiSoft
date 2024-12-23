@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io\region;
 
+use pocketmine\utils\BinaryStream;
+use pocketmine\world\format\io\SubChunkConverter;
 use pocketmine\level\format\SubChunk;
 use pocketmine\nbt\tag\ByteArrayTag;
 use pocketmine\nbt\tag\CompoundTag;
@@ -37,19 +39,27 @@ class PMAnvil extends Anvil{
 
 	protected function serializeSubChunk(SubChunk $subChunk) : CompoundTag{
 		return new CompoundTag("", [
-			new ByteArrayTag("Blocks",     $subChunk->getBlockIdArray()),
-			new ByteArrayTag("Data",       $subChunk->getBlockDataArray()),
+			new ByteArrayTag("Blocks",     self::serializeBlockLayers($subChunk)),
 			new ByteArrayTag("SkyLight",   $subChunk->getBlockSkyLightArray()),
 			new ByteArrayTag("BlockLight", $subChunk->getBlockLightArray())
 		]);
 	}
 
 	protected function deserializeSubChunk(CompoundTag $subChunk) : SubChunk{
+		if($subChunk->hasTag("Data")){
+			$blockLayers = [SubChunkConverter::convertSubChunkYZX(
+				$subChunk->getByteArray("Blocks"),
+				$subChunk->getByteArray("Data")
+			)];
+			$emptyBlockId = Block::AIR << Block::INTERNAL_METADATA_BITS;
+		}else{
+			$stream = new BinaryStream($subChunk->getByteArray("Blocks"));
+			[$emptyBlockId, $blockLayers] = self::deserializeBlockLayers($stream);
+		}
+
 		return new SubChunk(
-			$subChunk->getByteArray("Blocks"),
-			$subChunk->getByteArray("Data"),
-			$subChunk->getByteArray("SkyLight"),
-			$subChunk->getByteArray("BlockLight")
+			$emptyBlockId,
+			$blockLayers
 		);
 	}
 

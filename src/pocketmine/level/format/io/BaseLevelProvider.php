@@ -25,17 +25,26 @@ namespace pocketmine\level\format\io;
 
 use InvalidStateException;
 use pocketmine\level\format\Chunk;
+use pocketmine\level\format\SubChunk;
 use pocketmine\level\format\io\exception\CorruptedChunkException;
 use pocketmine\level\format\io\exception\UnsupportedChunkFormatException;
+use pocketmine\world\format\PalettedBlockArray;
 use pocketmine\level\LevelException;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\BigEndianNBTStream;
+use pocketmine\nbt\tag\ByteArrayTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\utils\BinaryStream;
 use function file_exists;
 use function file_get_contents;
 use function file_put_contents;
 use function mkdir;
+use function strlen;
+use function pack;
+use function unpack;
+use function array_values;
+use function count;
 
 abstract class BaseLevelProvider implements LevelProvider{
 	/** @var string */
@@ -189,4 +198,56 @@ abstract class BaseLevelProvider implements LevelProvider{
 	abstract protected function readChunk(int $chunkX, int $chunkZ) : ?Chunk;
 
 	abstract protected function writeChunk(Chunk $chunk) : void;
+
+    protected static function readFixedSizeByteArray(CompoundTag $chunk, string $tagName, int $length) : string{
+        $tag = $chunk->getTag($tagName);
+        if(!($tag instanceof ByteArrayTag)){
+            if($tag === null){
+                throw new CorruptedChunkException("'$tagName' key is missing from chunk NBT");
+            }
+            throw new CorruptedChunkException("Expected TAG_ByteArray for '$tagName'");
+        }
+        $data = $tag->getValue();
+        if(strlen($data) !== $length){
+            throw new CorruptedChunkException("Expected '$tagName' payload to have exactly $length bytes, but have " . strlen($data));
+        }
+        return $data;
+    }
+
+	public function serializeBlockLayers(SubChunk $subChunk) : string{
+        $stream = new BinaryStream();
+        $stream->putInt($subChunk->getEmptyBlockId());
+        $layers = $subChunk->getBlockLayers();
+        $stream->putByte(count($layers));
+        foreach($layers as $blocks){
+            $wordArray = $blocks->getWordArray();
+            $palette = $blocks->getPalette();
+
+            $stream->putByte($blocks->getBitsPerBlock());
+            $stream->put($wordArray);
+            $serialPalette = pack("L*", ...$palette);
+            $stream->putInt(strlen($serialPalette));
+            $stream->put($serialPalette);
+        }
+
+		return $stream->getBuffer();
+	}
+
+	public static function deserializeBlockLayers(BinaryStream $stream) : array{
+        $airBlockId = $stream->getInt();
+
+        /** @var PalettedBlockArray[] $layers */
+        $layers = [];
+        for($i = 0, $layerCount = $stream->getByte(); $i < $layerCount; ++$i){
+            $bitsPerBlock = $stream->getByte();
+            $words = $stream->get(PalettedBlockArray::getExpectedWordArraySize($bitsPerBlock));
+            /** @var int[] $unpackedPalette */
+            $unpackedPalette = unpack("L*", $stream->get($stream->getInt())); //unpack() will never fail here
+            $palette = array_values($unpackedPalette);
+
+            $layers[] = PalettedBlockArray::fromData($bitsPerBlock, $words, $palette);
+        }
+
+		return [$airBlockId, $layers];
+	}
 }
