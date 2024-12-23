@@ -48,9 +48,9 @@ class PMAnvil extends Anvil{
 
 	protected function deserializeSubChunk(CompoundTag $subChunk) : SubChunk{
 		if($subChunk->hasTag("Data")){
-			$blockLayers = [SubChunkConverter::convertSubChunkYZX(
-				$subChunk->getByteArray("Blocks"),
-				$subChunk->getByteArray("Data")
+			$blockLayers = [SubChunkConverter::convertSubChunkXZY(
+			    self::readFixedSizeByteArray($subChunk, "Blocks", 4096),
+                            self::readFixedSizeByteArray($subChunk, "Data", 2048)
 			)];
 			$emptyBlockId = Block::AIR << Block::INTERNAL_METADATA_BITS;
 		}else{
