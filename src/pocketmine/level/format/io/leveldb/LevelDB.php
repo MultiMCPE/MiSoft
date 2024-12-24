@@ -64,6 +64,7 @@ use function trim;
 use function unpack;
 use const INT32_MAX;
 use const LEVELDB_ZLIB_RAW_COMPRESSION;
+use const pocketmine\RESOURCE_PATH;
 use InvalidArgumentException;
 use Exception;
 
