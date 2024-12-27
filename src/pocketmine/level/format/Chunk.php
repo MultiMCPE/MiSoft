@@ -958,33 +958,63 @@ class Chunk{
 
 			$blockLayers = $subChunk->getBlockLayers();
 
-			$result->putByte(8); // storage version
-			$result->putByte(count($blockLayers)); // layer count
+			if($playerProtocol < ProtocolInfo::PROTOCOL_290){
+				$result->putByte(1); // maybe storage version???
 
-			foreach($blockLayers as $blocks){
-                // 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
-                if($blocks->getBitsPerBlock() === 0){
-                    //TODO: we use these in memory, but the game doesn't support them yet
+				$blocks = $blockLayers[0] ?? new PalettedBlockArray(Block::AIR);
+               	// 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
+				if($blocks->getBitsPerBlock() === 0){
+                	//TODO: we use these in memory, but the game doesn't support them yet
                     //polyfill them with 1-bpb instead
-                    $bitsPerBlock = 1;
-                    $words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
-                }else{
-                    $bitsPerBlock = $blocks->getBitsPerBlock();
-                    $words = $blocks->getWordArray();
+                	$bitsPerBlock = 1;
+                	$words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
+            	}else{
+                	$bitsPerBlock = $blocks->getBitsPerBlock();
+                	$words = $blocks->getWordArray();
                 }
-                $result->putByte(($bitsPerBlock << 1) | 1);
-                $result->put($words);
-                $palette = $blocks->getPalette();
+            	$result->putByte(($bitsPerBlock << 1) | 1);
+            	$result->put($words);
+            	$palette = $blocks->getPalette();
 
                 //these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
-                //but since we know they are always unsigned, we can avoid the extra fcall overhead of
-                //zigzag and just shift directly.
-                $result->putUnsignedVarInt(count($palette) << 1);
+            	//but since we know they are always unsigned, we can avoid the extra fcall overhead of
+            	//zigzag and just shift directly.
+            	$result->putUnsignedVarInt(count($palette) << 1);
 			    foreach($palette as $fullBlock){
 					$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f)->getBlockProtocol($playerProtocol);
 
 			    	$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
 			    	$result->putUnsignedVarInt($runtimeId << 1);
+				}
+			}else{
+				$result->putByte(8); // storage version
+				$result->putByte(count($blockLayers)); // layer count
+
+				foreach($blockLayers as $blocks){
+               		// 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
+                	if($blocks->getBitsPerBlock() === 0){
+                    	//TODO: we use these in memory, but the game doesn't support them yet
+                    	//polyfill them with 1-bpb instead
+                    	$bitsPerBlock = 1;
+                    	$words = str_repeat("\x00", PalettedBlockArray::getExpectedWordArraySize(1));
+                	}else{
+                    	$bitsPerBlock = $blocks->getBitsPerBlock();
+                    	$words = $blocks->getWordArray();
+                	}
+                	$result->putByte(($bitsPerBlock << 1) | 1);
+                	$result->put($words);
+                	$palette = $blocks->getPalette();
+
+                	//these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
+                	//but since we know they are always unsigned, we can avoid the extra fcall overhead of
+                	//zigzag and just shift directly.
+                	$result->putUnsignedVarInt(count($palette) << 1);
+			    	foreach($palette as $fullBlock){
+						$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f)->getBlockProtocol($playerProtocol);
+
+			    		$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
+			    		$result->putUnsignedVarInt($runtimeId << 1);
+					}
 				}
 			}
 		}
