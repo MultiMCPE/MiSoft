@@ -30,6 +30,7 @@ use pocketmine\entity\Entity;
 use pocketmine\entity\Skin;
 use pocketmine\item\Durable;
 use pocketmine\item\Item;
+use pocketmine\item\ItemBlock;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\math\Vector3;
@@ -393,8 +394,10 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-        $protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
-        if($protocolIdMeta !== null){
+		$protocolIdMeta = $item instanceof ItemBlock 
+		    ? $item->getBlock()?->getBlockProtocol($playerProtocol)?->getProtocolItemIdMeta($playerProtocol) 
+		    : $item->getProtocolIdMeta($playerProtocol);
+		if($protocolIdMeta !== null){
 			if($nbt === null){
 		    	$nbt = new CompoundTag();
 	    	}
@@ -597,7 +600,9 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-		$protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
+		$protocolIdMeta = $item instanceof ItemBlock 
+		    ? $item->getBlock()?->getBlockProtocol($playerProtocol)?->getProtocolItemIdMeta($playerProtocol) 
+		    : $item->getProtocolIdMeta($playerProtocol);
         if($protocolIdMeta !== null){
 		    if($nbt === null){
 		    	$nbt = new CompoundTag();
@@ -659,7 +664,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$blockRuntimeId = 0;
 		if($isBlockItem){
-		    $block = $item->getBlock();
+		    $block = $item->getBlock()->getBlockProtocol($playerProtocol) ?? $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
 			    $palette = BlockPalette::getPalette($playerProtocol);
 			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());

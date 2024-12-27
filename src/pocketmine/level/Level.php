@@ -1084,65 +1084,78 @@ class Level implements ChunkManager, Metadatable{
 	 * @param bool      $optimizeRebuilds
 	 */
 	public function sendBlocks(array $target, array $blocks, int $flags = UpdateBlockPacket::FLAG_NONE, bool $optimizeRebuilds = false){
-		$packets = [];
 		if($optimizeRebuilds){
-			$chunks = [];
-			foreach($blocks as $b){
-				if(!($b instanceof Vector3)){
-					throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+			foreach($target as $player){
+				$packets = [];
+			    $chunks = [];
+			    foreach($blocks as $b){
+				    if(!($b instanceof Vector3)){
+					    throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+				    }
+				    $pk = new UpdateBlockPacket();
+
+			    	$first = false;
+			    	if(!isset($chunks[$index = Level::chunkHash(($b->x >> 4), ($b->z >> 4))])){
+				    	$chunks[$index] = true;
+				    	$first = true;
+			    	}
+
+			    	$pk->x = $b->x;
+			    	$pk->y = $b->y;
+			    	$pk->z = $b->z;
+
+			    	if($b instanceof Block){
+						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+				    	$pk->blockId = $b->getId();
+				    	$pk->blockMeta = $b->getDamage();
+			    	}else{
+				    	$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
+						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
+						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+				    	$pk->blockId = $b->getId();
+				    	$pk->blockMeta = $b->getDamage();
+			    	}
+
+			    	$pk->flags = $first ? $flags : UpdateBlockPacket::FLAG_NONE;
+
+			    	$packets[] = $pk;
 				}
-				$pk = new UpdateBlockPacket();
 
-				$first = false;
-				if(!isset($chunks[$index = Level::chunkHash(($b->x >> 4), ($b->z >> 4))])){
-					$chunks[$index] = true;
-					$first = true;
-				}
-
-				$pk->x = $b->x;
-				$pk->y = $b->y;
-				$pk->z = $b->z;
-
-				if($b instanceof Block){
-					$pk->blockId = $b->getId();
-					$pk->blockMeta = $b->getDamage();
-				}else{
-					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->blockId = $fullBlock >> Block::INTERNAL_METADATA_BITS;
-					$pk->blockMeta = $fullBlock & Block::INTERNAL_METADATA_MASK;
-				}
-
-				$pk->flags = $first ? $flags : UpdateBlockPacket::FLAG_NONE;
-
-				$packets[] = $pk;
+				$this->server->batchPackets([$player], $packets, false, false);
 			}
 		}else{
-			foreach($blocks as $b){
-				if(!($b instanceof Vector3)){
-					throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
-				}
-				$pk = new UpdateBlockPacket();
+			foreach($target as $player){
+				$packets = [];
+			    foreach($blocks as $b){
+				    if(!($b instanceof Vector3)){
+					    throw new TypeError("Expected Vector3 in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+				    }
+				    $pk = new UpdateBlockPacket();
 
-				$pk->x = $b->x;
-				$pk->y = $b->y;
-				$pk->z = $b->z;
+				    $pk->x = $b->x;
+				    $pk->y = $b->y;
+				    $pk->z = $b->z;
 
-				if($b instanceof Block){
-					$pk->blockId = $b->getId();
-					$pk->blockMeta = $b->getDamage();
-				}else{
-					$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-					$pk->blockId = $fullBlock >> Block::INTERNAL_METADATA_BITS;
-					$pk->blockMeta = $fullBlock & Block::INTERNAL_METADATA_MASK;
-				}
+			    	if($b instanceof Block){
+						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+				    	$pk->blockId = $b->getId();
+				    	$pk->blockMeta = $b->getDamage();
+			    	}else{
+				    	$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
+						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
+						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+				    	$pk->blockId = $b->getId();
+				    	$pk->blockMeta = $b->getDamage();
+			    	}
 
-				$pk->flags = $flags;
+				    $pk->flags = $flags;
 
-				$packets[] = $pk;
+				    $packets[] = $pk;
+			    }
+
+				$this->server->batchPackets([$player], $packets, false, false);
 			}
 		}
-
-		$this->server->batchPackets($target, $packets, false, false);
 	}
 
 	public function clearCache(bool $force = false){

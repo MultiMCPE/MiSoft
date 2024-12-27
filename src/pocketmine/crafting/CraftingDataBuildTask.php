@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\crafting;
 
 use pocketmine\thread\NonThreadSafeValue;
+use pocketmine\block\BlockFactory;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
@@ -70,6 +71,7 @@ class CraftingDataBuildTask extends AsyncTask{
 	    }
 	    PacketPool::init();
 	    ItemFactory::init();
+		BlockFactory::init();
 
 	    $pk = new CraftingDataPacket();
 	    $pk->cleanRecipes = true;

@@ -25,8 +25,6 @@ namespace pocketmine\block;
 
 interface BlockIds{
 
-	public const CARVED_PUMPKIN = -155;
-
 	public const AIR = 0;
 	public const STONE = 1;
 	public const GRASS = 2;
@@ -277,6 +275,8 @@ interface BlockIds{
 	public const STRUCTURE_BLOCK = 252;
 
 	public const RESERVED6 = 255;
+
+	public const CARVED_PUMPKIN_BLOCK = 410;
 
 	public const NETHERITE_BLOCK = 525;
 }

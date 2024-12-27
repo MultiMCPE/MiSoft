@@ -26,6 +26,7 @@ namespace pocketmine\level\format\io;
 use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
+use pocketmine\block\BlockFactory;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\PacketPool;
@@ -87,6 +88,8 @@ class ChunkRequestTask extends AsyncTask{
 	}
 
 	public function onRun() : void{
+		BlockFactory::init();
+
 	    $chunk = Chunk::fastDeserialize($this->chunk);
 		$dimensionId = $this->dimensionId;
 

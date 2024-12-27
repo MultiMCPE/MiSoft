@@ -317,6 +317,7 @@ class BlockFactory{
 		//TODO: STRUCTURE_BLOCK
 
 		self::registerBlock(new Reserved6(Block::RESERVED6, 0, "reserved6"));
+		self::registerBlock(new CarvedPumpkin(Block::CARVED_PUMPKIN_BLOCK, 0, "Carved Pumpkin"));
 		self::registerBlock(new Netherite(Block::NETHERITE_BLOCK, 0, "Netherite Block"));
 
 		for($id = 0, $size = self::$fullList->getSize() >> 4; $id < $size; ++$id){

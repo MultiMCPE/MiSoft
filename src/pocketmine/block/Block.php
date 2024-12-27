@@ -841,4 +841,18 @@ class Block extends Position implements BlockIds, Metadatable{
 			$this->level->getBlockMetadata()->removeMetadata($this, $metadataKey, $owningPlugin);
 		}
 	}
+
+    /**
+     * @return [int, int]|null
+     */
+    public function getProtocolItemIdMeta(int $protocol) : ?array{
+        return null;
+    }
+
+	/**
+	 * @return Block|null
+	 */
+	public function getBlockProtocol(int $protocol) : ?Block{
+		return null;
+	}
 }

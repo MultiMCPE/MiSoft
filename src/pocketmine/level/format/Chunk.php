@@ -928,7 +928,14 @@ class Chunk{
 				for($z = 0; $z < 16; ++$z){
 					for($y = 0; $y < 16; ++$y){
 						$fullBlock = $palettedBlockArray->get($x, $y, $z);
-						[$legacyId, $legacyMeta] = [$fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK];
+						$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
+						$protocolBlock = $block->getBlockProtocol($playerProtocol);
+						if($protocolBlock !== null){
+							[$legacyId, $legacyMeta] = [$protocolBlock->getId(), $protocolBlock->getDamage()];
+						}else{
+							[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
+						}
+
 						if($legacyId > 255){
 							$legacyId = 248; //minecraft:info_update
 							$legacyMeta = 0;
@@ -979,7 +986,15 @@ class Chunk{
                 //zigzag and just shift directly.
                 $result->putUnsignedVarInt(count($palette) << 1);
 			    foreach($palette as $fullBlock){
-			    	$runtimeId = $legacyToRuntime($fullBlock >> 4, $fullBlock & 0x0f);
+					$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f);
+					$protocolBlock = $block->getBlockProtocol($playerProtocol);
+					if($protocolBlock !== null){
+						[$legacyId, $legacyMeta] = [$protocolBlock->getId(), $protocolBlock->getDamage()];
+					}else{
+						[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
+					}
+
+			    	$runtimeId = $legacyToRuntime($legacyId, $legacyMeta);
 			    	$result->putUnsignedVarInt($runtimeId << 1);
 				}
 			}

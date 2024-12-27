@@ -231,13 +231,15 @@ final class ActorMetadataConvertor{
 					    $flagsBinary = strrev(decbin($flags2));
 
 					    for($i = 0, $len = strlen($flagsBinary); $i < $len; ++$i){
-							if($flagsBinary[$i] === "1" and isset($protocolMetadataFlags[$i])){
-                            	$i += 64;
-								$flag = $protocolMetadataFlags[$i];
-								if($flag >= 64){
-									$newFlags2 |= (1 << ($flag % 64));
-								}else{
-                                    $newFlags |= (1 << $flag);
+							if($flagsBinary[$i] === "1"){
+								$i += 64;
+								if(isset($protocolMetadataFlags[$i])){
+							    	$flag = $protocolMetadataFlags[$i];
+							    	if($flag >= 64){
+								    	$newFlags2 |= (1 << ($flag % 64));
+							    	}else{
+                                        $newFlags |= (1 << $flag);
+									}
                                 }
 							}
 						}
