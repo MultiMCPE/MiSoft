@@ -317,7 +317,6 @@ class BlockFactory{
 		//TODO: STRUCTURE_BLOCK
 
 		self::registerBlock(new Reserved6(Block::RESERVED6, 0, "reserved6"));
-		self::registerBlock(new CarvedPumpkin(Block::CARVED_PUMPKIN_BLOCK, 0, "Carved Pumpkin"));
 		self::registerBlock(new Netherite(Block::NETHERITE_BLOCK, 0, "Netherite Block"));
 
 		for($id = 0, $size = self::$fullList->getSize() >> 4; $id < $size; ++$id){
@@ -380,14 +379,10 @@ class BlockFactory{
 			throw new InvalidArgumentException("Block meta value $meta is out of bounds");
 		}
 
-		try{
-			if(self::$fullList !== null){
-				$block = clone self::$fullList[($id << 4) | $meta];
-			}else{
-				$block = new UnknownBlock($id, $meta);
-			}
-		}catch(RuntimeException $e){
-			throw new InvalidArgumentException("Block ID $id is out of bounds");
+		if(isset(self::$fullList[($id << 4) | $meta])){
+			$block = clone self::$fullList[($id << 4) | $meta];
+		}else{
+			$block = new UnknownBlock($id, $meta);
 		}
 
 		if($pos !== null){
@@ -416,7 +411,6 @@ class BlockFactory{
 	 * @return bool
 	 */
 	public static function isRegistered(int $id) : bool{
-		$b = self::$fullList[$id << 4];
-		return $b !== null and !($b instanceof UnknownBlock);
+		return isset(self::$fullList[$id << 4]) and !(self::$fullList[$id << 4] instanceof UnknownBlock);
 	}
 }

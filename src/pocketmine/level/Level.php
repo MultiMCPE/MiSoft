@@ -1137,13 +1137,12 @@ class Level implements ChunkManager, Metadatable{
 				    $pk->z = $b->z;
 
 			    	if($b instanceof Block){
-						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+						$b = $b->getBlockProtocol($player->getProtocol());
 				    	$pk->blockId = $b->getId();
 				    	$pk->blockMeta = $b->getDamage();
 			    	}else{
 				    	$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
-						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
-						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
+						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK)->getBlockProtocol($player->getProtocol());
 				    	$pk->blockId = $b->getId();
 				    	$pk->blockMeta = $b->getDamage();
 			    	}

@@ -225,7 +225,7 @@ class Banner extends Item{
             return [ItemIds::INFO_UPDATE, 0];
         }
 
-        return null;
+        return parent::getProtocolIdMeta($protocol);
     }
 
 	public function getFuelTime() : int{

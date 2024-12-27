@@ -21,32 +21,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\block;
+namespace pocketmine\item;
 
-use pocketmine\item\ItemIds;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
-class CarvedPumpkin extends Pumpkin{
+class Netherite extends ItemBlock{
+    public function getProtocolIdMeta(int $protocol) : ?array{
+        if($protocol < ProtocolInfo::PROTOCOL_406){
+            return [ItemIds::DIAMOND_BLOCK, 0];
+        }
 
-	protected $id = self::CARVED_PUMPKIN_BLOCK;
-
-	public function getName() : string{
-		return "Carved Pumpkin";
-	}
-
-	public function getBlockProtocol(int $protocol) : ?Block{
-		if($protocol < ProtocolInfo::PROTOCOL_240){
-			return new Pumpkin($this->getDamage());
-		}
-
-		return null;
-	}
-
-    public function getProtocolItemIdMeta(int $protocol) : ?array{
-		if($protocol >= ProtocolInfo::PROTOCOL_240){
-            return [ItemIds::CARVED_PUMPKIN, 0];
-		}
-
-		return null;
+        return parent::getProtocolIdMeta($protocol);
     }
 }

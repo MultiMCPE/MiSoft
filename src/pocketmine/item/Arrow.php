@@ -37,6 +37,6 @@ class Arrow extends Item{
 			}
         }
 
-        return null;
+        return parent::getProtocolIdMeta($protocol);
     }
 }

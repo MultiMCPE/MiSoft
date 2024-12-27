@@ -842,17 +842,10 @@ class Block extends Position implements BlockIds, Metadatable{
 		}
 	}
 
-    /**
-     * @return [int, int]|null
-     */
-    public function getProtocolItemIdMeta(int $protocol) : ?array{
-        return null;
-    }
-
 	/**
-	 * @return Block|null
+	 * @return Block
 	 */
-	public function getBlockProtocol(int $protocol) : ?Block{
-		return null;
+	public function getBlockProtocol(int $protocol) : Block{
+		return $this;
 	}
 }

@@ -4826,6 +4826,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$timings = Timings::getSendDataPacketTimings($packet);
 		$timings->startTiming();
 		try{
+			$packet = clone $packet;
 		    $packet->setProtocol($this->protocol);
 
 			$ev = new DataPacketSendEvent($this, $packet);

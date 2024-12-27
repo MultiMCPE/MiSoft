@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace pocketmine\block;
 
 use pocketmine\item\TieredTool;
-use pocketmine\item\ItemIds;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class Netherite extends Solid{
@@ -51,19 +50,11 @@ class Netherite extends Solid{
 		return TieredTool::TIER_DIAMOND;
 	}
 
-    public function getProtocolItemIdMeta(int $protocol) : ?array{
-		if($protocol < ProtocolInfo::PROTOCOL_406){
-            return [ItemIds::DIAMOND_BLOCK, 0];
-		}
-
-		return null;
-    }
-
-	public function getBlockProtocol(int $protocol) : ?Block{
+	public function getBlockProtocol(int $protocol) : Block{
 		if($protocol < ProtocolInfo::PROTOCOL_406){
 	    	return new Diamond();
 		}
 
-		return null;
+		return parent::getBlockProtocol($protocol);
 	}
 }

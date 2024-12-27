@@ -262,6 +262,7 @@ class ItemFactory{
 		self::registerItem(new GoldenAppleEnchanted());
 		self::registerItem(new Item(Item::HEART_OF_THE_SEA, 0, "Heart of the Sea"));
 		self::registerItem(new Item(Item::TURTLE_SHELL_PIECE, 0, "Scute"));
+		self::registerItem(new Netherite(Block::NETHERITE_BLOCK, 0, Item::NETHERITE));
 		//TODO: TURTLE_HELMET
 
 		//TODO: COMPOUND
@@ -317,20 +318,16 @@ class ItemFactory{
 			throw new TypeError("`tags` argument must be a string or CompoundTag instance, " . (is_object($tags) ? "instance of " . get_class($tags) : gettype($tags)) . " given");
 		}
 
-		try{
+		if(isset(self::$list[self::getListOffset($id)])){
 			/** @var Item|null $listed */
 			$listed = self::$list[self::getListOffset($id)];
-			if($listed !== null){
-				$item = clone $listed;
-			}elseif($id < 256){ //intentionally excludes negatives because extended blocks aren't supported yet
-				/* Blocks must have a damage value 0-15, but items can have damage value -1 to indicate that they are
-				 * crafting ingredients with any-damage. */
-				$item = new ItemBlock($id, $meta);
-			}else{
-				$item = new Item($id, $meta);
-			}
-		}catch(RuntimeException $e){
-			throw new InvalidArgumentException("Item ID $id is invalid or out of bounds");
+			$item = clone $listed;
+		}elseif($id < 256){ //intentionally excludes negatives because extended blocks aren't supported yet
+			/* Blocks must have a damage value 0-15, but items can have damage value -1 to indicate that they are
+			 * crafting ingredients with any-damage. */
+			$item = new ItemBlock($id, $meta);
+		}else{
+			$item = new Item($id, $meta);
 		}
 
 		$item->setDamage($meta);
@@ -397,7 +394,7 @@ class ItemFactory{
 		if($id < 256){
 			return BlockFactory::isRegistered($id);
 		}
-		return self::$list[self::getListOffset($id)] !== null;
+		return isset(self::$list[self::getListOffset($id)]);
 	}
 
 	private static function getListOffset(int $id) : int{

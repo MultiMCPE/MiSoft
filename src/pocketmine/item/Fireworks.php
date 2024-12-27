@@ -133,6 +133,6 @@ class Fireworks extends Item{
             return [ItemIds::NETHER_STAR, $this->getDamage()];
         }
 
-        return null;
+        return parent::getProtocolIdMeta($protocol);
     }
 }
