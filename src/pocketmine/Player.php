@@ -3268,7 +3268,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-		if($packet->sound === LevelSoundEventPacket::SOUND_UNDEFINED){
+		if(
+			$packet->sound === LevelSoundEventPacket::SOUND_UNDEFINED or
+			$packet->sound === LevelSoundEventPacket::SOUND_NOTE
+		){
 			return false;
 		}
 
