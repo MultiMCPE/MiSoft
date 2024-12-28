@@ -268,6 +268,13 @@ class Item implements ItemIds, JsonSerializable{
 		return null;
 	}
 
+	/**
+	 * @return int[]
+	 */
+	public static function getCreativeItemProtocols() : array{
+		return array_keys(Item::$creative);
+	}
+
 	/** @var int */
 	protected $id;
 	/** @var int */
