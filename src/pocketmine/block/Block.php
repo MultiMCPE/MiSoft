@@ -115,6 +115,15 @@ class Block extends Position implements BlockIds, Metadatable{
 		return $this->itemId ?? ($this->getId() > 255 ? 255 - $this->getId() : $this->getId());
 	}
 
+    /**
+     * Returns the block as an item.
+     * State information such as facing, powered/unpowered, open/closed, etc., is discarded.
+     * Type information such as colour, wood type, etc. is preserved.
+     */
+    public function asItem() : Item{
+        return ItemFactory::get($this->getItemId(), $this->getVariant());
+    }
+
 	/**
 	 * @return int
 	 */
@@ -843,9 +852,9 @@ class Block extends Position implements BlockIds, Metadatable{
 	}
 
 	/**
-	 * @return Block
+	 * @return ?Block
 	 */
-	public function getBlockProtocol(int $protocol) : Block{
-		return $this;
+	public function getBlockProtocol(int $protocol) : ?Block{
+		return null;
 	}
 }

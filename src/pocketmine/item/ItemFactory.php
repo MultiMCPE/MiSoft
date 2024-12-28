@@ -262,7 +262,6 @@ class ItemFactory{
 		self::registerItem(new GoldenAppleEnchanted());
 		self::registerItem(new Item(Item::HEART_OF_THE_SEA, 0, "Heart of the Sea"));
 		self::registerItem(new Item(Item::TURTLE_SHELL_PIECE, 0, "Scute"));
-		self::registerItem(new Netherite(Block::NETHERITE_BLOCK, 0, Item::NETHERITE));
 		//TODO: TURTLE_HELMET
 
 		//TODO: COMPOUND

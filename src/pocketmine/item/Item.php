@@ -1149,9 +1149,9 @@ class Item implements ItemIds, JsonSerializable{
 	}
 
     /**
-     * @return [int, int]|null
+     * @return ?Item
      */
-    public function getProtocolIdMeta(int $protocol) : ?array{
+    public function getItemProtocol(int $protocol) : ?Item{
         return null;
     }
 }

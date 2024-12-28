@@ -928,7 +928,8 @@ class Chunk{
 				for($z = 0; $z < 16; ++$z){
 					for($y = 0; $y < 16; ++$y){
 						$fullBlock = $palettedBlockArray->get($x, $y, $z);
-						$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK)->getBlockProtocol($playerProtocol);
+						$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
+						$block->getBlockProtocol($playerProtocol) ?? $block;
 						[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
 
 						if($legacyId > 255){
@@ -981,7 +982,8 @@ class Chunk{
             	//zigzag and just shift directly.
             	$result->putUnsignedVarInt(count($palette) << 1);
 			    foreach($palette as $fullBlock){
-					$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f)->getBlockProtocol($playerProtocol);
+					$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f);
+					$block = $block->getBlockProtocol($playerProtocol) ?? $block;
 
 			    	$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
 			    	$result->putUnsignedVarInt($runtimeId << 1);
@@ -1010,7 +1012,8 @@ class Chunk{
                 	//zigzag and just shift directly.
                 	$result->putUnsignedVarInt(count($palette) << 1);
 			    	foreach($palette as $fullBlock){
-						$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f)->getBlockProtocol($playerProtocol);
+						$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f);
+						$block = $block->getBlockProtocol($playerProtocol) ?? $block;
 
 			    		$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
 			    		$result->putUnsignedVarInt($runtimeId << 1);

@@ -220,12 +220,12 @@ class Banner extends Item{
 		$this->setNamedTag($tag);
 	}
 
-    public function getProtocolIdMeta(int $protocol) : ?array{
+    public function getItemProtocol(int $protocol) : ?Item{
         if($protocol < ProtocolInfo::PROTOCOL_130){
-            return [ItemIds::INFO_UPDATE, 0];
+            return ItemFactory::get(ItemIds::INFO_UPDATE, 0);
         }
 
-        return parent::getProtocolIdMeta($protocol);
+        return parent::getItemProtocol($protocol);
     }
 
 	public function getFuelTime() : int{

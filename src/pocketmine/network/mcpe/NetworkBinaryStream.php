@@ -393,15 +393,15 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-		$protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
-		if($protocolIdMeta !== null){
+		$protocolItem = $item->getItemProtocol($playerProtocol);
+		if($protocolItem !== null){
 			if($nbt === null){
 		    	$nbt = new CompoundTag();
 	    	}
 	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
 	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 
-            [$id, $damage] = $protocolIdMeta;
+            [$id, $damage] = [$protocolItem->getId(), $protocolItem->getDamage()];
 		}
 
         if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
@@ -597,15 +597,15 @@ class NetworkBinaryStream extends BinaryStream{
 			$nbt = clone $item->getNamedTag();
 		}
 
-		$protocolIdMeta = $item->getProtocolIdMeta($playerProtocol);
-        if($protocolIdMeta !== null){
+		$protocolItem = $item->getItemProtocol($playerProtocol);
+        if($protocolItem !== null){
 		    if($nbt === null){
 		    	$nbt = new CompoundTag();
 	    	}
 	    	$nbt->setInt(self::PM_ID_TAG, $item->getId());
 	    	$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 
-            [$id, $coreData] = $protocolIdMeta;
+            [$id, $coreData] = [$protocolItem->getId(), $protocolItem->getDamage()];
 		}
 
         $palette = ItemPalette::getPalette($playerProtocol);
@@ -659,7 +659,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$blockRuntimeId = 0;
 		if($isBlockItem){
-		    $block = $item->getBlock()->getBlockProtocol($playerProtocol);
+		    $block = $item->getBlock()->getBlockProtocol($playerProtocol) ?? $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
 			    $palette = BlockPalette::getPalette($playerProtocol);
 			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());

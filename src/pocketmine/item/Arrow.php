@@ -30,13 +30,13 @@ class Arrow extends Item{
 		parent::__construct(self::ARROW, $meta, "Arrow");
 	}
 
-    public function getProtocolIdMeta(int $protocol) : ?array{
+    public function getItemProtocol(int $protocol) : ?Item{
         if($protocol < ProtocolInfo::PROTOCOL_280){
 			if($this->getDamage() >= 38){
-                return [ItemIds::ARROW, 0];
+                return new Arrow();
 			}
         }
 
-        return parent::getProtocolIdMeta($protocol);
+        return parent::getItemProtocol($protocol);
     }
 }

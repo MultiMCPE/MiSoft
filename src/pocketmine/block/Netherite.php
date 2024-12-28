@@ -50,7 +50,7 @@ class Netherite extends Solid{
 		return TieredTool::TIER_DIAMOND;
 	}
 
-	public function getBlockProtocol(int $protocol) : Block{
+	public function getBlockProtocol(int $protocol) : ?Block{
 		if($protocol < ProtocolInfo::PROTOCOL_406){
 	    	return new Diamond();
 		}
