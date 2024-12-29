@@ -260,17 +260,19 @@ class AsyncPool{
                     $this->checkCrashedWorker($worker, $task);
                     throw new AssumptionFailedError("checkCrashedWorker() should have thrown an exception, making this unreachable");
                 }else{
-                    /*
-                     * It's possible for a task to submit a progress update and then finish before the progress
-                     * update is detected by the parent thread, so here we consume any missed updates.
-                     *
-                     * When this happens, it's possible for a progress update to arrive between the previous
-                     * checkProgressUpdates() call and the next isGarbage() call, causing progress updates to be
-                     * lost. Thus, it's necessary to do one last check here to make sure all progress updates have
-                     * been consumed before completing.
-                     */
-                    $this->checkTaskProgressUpdates($task);
-                    $task->onCompletion($this->server);
+                    if(!$task->hasCancelledRun()){
+                        /*
+                         * It's possible for a task to submit a progress update and then finish before the progress
+                         * update is detected by the parent thread, so here we consume any missed updates.
+                         *
+                         * When this happens, it's possible for a progress update to arrive between the previous
+                         * checkProgressUpdates() call and the next isGarbage() call, causing progress updates to be
+                         * lost. Thus, it's necessary to do one last check here to make sure all progress updates have
+                         * been consumed before completing.
+                         */
+                        $this->checkTaskProgressUpdates($task);
+                        $task->onCompletion($this->server);
+                    }
                 }
             }else{
                 $this->checkTaskProgressUpdates($task);
