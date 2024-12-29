@@ -207,6 +207,10 @@ class TaskScheduler{
 		}
 	}
 
+public function isEnabled() : bool {
+    return $this->enabled;
+}
+
 	private function isReady(int $currentTick) : bool{
 		return !$this->queue->isEmpty() and $this->queue->current()->getNextRun() <= $currentTick;
 	}
