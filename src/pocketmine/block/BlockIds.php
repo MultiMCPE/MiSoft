@@ -283,4 +283,6 @@ interface BlockIds{
 	public const HONEY = 475;
 
 	public const NETHERITE = 525;
+
+	public const CRYING_OBSIDIAN = 544;
 }
