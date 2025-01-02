@@ -44,7 +44,7 @@ class ItemBlock extends Item{
 	}
 
 	public function getBlock() : Block{
-		return BlockFactory::get($this->blockId < 0 ? 255 - $this->blockId : $this->blockId, $this->meta === -1 ? 0 : $this->meta & 0xf);
+        return BlockFactory::get($this->blockId < 0 ? 255 - $this->blockId : $this->blockId, $this->meta === -1 ? 0 : $this->meta & 0xf);
 	}
 
 	public function getVanillaName() : string{
@@ -55,12 +55,8 @@ class ItemBlock extends Item{
 		return $this->getBlock()->getFuelTime();
 	}
 
-	public function getItemProtocol(int $protocol) : ?Item{
-		$blockProtocol = $this->getBlock()->getBlockProtocol($protocol);
-		if($blockProtocol === null){
-			return null;
-		}
-
-		return $blockProtocol->asItem();
-	}
+    public function getItemProtocol(int $protocol) : ?Item{
+        $blockProtocol = $this->getBlock()->getBlockProtocol($protocol);
+        return $blockProtocol?->asItem();
+    }
 }

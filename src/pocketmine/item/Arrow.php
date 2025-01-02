@@ -32,9 +32,9 @@ class Arrow extends Item{
 
     public function getItemProtocol(int $protocol) : ?Item{
         if($protocol < ProtocolInfo::PROTOCOL_280){
-			if($this->getDamage() >= 38){
+            if($this->getDamage() >= 38){
                 return new Arrow();
-			}
+            }
         }
 
         return parent::getItemProtocol($protocol);
