@@ -321,6 +321,7 @@ class BlockFactory{
 		self::registerBlock(new Beehive());
 		self::registerBlock(new Honey());
 		self::registerBlock(new Netherite(Block::NETHERITE, 0, "Netherite Block"));
+		self::registerBlock(new Chain());
 		self::registerBlock(new CryingObsidian());
 
 		for($id = 0, $size = self::$fullList->getSize() >> 4; $id < $size; ++$id){

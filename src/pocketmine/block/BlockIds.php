@@ -284,5 +284,7 @@ interface BlockIds{
 
 	public const NETHERITE = 525;
 
+	public const CHAIN_BLOCK = 541;
+
 	public const CRYING_OBSIDIAN = 544;
 }

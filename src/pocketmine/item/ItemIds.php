@@ -274,4 +274,6 @@ interface ItemIds extends BlockIds{
 
     public const SHIELD = 513;
 
+    public const CHAIN = 758;
+
 }
