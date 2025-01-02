@@ -276,7 +276,10 @@ interface BlockIds{
 
 	public const RESERVED6 = 255;
 
-	public const CARVED_PUMPKIN_BLOCK = 410;
+	public const CARVED_PUMPKIN = 410;
 
-	public const NETHERITE_BLOCK = 525;
+	public const BEEHIVE = 474;
+	public const HONEY = 475;
+
+	public const NETHERITE = 525;
 }

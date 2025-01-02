@@ -317,7 +317,9 @@ class BlockFactory{
 		//TODO: STRUCTURE_BLOCK
 
 		self::registerBlock(new Reserved6(Block::RESERVED6, 0, "reserved6"));
-		self::registerBlock(new Netherite(Block::NETHERITE_BLOCK, 0, "Netherite Block"));
+		self::registerBlock(new Beehive());
+		self::registerBlock(new Honey());
+		self::registerBlock(new Netherite(Block::NETHERITE, 0, "Netherite Block"));
 
 		for($id = 0, $size = self::$fullList->getSize() >> 4; $id < $size; ++$id){
 			if(self::$fullList[$id << 4] === null){

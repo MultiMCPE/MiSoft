@@ -28,7 +28,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class Netherite extends Solid{
 
-	protected $id = self::NETHERITE_BLOCK;
+	protected $id = self::NETHERITE;
 
 	public function __construct(int $meta = 0){
 		$this->meta = $meta;
