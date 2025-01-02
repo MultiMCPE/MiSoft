@@ -32,6 +32,7 @@ use pocketmine\Player;
 use pocketmine\tile\Banner;
 use pocketmine\tile\Banner as TileBanner;
 use pocketmine\tile\Tile;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function floor;
 
 class StandingBanner extends Transparent{
@@ -108,5 +109,13 @@ class StandingBanner extends Transparent{
 
 	public function isAffectedBySilkTouch() : bool{
 		return false;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_130){
+	    	return new Wool();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }
