@@ -278,6 +278,7 @@ interface BlockIds{
 
 	public const CARVED_PUMPKIN = 410;
 
+	public const BEE_NEST = 473;
 	public const BEEHIVE = 474;
 	public const HONEY = 475;
 

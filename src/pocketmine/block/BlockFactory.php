@@ -317,6 +317,7 @@ class BlockFactory{
 		//TODO: STRUCTURE_BLOCK
 
 		self::registerBlock(new Reserved6(Block::RESERVED6, 0, "reserved6"));
+		self::registerBlock(new BeeNest());
 		self::registerBlock(new Beehive());
 		self::registerBlock(new Honey());
 		self::registerBlock(new Netherite(Block::NETHERITE, 0, "Netherite Block"));

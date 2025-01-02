@@ -37,6 +37,10 @@ class Beehive extends Transparent{
 		return 0.6;
 	}
 
+	public function getToolType() : int{
+		return BlockToolType::TYPE_AXE;
+	}
+
 	public function getName() : string{
 		return "Beehive";
 	}
