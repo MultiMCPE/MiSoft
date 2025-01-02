@@ -531,6 +531,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->propertyManager->setShort(self::DATA_AIR, $this->namedtag->getShort("Air", 300));
 		$this->onGround = $this->namedtag->getByte("OnGround", 0) !== 0;
 		$this->invulnerable = $this->namedtag->getByte("Invulnerable", 0) !== 0;
+		$this->setScale($this->namedtag->getFloat("Scale", 1));
 
 		$this->attributeMap = new AttributeMap();
 		$this->addAttributes();
@@ -970,6 +971,7 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$this->namedtag->setShort("Air", $this->propertyManager->getShort(self::DATA_AIR));
 		$this->namedtag->setByte("OnGround", $this->onGround ? 1 : 0);
 		$this->namedtag->setByte("Invulnerable", $this->invulnerable ? 1 : 0);
+		$this->namedtag->setFloat("Scale", $this->getScale());
 	}
 
 	protected function initEntity() : void{
