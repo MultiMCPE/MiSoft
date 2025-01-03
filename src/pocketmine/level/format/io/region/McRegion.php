@@ -43,6 +43,7 @@ use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\world\format\io\SubChunkConverter;
 use pocketmine\world\format\PalettedBlockArray;
+use pocketmine\utils\BinaryStream;
 use GlobalLogger;
 use function array_filter;
 use function array_values;
@@ -108,27 +109,19 @@ class McRegion extends BaseLevelProvider{
 		$nbt->setByte("TerrainPopulated", $chunk->isPopulated() ? 1 : 0);
 		$nbt->setByte("LightPopulated", $chunk->isLightPopulated() ? 1 : 0);
 
-		$ids = "";
-		$data = "";
-		$skyLight = "";
-		$blockLight = "";
-		$subChunks = $chunk->getSubChunks();
-		for($x = 0; $x < 16; ++$x){
-			for($z = 0; $z < 16; ++$z){
-				for($y = 0; $y < 8; ++$y){
-					$subChunk = $subChunks[$y];
-					$ids .= $subChunk->getBlockIdColumn($x, $z);
-					$data .= $subChunk->getBlockDataColumn($x, $z);
-					$skyLight .= $subChunk->getBlockSkyLightColumn($x, $z);
-					$blockLight .= $subChunk->getBlockLightColumn($x, $z);
-				}
+		$subChunks = [];
+		foreach($chunk->getSubChunks() as $y => $subChunk){
+			if($subChunk->isEmpty()){
+				continue;
 			}
-		}
 
-		$nbt->setByteArray("Blocks", $ids);
-		$nbt->setByteArray("Data", $data);
-		$nbt->setByteArray("SkyLight", $skyLight);
-		$nbt->setByteArray("BlockLight", $blockLight);
+			$tag = new CompoundTag("", [
+				new ByteArrayTag("Blocks", self::serializeBlockLayers($subChunk))
+			]);
+			$tag->setByte("Y", $y);
+			$subChunks[] = $tag;
+		}
+		$nbt->setTag(new ListTag("BlockLayers", $subChunks, NBT::TAG_Compound));
 
 		$nbt->setByteArray("Biomes", $chunk->getBiomeIdArray()); //doesn't exist in regular McRegion, this is here for PocketMine-MP only
 		$nbt->setByteArray("HeightMap", pack("C*", ...$chunk->getHeightMapArray())); //this is ByteArray in McRegion, but IntArray in Anvil (due to raised build height)
@@ -169,37 +162,22 @@ class McRegion extends BaseLevelProvider{
 		$chunk = $chunk->getCompoundTag("Level");
 
 		$subChunks = [];
-		$fullIds = $chunk->hasTag("Blocks", ByteArrayTag::class) ? $chunk->getByteArray("Blocks") : str_repeat("\x00", 32768);
-		$fullData = $chunk->hasTag("Data", ByteArrayTag::class) ? $chunk->getByteArray("Data") : str_repeat("\x00", 16384);
-		$fullSkyLight = $chunk->hasTag("SkyLight", ByteArrayTag::class) ? $chunk->getByteArray("SkyLight") : str_repeat("\xff", 16384);
-		$fullBlockLight = $chunk->hasTag("BlockLight", ByteArrayTag::class) ? $chunk->getByteArray("BlockLight") : str_repeat("\x00", 16384);
+		if($chunk->hasTag("BlockLayers")){
+			$subChunksTag = $chunk->getListTag("BlockLayers") ?? [];
+			foreach($subChunksTag as $subChunk){
+				if($subChunk instanceof CompoundTag){
+					$stream = new BinaryStream($subChunk->getByteArray("Blocks"));
+					[$emptyBlockId, $blockLayers] = self::deserializeBlockLayers($stream);
+					$subChunks[$subChunk->getByte("Y")] = new SubChunk($emptyBlockId, $blockLayers);
+				}
+			}
+		}else{
+			$fullIds = self::readFixedSizeByteArray($chunk, "Blocks", 32768);
+			$fullData = self::readFixedSizeByteArray($chunk, "Data", 16384);
 
-		for($y = 0; $y < 8; ++$y){
-			$offset = ($y << 4);
-			$ids = "";
-			for($i = 0; $i < 256; ++$i){
-				$ids .= substr($fullIds, $offset, 16);
-				$offset += 128;
-			}
-			$data = "";
-			$offset = ($y << 3);
-			for($i = 0; $i < 256; ++$i){
-				$data .= substr($fullData, $offset, 8);
-				$offset += 64;
-			}
-			$skyLight = "";
-			$offset = ($y << 3);
-			for($i = 0; $i < 256; ++$i){
-				$skyLight .= substr($fullSkyLight, $offset, 8);
-				$offset += 64;
-			}
-			$blockLight = "";
-			$offset = ($y << 3);
-			for($i = 0; $i < 256; ++$i){
-				$blockLight .= substr($fullBlockLight, $offset, 8);
-				$offset += 64;
-			}
-			$subChunks[$y] = new SubChunk($ids, $data, $skyLight, $blockLight);
+		    for($y = 0; $y < 8; ++$y){
+			    $subChunks[$y] = new SubChunk(BlockLegacyIds::AIR << Block::INTERNAL_METADATA_BITS, [SubChunkConverter::convertSubChunkFromLegacyColumn($fullIds, $fullData, $y)]);
+		    }
 		}
 
 		if($chunk->hasTag("BiomeColors", IntArrayTag::class)){
