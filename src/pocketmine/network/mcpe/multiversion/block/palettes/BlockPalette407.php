@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\block\BlockIds;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
-use pocketmine\nbt\LittleEndianNBTStream;
+use pocketmine\nbt\BigEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\utils\AssumptionFailedError;
@@ -56,20 +56,16 @@ final class BlockPalette407 extends Palette{
 			throw new AssumptionFailedError("Missing required resource file");
 		}
 
-		$stream = (new LittleEndianNBTStream())->read($runtimeBlockStatesFile)->getValue();
+		$stream = (new BigEndianNBTStream())->readCompressed($runtimeBlockStatesFile)->getValue();
 		self::$bedrockKnownStates = $stream;
 		self::$encodedPalette = (new NetworkLittleEndianNBTStream())->write(new ListTag("", self::$bedrockKnownStates));
 
 		foreach($stream as $runtimeId => $tag){
-			/** @var CompoundTag $tag */
-			if(!$tag->hasTag("LegacyStates")){
+			$id = $tag->getInt("id");
+			$meta = $tag->getShort("data");
+			if($meta > 15){
 				continue;
 			}
-
-			$legacyStates = $tag->getListTag("LegacyStates")->getValue()[0];
-			/** @var CompoundTag $legacyStates */
-			$id = $legacyStates->getInt("id");
-			$meta = $legacyStates->getShort("val");
 
 			self::registerMapping($runtimeId, $id, $meta);
 		}

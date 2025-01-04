@@ -52,12 +52,12 @@ final class BlockPalette503 extends Palette{
 			throw new AssumptionFailedError("Missing required resource file");
 		}
 
-		$stream = (new BigEndianNBTStream())->read($runtimeBlockStatesFile)->getValue();
+		$stream = (new BigEndianNBTStream())->readCompressed($runtimeBlockStatesFile)->getValue();
 		self::$bedrockKnownStates = $stream;
 
 		foreach($stream as $tag){
 			$id = $tag->getInt("id");
-			$meta = $tag->getShort("data");
+			$meta = $tag->getTag("data")->getValue();
 			if($meta > 15){
 				continue;
 			}

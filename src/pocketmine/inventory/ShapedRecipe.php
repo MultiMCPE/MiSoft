@@ -188,8 +188,8 @@ class ShapedRecipe implements CraftingRecipe{
 		return $this->shape;
 	}
 
-	public function registerToCraftingManager(CraftingManager $manager) : void{
-		$manager->registerShapedRecipe($this);
+	public function registerToCraftingManager(CraftingManager $manager, ?int $protocol = null) : void{
+		$manager->registerShapedRecipe($this, $protocol);
 	}
 
 	/**

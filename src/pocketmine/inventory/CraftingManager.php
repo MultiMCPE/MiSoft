@@ -34,13 +34,19 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\Server;
 use pocketmine\timings\Timings;
+use function array_keys;
 use function array_map;
+use function array_diff;
+use function array_diff_assoc;
+use function scandir;
 use function file_get_contents;
 use function json_decode;
 use function json_encode;
 use function usort;
+use function krsort;
 use const DIRECTORY_SEPARATOR;
 use const pocketmine\RESOURCE_PATH;
+use ReflectionClass;
 
 class CraftingManager{
 	/** @var ShapedRecipe[][] */
@@ -65,44 +71,97 @@ class CraftingManager{
 
 	public function init() : void{
 		self::registerBrewingStand();
+		self::registerFurnaceRecipes();
+		self::registerProtocolRecipes();
+	}
 
-		$recipes = json_decode(file_get_contents(RESOURCE_PATH . "vanilla" . DIRECTORY_SEPARATOR . "recipes.json"), true);
-
+	private function registerProtocolRecipes() : void{
 		$itemDeserializerFunc = Closure::fromCallable([Item::class, 'jsonDeserialize']);
-		foreach($recipes as $recipe){
-			switch($recipe["type"]){
-				case "shapeless":
-					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
-						break;
-					}
-					$this->registerRecipe(new ShapelessRecipe(
-						array_map($itemDeserializerFunc, $recipe["input"]),
-						array_map($itemDeserializerFunc, $recipe["output"])
-					));
+
+		$protocolRecipesDirectory = RESOURCE_PATH . DIRECTORY_SEPARATOR . "vanilla" . DIRECTORY_SEPARATOR . "recipes" . DIRECTORY_SEPARATOR . "protocols" . DIRECTORY_SEPARATOR;
+        foreach(array_diff(scandir($protocolRecipesDirectory), ["..", "."]) as $protocol){
+			$shapelessRecipes = json_decode(file_get_contents($protocolRecipesDirectory . $protocol . DIRECTORY_SEPARATOR . "shapeless_recipes.json"), true);
+			$shapedRecipes = json_decode(file_get_contents($protocolRecipesDirectory . $protocol . DIRECTORY_SEPARATOR . "shaped_recipes.json"), true);
+
+			foreach($shapelessRecipes as $recipe){
+				if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
 					break;
-				case "shaped":
-					if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
-						break;
-					}
-					$this->registerRecipe(new ShapedRecipe(
-						$recipe["shape"],
-						array_map($itemDeserializerFunc, $recipe["input"]),
-						array_map($itemDeserializerFunc, $recipe["output"])
-					));
+				}
+				$this->registerShapelessRecipe(new ShapelessRecipe(
+					array_map($itemDeserializerFunc, $recipe["input"]),
+					array_map($itemDeserializerFunc, $recipe["output"])
+				), (int) $protocol);
+			}
+
+			foreach($shapedRecipes as $recipe){
+				if($recipe["block"] !== "crafting_table"){ //TODO: filter others out for now to avoid breaking economics
 					break;
-				case "smelting":
-					if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
-						break;
-					}
-					$this->registerRecipe(new FurnaceRecipe(
-						Item::jsonDeserialize($recipe["output"]),
-						Item::jsonDeserialize($recipe["input"]))
-					);
-					break;
-				default:
-					break;
+				}
+				$this->registerShapedRecipe(new ShapedRecipe(
+					$recipe["shape"],
+					array_map($itemDeserializerFunc, $recipe["input"]),
+					array_map($itemDeserializerFunc, $recipe["output"])
+				), (int) $protocol);
 			}
 		}
+
+		krsort($this->shapelessRecipes);
+		krsort($this->shapedRecipes);
+	}
+
+	private function registerFurnaceRecipes() : void{
+		$itemDeserializerFunc = Closure::fromCallable([Item::class, 'jsonDeserialize']);
+
+		$recipes = json_decode(file_get_contents(RESOURCE_PATH . "vanilla" . DIRECTORY_SEPARATOR . "recipes" . DIRECTORY_SEPARATOR . "furnace_recipes.json"), true);
+		foreach($recipes as $recipe){
+			if($recipe["block"] !== "furnace"){ //TODO: filter others out for now to avoid breaking economics
+				break;
+			}
+			$this->registerFurnaceRecipe(new FurnaceRecipe(
+				Item::jsonDeserialize($recipe["output"]),
+				Item::jsonDeserialize($recipe["input"]))
+			);
+		}
+	}
+
+	/**
+	 * @param int $protocol
+	 */
+	public function getShapelessRecipesListKey(int $protocol) : int{
+		foreach($this->shapelessRecipes as $key => $recipes){
+			if($protocol >= $key){
+				return $key;
+			}
+		}
+
+		return $protocol;
+	}
+
+	/**
+	 * @param int $protocol
+	 */
+	public function getShapedRecipesListKey(int $protocol) : int{
+		foreach($this->shapedRecipes as $key => $recipes){
+			if($protocol >= $key){
+				return $key;
+			}
+		}
+
+		return $protocol;
+	}
+
+	/**
+	 * @return int[]
+	 */
+	public function getShapelessRecipesProtocols() : array{
+		return array_keys($this->shapelessRecipes);
+	}
+
+	/**
+	 * @return int[]
+	 */
+	public function getShapedRecipesProtocols() : array{
+		return array_keys($this->shapedRecipes);
 	}
 
     /**
@@ -135,8 +194,8 @@ class CraftingManager{
                 Timings::$craftingDataCacheRebuildTimer->startTiming();
 
                 $player->getServer()->getAsyncPool()->submitTask($this->craftingDataBuildTask[$player->getCraftingProtocol()] = new CraftingDataBuildTask(
-                    $this->shapelessRecipes,
-                    $this->shapedRecipes,
+                    $this->getShapelessRecipes($player->getCraftingProtocol()),
+                    $this->getShapedRecipes($player->getCraftingProtocol()),
                     $this->furnaceRecipes,
 					$this->brewingRecipes,
                     $player->getCraftingProtocol(),
@@ -204,17 +263,21 @@ class CraftingManager{
 	}
 
 	/**
+	 * @param int $protocol
+	 * 
 	 * @return ShapelessRecipe[][]
 	 */
-	public function getShapelessRecipes() : array{
-		return $this->shapelessRecipes;
+	public function getShapelessRecipes(int $protocol) : array{
+		return $this->shapelessRecipes[$this->getShapelessRecipesListKey($protocol)] ?? [];
 	}
 
 	/**
+	 * @param int $protocol
+	 * 
 	 * @return ShapedRecipe[][]
 	 */
-	public function getShapedRecipes() : array{
-		return $this->shapedRecipes;
+	public function getShapedRecipes(int $protocol) : array{
+		return $this->shapedRecipes[$this->getShapedRecipesListKey($protocol)] ?? [];
 	}
 
 	/**
@@ -226,18 +289,36 @@ class CraftingManager{
 
 	/**
 	 * @param ShapedRecipe $recipe
+	 * @param ?int $protocol
 	 */
-	public function registerShapedRecipe(ShapedRecipe $recipe) : void{
-		$this->shapedRecipes[self::hashOutputs($recipe->getResults())][] = $recipe;
+	public function registerShapedRecipe(ShapedRecipe $recipe, ?int $protocol = null) : void{
+		if($protocol === null){
+			$protocols = array_keys($this->shapedRecipes);
+		}else{
+			$protocols = [$protocol];
+		}
+
+		foreach($protocols as $protocol){
+	    	$this->shapedRecipes[$protocol][self::hashOutputs($recipe->getResults())][] = $recipe;
+		}
 
 		$this->craftingDataCache = [];
 	}
 
 	/**
 	 * @param ShapelessRecipe $recipe
+	 * @param ?int $protocol
 	 */
-	public function registerShapelessRecipe(ShapelessRecipe $recipe) : void{
-		$this->shapelessRecipes[self::hashOutputs($recipe->getResults())][] = $recipe;
+	public function registerShapelessRecipe(ShapelessRecipe $recipe, ?int $protocol = null) : void{
+		if($protocol === null){
+			$protocols = array_keys($this->shapelessRecipes);
+		}else{
+			$protocols = [$protocol];
+		}
+
+		foreach($protocols as $protocol){
+	    	$this->shapelessRecipes[$protocol][self::hashOutputs($recipe->getResults())][] = $recipe;
+		}
 
 		$this->craftingDataCache = [];
 	}
@@ -254,24 +335,27 @@ class CraftingManager{
 	/**
 	 * @param CraftingGrid $grid
 	 * @param Item[]       $outputs
+	 * @param int          $protocol
 	 *
 	 * @return CraftingRecipe|null
 	 */
-	public function matchRecipe(CraftingGrid $grid, array $outputs) : ?CraftingRecipe{
+	public function matchRecipe(CraftingGrid $grid, array $outputs, int $protocol) : ?CraftingRecipe{
 		//TODO: try to match special recipes before anything else (first they need to be implemented!)
 
 		$outputHash = self::hashOutputs($outputs);
+		$shapelessKey = $this->getShapelessRecipesListKey($protocol);
+		$shapedKey = $this->getShapedRecipesListKey($protocol);
 
-		if(isset($this->shapedRecipes[$outputHash])){
-			foreach($this->shapedRecipes[$outputHash] as $recipe){
+		if(isset($this->shapedRecipes[$shapedKey][$outputHash])){
+			foreach($this->shapedRecipes[$shapedKey][$outputHash] as $recipe){
 				if($recipe->matchesCraftingGrid($grid)){
 					return $recipe;
 				}
 			}
 		}
 
-		if(isset($this->shapelessRecipes[$outputHash])){
-			foreach($this->shapelessRecipes[$outputHash] as $recipe){
+		if(isset($this->shapelessRecipes[$shapelessKey][$outputHash])){
+			foreach($this->shapelessRecipes[$shapelessKey][$outputHash] as $recipe){
 				if($recipe->matchesCraftingGrid($grid)){
 					return $recipe;
 				}
@@ -283,22 +367,25 @@ class CraftingManager{
 
 	/**
 	 * @param Item[] $outputs
+	 * @param int $protocol
 	 *
 	 * @return CraftingRecipe[]|Generator
 	 */
-	public function matchRecipeByOutputs(array $outputs) : Generator{
+	public function matchRecipeByOutputs(array $outputs, int $protocol) : Generator{
 		//TODO: try to match special recipes before anything else (first they need to be implemented!)
 
 		$outputHash = self::hashOutputs($outputs);
+		$shapelessKey = $this->getShapelessRecipesListKey($protocol);
+		$shapedKey = $this->getShapedRecipesListKey($protocol);
 
-		if(isset($this->shapedRecipes[$outputHash])){
-			foreach($this->shapedRecipes[$outputHash] as $recipe){
+		if(isset($this->shapedRecipes[$shapedKey][$outputHash])){
+			foreach($this->shapedRecipes[$shapedKey][$outputHash] as $recipe){
 				yield $recipe;
 			}
 		}
 
-		if(isset($this->shapelessRecipes[$outputHash])){
-			foreach($this->shapelessRecipes[$outputHash] as $recipe){
+		if(isset($this->shapelessRecipes[$shapelessKey][$outputHash])){
+			foreach($this->shapelessRecipes[$shapelessKey][$outputHash] as $recipe){
 				yield $recipe;
 			}
 		}
@@ -315,12 +402,13 @@ class CraftingManager{
 
 	/**
 	 * @param Recipe $recipe
+	 * @param ?int $protocol
 	 */
-	public function registerRecipe(Recipe $recipe) : void{
-		$recipe->registerToCraftingManager($this);
+	public function registerRecipe(Recipe $recipe, ?int $protocol = null) : void{
+		$recipe->registerToCraftingManager($this, $protocol);
 	}
 
-	protected function registerBrewingStand() : void{
+	private function registerBrewingStand() : void{
 		//Potion
 		//WATER
 		$this->registerBrewingRecipe(new BrewingRecipe(Item::get(Item::POTION, Potion::AWKWARD, 1), Item::get(Item::NETHER_WART, 0, 1), Item::get(Item::POTION, Potion::WATER, 1)));
@@ -452,7 +540,7 @@ class CraftingManager{
 		$this->registerBrewingRecipe(new BrewingRecipe(Item::get(Item::SPLASH_POTION, Potion::LONG_INVISIBILITY, 1), Item::get(Item::REDSTONE_DUST, 0, 1), Item::get(Item::SPLASH_POTION, Potion::INVISIBILITY, 1)));
 		$this->registerBrewingRecipe(new BrewingRecipe(Item::get(Item::SPLASH_POTION, Potion::LONG_INVISIBILITY, 1), Item::get(Item::FERMENTED_SPIDER_EYE, 0, 1), Item::get(Item::SPLASH_POTION, Potion::LONG_NIGHT_VISION, 1)));
 
-		$ref = new \ReflectionClass(Potion::class);
+		$ref = new ReflectionClass(Potion::class);
 		$potions = array_diff_assoc($ref->getConstants(), $ref->getParentClass()->getConstants());
 		foreach($potions as $potion){
 			$this->registerBrewingRecipe(new BrewingRecipe(Item::get(Item::SPLASH_POTION, $potion, 1), Item::get(Item::GUNPOWDER, 0, 1), Item::get(Item::POTION, $potion, 1)));

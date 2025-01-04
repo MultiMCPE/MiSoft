@@ -39,7 +39,6 @@ use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette360;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette370;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette389;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette407;
-use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette408;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette419;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette428;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette440;
@@ -109,7 +108,6 @@ class BlockPalette{
             ProtocolInfo::PROTOCOL_440 => new BlockPalette440(),
             ProtocolInfo::PROTOCOL_428 => new BlockPalette428(),
             ProtocolInfo::PROTOCOL_419 => new BlockPalette419(),
-            ProtocolInfo::PROTOCOL_408 => new BlockPalette408(),
             ProtocolInfo::PROTOCOL_407 => new BlockPalette407(),
             ProtocolInfo::PROTOCOL_389 => new BlockPalette389(),
             ProtocolInfo::PROTOCOL_370 => new BlockPalette370(),

@@ -133,7 +133,7 @@ class CraftingTransaction extends InventoryTransaction{
 		$this->matchItems($this->outputs, $this->inputs);
 
 		$failed = 0;
-		foreach($this->source->getServer()->getCraftingManager()->matchRecipeByOutputs($this->outputs) as $recipe){
+		foreach($this->source->getServer()->getCraftingManager()->matchRecipeByOutputs($this->outputs, $this->source->getProtocol()) as $recipe){
 			try{
 				//compute number of times recipe was crafted
 				$this->repetitions = $this->matchRecipeItems($this->outputs, $recipe->getResultsFor($this->source->getCraftingGrid()), false);

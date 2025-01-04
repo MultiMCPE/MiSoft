@@ -24,16 +24,12 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\multiversion\block\palettes;
 
 use pocketmine\block\BlockIds;
-use pocketmine\nbt\NBT;
+use pocketmine\nbt\BigEndianNBTStream;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
+use pocketmine\utils\AssumptionFailedError;
 use function file_get_contents;
-use function getmypid;
-use function json_decode;
-use function mt_rand;
-use function mt_srand;
-use function shuffle;
 use const pocketmine\RESOURCE_PATH;
 
 /**
@@ -55,58 +51,24 @@ final class BlockPalette389 extends Palette{
 	}
 
 	public static function init() : void{
-		$tag = (new NetworkLittleEndianNBTStream())->read(file_get_contents(RESOURCE_PATH . "/vanilla/palette/389/required_block_states.nbt"));
-		if(!($tag instanceof ListTag) or $tag->getTagType() !== NBT::TAG_Compound){ //this is a little redundant currently, but good for auto complete and makes phpstan happy
-			throw new \RuntimeException("Invalid blockstates table, expected TAG_List<TAG_Compound> root");
+		$runtimeBlockStatesFile = file_get_contents(RESOURCE_PATH . "/vanilla/palette/389/runtime_block_states.dat");
+		if($runtimeBlockStatesFile === false){
+			throw new AssumptionFailedError("Missing required resource file");
 		}
 
-		/** @var CompoundTag[] $list */
-		$list = $tag->getValue();
-		self::$bedrockKnownStates = self::randomizeTable($list);
-        self::$encodedPalette = (new NetworkLittleEndianNBTStream())->write(new ListTag("", self::$bedrockKnownStates));
+		$stream = (new BigEndianNBTStream())->readCompressed($runtimeBlockStatesFile)->getValue();
+		self::$bedrockKnownStates = $stream;
+		self::$encodedPalette = (new NetworkLittleEndianNBTStream())->write(new ListTag("", self::$bedrockKnownStates));
 
-		self::setupLegacyMappings();
-	}
-
-	private static function setupLegacyMappings() : void{
-		$legacyIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block_id_map389.json"), true);
-		$legacyStateMap = (new NetworkLittleEndianNBTStream())->read(file_get_contents(RESOURCE_PATH . "/vanilla/palette/389/r12_to_current_block_map.nbt"));
-		if(!($legacyStateMap instanceof ListTag) or $legacyStateMap->getTagType() !== NBT::TAG_Compound){
-			throw new \RuntimeException("Invalid legacy states mapping table, expected TAG_List<TAG_Compound> root");
-		}
-
-		/**
-		 * @var int[][] $idToStatesMap string id -> int[] list of candidate state indices
-		 */
-		$idToStatesMap = [];
-		foreach(self::$bedrockKnownStates as $k => $state){
-			$idToStatesMap[$state->getCompoundTag("block")->getString("name")][] = $k;
-		}
-		/** @var CompoundTag $pair */
-		foreach($legacyStateMap as $pair){
-			$oldState = $pair->getCompoundTag("old");
-			$id = $legacyIdMap[$oldState->getString("name")];
-			$data = $oldState->getShort("val");
-			if($data > 15){
-				//we can't handle metadata with more than 4 bits
+		foreach($stream as $runtimeId => $tag){
+			if(!$tag->hasTag("meta")) continue;
+			$id = $tag->getShort("id");
+			$meta = $tag->getIntArray("meta")[0];
+			if($meta > 15){
 				continue;
 			}
-			$mappedState = $pair->getCompoundTag("new");
 
-			//TODO HACK: idiotic NBT compare behaviour on 3.x compares keys which are stored by values
-			$mappedState->setName("block");
-			$mappedName = $mappedState->getString("name");
-			if(!isset($idToStatesMap[$mappedName])){
-				throw new \RuntimeException("Mapped new state does not appear in network table");
-			}
-			foreach($idToStatesMap[$mappedName] as $k){
-				$networkState = self::$bedrockKnownStates[$k];
-				if($mappedState->equals($networkState->getCompoundTag("block"))){
-					self::registerMapping($k, $id, $data);
-					continue 2;
-				}
-			}
-			throw new \RuntimeException("Mapped new state does not appear in network table");
+			self::registerMapping($runtimeId, $id, $meta);
 		}
 	}
 
@@ -114,23 +76,6 @@ final class BlockPalette389 extends Palette{
 		if(self::$bedrockKnownStates === null){
 			self::init();
 		}
-	}
-
-	/**
-	 * Randomizes the order of the runtimeID table to prevent plugins relying on them.
-	 * Plugins shouldn't use this stuff anyway, but plugin devs have an irritating habit of ignoring what they
-	 * aren't supposed to do, so we have to deliberately break it to make them stop.
-	 *
-	 * @param CompoundTag[] $table
-	 *
-	 * @return CompoundTag[]
-	 */
-	private static function randomizeTable(array $table) : array{
-		$postSeed = mt_rand(); //save a seed to set afterwards, to avoid poor quality randoms
-		mt_srand(getmypid()); //Use a seed which is the same on all threads. This isn't a secure seed, but we don't care.
-		shuffle($table);
-		mt_srand($postSeed); //restore a good quality seed that isn't dependent on PID
-		return $table;
 	}
 
 	/**
