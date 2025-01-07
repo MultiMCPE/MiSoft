@@ -333,15 +333,21 @@ class ItemFactory{
 			/** @var Item|null $listed */
 			$listed = self::$list[self::getListOffset($id)];
 			$item = clone $listed;
+			if($item instanceof Durable){
+                if($meta >= 0 && $meta <= $item->getMaxDurability()){
+                    $item->setDamage($meta);
+                }else{
+                    $item->setDamage(0);
+                }
+			}
 		}elseif($id < 256){ //intentionally excludes negatives because extended blocks aren't supported yet
 			/* Blocks must have a damage value 0-15, but items can have damage value -1 to indicate that they are
 			 * crafting ingredients with any-damage. */
-			$item = new ItemBlock($id, $meta);
+			$item = new ItemBlock($id, $meta & 0xf);
 		}else{
 			$item = new Item($id, $meta);
 		}
 
-		$item->setDamage($meta);
 		$item->setCount($count);
 		$item->setCompoundTag($tags);
 		return $item;
