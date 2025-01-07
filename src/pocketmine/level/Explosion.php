@@ -42,6 +42,7 @@ use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\ExplodePacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Container;
 use pocketmine\tile\Tile;
@@ -224,6 +225,15 @@ class Explosion{
 					$this->level->dropItem($block->add(0.5, 0.5, 0.5), $drop);
 				}
 			}
+
+            if($this->level->obfuscateChunks){
+                $blocks = [$block->asVector3()];
+                $players = $this->level->getChunkPlayers($block->getFloorX() >> 4, $block->getFloorZ() >> 4);
+                foreach([Vector3::SIDE_DOWN, Vector3::SIDE_UP, Vector3::SIDE_NORTH, Vector3::SIDE_SOUTH, Vector3::SIDE_WEST, Vector3::SIDE_EAST] as $side){
+                    $blocks[] = $blocks[0]->getSide($side);
+                }
+                $this->level->sendBlocks($players, $blocks, UpdateBlockPacket::FLAG_NEIGHBORS);
+            }
 
 			$this->level->setBlockIdAt($block->x, $block->y, $block->z, 0);
 			$this->level->setBlockDataAt($block->x, $block->y, $block->z, 0);

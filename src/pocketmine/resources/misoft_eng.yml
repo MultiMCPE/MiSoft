@@ -37,6 +37,13 @@ ender:
  allow-ender: true
  level-name: "ender"
 
+anti-xray:
+ #Select whether anti-xray is enabled
+ enabled: false
+ #Worlds where anti-xray will be enabled
+ worlds:
+  - world
+
 mobs:
  # If enabled, mobs can move around
  # Note: this feature can cause lag in your server when lots of mob are spawned

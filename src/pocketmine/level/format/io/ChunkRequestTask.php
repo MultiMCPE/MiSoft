@@ -23,6 +23,9 @@ declare(strict_types=1);
 
 namespace pocketmine\level\format\io;
 
+use pocketmine\block\Block;
+use pocketmine\block\BlockIds;
+use pocketmine\math\Vector3;
 use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
@@ -62,11 +65,22 @@ class ChunkRequestTask extends AsyncTask{
 	protected $protocol;
 	/** @var int */
 	protected $levelChunkPacketId;
+	protected $obfuscate;
 
-	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol){
+    const REPLACE_WITH = [
+        BlockIds::GOLD_ORE, BlockIds::GOLD_BLOCK,
+        BlockIds::IRON_ORE, BlockIds::IRON_BLOCK,
+        BlockIds::LAPIS_ORE, BlockIds::LAPIS_BLOCK,
+        BlockIds::DIAMOND_ORE, BlockIds::DIAMOND_BLOCK,
+        BlockIds::REDSTONE_ORE, BlockIds::REDSTONE_BLOCK,
+        BlockIds::EMERALD_ORE, BlockIds::EMERALD_BLOCK,
+    ];
+
+	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol, $obfuscate){
 		$this->levelId = $level->getId();
 		$this->compressionLevel = $level->getServer()->networkCompressionLevel;
 
+        $this->obfuscate = $obfuscate;
 		$this->chunkX = $chunkX;
 		$this->chunkZ = $chunkZ;
 		$this->dimensionId = $dimensionId;
@@ -94,6 +108,10 @@ class ChunkRequestTask extends AsyncTask{
 		$dimensionId = $this->dimensionId;
 
         $protocol = $this->protocol;
+
+        if($this->obfuscate){
+            self::obfuscateChunk($chunk);
+        }
 
 		if(($palette = $this->palette->deserialize()) !== null){
 			BlockPalette::addPalette($palette, $protocol);
@@ -142,4 +160,28 @@ class ChunkRequestTask extends AsyncTask{
 			$server->getLogger()->debug("Dropped chunk task due to world not loaded");
 		}
 	}
+
+    public static function obfuscateChunk(Chunk $chunk): void{
+        for($yy = 0; $yy <= 8; $yy++){
+            $subchunk = $chunk->getSubChunk($yy);
+            for($x = 1; $x < 15; $x++){
+                for($z = 1; $z < 15; $z++){
+                    for($y = 1; $y < 15; $y++){
+                        if($subchunk->getBlockId($x, $y, $z) !== 1){
+                            continue;
+                        }
+                        $vector = new Vector3($chunk->getX() * 16 + $x, $yy * 16 + $y, $chunk->getZ() * 16 + $z);
+                        foreach([Vector3::SIDE_DOWN, Vector3::SIDE_UP, Vector3::SIDE_NORTH, Vector3::SIDE_SOUTH, Vector3::SIDE_WEST, Vector3::SIDE_EAST] as $side){
+                            $side = $vector->getSide($side);
+                            $blockId = $chunk->getBlockId($side->x & 0x0f, $side->y, $side->z & 0x0f);
+                            if($blockId !== Block::STONE){
+                                continue 2;
+                            }
+                        }
+                        $subchunk->setBlockId($x, $y, $z, self::REPLACE_WITH[array_rand(self::REPLACE_WITH)]);
+                    }
+                }
+            }
+        }
+    }
 }

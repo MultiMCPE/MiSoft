@@ -246,6 +246,8 @@ class Level implements ChunkManager, Metadatable{
 	/** @var bool[] */
 	private $generatorRegisteredWorkers = [];
 
+    public $obfuscateChunks = false;
+
 	/** @var bool */
 	private $autoSave = true;
 
@@ -477,6 +479,10 @@ class Level implements ChunkManager, Metadatable{
 		$this->temporalVector = new Vector3(0, 0, 0);
 
 		$this->weather = new Weather($this, 0);
+
+        if($this->server->getAdvancedProperty("anti-xray.enabled", true)){
+            $this->obfuscateChunks = in_array($this->getFolderName(), (array) $this->server->getAdvancedProperty("anti-xray.worlds", ["world"]));
+        }
 
         if($this->server->netherEnabled and $this->server->netherName == $this->folderName)
             $this->setDimensionId(DimensionIds::NETHER);
@@ -2012,6 +2018,19 @@ class Level implements ChunkManager, Metadatable{
 			return false;
 		}
 
+        if($this->obfuscateChunks){
+            $blocks = [$target->asVector3()];
+            $players = $this->getChunkPlayers($target->getFloorX() >> 4, $target->getFloorZ() >> 4);
+            foreach([Vector3::SIDE_DOWN, Vector3::SIDE_UP, Vector3::SIDE_NORTH, Vector3::SIDE_SOUTH, Vector3::SIDE_WEST, Vector3::SIDE_EAST] as $side){
+                $side = $blocks[0]->getSide($side);
+                /*foreach([Vector3::SIDE_DOWN, Vector3::SIDE_UP, Vector3::SIDE_NORTH, Vector3::SIDE_SOUTH, Vector3::SIDE_WEST, Vector3::SIDE_EAST] as $side_2){
+                  $blocks[] = $side->getSide($side_2);
+                }*/
+                $blocks[] = $side;
+            }
+            $this->sendBlocks($players, $blocks, UpdateBlockPacket::FLAG_NEIGHBORS);
+        }
+
 		foreach($affectedBlocks as $t){
 			$this->destroyBlockInternal($t, $item, $player, $createParticles);
 		}
@@ -2862,7 +2881,7 @@ class Level implements ChunkManager, Metadatable{
 			    	}
 			    	assert($chunk->getX() === $x and $chunk->getZ() === $z, "Chunk coordinate mismatch: expected $x $z, but chunk has coordinates " . $chunk->getX() . " " . $chunk->getZ() . ", did you forget to clone a chunk before setting?");
 
-			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $this->getDimensionId(), $chunk, $protocol));
+			    	$this->server->getAsyncPool()->submitTask($task = new ChunkRequestTask($this, $x, $z, $this->getDimensionId(), $chunk, $protocol, $this->obfuscateChunks));
 			    	$this->chunkSendTasks[$index][$protocol] = $task;
 
 			    	$this->timings->syncChunkSendPrepareTimer->stopTiming();
