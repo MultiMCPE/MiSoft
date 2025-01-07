@@ -480,7 +480,7 @@ class Level implements ChunkManager, Metadatable{
 
 		$this->weather = new Weather($this, 0);
 
-        if($this->server->getAdvancedProperty("anti-xray.enabled", true)){
+        if($this->server->getAdvancedProperty("anti-xray.enabled", false)){
             $this->obfuscateChunks = in_array($this->getFolderName(), (array) $this->server->getAdvancedProperty("anti-xray.worlds", ["world"]));
         }
 
