@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class DriedKelp extends Food{
 	public function __construct(int $meta = 0){
 		parent::__construct(self::DRIED_KELP, $meta, "Dried Kelp");
@@ -35,4 +37,12 @@ class DriedKelp extends Food{
 	public function getSaturationRestore() : float{
 		return 0.6;
 	}
+
+    public function getItemProtocol(int $protocol) : ?Item{
+        if($protocol < ProtocolInfo::PROTOCOL_240){
+            return ItemFactory::get(ItemIds::APPLE, 0); // яблочко хд
+        }
+
+        return parent::getItemProtocol($protocol);
+    }
 }
