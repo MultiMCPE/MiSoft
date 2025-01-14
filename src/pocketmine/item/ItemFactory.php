@@ -337,7 +337,7 @@ class ItemFactory{
 		}elseif($id < 256){ //intentionally excludes negatives because extended blocks aren't supported yet
 			/* Blocks must have a damage value 0-15, but items can have damage value -1 to indicate that they are
 			 * crafting ingredients with any-damage. */
-			$item = new ItemBlock($id, $meta & 0xf);
+			$item = new ItemBlock($id, $meta === -1 ? -1 : $meta & 0xf);
 		}else{
 			$item = new Item($id, $meta);
 		}
