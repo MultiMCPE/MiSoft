@@ -275,7 +275,7 @@ class NetworkBinaryStream extends BinaryStream{
 
 		$auxValue = $this->getVarInt();
 		$data = $auxValue >> 8;
-		if($playerProtocol < ProtocolInfo::PROTOCOL_130 && $data === 0x7fff){
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_110 && $playerProtocol < ProtocolInfo::PROTOCOL_130 && $data === 0x7fff){
 		    $data = -1;
 		}
 		$cnt = $auxValue & 0xff;
@@ -448,7 +448,11 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
 		$this->putVarInt($id);
-		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+		if($playerProtocol < ProtocolInfo::PROTOCOL_110){
+			$auxValue = ($damage << 8) | $item->getCount();
+		}else{
+			$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+		}
 		$this->putVarInt($auxValue);
 
 		if($nbt !== null){
