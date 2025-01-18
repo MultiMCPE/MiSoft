@@ -300,7 +300,7 @@ class CraftingDataPacket extends DataPacket{
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_350){
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
-				$stream->putVarInt(50); //TODO: priority
+				$stream->putVarInt($recipe->getPriority());
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
 					if($playerProtocol >= ProtocolInfo::PROTOCOL_685){
                         $stream->putBool(true); //RecipeUnlockingRequirement
@@ -341,7 +341,7 @@ class CraftingDataPacket extends DataPacket{
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_350){
 	    	$stream->putString("crafting_table"); //TODO: blocktype (no prefix) (this might require internal API breaks)
 	    	if($playerProtocol >= ProtocolInfo::PROTOCOL_361){
-				$stream->putVarInt(50); //TODO: priority
+				$stream->putVarInt($recipe->getPriority());
 	        	if($playerProtocol >= ProtocolInfo::PROTOCOL_392){
 					if($playerProtocol >= ProtocolInfo::PROTOCOL_671){
 						$stream->putBool(true); //symmetric

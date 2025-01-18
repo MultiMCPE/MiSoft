@@ -46,6 +46,9 @@ class ShapedRecipe implements CraftingRecipe{
 	/** @var int */
 	private $width;
 
+	/** @var int */
+	private $priority;
+
 	/**
 	 * Constructs a ShapedRecipe instance.
 	 *
@@ -58,10 +61,11 @@ class ShapedRecipe implements CraftingRecipe{
 	 *     This accepts an array of Items, indexed by character. Every unique character (except space) in the shape
 	 *     array MUST have a corresponding item in this list. Space character is automatically treated as air.
 	 * @param Item[]   $results List of items that this recipe produces when crafted.
+	 * @param int      $priority Recipe priority
 	 *
 	 * Note: Recipes **do not** need to be square. Do NOT add padding for empty rows/columns.
 	 */
-	public function __construct(array $shape, array $ingredients, array $results){
+	public function __construct(array $shape, array $ingredients, array $results, int $priority = 50){
 		$this->height = count($shape);
 		if($this->height > 3 or $this->height <= 0){
 			throw new InvalidArgumentException("Shaped recipes may only have 1, 2 or 3 rows, not $this->height");
@@ -93,6 +97,8 @@ class ShapedRecipe implements CraftingRecipe{
 		}
 
 		$this->results = array_map(function(Item $item) : Item{ return clone $item; }, $results);
+
+		$this->priority = $priority;
 	}
 
 	public function getWidth() : int{
@@ -224,5 +230,22 @@ class ShapedRecipe implements CraftingRecipe{
 		}
 
 		return $this->matchInputMap($grid, false) or $this->matchInputMap($grid, true);
+	}
+
+	/**
+	 * @param int $priority
+	 * 
+	 * @return ShapedRecipe
+	 */
+	public function setPriority(int $priority) : ShapedRecipe{
+		$this->priority = $priority;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPriority() : int{
+		return $this->priority;
 	}
 }

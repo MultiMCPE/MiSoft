@@ -494,8 +494,10 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_419:
 			    return ProtocolInfo::PROTOCOL_419;
 			case ProtocolInfo::PROTOCOL_408:
+				return ProtocolInfo::PROTOCOL_408;
 			case ProtocolInfo::PROTOCOL_407:
 			case ProtocolInfo::PROTOCOL_406:
+				return ProtocolInfo::PROTOCOL_406;
 			case ProtocolInfo::PROTOCOL_403:
 				return ProtocolInfo::PROTOCOL_403;
 			case ProtocolInfo::PROTOCOL_402:
@@ -508,6 +510,7 @@ abstract class ProtocolConvertor{
 			    return ProtocolInfo::PROTOCOL_392;
 			case ProtocolInfo::PROTOCOL_390:
 			case ProtocolInfo::PROTOCOL_389:
+				return ProtocolInfo::PROTOCOL_389;
 			case ProtocolInfo::PROTOCOL_388:
 			case ProtocolInfo::PROTOCOL_387:
 			case ProtocolInfo::PROTOCOL_386:
@@ -524,6 +527,7 @@ abstract class ProtocolConvertor{
 			    return ProtocolInfo::PROTOCOL_350;
 			case ProtocolInfo::PROTOCOL_342:
 			case ProtocolInfo::PROTOCOL_340:
+				return ProtocolInfo::PROTOCOL_340;
 			case ProtocolInfo::PROTOCOL_332:
 			case ProtocolInfo::PROTOCOL_331:
 			    return ProtocolInfo::PROTOCOL_331;

@@ -89,7 +89,8 @@ class CraftingManager{
 				}
 				$this->registerShapelessRecipe(new ShapelessRecipe(
 					array_map($itemDeserializerFunc, $recipe["input"]),
-					array_map($itemDeserializerFunc, $recipe["output"])
+					array_map($itemDeserializerFunc, $recipe["output"]),
+					$recipe["priority"] ?? 50
 				), (int) $protocol);
 			}
 
@@ -100,7 +101,8 @@ class CraftingManager{
 				$this->registerShapedRecipe(new ShapedRecipe(
 					$recipe["shape"],
 					array_map($itemDeserializerFunc, $recipe["input"]),
-					array_map($itemDeserializerFunc, $recipe["output"])
+					array_map($itemDeserializerFunc, $recipe["output"]),
+					$recipe["priority"] ?? 50
 				), (int) $protocol);
 			}
 		}

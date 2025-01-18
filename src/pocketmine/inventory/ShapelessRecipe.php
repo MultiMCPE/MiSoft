@@ -34,17 +34,23 @@ class ShapelessRecipe implements CraftingRecipe{
 	/** @var Item[] */
 	private $results;
 
+	/** @var int */
+	private $priority;
+
 	/**
 	 * @param Item[] $ingredients No more than 9 total. This applies to sum of item stack counts, not count of array.
 	 * @param Item[] $results List of result items created by this recipe.
+	 * @param int    $priority Recipe priority
 	 */
-	public function __construct(array $ingredients, array $results){
+	public function __construct(array $ingredients, array $results, int $priority = 50){
 		foreach($ingredients as $item){
 			//Ensure they get split up properly
 			$this->addIngredient($item);
 		}
 
 		$this->results = array_map(function(Item $item) : Item{ return clone $item; }, $results);
+
+		$this->priority = $priority;
 	}
 
 	public function getResults() : array{
@@ -137,5 +143,22 @@ class ShapelessRecipe implements CraftingRecipe{
 		}
 
 		return empty($input); //crafting grid should be empty apart from the given ingredient stacks
+	}
+
+	/**
+	 * @param int $priority
+	 * 
+	 * @return ShapelessRecipe
+	 */
+	public function setPriority(int $priority) : ShapelessRecipe{
+		$this->priority = $priority;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getPriority() : int{
+		return $this->priority;
 	}
 }

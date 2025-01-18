@@ -3798,7 +3798,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
-        $recipes = $this->server->getCraftingManager()->matchRecipeByOutputs($packet->output, $this->getProtocol());
+        $recipes = $this->server->getCraftingManager()->matchRecipeByOutputs($packet->output, $this->getCraftingProtocol());
         $this->transactionQueue->execute();
         $inventory = $this->transactionQueue->getInventory();
         if(count($packet->input) > 0){
