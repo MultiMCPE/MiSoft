@@ -5786,7 +5786,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function removeInteractiveTag() : void{
 		if($this->getInteractiveTag() !== null){
-			$this->propertyManager->removeProperty(self::DATA_INTERACTIVE_TAG);
+			$this->propertyManager->setString(self::DATA_INTERACTIVE_TAG, "");
 		}
 	}
 }
