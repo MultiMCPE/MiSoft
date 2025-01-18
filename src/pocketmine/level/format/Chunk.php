@@ -960,7 +960,7 @@ class Chunk{
 			$blockLayers = $subChunk->getBlockLayers();
 
 			if($playerProtocol < ProtocolInfo::PROTOCOL_290){
-				$result->putByte(1); // maybe storage version???
+				$result->putByte(1); // storage version (paletted v1, single blockstorage)
 
 				$blocks = $blockLayers[0] ?? new PalettedBlockArray(Block::AIR);
                	// 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)

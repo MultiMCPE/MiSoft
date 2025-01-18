@@ -360,9 +360,18 @@ class LevelDB extends BaseLevelProvider{
 		$binaryStream = new BinaryStream();
 
 		switch($chunkVersion){
+			case 15: //MCPE 1.12.0.4 beta (???)
+			case 14: //MCPE 1.11.1.2 (???)
+			case 13: //MCPE 1.11.0.4 beta (???)
+			case 12: //MCPE 1.11.0.3 beta (???)
+			case 11: //MCPE 1.11.0.1 beta (???)
+			case 10: //MCPE 1.9 (???)
+			case 9: //MCPE 1.8 (???)
+			case 8: //MCPE 1.2.13 (paletted subchunks)
 			case 7: //MCPE 1.2 (???)
+			case 6: //MCPE 1.2.0.2 beta (???)
+			case 5: //MCPE 1.1
 			case 4: //MCPE 1.1
-				//TODO: check beds
 			case 3: //MCPE 1.0
 				for($y = 0; $y < Chunk::MAX_SUBCHUNKS; ++$y){
 					if(($data = $this->db->get($index . self::TAG_SUBCHUNK_PREFIX . chr($y))) === false){
@@ -376,19 +385,13 @@ class LevelDB extends BaseLevelProvider{
 					}
 
 					switch($subChunkVersion){
-						case 8:
-                            //legacy extradata layers intentionally ignored because they aren't supposed to exist in v8
-                            $storageCount = $binaryStream->getByte();
-                            if($storageCount > 0){
-                                $storages = [];
-
-                                for($k = 0; $k < $storageCount; ++$k){
-                                    $storages[] = $this->deserializePaletted($binaryStream);
-                                }
-                                $subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, $storages);
-                            }
-							break;
 						case 0:
+						case 2: //these are all identical to version 0, but vanilla respects these so we should also
+						case 3:
+						case 4:
+						case 5:
+						case 6:
+						case 7:
 							$blocks = $binaryStream->get(4096);
 							$blockData = $binaryStream->get(2048);
 							if($chunkVersion < 4){
@@ -404,6 +407,22 @@ class LevelDB extends BaseLevelProvider{
 
 							$subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, SubChunkConverter::convertSubChunkXZY($blocks, $blockData), $blockSkyLight, $blockLight);
 							break;
+						case 1: //paletted v1, has a single blockstorage
+							$storages = [$this->deserializePaletted($binaryStream)];
+							$subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, $storages);
+							break;
+						case 8:
+							//legacy extradata layers intentionally ignored because they aren't supposed to exist in v8
+							$storageCount = $binaryStream->getByte();
+							if($storageCount > 0){
+								$storages = [];
+
+								for($k = 0; $k < $storageCount; ++$k){
+									$storages[] = $this->deserializePaletted($binaryStream);
+								}
+								$subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, $storages);
+							}
+							break;
 						default:
 							//TODO: set chunks read-only so the version on disk doesn't get overwritten
 							throw new UnsupportedChunkFormatException("don't know how to decode LevelDB subchunk format version $subChunkVersion");
@@ -418,6 +437,8 @@ class LevelDB extends BaseLevelProvider{
 				}
 				break;
 			case 2: // < MCPE 1.0
+			case 1:
+			case 0: //MCPE 0.9.0.1 beta (first version)
 				$binaryStream->setBuffer($this->db->get($index . self::TAG_LEGACY_TERRAIN));
 				$fullIds = $binaryStream->get(32768);
 				$fullData = $binaryStream->get(16384);
