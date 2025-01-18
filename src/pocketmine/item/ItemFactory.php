@@ -338,6 +338,8 @@ class ItemFactory{
 					$item->setDamage(0);
 				}elseif($meta > $item->getMaxDurability()){
 					$item->setDamage($item->getMaxDurability());
+				}else{
+					$item->setDamage($meta);
 				}
 			}else{
 			    $item->setDamage($meta);
