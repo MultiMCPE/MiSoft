@@ -3348,12 +3348,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$id = $packet->data;
 				}
 
-				if($this->inventory->getItemInHand()->getId() !== $id){
-					return false;
+				$item = $this->inventory->getItemInHand();
+				if($item->getId() !== $id){
+					return ($item->getItemProtocol($this->getProtocol()) ?? $item)->getId() === $id;
 				}
 
 				$viewers = $this->getViewers();
 				foreach($viewers as $viewer){
+					$id = ($item->getItemProtocol($viewer->getProtocol()) ?? $item)->getId();
+
 					$pk = new ActorEventPacket();
 					$pk->entityRuntimeId = $this->getId();
 					$pk->event = ActorEventPacket::EATING_ITEM;
