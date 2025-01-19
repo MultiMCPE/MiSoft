@@ -405,7 +405,7 @@ class LevelDB extends BaseLevelProvider{
 								$lightPopulated = false;
 							}
 
-							$subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, SubChunkConverter::convertSubChunkXZY($blocks, $blockData), $blockSkyLight, $blockLight);
+							$subChunks[$y] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, [SubChunkConverter::convertSubChunkXZY($blocks, $blockData)], $blockSkyLight, $blockLight);
 							break;
 						case 1: //paletted v1, has a single blockstorage
 							$storages = [$this->deserializePaletted($binaryStream)];
@@ -470,7 +470,7 @@ class LevelDB extends BaseLevelProvider{
 						$blockLight .= substr($fullBlockLight, $subOffset, 8);
 						$subOffset += 64;
 					}
-					$subChunks[$yy] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, SubChunkConverter::convertSubChunkXZY($ids, $data), $skyLight, $blockLight);
+					$subChunks[$yy] = new SubChunk(Block::AIR << Block::INTERNAL_METADATA_BITS, [SubChunkConverter::convertSubChunkXZY($ids, $data)], $skyLight, $blockLight);
 				}
 
 				$heightMap = array_values(unpack("C*", $binaryStream->get(256)));
