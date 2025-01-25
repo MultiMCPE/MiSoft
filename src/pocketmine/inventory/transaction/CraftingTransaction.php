@@ -161,6 +161,10 @@ class CraftingTransaction extends InventoryTransaction{
 	}
 
 	protected function sendInventories() : void{
+		if($this->source->getProtocol() < ProtocolInfo::PROTOCOL_130){
+			return;
+		}
+
 		parent::sendInventories();
 
 		/*

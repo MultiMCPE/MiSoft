@@ -4443,6 +4443,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return true;
 		}
 
+        if($this->isCreative(true) && $this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+            $this->transactionQueue->getInventory()->clearAll();
+        }
 		$this->doCloseInventory();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){

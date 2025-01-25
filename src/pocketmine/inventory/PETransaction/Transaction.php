@@ -29,6 +29,8 @@ use pocketmine\inventory\Inventory;
 use pocketmine\item\Item;
 use pocketmine\item\ItemIds;
 use pocketmine\Player;
+//use pocketmine\item\Arrow;
+//use pocketmine\item\Durable;
 use function abs;
 
 class Transaction{
@@ -161,31 +163,38 @@ class Transaction{
 	 * Handles transaction execution. Returns whether transaction was successful or not.
 	 */
     public function execute(TransactionQueue $transactionQueue) : bool{
+        $change = $this->getChange();
         $player = $transactionQueue->getPlayer();
-        if(!$player->isCreative()){
-            $change = $this->getChange();
-            if($change !== null){ //No changes to make, ignore this transaction
-                /* Verify that we have the required items */
-                if($change["out"] instanceof Item){
-                    if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
-                        return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
-                    }
-                }
-                if($change["in"] instanceof Item){
-                    if(!$transactionQueue->getInventory()->contains($change["in"])){
-                        return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
-                    }
-                }
 
-		        /* All checks passed, make changes to floating inventory
-		        * This will not be reached unless all requirements are met */
-                if($change["out"] instanceof Item){
-                    $transactionQueue->getInventory()->addItem($change["out"]);
-                }
-                if($change["in"] instanceof Item){
-                    $transactionQueue->getInventory()->removeItem($change["in"]);
-                }
+        if($change === null){
+            $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem(), false);
+            return true;
+        }
+
+        if($change["out"] instanceof Item){
+            if(!$this->getInventory()->getItem($this->getSlot())->equals($change["out"], $change["out"]->hasAnyDamageValue(), !$change["out"]->hasNamedTag())){
+                return $this->error("Player inventory not contains " . $change["out"] . " in slot " . $this->getSlot() . ". Have " . $this->getInventory()->getItem($this->getSlot()));
             }
+        }
+
+        if($change["in"] instanceof Item){
+            if($transactionQueue->getInventory()->contains($change["in"])){
+                //условие построено странно но мне нравится такой стиль
+            }elseif($player->isCreative(true) and Item::getCreativeItemIndex($change["in"], $player->getProtocol()) !== -1){
+                $transactionQueue->getInventory()->addItem($change["in"]);
+            //}elseif($this->targetItem instanceof Durable or $this->targetItem instanceof Arrow){
+                //превентивный удар по легаси, возможно с избытком
+                //return false;
+            }else{
+                return $this->error("Transaction inventory not contains " . $change["in"] . ". Transaction inventory contents: " . implode("; ", $transactionQueue->getInventory()->getContents()));
+            }
+        }
+
+        if($change["out"] instanceof Item){
+            $transactionQueue->getInventory()->addItem($change["out"]);
+        }
+        if($change["in"] instanceof Item){
+            $transactionQueue->getInventory()->removeItem($change["in"]);
         }
 
         $this->getInventory()->setItem($this->getSlot(), $this->getTargetItem(), false);
