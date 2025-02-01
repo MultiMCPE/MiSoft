@@ -190,9 +190,9 @@ class NetworkInventoryAction{
 		}
 		switch($this->sourceType){
 			case self::SOURCE_CONTAINER:
+				$slot = 0;
 				if($this->inventorySlot === 27 && ($player->getWindow(Player::BEACON_WINDOW_ID) instanceof BeaconInventory)){
 					$window = $player->getWindow(Player::BEACON_WINDOW_ID);
-					$slot = 0;
 				}elseif(($this->inventorySlot === 14 or $this->inventorySlot === 15) && ($player->findEnchantInventory() instanceof EnchantInventory)){
 					$window = $player->findEnchantInventory();
 					$slot = ($this->inventorySlot === 14 ? 0 : 1);
