@@ -23,13 +23,14 @@ declare(strict_types=1);
 
 namespace pocketmine\entity\behavior;
 
+use pocketmine\entity\Mob;
 use pocketmine\entity\passive\Villager;
 
 class LookAtTradingPlayerBehavior extends LookAtPlayerBehavior{
-	/** @var Villager */
+	/** @var Mob */
 	protected $mob;
 
-	public function __construct(Villager $villager){
+	public function __construct(Mob $villager){
 		parent::__construct($villager, 8);
 	}
 
