@@ -357,6 +357,7 @@ class PacketPool {
 		self::registerPacket(new ContainerRegistryCleanupPacket());
 		self::registerPacket(new MovementEffectPacket());
 		self::registerPacket(new SetMovementAuthorityPacket());
+		self::registerPacket(new MovementPredictionSyncPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// ItemComponentPacket - ItemRegistryPacket

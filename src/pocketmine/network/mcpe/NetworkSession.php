@@ -246,6 +246,7 @@ use pocketmine\network\mcpe\protocol\ContainerRegistryCleanupPacket;
 use pocketmine\network\mcpe\protocol\MovementEffectPacket;
 use pocketmine\network\mcpe\protocol\SetMovementAuthorityPacket;
 use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
+use pocketmine\network\mcpe\protocol\MovementPredictionSyncPacket;
 
 abstract class NetworkSession{
 
@@ -1140,6 +1141,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleItemRegistry(ItemRegistryPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleMovementPredictionSync(MovementPredictionSyncPacket $packet) : bool{
 		return false;
 	}
 }
