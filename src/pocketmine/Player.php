@@ -154,6 +154,7 @@ use pocketmine\network\mcpe\protocol\EmotePacket;
 use pocketmine\network\mcpe\protocol\InteractPacket;
 use pocketmine\network\mcpe\protocol\InventoryTransactionPacket;
 use pocketmine\network\mcpe\protocol\ItemFrameDropItemPacket;
+use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
@@ -1790,7 +1791,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
             $layers = [
 				//TODO: dynamic flying speed! FINALLY!!!!!!!!!!!!!!!!!
-				new AbilitiesLayer(AbilitiesLayer::LAYER_BASE, $boolAbilities, 0.05, 0.1),
+				new AbilitiesLayer(AbilitiesLayer::LAYER_BASE, $boolAbilities, 0.05, 1.0, 0.1),
 			];
 
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
@@ -1802,7 +1803,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		
 					$layers[] = new AbilitiesLayer(AbilitiesLayer::LAYER_SPECTATOR, [
 						AbilitiesLayer::ABILITY_FLYING => true,
-					], null, null);
+					], null, null, null);
 				}
 			}
 
@@ -2920,6 +2921,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+				$palette = ItemPalette::getPalette($this->getProtocol());
+				$this->sendDataPacket(ItemRegistryPacket::create($palette::getEntries()));
+			}
 	    	$this->sendDataPacket(new AvailableActorIdentifiersPacket());
 	    	$this->sendDataPacket(new BiomeDefinitionListPacket());
         }

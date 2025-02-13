@@ -948,6 +948,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 				AbilitiesLayer::LAYER_BASE,
 				array_fill(0, AbilitiesLayer::NUMBER_OF_ABILITIES, false),
 				0.0,
+				1.0,
 				0.0
 			)
 		]);

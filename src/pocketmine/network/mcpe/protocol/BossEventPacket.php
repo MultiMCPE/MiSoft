@@ -59,6 +59,8 @@ class BossEventPacket extends DataPacket{
 	public $healthPercent;
 	/** @var string */
 	public $title;
+	/** @var string */
+	public $filteredTitle = "";
 	/** @var int */
 	public $unknownShort;
 	/** @var int */
@@ -78,6 +80,9 @@ class BossEventPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$this->title = $this->getString();
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+					$this->filteredTitle = $this->getString();
+				}
 				$this->healthPercent = $this->getLFloat();
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_UNKNOWN_6:
@@ -91,6 +96,9 @@ class BossEventPacket extends DataPacket{
 				break;
 			case self::TYPE_TITLE:
 				$this->title = $this->getString();
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+					$this->filteredTitle = $this->getString();
+				}
 				break;
 			default:
 				break;
@@ -109,6 +117,9 @@ class BossEventPacket extends DataPacket{
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_SHOW:
 				$this->putString($this->title);
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+					$this->putString($this->filteredTitle);
+				}
                 $this->putLFloat($this->healthPercent);
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_UNKNOWN_6:
@@ -122,6 +133,9 @@ class BossEventPacket extends DataPacket{
 				break;
 			case self::TYPE_TITLE:
 				$this->putString($this->title);
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+					$this->putString($this->filteredTitle);
+				}
 				break;
 			default:
 				break;

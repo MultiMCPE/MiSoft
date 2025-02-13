@@ -245,6 +245,7 @@ use pocketmine\network\mcpe\protocol\CameraAimAssistPacket;
 use pocketmine\network\mcpe\protocol\ContainerRegistryCleanupPacket;
 use pocketmine\network\mcpe\protocol\MovementEffectPacket;
 use pocketmine\network\mcpe\protocol\SetMovementAuthorityPacket;
+use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
 
 abstract class NetworkSession{
 
@@ -1135,6 +1136,10 @@ abstract class NetworkSession{
 	}
 
 	public function handleSetMovementAuthority(SetMovementAuthorityPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleItemRegistry(ItemRegistryPacket $packet) : bool{
 		return false;
 	}
 }

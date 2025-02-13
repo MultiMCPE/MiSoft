@@ -446,7 +446,7 @@ class StartGamePacket extends DataPacket{
 		            	$this->blockTable[$i] = ["name" => $id, "data" => $data, "legacy_id" => $legacy_id ?? 0];
 	            	}
 	        	}
-	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360 && $this->getProtocol() < ProtocolInfo::PROTOCOL_776){
 		            $this->itemTable = [];
 	            	for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
 		            	$id = $this->getString();
@@ -681,7 +681,7 @@ class StartGamePacket extends DataPacket{
 		            	$this->put($nbtWriter->write($entry->getStates()));
 	            	}
                 }
-	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
+	        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360 && $this->getProtocol() < ProtocolInfo::PROTOCOL_776){
 	        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	        	        $palette = ItemPalette::getPalette($this->getProtocol());
 	        	        $this->put($palette::getEncodedPalette());

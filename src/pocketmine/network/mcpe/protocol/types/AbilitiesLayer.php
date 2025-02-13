@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use RuntimeException;
 
@@ -45,8 +46,9 @@ final class AbilitiesLayer{
 	public const ABILITY_WORLD_BUILDER = 16;
 	public const ABILITY_NO_CLIP = 17;
 	public const ABILITY_PRIVILEGED_BUILDER = 18;
+	public const ABILITY_VERTICAL_FLY_SPEED = 19;
 
-	public const NUMBER_OF_ABILITIES = 19;
+	public const NUMBER_OF_ABILITIES = 20;
 
 	/**
 	 * @param bool[] $boolAbilities
@@ -56,6 +58,7 @@ final class AbilitiesLayer{
 		private int $layerId,
 		private array $boolAbilities,
 		private ?float $flySpeed,
+		private ?float $verticalFlySpeed,
 		private ?float $walkSpeed
 	){}
 
@@ -70,13 +73,18 @@ final class AbilitiesLayer{
 
 	public function getFlySpeed() : ?float{ return $this->flySpeed; }
 
+	public function getVerticalFlySpeed() : ?float{ return $this->verticalFlySpeed; }
+
 	public function getWalkSpeed() : ?float{ return $this->walkSpeed; }
 
-	public static function decode(NetworkBinaryStream $in) : self{
+	public static function decode(NetworkBinaryStream $in, int $playerProtocol) : self{
 		$layerId = $in->getLShort();
 		$setAbilities = $in->getLInt();
 		$setAbilityValues = $in->getLInt();
 		$flySpeed = $in->getLFloat();
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
+			$verticalFlySpeed = $in->getLFloat();
+		}
 		$walkSpeed = $in->getLFloat();
 
 		$boolAbilities = [];
@@ -94,6 +102,14 @@ final class AbilitiesLayer{
 			}
 			$flySpeed = null;
 		}
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
+		    if(($setAbilities & (1 << self::ABILITY_VERTICAL_FLY_SPEED)) === 0){
+			    if($verticalFlySpeed !== 0.0){
+				    throw new RuntimeException("Vertical fly speed should be zero if the layer does not set it");
+			    }
+			    $verticalFlySpeed = null;
+		    }
+	    }
 		if(($setAbilities & (1 << self::ABILITY_WALK_SPEED)) === 0){
 			if($walkSpeed !== 0.0){
 				throw new RuntimeException("Walk speed should be zero if the layer does not set it");
@@ -101,10 +117,10 @@ final class AbilitiesLayer{
 			$walkSpeed = null;
 		}
 
-		return new self($layerId, $boolAbilities, $flySpeed, $walkSpeed);
+		return new self($layerId, $boolAbilities, $flySpeed, $verticalFlySpeed ?? 0.0, $walkSpeed);
 	}
 
-	public function encode(NetworkBinaryStream $out) : void{
+	public function encode(NetworkBinaryStream $out, int $playerProtocol) : void{
 		$out->putLShort($this->layerId);
 
 		$setAbilities = 0;
@@ -116,6 +132,11 @@ final class AbilitiesLayer{
 		if($this->flySpeed !== null){
 			$setAbilities |= (1 << self::ABILITY_FLY_SPEED);
 		}
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
+			if($this->verticalFlySpeed !== null){
+				$setAbilities |= (1 << self::ABILITY_VERTICAL_FLY_SPEED);
+			}
+		}
 		if($this->walkSpeed !== null){
 			$setAbilities |= (1 << self::ABILITY_WALK_SPEED);
 		}
@@ -123,6 +144,9 @@ final class AbilitiesLayer{
 		$out->putLInt($setAbilities);
 		$out->putLInt($setAbilityValues);
 		$out->putLFloat($this->flySpeed ?? 0);
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
+			$out->putLFloat($this->verticalFlySpeed ?? 0);
+		}
 		$out->putLFloat($this->walkSpeed ?? 0);
 	}
 }

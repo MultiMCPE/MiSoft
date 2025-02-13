@@ -64,6 +64,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds686;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds712;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds729;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds748;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds776;
 use pocketmine\utils\Binary;
 use ReflectionClass;
 use SplFixedArray;
@@ -71,6 +72,7 @@ use function array_key_last;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_776 => PacketsIds776::class,
 		ProtocolInfo::PROTOCOL_748 => PacketsIds748::class,
 		ProtocolInfo::PROTOCOL_729 => PacketsIds729::class,
 		ProtocolInfo::PROTOCOL_712 => PacketsIds712::class,
@@ -300,7 +302,7 @@ class PacketPool {
 		self::registerPacket(new CameraShakePacket());
 		self::registerPacket(new PlayerFogPacket());
 		self::registerPacket(new CorrectPlayerMovePredictionPacket());
-		self::registerPacket(new ItemComponentPacket());
+		self::registerPacket(new ItemRegistryPacket());
 		self::registerPacket(new FilterTextPacket());
 		self::registerPacket(new ClientboundDebugRendererPacket());
 		self::registerPacket(new SyncActorPropertyPacket());
@@ -357,6 +359,8 @@ class PacketPool {
 		self::registerPacket(new SetMovementAuthorityPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
+		// ItemComponentPacket - ItemRegistryPacket
+		self::registerPacket(new ItemComponentPacket());
 		// 1.1
 		self::registerPacket(new RemoveBlockPacket());
 		self::registerPacket(new UseItemPacket());

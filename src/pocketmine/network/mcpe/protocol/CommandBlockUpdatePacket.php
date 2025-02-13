@@ -57,6 +57,8 @@ class CommandBlockUpdatePacket extends DataPacket{
 	public $lastOutput;
 	/** @var string */
 	public $name;
+	/** @var string */
+	public $filteredName;
 	/** @var bool */
 	public $shouldTrackOutput;
 	/** @var int */
@@ -80,6 +82,9 @@ class CommandBlockUpdatePacket extends DataPacket{
 		$this->command = $this->getString();
 		$this->lastOutput = $this->getString();
 		$this->name = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+			$this->filteredName = $this->getString();
+		}
 
 		$this->shouldTrackOutput = $this->getBool();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
@@ -103,6 +108,9 @@ class CommandBlockUpdatePacket extends DataPacket{
 		$this->putString($this->command);
 		$this->putString($this->lastOutput);
 		$this->putString($this->name);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+			$this->putString($this->filteredName);
+		}
 
         $this->putBool($this->shouldTrackOutput);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){

@@ -1268,10 +1268,13 @@ class NetworkBinaryStream extends BinaryStream{
         $this->putInt($structureSettings->integritySeed);
 	}
 
-	protected function getStructureEditorData() : StructureEditorData{
+	protected function getStructureEditorData(int $playerProtocol) : StructureEditorData{
 		$result = new StructureEditorData();
 
 		$result->structureName = $this->getString();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+			$result->filteredStructureName = $this->getString();
+		}
 		$result->structureDataField = $this->getString();
 
 		$result->includePlayers = $this->getBool();
@@ -1284,8 +1287,11 @@ class NetworkBinaryStream extends BinaryStream{
 		return $result;
 	}
 
-	protected function putStructureEditorData(StructureEditorData $structureEditorData) : void{
+	protected function putStructureEditorData(StructureEditorData $structureEditorData, int $playerProtocol) : void{
 		$this->putString($structureEditorData->structureName);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+			$this->putString($structureEditorData->filteredStructureName);
+		}
 		$this->putString($structureEditorData->structureDataField);
 
         $this->putBool($structureEditorData->includePlayers);

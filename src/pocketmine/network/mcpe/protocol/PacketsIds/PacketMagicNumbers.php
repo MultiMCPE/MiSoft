@@ -185,7 +185,7 @@ interface PacketMagicNumbers{
 	public const CAMERA_SHAKE_PACKET = 0x9f;
 	public const PLAYER_FOG_PACKET = 0xa0;
 	public const CORRECT_PLAYER_MOVE_PREDICTION_PACKET = 0xa1;
-	public const ITEM_COMPONENT_PACKET = 0xa2;
+	public const ITEM_REGISTRY_PACKET = 0xa2;
 	public const FILTER_TEXT_PACKET = 0xa3;
 	public const CLIENTBOUND_DEBUG_RENDERER_PACKET = 0xa4;
 	public const SYNC_ACTOR_PROPERTY_PACKET = 0xa5;
@@ -243,18 +243,22 @@ interface PacketMagicNumbers{
 	public const CONTAINER_REGISTRY_CLEANUP_PACKET = 0x13d;
 	public const MOVEMENT_EFFECT_PACKET = 0x13e;
 	public const SET_MOVEMENT_AUTHORITY_PACKET = 0x13f;
+
+	public const MOVEMENT_PREDICTION_SYNC_PACKET = 0x142;
 	// EXPLODE_PACKET - TICK_SYNC_PACKET
 	public const EXPLODE_PACKET = 0x100;
+	// ITEM_COMPONENT_PACKET - ITEM_REGISTRY_PACKET
+	public const ITEM_COMPONENT_PACKET = 0x101;
 	// 1.1
-	public const CONTAINER_SET_SLOT_PACKET = 0x101;
-	public const CONTAINER_SET_CONTENT_PACKET = 0x102;
-	public const DROP_ITEM_PACKET = 0x103;
-	public const USE_ITEM_PACKET = 0x104;
-	public const REMOVE_BLOCK_PACKET = 0x105;
-	public const COMMAND_STEP_PACKET = 0x106;
-	public const ADD_HANGING_ACTOR_PACKET = 0x107;
-	public const INVENTORY_ACTION_PACKET = 0x108;
-	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x109;
-	public const ADD_ITEM_PACKET = 0x110;
-	public const BATCH_PACKET = 0x111;
+	public const CONTAINER_SET_SLOT_PACKET = 0x102;
+	public const CONTAINER_SET_CONTENT_PACKET = 0x103;
+	public const DROP_ITEM_PACKET = 0x104;
+	public const USE_ITEM_PACKET = 0x105;
+	public const REMOVE_BLOCK_PACKET = 0x106;
+	public const COMMAND_STEP_PACKET = 0x107;
+	public const ADD_HANGING_ACTOR_PACKET = 0x108;
+	public const INVENTORY_ACTION_PACKET = 0x109;
+	public const REPLACE_ITEM_IN_SLOT_PACKET = 0x110;
+	public const ADD_ITEM_PACKET = 0x111;
+	public const BATCH_PACKET = 0x112;
 }

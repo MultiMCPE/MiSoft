@@ -38,11 +38,11 @@ class UpdateAbilitiesPacket extends DataPacket{
 	public function getData() : AbilitiesData{ return $this->data; }
 
 	protected function decodePayload(){
-	    $this->data = AbilitiesData::decode($this);
+	    $this->data = AbilitiesData::decode($this, $this->getProtocol());
 	}
 
 	protected function encodePayload(){
-	    $this->data->encode($this);
+	    $this->data->encode($this, $this->getProtocol());
 	}
 
 	public function handle(NetworkSession $session) : bool{

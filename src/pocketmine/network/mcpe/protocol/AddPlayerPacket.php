@@ -119,7 +119,7 @@ class AddPlayerPacket extends DataPacket{
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
                     $this->syncedProperties = PropertySyncData::read($this);
                 }
-                $this->abilitiesData = AbilitiesData::decode($this);
+                $this->abilitiesData = AbilitiesData::decode($this, $this->getProtocol());
             }else{
 	        	$this->uvarint1 = $this->getUnsignedVarInt();
 	        	$this->uvarint2 = $this->getUnsignedVarInt();
@@ -178,7 +178,7 @@ class AddPlayerPacket extends DataPacket{
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
                     ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
                 }
-                $this->abilitiesData->encode($this);
+                $this->abilitiesData->encode($this, $this->getProtocol());
             }else{
 	        	$this->putUnsignedVarInt($this->uvarint1);
 	        	$this->putUnsignedVarInt($this->uvarint2);

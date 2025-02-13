@@ -34,6 +34,8 @@ class StructureEditorData{
 	/** @var string */
 	public $structureName;
 	/** @var string */
+	public $filteredStructureName;
+	/** @var string */
 	public $structureDataField;
 	/** @var bool */
 	public $includePlayers;
