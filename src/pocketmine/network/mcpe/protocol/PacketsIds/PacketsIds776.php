@@ -181,7 +181,7 @@ final class PacketsIds776{
 	public const CAMERA_SHAKE_PACKET = 0x9f;
 	public const PLAYER_FOG_PACKET = 0xa0;
 	public const CORRECT_PLAYER_MOVE_PREDICTION_PACKET = 0xa1;
-	public const ITEM_COMPONENT_PACKET = 0xa2;
+	public const ITEM_REGISTRY_PACKET = 0xa2;
 
 	public const CLIENTBOUND_DEBUG_RENDERER_PACKET = 0xa4;
 	public const SYNC_ACTOR_PROPERTY_PACKET = 0xa5;

@@ -48,7 +48,7 @@ class CreativeContentPacket extends DataPacket{
             foreach($this->groups as $group){
                 $this->putString($group->getGroupName());
                 $this->putLInt($group->getItemLegacyId());
-                $this->putUnsignedVarInt(0);
+                $this->putUnsignedVarInt(0); // nbt count
             }
 
             static $knownGroups = null;

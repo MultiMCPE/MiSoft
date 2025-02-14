@@ -98,7 +98,7 @@ final class ItemPalette776 extends Palette{
 		$entries = [];
 		$emptyNBT = new CompoundTag();
 		foreach($itemList as $stringId => $entry){
-			$entries = new ItemTypeEntry(
+			$entries[] = new ItemTypeEntry(
 				$stringId,
 				$entry["runtime_id"],
 				$entry["component_based"],
@@ -204,7 +204,7 @@ final class ItemPalette776 extends Palette{
 	/**
 	 * @return ItemTypeEntry[]
 	 */
-	public static function getEntries() : string{
+	public static function getEntries() : array{
 		return self::$entries;
 	}
 }
