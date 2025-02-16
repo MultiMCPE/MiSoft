@@ -25,6 +25,7 @@ namespace pocketmine\inventory;
 
 use InvalidArgumentException;
 use pocketmine\item\Item;
+use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use pocketmine\Player;
@@ -76,9 +77,10 @@ class OldPlayerInventory extends PlayerInventory{
 		$pk = new ContainerSetContentPacket();
 		$pk->windowid = ContainerIds::CREATIVE;
 		if($this->getHolder()->getGamemode() === Player::CREATIVE){
-			foreach(Item::getCreativeItems($this->getHolder()->getProtocol()) as $i => $item){
-				$pk->slots[$i] = clone $item;
-			}
+            $creativeItemEntries = CreativePacketCache::getInstance()->getItems($this->getHolder()->getProtocol());
+            foreach($creativeItemEntries as $i => $creativeItemEntry){
+                $pk->slots[$i] = clone $creativeItemEntry->getItem();
+            }
 		}
 		$pk->targetEid = $this->getHolder()->getId();
 		$this->getHolder()->dataPacket($pk);

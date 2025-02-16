@@ -272,7 +272,7 @@ class PlayerInventory extends BaseInventory{
 
             $items = [];
             foreach($creativeItemEntries as $creativeItemEntry){
-                $items[] = $creativeItemEntry->getItem();
+                $items[] = clone $creativeItemEntry->getItem();
             }
 
 	    	$pk = new InventoryContentPacket();
