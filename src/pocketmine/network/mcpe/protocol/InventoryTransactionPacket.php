@@ -110,7 +110,7 @@ class InventoryTransactionPacket extends DataPacket{
         }
 
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->actions[] = $action = (new NetworkInventoryAction())->read($this, $this->hasItemStackIds ?? false);
+			$this->actions[] = $action = (new NetworkInventoryAction())->read($this, $this->hasItemStackIds ?? true);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
                 if($this->getProtocol() < ProtocolInfo::PROTOCOL_401){

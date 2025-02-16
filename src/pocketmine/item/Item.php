@@ -44,6 +44,7 @@ use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\utils\Binary;
@@ -128,57 +129,23 @@ class Item implements ItemIds, JsonSerializable{
 		return ItemFactory::fromString($str, $multiple);
 	}
 
-
-	/** @var int[Item[]] */
-	private static $creative = [];
-
-	public static function initCreativeItems(){
-		self::clearCreativeItems();
-
-		$creativeItemsDirectory = RESOURCE_PATH . DIRECTORY_SEPARATOR . "vanilla" . DIRECTORY_SEPARATOR . "creative_items" . DIRECTORY_SEPARATOR;
-        foreach(array_diff(scandir($creativeItemsDirectory), ["..", "."]) as $protocol){
-			$creativeItems = json_decode(file_get_contents($creativeItemsDirectory . $protocol . DIRECTORY_SEPARATOR . "creativeitems.json"), true);
-
-			foreach($creativeItems as $data){
-				$item = Item::jsonDeserialize($data);
-				if($item->getName() === "Unknown"){
-					continue;
-				}
-				self::addCreativeItem($item, (int) $protocol);
-			}
-		}
-	}
-
 	/**
 	 * Removes all previously added items from the creative menu.
 	 * Note: Players who are already online when this is called will not see this change.
 	 */
 	public static function clearCreativeItems(?int $protocol = null){
-		if($protocol === null){
-			$protocols = array_keys(Item::$creative);
-		}else{
-			$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
-			if($protocol === null){
-				return;
-			}
-
-			$protocols = [$protocol];
-		}
-
-		foreach($protocols as $protocol){
-		    Item::$creative[$protocol] = [];
-		}
-
-		krsort(Item::$creative);
+		CreativePacketCache::getInstance()->clearItems($protocol);
 	}
 
-	public static function getCreativeItems(int $protocol) : array{
-		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
-		if($protocol === null){
-			return [];
-		}
+    public static function getCreativeItems(int $protocol = ProtocolInfo::CURRENT_PROTOCOL) : array{
+        $creativeItemEntries = CreativePacketCache::getInstance()->getItems($protocol);
 
-		return Item::$creative[$protocol];
+        $items = [];
+        foreach ($creativeItemEntries as $creativeItemEntry){
+            $items[] = $creativeItemEntry->getItem();
+        }
+
+        return $items;
 	}
 
 	/**
@@ -186,20 +153,11 @@ class Item implements ItemIds, JsonSerializable{
 	 * Note: Players who are already online when this is called will not see this change.
 	 *
 	 * @param Item $item
+	 * @param ?int $groupId
 	 * @param ?int $protocol
 	 */
-	public static function addCreativeItem(Item $item, ?int $protocol = null){
-		if($protocol === null){
-			$protocols = array_keys(Item::$creative);
-		}else{
-			$protocols = [$protocol];
-		}
-
-		foreach($protocols as $protocol){
-	    	Item::$creative[$protocol][] = clone $item;
-		}
-
-		krsort(Item::$creative);
+    public static function addCreativeItem(Item $item, ?int $groupId = null, ?int $protocol = null){
+        CreativePacketCache::getInstance()->addItem($item, $groupId, $protocol);
 	}
 
 	/**
@@ -210,22 +168,11 @@ class Item implements ItemIds, JsonSerializable{
 	 * @param ?int $protocol
 	 */
 	public static function removeCreativeItem(Item $item, ?int $protocol = null){
-		if($protocol === null){
-			$protocols = array_keys(Item::$creative);
-		}else{
-			$protocols = [(Item::getCreativeItemListKeyByProtocol($protocol) ?? $protocol)];
-		}
-
-		foreach($protocols as $protocol){
-		    $index = self::getCreativeItemIndex($item, $protocol);
-	    	if($index !== -1){
-		    	unset(Item::$creative[$protocol][$index]);
-			}
-		}
+		CreativePacketCache::getInstance()->removeItem($item, $protocol);
 	}
 
 	public static function isCreativeItem(Item $item, int $protocol) : bool{
-		return Item::getCreativeItemIndex($item, $protocol) !== -1;
+		return CreativePacketCache::getInstance()->getItemIndex($item, $protocol) !== -1;
 	}
 
 	/**
@@ -234,45 +181,20 @@ class Item implements ItemIds, JsonSerializable{
 	 *
 	 * @return Item|null
 	 */
-	public static function getCreativeItem(int $index, int $protocol){
-		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
-		if($protocol === null){
-			return null;
-		}
-
-		return Item::$creative[$protocol][$index] ?? null;
+    public static function getCreativeItem(int $index, int $protocol = ProtocolInfo::CURRENT_PROTOCOL){
+        $items = self::getCreativeItems($protocol);
+        return $items[$index] ?? null;
 	}
 
 	public static function getCreativeItemIndex(Item $item, int $protocol) : int{
-		$protocol = Item::getCreativeItemListKeyByProtocol($protocol);
-		if($protocol === null){
-			return -1;
-		}
-
-		foreach(Item::$creative[$protocol] as $i => $d){
-			if($item->equals($d, !($item instanceof Durable))){
-				return $i;
-			}
-		}
-
-		return -1;
-	}
-
-    public static function getCreativeItemListKeyByProtocol(int $protocol) : ?int{
-		foreach(Item::$creative as $listProtocol => $items){
-			if($protocol >= $listProtocol){
-				return $listProtocol;
-			}
-		}
-
-		return null;
+		return CreativePacketCache::getInstance()->getItemIndex($item, $protocol);
 	}
 
     /**
      * @return int[]
      */
     public static function getCreativeItemProtocols() : array{
-        return array_keys(Item::$creative);
+        return CreativePacketCache::getInstance()->getCreativeItemProtocols();
     }
 
     /** @var int */

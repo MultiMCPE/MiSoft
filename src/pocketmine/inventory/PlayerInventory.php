@@ -28,6 +28,7 @@ use LogicException;
 use pocketmine\entity\Human;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
@@ -264,14 +265,13 @@ class PlayerInventory extends BaseInventory{
 
 		$items = [];
 	    if(!$holder->isSpectator()){ //fill it for all gamemodes except spectator
-		    foreach(Item::getCreativeItems($holder->getProtocol()) as $i => $item){
-			    $items[$i] = clone $item;
-		    }
+		    $items = CreativePacketCache::getInstance()->getItems($holder->getProtocol());
 	    }
 
 		if($holder->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 		    $pk = new CreativeContentPacket();
-		    $pk->groups = CreativeGroup::getAll();
+			$pk->items = $items;
+		    $pk->groups = CreativePacketCache::getInstance()->getGroups($holder->getProtocol());
         }else{
 	    	$pk = new InventoryContentPacket();
 	    	$pk->windowId = ContainerIds::CREATIVE;

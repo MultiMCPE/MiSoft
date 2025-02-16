@@ -78,6 +78,7 @@ use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\PlayerListPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
+use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\RakLibInterface;
 use pocketmine\network\Network;
 use pocketmine\network\query\QueryHandler;
@@ -1833,7 +1834,7 @@ class Server{
 			BlockFactory::init();
 			Enchantment::init();
 			ItemFactory::init();
-			Item::initCreativeItems();
+			CreativePacketCache::getInstance(); // init creative items
 			Biome::init();
 			MapManager::loadIdCounts();
 			Color::initDyeColors();
