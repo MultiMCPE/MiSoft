@@ -1217,21 +1217,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$pk->dimension = $targetLevel->getDimensionId();
 				$pk->position = $this->asVector3();
 				$this->dataPacket($pk);
-				if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
-					// fast world loading
-			    	$pk1 = new PlayStatusPacket();
-			    	$pk1->status = PlayStatusPacket::PLAYER_SPAWN;
-			    	$this->dataPacket($pk1);
-				}else{
-					// fast world loading
-					$pk1 = new PlayerActionPacket();
-					$pk1->entityRuntimeId = $this->getId();
-					$pk1->action = PlayerActionPacket::ACTION_DIMENSION_CHANGE_ACK;
-					[$pk1->x, $pk1->y, $pk1->z] = [(int) $this->x, (int) $this->y, (int) $this->z];
-					[$pk1->rx, $pk1->ry, $pk1->rz] = [(int) $this->x, (int) $this->y, (int) $this->z];
-					$pk1->face = 0;
-					$this->dataPacket($pk1);
-				}
+
+				// fast world loading
+				$pk1 = new PlayerActionPacket();
+				$pk1->entityRuntimeId = $this->getId();
+				$pk1->action = PlayerActionPacket::ACTION_DIMENSION_CHANGE_ACK;
+				[$pk1->x, $pk1->y, $pk1->z] = [(int) $this->x, (int) $this->y, (int) $this->z];
+				[$pk1->rx, $pk1->ry, $pk1->rz] = [(int) $this->x, (int) $this->y, (int) $this->z];
+				$pk1->face = 0;
+				$this->dataPacket($pk1);
 			}
 
 			$targetLevel->getWeather()->sendWeather($this);
@@ -3753,6 +3747,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}
 					return true;
 				}
+			}
+
+			if(!$this->isConnected()){
+				return true;
 			}
 
 			$this->inventory->sendHeldItem($this);

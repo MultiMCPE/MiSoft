@@ -929,7 +929,7 @@ class Chunk{
 					for($y = 0; $y < 16; ++$y){
 						$fullBlock = $palettedBlockArray->get($x, $y, $z);
 						$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
-						$block->getBlockProtocol($playerProtocol) ?? $block;
+						$block = $block->getBlockProtocol($playerProtocol) ?? $block;
 						[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
 
 						if($legacyId > 255){

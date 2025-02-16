@@ -263,20 +263,23 @@ class PlayerInventory extends BaseInventory{
 			throw new LogicException("Cannot send creative inventory contents to non-player inventory holder");
 		}
 
-		$items = [];
-	    if(!$holder->isSpectator()){ //fill it for all gamemodes except spectator
-		    $items = CreativePacketCache::getInstance()->getItems($holder->getProtocol());
-	    }
-
 		if($holder->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 		    $pk = new CreativeContentPacket();
-			$pk->items = $items;
+			$pk->items = !$holder->isSpectator() ? CreativePacketCache::getInstance()->getItems($holder->getProtocol()) : [];
 		    $pk->groups = CreativePacketCache::getInstance()->getGroups($holder->getProtocol());
         }else{
+            $creativeItemEntries = !$holder->isSpectator() ? CreativePacketCache::getInstance()->getItems($holder->getProtocol()) : [];
+
+            $items = [];
+            foreach($creativeItemEntries as $creativeItemEntry){
+                $items[] = $creativeItemEntry->getItem();
+            }
+
 	    	$pk = new InventoryContentPacket();
 	    	$pk->windowId = ContainerIds::CREATIVE;
+			$pk->items = $items;
         }
-        $pk->items = $items;
+
         $holder->dataPacket($pk);
     }
 
