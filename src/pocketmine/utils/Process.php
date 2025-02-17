@@ -56,7 +56,7 @@ final class Process{
 		$reserved = memory_get_usage();
 		$VmSize = null;
 		$VmRSS = null;
-		if(Utils::getOS() === Utils::OS_LINUX || Utils::getOS() === Utils::OS_ANDROID){
+		if(Utils::getOS() === OS::LINUX || Utils::getOS() === OS::ANDROID){
 			$status = @file_get_contents("/proc/self/status");
 			if($status === false) throw new AssumptionFailedError("/proc/self/status should always be accessible");
 
@@ -94,7 +94,7 @@ final class Process{
 		$stack = 0;
 		$heap = 0;
 
-		if(Utils::getOS() === Utils::OS_LINUX || Utils::getOS() === Utils::OS_ANDROID){
+		if(Utils::getOS() === OS::LINUX || Utils::getOS() === OS::ANDROID){
 			$mappings = @file("/proc/self/maps");
 			if($mappings === false) throw new AssumptionFailedError("/proc/self/maps should always be accessible");
 			foreach($mappings as $line){
@@ -112,7 +112,7 @@ final class Process{
 	}
 
 	public static function getThreadCount() : int{
-		if(Utils::getOS() === Utils::OS_LINUX || Utils::getOS() === Utils::OS_ANDROID){
+		if(Utils::getOS() === OS::LINUX || Utils::getOS() === OS::ANDROID){
 			$status = @file_get_contents("/proc/self/status");
 			if($status === false) throw new AssumptionFailedError("/proc/self/status should always be accessible");
 			if(preg_match("/Threads:[ \t]+([0-9]+)/", $status, $matches) > 0){
@@ -134,11 +134,11 @@ final class Process{
 			$logger->syncFlushBuffer();
 		}
 		switch(Utils::getOS()){
-			case Utils::OS_WINDOWS:
+			case OS::WINDOWS:
 				exec("taskkill.exe /F " . ($subprocesses ? "/T " : "") . "/PID $pid > NUL 2> NUL");
 				break;
-			case Utils::OS_MACOS:
-			case Utils::OS_LINUX:
+			case OS::MACOS:
+			case OS::LINUX:
 			default:
 				if($subprocesses){
 					$pid = -$pid;
