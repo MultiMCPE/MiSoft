@@ -8,12 +8,14 @@ use InvalidArgumentException;
 use InvalidStateException;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\types\ItemTypeEntry;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use UnexpectedValueException;
 use function array_key_exists;
 use function count;
 use function file_get_contents;
 use function json_decode;
+use function base64_decode;
 use const pocketmine\RESOURCE_PATH;
 
 final class ItemPalette776 extends Palette{
@@ -97,13 +99,14 @@ final class ItemPalette776 extends Palette{
 
 		$entries = [];
 		$emptyNBT = new CompoundTag();
+		$nbtSerializer = new LittleEndianNBTStream();
 		foreach($itemList as $stringId => $entry){
 			$entries[] = new ItemTypeEntry(
 				$stringId,
 				$entry["runtime_id"],
 				$entry["component_based"],
 				$entry["version"],
-				$emptyNBT
+				isset($entry["component_nbt"]) ? $nbtSerializer->read(base64_decode($entry["component_nbt"])) : $emptyNBT
 			);
 		}
 		self::$entries = $entries;
