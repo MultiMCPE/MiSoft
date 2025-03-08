@@ -40,6 +40,9 @@ class SerializedSkin{
     public const GEOMETRY_CUSTOM = "geometry.humanoid.custom";
     public const GEOMETRY_CUSTOM_SLIM = "geometry.humanoid.customSlim";
 
+    public const ARM_SIZE_SLIM = "slim";
+    public const ARM_SIZE_WIDE = "wide";
+
     /** @var string[]|null */
     public static $defaultSkins = null;
 
@@ -107,7 +110,7 @@ class SerializedSkin{
                 false,
                 false,
                 null,
-                "",
+                self::ARM_SIZE_WIDE,
                 new Color(0, 0, 0),
                 SplFixedArray::fromArray([]),
                 SplFixedArray::fromArray([]),
@@ -130,7 +133,7 @@ class SerializedSkin{
                 false,
                 false,
                 null,
-                "",
+                self::ARM_SIZE_WIDE,
                 new Color(0, 0, 0),
                 SplFixedArray::fromArray([]),
                 SplFixedArray::fromArray([]),
