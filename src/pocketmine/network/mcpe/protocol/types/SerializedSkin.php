@@ -43,6 +43,8 @@ class SerializedSkin{
     public const ARM_SIZE_SLIM = "slim";
     public const ARM_SIZE_WIDE = "wide";
 
+    public const DEFAULT_GEOMETRY_DATA_ENGINE_VERSION = "0.0.0";
+
     /** @var string[]|null */
     public static $defaultSkins = null;
 
@@ -103,7 +105,7 @@ class SerializedSkin{
                 $skin->getCapeData() === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($skin->getCapeData()),
                 json_encode(["geometry" => ["default" => ($skin->getGeometryName() === "" ? self::GEOMETRY_CUSTOM : $skin->getGeometryName())]]),
                 self::updateGeometry($skin->getGeometryData(), $skin->getGeometryName()),
-                "",
+                self::DEFAULT_GEOMETRY_DATA_ENGINE_VERSION,
                 "",
                 [],
                 false,
@@ -126,7 +128,7 @@ class SerializedSkin{
                 ($mapping["capeData"] ?? $skin->getCapeData()) === "" ? new SkinImage(0, 0, "") : SkinImage::fromLegacy($mapping["capeData"] ?? $skin->getCapeData()),
                 json_encode(["geometry" => ["default" => $mapping["geometry"]]]),
                 $mapping["geometryData"],
-                "",
+                self::DEFAULT_GEOMETRY_DATA_ENGINE_VERSION,
                 "",
                 [],
                 false,
