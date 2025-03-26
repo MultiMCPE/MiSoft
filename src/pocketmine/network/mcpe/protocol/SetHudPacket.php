@@ -45,17 +45,25 @@ class SetHudPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->hudElements = [];
 		for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
-			$this->hudElements[] = HudElement::fromPacket($this->getByte());
+			$this->hudElements[] = HudElement::fromPacket($this->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? $this->getVarInt() : $this->getByte());
 		}
-		$this->visibility = HudVisibility::fromPacket($this->getByte());
+		$this->visibility = HudVisibility::fromPacket($this->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? $this->getVarInt() : $this->getByte());
 	}
 
 	protected function encodePayload(){
 		$this->putUnsignedVarInt(count($this->hudElements));
 		foreach($this->hudElements as $element){
-			$this->putByte($element->value);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+		        $this->putVarInt($element->value);
+		    }else{
+			    $this->putByte($element->value);
+		    }
 		}
-		$this->putByte($this->visibility->value);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+		    $this->putVarInt($this->visibility->value);
+		}else{
+		    $this->putByte($this->visibility->value);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

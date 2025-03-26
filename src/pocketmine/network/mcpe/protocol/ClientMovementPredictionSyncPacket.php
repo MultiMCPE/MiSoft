@@ -18,8 +18,10 @@ use pocketmine\network\mcpe\protocol\types\BitSet;
 use pocketmine\network\mcpe\NetworkSession;
 use InvalidArgumentException;
 
-class MovementPredictionSyncPacket extends DataPacket{
-	public const NETWORK_ID = ProtocolInfo::MOVEMENT_PREDICTION_SYNC_PACKET;
+class ClientMovementPredictionSyncPacket extends DataPacket{
+	public const NETWORK_ID = ProtocolInfo::CLIENT_MOVEMENT_PREDICTION_SYNC_PACKET;
+
+    public const FLAG_LENGTH = 123;
 
 	private BitSet $flags;
 
@@ -35,6 +37,7 @@ class MovementPredictionSyncPacket extends DataPacket{
 	private float $hunger;
 
 	private int $actorUniqueId;
+	private bool $actorFlyingState;
 
 	/**
 	 * @generate-create-func
@@ -51,6 +54,7 @@ class MovementPredictionSyncPacket extends DataPacket{
 		float $health,
 		float $hunger,
 		int $actorUniqueId,
+		bool $actorFlyingState,
 	) : self{
 		$result = new self;
 		$result->flags = $flags;
@@ -64,6 +68,7 @@ class MovementPredictionSyncPacket extends DataPacket{
 		$result->health = $health;
 		$result->hunger = $hunger;
 		$result->actorUniqueId = $actorUniqueId;
+		$result->actorFlyingState = $actorFlyingState;
 		return $result;
 	}
 
@@ -79,12 +84,13 @@ class MovementPredictionSyncPacket extends DataPacket{
 		float $health,
 		float $hunger,
 		int $actorUniqueId,
+		bool $actorFlyingState,
 	) : self{
-		if($flags->getLength() !== 120){
-			throw new InvalidArgumentException("Input flags must be 120 bits long");
+		if($flags->getLength() !== self::FLAG_LENGTH){
+			throw new InvalidArgumentException("Input flags must be " . self::FLAG_LENGTH . " bits long");
 		}
 
-		return self::internalCreate($flags, $scale, $width, $height, $movementSpeed, $underwaterMovementSpeed, $lavaMovementSpeed, $jumpStrength, $health, $hunger, $actorUniqueId);
+		return self::internalCreate($flags, $scale, $width, $height, $movementSpeed, $underwaterMovementSpeed, $lavaMovementSpeed, $jumpStrength, $health, $hunger, $actorUniqueId, $actorFlyingState);
 	}
 
 	public function getFlags() : BitSet{ return $this->flags; }
@@ -109,8 +115,10 @@ class MovementPredictionSyncPacket extends DataPacket{
 
 	public function getActorUniqueId() : int{ return $this->actorUniqueId; }
 
+    public function getActorFlyingState() : bool{ return $this->actorFlyingState; }
+
 	protected function decodePayload() : void{
-		$this->flags = BitSet::read($this, 120);
+		$this->flags = BitSet::read($this, $this->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? self::FLAG_LENGTH : 120);
 		$this->scale = $this->getLFloat();
 		$this->width = $this->getLFloat();
 		$this->height = $this->getLFloat();
@@ -121,6 +129,9 @@ class MovementPredictionSyncPacket extends DataPacket{
 		$this->health = $this->getLFloat();
 		$this->hunger = $this->getLFloat();
 		$this->actorUniqueId = $this->getActorUniqueId();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+		    $this->actorFlyingState = $this->getBool();
+		}
 	}
 
 	protected function encodePayload() : void{
@@ -135,9 +146,12 @@ class MovementPredictionSyncPacket extends DataPacket{
 		$this->putLFloat($this->health);
 		$this->putLFloat($this->hunger);
 		$this->putActorUniqueId($this->actorUniqueId);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+		    $this->putBool($this->actorFlyingState);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		return $session->handleMovementPredictionSync($this);
+		return $session->handleClientMovementPredictionSync($this);
 	}
 }

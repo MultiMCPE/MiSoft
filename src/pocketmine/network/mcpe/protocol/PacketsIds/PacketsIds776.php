@@ -240,5 +240,5 @@ final class PacketsIds776{
 	public const MOVEMENT_EFFECT_PACKET = 0x13e;
 	public const SET_MOVEMENT_AUTHORITY_PACKET = 0x13f;
 
-	public const MOVEMENT_PREDICTION_SYNC_PACKET = 0x142;
+	public const CLIENT_MOVEMENT_PREDICTION_SYNC_PACKET = 0x142;
 }

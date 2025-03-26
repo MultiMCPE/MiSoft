@@ -68,6 +68,7 @@ use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette729;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette748;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette766;
 use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette776;
+use pocketmine\network\mcpe\multiversion\block\palettes\BlockPalette786;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Server;
 use function krsort;
@@ -81,6 +82,7 @@ class BlockPalette{
      */
     public static function initPalette(int $paletteProtocol) : void{
         $pools = [
+            ProtocolInfo::PROTOCOL_786 => new BlockPalette786(),
             ProtocolInfo::PROTOCOL_776 => new BlockPalette776(),
             ProtocolInfo::PROTOCOL_766 => new BlockPalette766(),
             ProtocolInfo::PROTOCOL_748 => new BlockPalette748(),

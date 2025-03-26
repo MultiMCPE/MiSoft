@@ -583,6 +583,8 @@ class LevelSoundEventPacket extends DataPacket{
 	public $isBabyMob = false; //...
 	/** @var bool */
 	public $disableRelativeVolume = false;
+	/** @var int */
+	public $actorUniqueId = -1;
 
 	protected function decodePayload(){
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_332){
@@ -616,6 +618,9 @@ class LevelSoundEventPacket extends DataPacket{
 		}
 		$this->isBabyMob = $this->getBool();
 		$this->disableRelativeVolume = $this->getBool();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+		    $this->actorUniqueId = $this->getLLong(); //WHY IS THIS NON-STANDARD?
+		}
 	}
 
 	protected function encodePayload(){
@@ -655,6 +660,9 @@ class LevelSoundEventPacket extends DataPacket{
         }
         $this->putBool($this->isBabyMob);
         $this->putBool($this->disableRelativeVolume);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_786){
+            $this->putLLong($this->actorUniqueId);
+        }
 	}
 
 	public function mustBeDecoded() : bool{

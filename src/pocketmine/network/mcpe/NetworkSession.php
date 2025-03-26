@@ -246,7 +246,10 @@ use pocketmine\network\mcpe\protocol\ContainerRegistryCleanupPacket;
 use pocketmine\network\mcpe\protocol\MovementEffectPacket;
 use pocketmine\network\mcpe\protocol\SetMovementAuthorityPacket;
 use pocketmine\network\mcpe\protocol\ItemRegistryPacket;
-use pocketmine\network\mcpe\protocol\MovementPredictionSyncPacket;
+use pocketmine\network\mcpe\protocol\ClientMovementPredictionSyncPacket;
+use pocketmine\network\mcpe\protocol\UpdateClientOptionsPacket;
+use pocketmine\network\mcpe\protocol\PlayerVideoCapturePacket;
+use pocketmine\network\mcpe\protocol\PlayerUpdateEntityOverridesPacket;
 
 abstract class NetworkSession{
 
@@ -1144,7 +1147,19 @@ abstract class NetworkSession{
 		return false;
 	}
 
-	public function handleMovementPredictionSync(MovementPredictionSyncPacket $packet) : bool{
+	public function handleClientMovementPredictionSync(ClientMovementPredictionSyncPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleUpdateClientOptions(UpdateClientOptionsPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerVideoCapturePacket(PlayerVideoCapturePacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerUpdateEntityOverridesPacket(PlayerUpdateEntityOverridesPacket $packet) : bool{
 		return false;
 	}
 }
