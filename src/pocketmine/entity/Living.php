@@ -30,6 +30,8 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDeathEvent;
 use pocketmine\event\entity\EntityEffectAddEvent;
 use pocketmine\event\entity\EntityEffectRemoveEvent;
+use pocketmine\entity\projectile\EnderPearl;
+use pocketmine\entity\data\KnockBackData;
 use pocketmine\inventory\ArmorInventory;
 use pocketmine\inventory\ArmorInventoryEventProcessor;
 use pocketmine\item\Armor;
@@ -47,6 +49,7 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\MobEffectPacket;
+use pocketmine\Server;
 use pocketmine\Player;
 use pocketmine\timings\Timings;
 use pocketmine\utils\Binary;
@@ -63,6 +66,7 @@ use function min;
 use function mt_getrandmax;
 use function mt_rand;
 use function sqrt;
+use function in_array;
 use const M_PI;
 
 abstract class Living extends Entity implements Damageable{
@@ -103,6 +107,9 @@ abstract class Living extends Entity implements Damageable{
 	protected $moveForward = 0.0;
 	/** @var float */
 	protected $moveStrafing = 0.0;
+
+    /** @var KnockBackData */
+    protected KnockBackData $knockBackData;
 
 	public function getRevengeTarget() : ?Entity{
 		if($this->revengeTargetId !== null){
@@ -214,6 +221,8 @@ abstract class Living extends Entity implements Damageable{
 		}
 
 		$this->setGenericFlag(self::DATA_FLAG_LEASHED, $this->leashed);
+
+		$this->knockBackData = clone self::getDefaultKnockBackData();
 	}
 
 	protected function addAttributes() : void{
@@ -692,14 +701,25 @@ abstract class Living extends Entity implements Damageable{
 
 		$this->applyDamageModifiers($source);
 
-		if($source instanceof EntityDamageByEntityEvent and (
-			$source->getCause() === EntityDamageEvent::CAUSE_BLOCK_EXPLOSION or
-			$source->getCause() === EntityDamageEvent::CAUSE_ENTITY_EXPLOSION)
-		){
+	    $needVanillaKnockBack = in_array($source->getCause(), [
+	        EntityDamageEvent::CAUSE_BLOCK_EXPLOSION,
+	        EntityDamageEvent::CAUSE_ENTITY_EXPLOSION
+	    ]);
+		if($source instanceof EntityDamageByEntityEvent and $needVanillaKnockBack){
 			//TODO: knockback should not just apply for entity damage sources
 			//this doesn't matter for TNT right now because the PrimedTNT entity is considered the source, not the block.
 			$base = $source->getKnockBack();
 			$source->setKnockBack($base - min($base, $base * $this->getHighestArmorEnchantmentLevel(Enchantment::BLAST_PROTECTION) * 0.15));
+		}
+
+	    if(
+	        $this instanceof Player &&
+			$this->knockBackData->isVerticalLimitEnabled() &&
+			$source instanceof EntityDamageByEntityEvent &&
+			abs($source->getDamager()->getPosition()->y - $this->asLocation()->y) > $this->knockBackData->getVerticalLimit() &&
+			$this->inAirTicks > 30
+		){
+			$this->knockBackData->setActiveVerticalLimit(true);
 		}
 
 		parent::attack($source);
@@ -708,12 +728,16 @@ abstract class Living extends Entity implements Damageable{
 			return;
 		}
 
-		$this->attackTime = $source->getAttackCooldown();
+		$this->attackTime = $this->knockBackData->isVanilla() ? $source->getAttackCooldown() : $this->knockBackData->getDelay();
 
 		if($source instanceof EntityDamageByEntityEvent){
 			$e = $source->getDamager();
 			if($source instanceof EntityDamageByChildEntityEvent){
 				$e = $source->getChild();
+			}
+
+			if($e instanceof EnderPearl){
+			    return;
 			}
 
 			if($e !== null){
@@ -726,7 +750,7 @@ abstract class Living extends Entity implements Damageable{
 
 				$deltaX = $this->x - $e->x;
 				$deltaZ = $this->z - $e->z;
-				$this->knockBack($e, $source->getBaseDamage(), $deltaX, $deltaZ, $source->getKnockBack());
+				$this->knockBack($e, $source->getBaseDamage(), $deltaX, $deltaZ, $source->getKnockBack(), $needVanillaKnockBack);
 
 				$attacker = $source->getDamager();
 				if($attacker instanceof Living){
@@ -746,29 +770,34 @@ abstract class Living extends Entity implements Damageable{
 		$this->broadcastEntityEvent(ActorEventPacket::HURT_ANIMATION);
 	}
 
-	public function knockBack(Entity $attacker, float $damage, float $x, float $z, float $base = 0.4) : void{
+	public function knockBack(Entity $attacker, float $damage, float $x, float $z, float $base = 0.4, bool $needVanilla = false) : void{
 		$f = sqrt($x * $x + $z * $z);
 		if($f <= 0){
 			return;
 		}
-		if(mt_rand() / mt_getrandmax() > $this->getAttributeMap()->getAttribute(Attribute::KNOCKBACK_RESISTANCE)->getValue()){
-			$f = 1 / $f;
 
-			$motion = clone $this->motion;
+		$f = 1 / $f;
 
-			$motion->x /= 2;
-			$motion->y /= 2;
-			$motion->z /= 2;
-			$motion->x += $x * $f * $base;
-			$motion->y += $base;
-			$motion->z += $z * $f * $base;
+		$motionX = $this->motion->x / 2;
+		$motionY = $this->motion->y / 2;
+		$motionZ = $this->motion->z / 2;
 
-			if($motion->y > $base){
-				$motion->y = $base;
-			}
+		$isVanilla = $needVanilla ? $needVanilla : $this->knockBackData->isVanilla();
 
-			$this->setMotion($motion);
+		$motionX += $x * $f * ($isVanilla ? $base : $this->knockBackData->getX());
+		$motionY += $isVanilla ? $base : $this->knockBackData->getY();
+		$motionZ += $z * $f * ($isVanilla ? $base : $this->knockBackData->getX());
+
+		if($motionY > ($isVanilla ? $base : $this->knockBackData->getY())){
+			$motionY = $isVanilla ? $base : $this->knockBackData->getY();
 		}
+
+		if($this->knockBackData->isVerticalLimitEnabled() && $this->knockBackData->isActiveVerticalLimit()){
+			$this->knockBackData->setActiveVerticalLimit(false);
+			$motionY *= $this->knockBackData->getVericalLimitMultiplier();
+		}
+
+		$this->setMotion(new Vector3($motionX, $motionY, $motionZ));
 	}
 
 	public function kill() : void{
@@ -1221,5 +1250,19 @@ abstract class Living extends Entity implements Damageable{
 	 */
 	public function setMoveStrafing(float $moveStrafing) : void{
 		$this->moveStrafing = $moveStrafing;
+	}
+
+    /**
+     * @return KnockBackData
+     */
+	public function getKnockBackData() : KnockBackData{
+		return $this->knockBackData;
+	}
+
+    /**
+     * @param KnockBackData $knockBackData
+     */
+	public function setKnockBackData(KnockBackData $knockBackData) : void{
+		$this->knockBackData = $knockBackData;
 	}
 }

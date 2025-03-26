@@ -78,6 +78,7 @@ use pocketmine\entity\projectile\Snowball;
 use pocketmine\entity\projectile\SplashPotion;
 use pocketmine\entity\vehicle\Boat;
 use pocketmine\entity\vehicle\Minecart;
+use pocketmine\entity\data\KnockBackData;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityDespawnEvent;
 use pocketmine\event\entity\EntityLevelChangeEvent;
@@ -222,6 +223,8 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		Attribute::init();
 		Effect::init();
 		PaintingMotive::init();
+
+		self::initDefaultKnockBackData();
 	}
 
 
@@ -469,6 +472,9 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 	/** @var Random */
 	public $random;
+
+    /** @var KnockBackData */
+    private static KnockBackData $defaultKnockBackData;
 
 	public function __construct(Level $level, CompoundTag $nbt){
 		$this->random = new Random(intval(microtime(true) * 1000));
@@ -2685,6 +2691,31 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 
 	public function removeMetadata(string $metadataKey, Plugin $owningPlugin){
 		$this->server->getEntityMetadata()->removeMetadata($this, $metadataKey, $owningPlugin);
+	}
+
+    /**
+     * @return KnockBackData
+     */
+	public static function getDefaultKnockBackData() : KnockBackData{
+		return self::$defaultKnockBackData;
+	}
+ 
+	private static function initDefaultKnockBackData() : void{
+		$kbData = Server::getInstance()->getAdvancedProperty("entity.knockBack", [
+			"vanilla" => true,
+		]);
+
+		self::$defaultKnockBackData = $kbData["vanilla"] ?
+		    new KnockBackData() :
+		    new KnockBackData(
+		        false,
+		        $kbData["modX"],
+		        $kbData["modY"],
+		        $kbData["delay"],
+		        $kbData["verticalLimitEnabled"],
+		        $kbData["verticalLimit"],
+		        $kbData["verticalLimitMultiplier"]
+		    );
 	}
 
 	public function __toString(){

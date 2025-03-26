@@ -9,6 +9,17 @@ kill-thread:
  #Выберите, через сколько секунд после зависания сервер будет отключен
  timeout: 10
 
+entity:
+ knockBack:
+  #Если vanilla=true, то настройки ниже работать не будут.
+  vanilla: true
+  modX: 0.4
+  modY: 0.4
+  delay: 10
+  verticalLimitEnabled: true
+  verticalLimit: 2.5
+  verticalLimitMultiplier: 0.85
+
 level:
  #Выберите, включена ли погода (дождь может вызвать лаги на старых устройствах)
  weather: true

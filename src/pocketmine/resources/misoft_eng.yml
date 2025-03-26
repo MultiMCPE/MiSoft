@@ -6,6 +6,17 @@ kill-thread:
  #Select how many seconds after the server freezes will be disabled
  timeout: 10
 
+entity:
+ knockBack:
+  #If vanilla=true, then the settings below will not work.
+  vanilla: true
+  modX: 0.4
+  modY: 0.4
+  delay: 10
+  verticalLimitEnabled: true
+  verticalLimit: 2.5
+  verticalLimitMultiplier: 0.85
+
 level:
  #Set if weather is enabled (rain may cause lag to older devices)
  weather: true
