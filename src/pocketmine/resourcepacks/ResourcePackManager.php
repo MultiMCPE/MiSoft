@@ -143,6 +143,19 @@ class ResourcePackManager{
 		}
 	}
 
+    /**
+     * @param ResourcePack $pack
+     */
+    public function addPack(ResourcePack $pack) : void{
+		$this->resourcePacks[] = $pack;
+		$this->uuidList[strtolower($pack->getPackId())] = $pack;
+
+		$key = $pack->getEncryptionKey();
+		if($key !== null){
+		    $this->encryptionKeys[strtolower($pack->getPackId())] = $key;
+		}
+    }
+
 	/**
 	 * Returns the directory which resource packs are loaded from.
 	 * @return string
