@@ -4007,6 +4007,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					//TODO: HACK! this restores 1.14ish behaviour, but this should be able to be listened to and
 					//controlled by plugins. However, the player is always a subscriber to their own inventory so it
 					//doesn't integrate well with the regular container system right now.
+					$this->openHardcodedWindows[$windowId] = true;
 				    $pk = new ContainerOpenPacket();
 				    $pk->windowId = self::HARDCODED_INVENTORY_WINDOW_ID;
 				    $pk->type = WindowTypes::INVENTORY;
@@ -4454,18 +4455,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
 			if(array_key_exists($packet->windowId, $this->openHardcodedWindows)){
 				unset($this->openHardcodedWindows[$packet->windowId]);
-	        	if($packet->windowId >= self::RESERVED_WINDOW_ID_RANGE_START and $packet->windowId <= self::RESERVED_WINDOW_ID_RANGE_END){
-		            $pk = new ContainerClosePacket();
-		            $pk->windowId = $packet->windowId;
-					$pk->windowType = $this->getCurrentWindowType();
-		            $this->sendDataPacket($pk);
-		            return true;
-				}
+		        $pk = new ContainerClosePacket();
+		        $pk->windowId = $packet->windowId;
+				$pk->windowType = $this->getCurrentWindowType();
+		        $this->sendDataPacket($pk);
+		        return true;
 	    	}
 		}
 		if(isset($this->windowIndex[$packet->windowId])){
 		    $this->closingWindowId = $packet->windowId;
-			(new InventoryCloseEvent($this->windowIndex[$packet->windowId], $this))->call();
 			$this->removeWindow($this->windowIndex[$packet->windowId]);
 			$this->closingWindowId = null;
 			return true;
@@ -4484,6 +4482,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$pk->windowType = $this->getCurrentWindowType();
 		    	$pk->server = false;
 		    	$this->sendDataPacket($pk);
+		    	return true;
 			}else{
 				if($packet->windowId === 255){
 		        	//Closed a fake window
@@ -5643,6 +5642,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		}
 
 		if($id !== null){
+		    (new InventoryCloseEvent($inventory, $this))->call();
 			$inventory->close($this);
 			unset($this->windows[$hash], $this->windowIndex[$id], $this->permanentWindows[$id]);
 		}
