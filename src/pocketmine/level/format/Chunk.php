@@ -34,7 +34,6 @@ use pocketmine\level\biome\Biome;
 use pocketmine\level\Level;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\Player;
@@ -808,7 +807,7 @@ class Chunk{
 	 */
 	public function getHighestSubChunkIndex() : int{
 		for($y = $this->subChunks->count() - 1; $y >= 0; --$y){
-			if($this->subChunks[$y] instanceof EmptySubChunk){
+			if($this->subChunks[$y]->isEmpty(false)){
 				//No need to thoroughly prune empties at runtime, this will just reduce performance.
 				continue;
 			}
@@ -874,50 +873,42 @@ class Chunk{
 	 * @return string
 	 */
 	public function networkSerialize(int $playerProtocol, int $dimensionId, ?Closure $legacyToRuntime) : string{
-		$result = "";
+		$stream = new BinaryStream();
 		$subChunkCount = $this->getSubChunkSendCount();
 		if($playerProtocol < ProtocolInfo::PROTOCOL_360){
-	    	$result .= chr($subChunkCount);
-		}elseif($playerProtocol >= ProtocolInfo::PROTOCOL_475){
+	    	$stream->putByte($subChunkCount);
+		}elseif($playerProtocol >= ProtocolInfo::PROTOCOL_475 && $dimensionId === DimensionIds::OVERWORLD){
 	    	//TODO: HACK! fill in fake subchunks to make up for the new negative space client-side
 	    	for($y = 0; $y < 4; ++$y){
-		    	$result .= chr(8); //subchunk version 8
-		    	$result .= chr(0); //0 layers - client will treat this as all-air
+		    	$stream->putByte(8); //subchunk version 8
+		    	$stream->putByte(0); //0 layers - client will treat this as all-air
 	    	}
 		}
 		for($y = 0; $y < $subChunkCount; ++$y){
-			$result .= $this->networkSerializeSubChunk($this->subChunks[$y], $playerProtocol, $legacyToRuntime);
+			$this->networkSerializeSubChunk($this->getSubChunk($y), $playerProtocol, $legacyToRuntime, $stream);
 		}
-		if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
-		    if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
-	        	//TODO: right now we don't support 3D natively, so we just 3Dify our 2D biomes so they fill the column
-	        	$encodedBiomePalette = $this->networkSerializeBiomesAsPalette();
-	        	$result .= str_repeat($encodedBiomePalette, $this->getDimensionBiomeMaxSubChunkIndex($playerProtocol, $dimensionId));
-		    }else{
-	        	$result .= $this->biomeIds;
-		    }
-	    	$result .= chr(0); //border block array count
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
+	        //TODO: right now we don't support 3D natively, so we just 3Dify our 2D biomes so they fill the column
+	        $encodedBiomePalette = $this->networkSerializeBiomesAsPalette();
+	        $stream->put(str_repeat($encodedBiomePalette, $this->getDimensionBiomeMaxSubChunkIndex($playerProtocol, $dimensionId)));
 		}else{
-	    	$result .= pack("v*", ...$this->heightMap)
-		    	. $this->biomeIds
-		    	. chr(0); //border block array count
-	    	//Border block entry format: 1 byte (4 bits X, 4 bits Z). These are however useless since they crash the regular client.
-		    if($playerProtocol < ProtocolInfo::PROTOCOL_270){
-		        $extraData = new NetworkBinaryStream();
-		        $extraData->putVarInt(0);
-
-		        $result .= $extraData->getBuffer(); // extraData (WTF)
-	    	}
+		    if($playerProtocol < ProtocolInfo::PROTOCOL_360){
+		        $stream->put(pack("v*", ...$this->heightMap));
+		    }
+	    	$stream->put($this->biomeIds);
+		}
+		$stream->putByte(0); //border block array count
+	    //Border block entry format: 1 byte (4 bits X, 4 bits Z). These are however useless since they crash the regular client.
+		if($playerProtocol < ProtocolInfo::PROTOCOL_270){
+		    $stream->putVarInt(0); // extraData (WTF)
 		}
 
-		return $result;
+		return $stream->getBuffer();
 	}
 
-	public function networkSerializeSubChunk(SubChunkInterface $subChunk, int $playerProtocol, ?Closure $legacyToRuntime) : string{
-	    $result = new NetworkBinaryStream();
-
+	public function networkSerializeSubChunk(SubChunkInterface $subChunk, int $playerProtocol, ?Closure $legacyToRuntime, BinaryStream $stream) : void{
 		if($legacyToRuntime === null){
-		    $result->putByte(0); // storage version
+		    $stream->putByte(0); // storage version
 
 			$palettedBlockArray = $subChunk->getBlockLayers()[0] ?? new PalettedBlockArray(Block::AIR);
 
@@ -948,11 +939,11 @@ class Chunk{
 				}
 			}
 
-		    $result->put($blockIdArray);
-		    $result->put($blockDataArray);
+		    $stream->put($blockIdArray);
+		    $stream->put($blockDataArray);
 		    if($playerProtocol < ProtocolInfo::PROTOCOL_130){
-			    $result->put($subChunk->getBlockSkyLightArray());
-			    $result->put($subChunk->getBlockLightArray());
+			    $stream->put($subChunk->getBlockSkyLightArray());
+			    $stream->put($subChunk->getBlockLightArray());
 		    }
 	    }else{
 			Utils::validateCallableSignature(function(int $blockId, int $meta) : int{}, $legacyToRuntime);
@@ -960,7 +951,7 @@ class Chunk{
 			$blockLayers = $subChunk->getBlockLayers();
 
 			if($playerProtocol < ProtocolInfo::PROTOCOL_290){
-				$result->putByte(1); // storage version (paletted v1, single blockstorage)
+				$stream->putByte(1); // storage version (paletted v1, single blockstorage)
 
 				$blocks = $blockLayers[0] ?? new PalettedBlockArray(Block::AIR);
                	// 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
@@ -973,24 +964,24 @@ class Chunk{
                 	$bitsPerBlock = $blocks->getBitsPerBlock();
                 	$words = $blocks->getWordArray();
                 }
-            	$result->putByte(($bitsPerBlock << 1) | 1);
-            	$result->put($words);
+            	$stream->putByte(($bitsPerBlock << 1) | 1);
+            	$stream->put($words);
             	$palette = $blocks->getPalette();
 
                 //these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
             	//but since we know they are always unsigned, we can avoid the extra fcall overhead of
             	//zigzag and just shift directly.
-            	$result->putUnsignedVarInt(count($palette) << 1);
+            	$stream->putUnsignedVarInt(count($palette) << 1);
 			    foreach($palette as $fullBlock){
 					$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f);
 					$block = $block->getBlockProtocol($playerProtocol) ?? $block;
 
 			    	$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
-			    	$result->putUnsignedVarInt($runtimeId << 1);
+			    	$stream->putUnsignedVarInt($runtimeId << 1);
 				}
 			}else{
-				$result->putByte(8); // storage version
-				$result->putByte(count($blockLayers)); // layer count
+				$stream->putByte(8); // storage version
+				$stream->putByte(count($blockLayers)); // layer count
 
 				foreach($blockLayers as $blocks){
                		// 1 is network format (palette out of runtimeIDs), 0 is storage format (palette out of NBT tags)
@@ -1003,26 +994,24 @@ class Chunk{
                     	$bitsPerBlock = $blocks->getBitsPerBlock();
                     	$words = $blocks->getWordArray();
                 	}
-                	$result->putByte(($bitsPerBlock << 1) | 1);
-                	$result->put($words);
+                	$stream->putByte(($bitsPerBlock << 1) | 1);
+                	$stream->put($words);
                 	$palette = $blocks->getPalette();
 
                 	//these LSHIFT by 1 uvarints are optimizations: the client expects zigzag varints here
                 	//but since we know they are always unsigned, we can avoid the extra fcall overhead of
                 	//zigzag and just shift directly.
-                	$result->putUnsignedVarInt(count($palette) << 1);
+                	$stream->putUnsignedVarInt(count($palette) << 1);
 			    	foreach($palette as $fullBlock){
 						$block = BlockFactory::get($fullBlock >> 4, $fullBlock & 0x0f);
 						$block = $block->getBlockProtocol($playerProtocol) ?? $block;
 
 			    		$runtimeId = $legacyToRuntime($block->getId(), $block->getDamage());
-			    		$result->putUnsignedVarInt($runtimeId << 1);
+			    		$stream->putUnsignedVarInt($runtimeId << 1);
 					}
 				}
 			}
 		}
-
-		return $result->buffer;
 	}
 
 	private function networkSerializeBiomesAsPalette() : string{

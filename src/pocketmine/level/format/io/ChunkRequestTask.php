@@ -120,14 +120,15 @@ class ChunkRequestTask extends AsyncTask{
 		    };
 		}
 
-        $extraPayload = $chunk->networkSerialize($protocol, $dimensionId, $legacyToRuntime ?? null);
-		if($protocol >= ProtocolInfo::PROTOCOL_475){
-			if($dimensionId !== DimensionIds::OVERWORLD){
-				$extraPayload = substr($extraPayload, 4 * 2);
-			}
-		}
-
-	    $pk = LevelChunkPacket::withoutCache(new ChunkPosition($this->chunkX, $this->chunkZ), $dimensionId, (($protocol >= ProtocolInfo::PROTOCOL_475 && $dimensionId === DimensionIds::OVERWORLD) ? $chunk->getSubChunkSendCount() + 4 : $chunk->getSubChunkSendCount()), $extraPayload . $this->tiles);
+	    $pk = LevelChunkPacket::withoutCache(
+	        new ChunkPosition($this->chunkX, $this->chunkZ),
+	        $dimensionId,
+	        (($protocol >= ProtocolInfo::PROTOCOL_475 && $dimensionId === DimensionIds::OVERWORLD) ?
+	            $chunk->getSubChunkSendCount() + 4 :
+	            $chunk->getSubChunkSendCount()
+	       ),
+	       $chunk->networkSerialize($protocol, $dimensionId, $legacyToRuntime ?? null) . $this->tiles
+	    );
 		$pk->setPacketIdToSend($this->levelChunkPacketId);
 	    $pk->setProtocol($protocol);
 

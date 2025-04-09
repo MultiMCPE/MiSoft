@@ -181,7 +181,7 @@ class StartGamePacket extends DataPacket{
 	/** @var int */
 	public $limitedWorldLength = 0;
 	/** @var bool */
-	public $isNewNether = true;
+	public $isNewNether = false;
 	/** @var EducationUriResource|null */
 	public $eduSharedUriResource = null;
 	/** @var bool|null */
