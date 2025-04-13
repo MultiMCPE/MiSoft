@@ -27,6 +27,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use function chr;
 use function ord;
+use UnexpectedValueException;
 
 /**
  * One of the most useless packets.
@@ -48,6 +49,9 @@ class PlayerHotbarPacket extends DataPacket{
 		$this->windowId = $this->getByte();
 		if ($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200) {
             $slots = $this->getUnsignedVarInt();
+	    if($slots > 128){
+	        throw new UnexpectedValueException("Too many slots count: $slots");
+	    }
             for ($slot = 0; $slot < $slots; ++$slot) {
                 $this->slots[$slot] = $this->getUnsignedVarInt();
             }
