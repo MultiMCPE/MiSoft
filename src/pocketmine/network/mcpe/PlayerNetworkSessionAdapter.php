@@ -460,7 +460,7 @@ class PlayerNetworkSessionAdapter extends NetworkSession{
 	public function handleMoveActorAbsolute(MoveActorAbsolutePacket $packet) : bool{
 		$target = $this->player->getServer()->findEntity($packet->entityRuntimeId);
 		if($target !== null){
-			$target->setClientPositionAndRotation($packet->position, $packet->yRot, $packet->xRot, 3, ($packet->flags & MoveActorAbsolutePacket::FLAG_TELEPORT) !== 0);
+			$target->setClientPositionAndRotation($packet->position, $packet->yaw, $packet->pitch, 3, ($packet->flags & MoveActorAbsolutePacket::FLAG_TELEPORT) !== 0);
 			//$target->onGround = ($packet->flags & MoveActorAbsolutePacket::FLAG_GROUND) !== 0;
 
 		    return true;

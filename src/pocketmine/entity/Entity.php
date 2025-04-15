@@ -107,7 +107,6 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\RemoveActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
 use pocketmine\network\mcpe\protocol\SetActorLinkPacket;
@@ -1295,33 +1294,19 @@ abstract class Entity extends Location implements Metadatable, EntityIds, Entity
 		$pk = new MoveActorAbsolutePacket();
 		$pk->entityRuntimeId = $this->id;
 		$pk->position = $this->getOffsetPosition($this);
-
-		//this looks very odd but is correct as of 1.5.0.7
-		//for arrows this is actually x/y/z rotation
-		//for mobs x and z are used for pitch and yaw, and y is used for headyaw
-		$pk->xRot = $this->pitch;
+		$pk->pitch = $this->pitch;
+		$pk->yaw = $this->yaw;
+		$pk->headYaw = $this->headYaw ?? $this->yaw;
 
 		if($teleport){
 			$pk->flags |= MoveActorAbsolutePacket::FLAG_TELEPORT;
 		}
+
 		if($this->onGround){
 			$pk->flags |= MoveActorAbsolutePacket::FLAG_GROUND;
 		}
 
-		$viewers = $this->level->getChunkPlayers($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
-		foreach($viewers as $viewer){
-			if($viewer->getProtocol() >= ProtocolInfo::PROTOCOL_273){
-				$newpk = clone $pk;
-				$newpk->yRot = $this->yaw;
-				$newpk->zRot = $this->headYaw ?? $this->yaw;
-				$viewer->sendDataPacket($newpk);
-			}else{
-				$oldpk = clone $pk;
-				$oldpk->yRot = $this->headYaw ?? $this->yaw;
-				$oldpk->zRot = $this->yaw;
-				$viewer->sendDataPacket($oldpk);
-			}
-		}
+		$this->level->broadcastPacketToViewers($this, $pk);
 	}
 
 	protected function broadcastMotion() : void{

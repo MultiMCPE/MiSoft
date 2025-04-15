@@ -44,39 +44,39 @@ class MoveActorAbsolutePacket extends DataPacket{
 	/** @var Vector3 */
 	public $position;
 	/** @var float */
-	public $xRot;
+	public $pitch;
 	/** @var float */
-	public $yRot;
+	public $yaw;
 	/** @var float */
-	public $zRot;
+	public $headYaw; //always zero for non-mobs
 
 	protected function decodePayload(){
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_274){
 	        	$this->flags = $this->getByte();
-	    	} else {
+	    	}else{
                 $this->flags = $this->getLShort();
 	    	}
 	    	$this->position = $this->getVector3();
-	    	$this->xRot = $this->getByteRotation();
-	    	$this->yRot = $this->getByteRotation();
-	    	$this->zRot = $this->getByteRotation();
-		} else {
+	    	$this->pitch = $this->getByteRotation();
+	    	$this->yaw = $this->getByteRotation();
+	    	$this->headYaw = $this->getByteRotation();
+		}else{
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
 	    	$this->position = $this->getVector3();
-	    	$this->xRot = $this->getByteRotation();
-	    	$this->yRot = $this->getByteRotation();
-	    	$this->zRot = $this->getByteRotation();
+	    	$this->pitch = $this->getByteRotation();
+	    	$this->headYaw = $this->getByteRotation();
+	    	$this->yaw = $this->getByteRotation();
 
 	    	$this->flags = 0;
-            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110) {
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
                 $onGround = $this->getBool();
                 $isTeleported = $this->getBool();
-                if ($onGround) {
+                if($onGround){
                     $this->flags |= self::FLAG_GROUND;
                 }
-                if ($isTeleported) {
+                if($isTeleported){
                     $this->flags |= self::FLAG_TELEPORT;
                 }
             }
@@ -84,23 +84,23 @@ class MoveActorAbsolutePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_273) {
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
-	    	if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_274) {
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_274){
                 $this->putByte($this->flags);
-	    	} else {
+	    	}else{
                 $this->putLShort($this->flags);
 	    	}
 	    	$this->putVector3($this->position);
-	    	$this->putByteRotation($this->xRot);
-	    	$this->putByteRotation($this->yRot);
-	    	$this->putByteRotation($this->zRot);
-		} else {
+	    	$this->putByteRotation($this->pitch);
+	    	$this->putByteRotation($this->yaw);
+	    	$this->putByteRotation($this->headYaw);
+		}else{
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
 	    	$this->putVector3($this->position);
-	    	$this->putByteRotation($this->xRot);
-	    	$this->putByteRotation($this->yRot);
-	    	$this->putByteRotation($this->zRot);
+	    	$this->putByteRotation($this->pitch);
+	    	$this->putByteRotation($this->headYaw);
+	    	$this->putByteRotation($this->yaw);
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 				$this->putBool(($this->flags & self::FLAG_GROUND) !== 0);
