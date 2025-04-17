@@ -175,14 +175,12 @@ final class CommandListJson implements JsonSerializable{
             $data["type"] = "stringenum";
             $data["enum_type"] = $paramTypes[$parameter->enum->enumName] ?? $parameter->enum->enumName;
 
-            if(count($parameter->enum->getValues()) > 0){
+            if(count($parameter->enum->enumValues) > 0){
                 $data["enum_values"] = $parameter->enum->enumValues;
             }
         }
 
-        if($parameter->isOptional){
-            $data["optional"] = true;
-        }
+        $data["optional"] = true;
 
         return $data;
     }
