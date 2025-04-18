@@ -28,8 +28,10 @@ use LogicException;
 use pocketmine\entity\Human;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\protocol\CreativeContentPacket;
+use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\InventoryContentPacket;
 use pocketmine\network\mcpe\protocol\MobEquipmentPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -38,8 +40,10 @@ use pocketmine\network\mcpe\protocol\types\CreativeGroup;
 use pocketmine\Player;
 use RuntimeException;
 use SplFixedArray;
+use function array_search;
 use function in_array;
 use function is_array;
+use function range;
 
 class PlayerInventory extends BaseInventory{
 
@@ -129,7 +133,7 @@ class PlayerInventory extends BaseInventory{
 	/**
 	 * Resets hotbar links to their original defaults.
 	 */
-	public function resetHotbar(){
+	public function resetHotbar() : void{
 		$this->hotbar = SplFixedArray::fromArray(range(0, $this->getHotbarSize() - 1, 1));
 	}
 
@@ -162,17 +166,56 @@ class PlayerInventory extends BaseInventory{
 	}
 
 	/**
+	 * Called when a client equips a hotbar slot. This method should not be used by plugins.
+	 * This method will call PlayerItemHeldEvent.
+	 *
+	 * @param int $hotbarSlot Number of the hotbar slot to equip.
+	 * @param ?int $inventorySlot
+	 *
+	 * @return bool if the equipment change was successful, false if not.
+	 */
+	public function equipItem(int $hotbarSlot, ?int $inventorySlot = null) : bool{
+		$holder = $this->getHolder();
+		if(!$this->isHotbarSlot($hotbarSlot)){
+			if($holder instanceof Player){
+				$this->sendContents($holder);
+			}
+			return false;
+		}
+
+		if($holder instanceof Player){
+			$ev = new PlayerItemHeldEvent($holder, $inventorySlot === null ? $this->getItem($hotbarSlot) : $this->getItem($inventorySlot), $hotbarSlot);
+			$ev->call();
+
+			if($ev->isCancelled()){
+				$this->sendHeldItem($holder);
+				return false;
+			}
+		}
+		$this->setHeldItemIndex($hotbarSlot, false, $inventorySlot);
+
+		return true;
+	}
+
+	/**
 	 * Sets which hotbar slot the player is currently loading.
 	 *
 	 * @param int  $hotbarSlot 0-8 index of the hotbar slot to hold
 	 * @param bool $send Whether to send updates back to the inventory holder. This should usually be true for plugin calls.
 	 *                    It should only be false to prevent feedback loops of equipment packets between client and server.
+	 * @param ?int $inventorySlot
 	 *
 	 * @throws InvalidArgumentException if the hotbar slot is out of range
 	 */
 	public function setHeldItemIndex(int $hotbarSlot, bool $send = true, ?int $inventorySlot = null){
 	    $this->throwIfNotHotbarSlot($hotbarSlot);
 		$this->itemInHandIndex = $hotbarSlot;
+
+		if($inventorySlot !== null){
+			/* Handle a hotbar slot mapping change. This allows PE to select different inventory slots.
+			 * This is the only time slot mapping should ever be changed. */
+            $this->setHotbarSlotIndex($hotbarSlot, $inventorySlot);
+		}
 
 		if($this->getHolder() instanceof Player and $send){
 			$this->sendHeldItem($this->getHolder());
@@ -236,12 +279,21 @@ class PlayerInventory extends BaseInventory{
 		$pk->windowId = ContainerIds::INVENTORY;
 
 		if(!is_array($target)){
+		    if($target->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        $pk->inventorySlot = $pk->hotbarSlot;
+		    }
 			$target->dataPacket($pk);
 			if($this->getHeldItemSlot() !== -1 and $target === $this->getHolder()){
 				$this->sendSlot($this->getHeldItemSlot(), $target);
 			}
 		}else{
-			$this->getHolder()->getLevelNonNull()->getServer()->broadcastPacket($target, $pk);
+		    foreach($target as $player){
+		        $packet = clone $pk;
+		        if($target->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		            $packet->inventorySlot = $pk->hotbarSlot;
+		        }
+		        $player->dataPacket($packet);
+		    }
 			if($this->getHeldItemSlot() !== -1 and in_array($this->getHolder(), $target, true)){
 				$this->sendSlot($this->getHeldItemSlot(), $this->getHolder());
 			}
@@ -267,7 +319,7 @@ class PlayerInventory extends BaseInventory{
 		    $pk = new CreativeContentPacket();
 			$pk->items = !$holder->isSpectator() ? CreativePacketCache::getInstance()->getItems($holder->getProtocol()) : [];
 		    $pk->groups = CreativePacketCache::getInstance()->getGroups($holder->getProtocol());
-        }else{
+        }elseif($holder->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             $creativeItemEntries = !$holder->isSpectator() ? CreativePacketCache::getInstance()->getItems($holder->getProtocol()) : [];
 
             $items = [];
@@ -278,9 +330,24 @@ class PlayerInventory extends BaseInventory{
 	    	$pk = new InventoryContentPacket();
 	    	$pk->windowId = ContainerIds::CREATIVE;
 			$pk->items = $items;
+        }else{
+	   	    $pk = new ContainerSetContentPacket();
+	    	$pk->windowid = ContainerIds::CREATIVE;
+		    if($holder->getGamemode() === Player::CREATIVE){
+                $creativeItemEntries = CreativePacketCache::getInstance()->getItems($holder->getProtocol());
+                foreach($creativeItemEntries as $i => $creativeItemEntry){
+                    $pk->slots[$i] = clone $creativeItemEntry->getItem();
+                }
+		    }
+		    $pk->targetEid = $holder->getId();
         }
 
         $holder->dataPacket($pk);
+    }
+
+    public function clearAll(bool $send = true) : void{
+        $this->resetHotbar();
+        parent::clearAll($send);
     }
 
 	/**

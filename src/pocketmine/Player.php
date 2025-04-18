@@ -66,7 +66,6 @@ use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerInteractEntityEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\event\player\PlayerItemConsumeEvent;
-use pocketmine\event\player\PlayerItemHeldEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerJumpEvent;
 use pocketmine\event\player\PlayerKickEvent;
@@ -3928,54 +3927,24 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
             return true;
         }
 
-        if($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200){
-            if($packet->inventorySlot === 0 || $packet->inventorySlot === 255){
-                $packet->inventorySlot =- 1;
-            }else{
-                if($packet->inventorySlot < 9){
-                    $this->server->getLogger()->debug("Tried to equip a slot that does not exist (index " . $packet->inventorySlot . ")");
-                    $this->sendAllInventories();
-
-                    return false;
-                }
-
-                $packet->inventorySlot -= 9;
+        if($this->getProtocol() < ProtocolInfo::PROTOCOL_130){
+            //Get the index of the slot in the actual inventory
+            $packet->inventorySlot -= $this->inventory->getHotbarSize();
+            if($packet->inventorySlot < 0 || $packet->inventorySlot >= $this->inventory->getSize()){
+				//Mapping was not in range of the inventory, set it to -1
+				//This happens if the client selected a blank slot (sends 255)
+                $packet->inventorySlot = -1;
             }
+
+            $this->inventory->equipItem($packet->hotbarSlot, $packet->inventorySlot);
+        }else{
+            $this->inventory->equipItem($packet->hotbarSlot);
         }
 
-        if(!$this->selectHotbarSlot($packet->hotbarSlot, $packet->inventorySlot)){
-            $this->inventory->sendHeldItem($this);
-        }
-
-        return true;
-	}
-
-    /**
-     * @param int $hotbarSlot
-     * @param ?int $inventorySlot
-     * 
-     * @return bool
-     */
-    public function selectHotbarSlot(int $hotbarSlot, ?int $inventorySlot = null) : bool{
-        if(!$this->inventory->isHotbarSlot($hotbarSlot)){
-            return false;
-        }
-
-        if($inventorySlot !== null && ($inventorySlot < -1 || $inventorySlot >= $this->inventory->getSize())){
-            return false;
-        }
-
-        $ev = new PlayerItemHeldEvent($this, $this->inventory->getItem($hotbarSlot), $hotbarSlot);
-        $ev->call();
-        if($ev->isCancelled()){
-            return false;
-        }
-
-        $this->inventory->setHeldItemIndex($hotbarSlot, false, $inventorySlot);
         $this->setUsingItem(false);
 
         return true;
-    }
+	}
 
 	public function handleInteract(InteractPacket $packet) : bool{
 		if(!$this->spawned or !$this->isAlive()){
@@ -4519,7 +4488,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
                 $transaction = new Transaction($this->armorInventory, $packet->slot, $packet->item);
                 break;
             case ContainerIds::HOTBAR:
-                $this->inventory->setHotbarSlotIndex($packet->hotbarSlot, $packet->slot - 9);
+                //Hotbar link update
+				//hotbarSlot 0-8, slot 9-44
+				$this->inventory->setHotbarSlotIndex($packet->hotbarSlot, $packet->slot - 9);
                 return true;
             default:
                 $inventory = $this->getWindow($packet->windowid);
@@ -4718,7 +4689,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		/** @var WritableBook $oldBook */
 		if($this->getProtocol() === ProtocolInfo::PROTOCOL_201 || $this->getProtocol() < ProtocolInfo::PROTOCOL_200){
-		    $packet->inventorySlot -= 9;
+		    $packet->inventorySlot -= $this->inventory->getHotbarSize();
 		}
 
 		$oldBook = $this->inventory->getItem($packet->inventorySlot);

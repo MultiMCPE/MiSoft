@@ -56,7 +56,9 @@ abstract class ProjectileItem extends Item{
 			$projectile->setMotion($projectile->getMotion()->multiply($this->getThrowForce()));
 		}
 
-		$this->count--;
+		if($player->isSurvival()){
+            $player->getInventory()->setItemInHand(--$this->count > 0 ? $this : ItemFactory::get(Item::AIR));
+        }
 
 		if($projectile instanceof Projectile){
 			$projectileEv = new ProjectileLaunchEvent($projectile);

@@ -483,9 +483,11 @@ abstract class BaseInventory implements Inventory{
 		    	$pk->targetEid = $player->getId();
 		    	$pk->slots = $items;
                 if($this instanceof PlayerInventory){
+                    $pk->hotbar = [];
                     for($i = 0; $i < $this->getHotbarSize(); $i++){
                         $pk->slots[] = ItemFactory::get(ItemIds::AIR, 0);
-                        $pk->hotbar[$i] = $this->getHotbarSize() + $this->getHotbarSlotIndex($i);
+                        $index = $this->getHotbarSlotIndex($i);
+                        $pk->hotbar[] = $index <= -1 ? -1 : $index + $this->getHotbarSize();
                     }
                 }
 			    $player->dataPacket(clone $pk);

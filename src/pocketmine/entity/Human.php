@@ -35,7 +35,6 @@ use pocketmine\event\player\PlayerExperienceChangeEvent;
 use pocketmine\inventory\EnderChestInventory;
 use pocketmine\inventory\EntityInventoryEventProcessor;
 use pocketmine\inventory\InventoryHolder;
-use pocketmine\inventory\OldPlayerInventory;
 use pocketmine\inventory\PETransaction\TransactionQueue;
 use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\PlayerOffHandInventory;
@@ -671,7 +670,7 @@ class Human extends Creature implements ProjectileSource, InventoryHolder{
 		$this->setPlayerFlag(self::DATA_PLAYER_FLAG_SLEEP, false);
 		$this->propertyManager->setBlockPos(self::DATA_PLAYER_BED_POSITION, null);
 
-		$this->inventory = ($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130) ? new OldPlayerInventory($this) : new PlayerInventory($this);
+		$this->inventory = new PlayerInventory($this);
 		$this->offHandInventory = new PlayerOffHandInventory($this);
 		$this->enderChestInventory = new EnderChestInventory();
 		if($this instanceof Player && $this->getProtocol() < ProtocolInfo::PROTOCOL_130){
