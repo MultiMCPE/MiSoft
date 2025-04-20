@@ -40,7 +40,7 @@ final class CreativeGroupEntry{
         }else{
             $categoryId = $in->getLInt();
             $categoryName = $in->getString();
-            $icon = $in->getSlot($protocolVersion, false);
+            $icon = $in->getSlot(false);
         }
         return new self($categoryId ?? 0, $categoryName, $icon);
     }
@@ -53,7 +53,7 @@ final class CreativeGroupEntry{
         }else{
             $out->putLInt($this->categoryId);
             $out->putString($this->categoryName);
-            $out->putSlot($this->icon, $protocolVersion, false);
+            $out->putSlot($this->icon, false);
         }
     }
 }

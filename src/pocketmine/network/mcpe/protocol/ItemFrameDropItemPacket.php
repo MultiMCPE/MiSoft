@@ -42,14 +42,14 @@ class ItemFrameDropItemPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_101){
-			$this->item = $this->getSlot($this->getProtocol());
+			$this->item = $this->getSlot();
 		}
 	}
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_101){
-			$this->putSlot($this->item, $this->getProtocol());
+			$this->putSlot($this->item);
 		}
 	}
 

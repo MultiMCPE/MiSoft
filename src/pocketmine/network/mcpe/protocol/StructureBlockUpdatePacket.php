@@ -44,7 +44,7 @@ class StructureBlockUpdatePacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->structureEditorData = $this->getStructureEditorData($this->getProtocol());
+		$this->structureEditorData = $this->getStructureEditorData();
         $this->isPowered = $this->getBool();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553){
             $this->waterlogged = $this->getBool();
@@ -53,7 +53,7 @@ class StructureBlockUpdatePacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putStructureEditorData($this->structureEditorData, $this->getProtocol());
+		$this->putStructureEditorData($this->structureEditorData);
         $this->putBool($this->isPowered);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_553){
             $this->putBool($this->waterlogged);

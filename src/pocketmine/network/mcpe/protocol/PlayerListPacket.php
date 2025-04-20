@@ -107,7 +107,7 @@ class PlayerListPacket extends DataPacket{
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	$entry->buildPlatform = $this->getLInt();
 			        	    }
-			            	$entry->skin = $this->getSkin($this->getProtocol());
+			            	$entry->skin = $this->getSkin();
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
 			                	$entry->isTeacher = $this->getBool();
 			                	$entry->isHost = $this->getBool();
@@ -202,7 +202,7 @@ class PlayerListPacket extends DataPacket{
 			        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
                                 $this->putLInt($entry->buildPlatform);
 			        	    }
-			            	$this->putSkin($entry->skin, $this->getProtocol());
+			            	$this->putSkin($entry->skin);
 			            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_385){
                                 $this->putBool($entry->isTeacher);
                                 $this->putBool($entry->isHost);

@@ -59,7 +59,7 @@ class InventorySlotPacket extends DataPacket{
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 				$this->containerName = FullContainerName::read($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-					$this->storage = $this->getSlot($this->getProtocol());
+					$this->storage = $this->getSlot();
 				}else{
 				    $this->dynamicContainerSize = $this->getUnsignedVarInt();
 				}
@@ -67,7 +67,7 @@ class InventorySlotPacket extends DataPacket{
                 $this->dynamicContainerId = $this->getUnsignedVarInt();
 			}
         }
-		$this->item = $this->getSlot($this->getProtocol());
+		$this->item = $this->getSlot();
 	}
 
 	protected function encodePayload(){
@@ -80,7 +80,7 @@ class InventorySlotPacket extends DataPacket{
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-					$this->putSlot($this->storage ?? ItemFactory::get(Item::AIR), $this->getProtocol());
+					$this->putSlot($this->storage ?? ItemFactory::get(Item::AIR));
 				}else{
 				    $this->putUnsignedVarInt($this->dynamicContainerSize);
 				}
@@ -88,7 +88,7 @@ class InventorySlotPacket extends DataPacket{
                 $this->putUnsignedVarInt($this->dynamicContainerId);
 			}
         }
-		$this->putSlot($this->item, $this->getProtocol());
+		$this->putSlot($this->item);
 	}
 
 	public function handle(NetworkSession $session) : bool{

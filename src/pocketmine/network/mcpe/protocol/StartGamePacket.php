@@ -318,7 +318,7 @@ class StartGamePacket extends DataPacket{
 		$this->commandsEnabled = $this->getBool();
 		$this->isTexturePacksRequired = $this->getBool();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
-			$this->gameRules = $this->getGameRules($this->getProtocol());
+			$this->gameRules = $this->getGameRules();
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
          	   if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
              	   $this->experiments = Experiments::read($this);
@@ -568,7 +568,7 @@ class StartGamePacket extends DataPacket{
         $this->putBool($this->commandsEnabled);
         $this->putBool($this->isTexturePacksRequired);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
-		    $this->putGameRules($this->gameRules, $this->getProtocol());
+		    $this->putGameRules($this->gameRules);
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
     		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 	    	        $this->experiments->write($this);

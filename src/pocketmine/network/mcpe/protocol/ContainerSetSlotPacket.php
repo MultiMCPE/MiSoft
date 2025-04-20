@@ -42,7 +42,7 @@ class ContainerSetSlotPacket extends DataPacket{
 		$this->windowid = $this->getByte();
 		$this->slot = $this->getVarInt();
 		$this->hotbarSlot = $this->getVarInt();
-		$this->item = $this->getSlot($this->getProtocol());
+		$this->item = $this->getSlot();
 		$this->selectSlot = $this->getByte();
 	}
 
@@ -50,7 +50,7 @@ class ContainerSetSlotPacket extends DataPacket{
         $this->putByte($this->windowid);
 		$this->putVarInt($this->slot);
 		$this->putVarInt($this->hotbarSlot);
-		$this->putSlot($this->item, $this->getProtocol());
+		$this->putSlot($this->item);
         $this->putByte($this->selectSlot);
 	}
 

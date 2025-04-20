@@ -61,8 +61,6 @@ abstract class DataPacket extends NetworkBinaryStream{
 	/** @var int */
 	public $recipientSubId = 0x0;
 	/** @var int|null */
-	private $packetProtocol;
-	/** @var int|null */
 	private $packetIdToSend;
 
 	public function pid(){
@@ -73,16 +71,8 @@ abstract class DataPacket extends NetworkBinaryStream{
 		return (new ReflectionClass($this))->getShortName();
 	}
 
-	public function setProtocol(int $protocol) : void{
-	    $this->packetProtocol = $protocol;
-	}
-	
-	public function getProtocol() : int{
-	    return $this->packetProtocol;
-	}
-
     public function checkProtocol() : void{
-        if($this->packetProtocol === null){
+        if($this->protocol === null){
             throw new InvalidArgumentException('Protocol has not passed. Please use $packet->setProtocol(int $protocol)->... for fix it.');
         }
     }
@@ -128,9 +118,9 @@ abstract class DataPacket extends NetworkBinaryStream{
 	 * @throws UnexpectedValueException
 	 */
 	protected function decodeHeader(){
-        if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
+        if($this->protocol < ProtocolInfo::PROTOCOL_280){
             $this->getByte();
-            if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
+            if($this->protocol >= ProtocolInfo::PROTOCOL_130){
                 $this->senderSubId = $this->getByte();
                 $this->recipientSubId = $this->getByte();
                 if($this->senderSubId > 0x4 || $this->recipientSubId > 0x4){
@@ -170,10 +160,10 @@ abstract class DataPacket extends NetworkBinaryStream{
 	}
 
 	protected function encodeHeader(){
-	    $pid = $this->packetIdToSend ?? PacketPool::getPacketIdByMagic($this->pid(), $this->packetProtocol);
-        if($this->packetProtocol < ProtocolInfo::PROTOCOL_280){
+	    $pid = $this->packetIdToSend ?? PacketPool::getPacketIdByMagic($this->pid(), $this->protocol);
+        if($this->protocol < ProtocolInfo::PROTOCOL_280){
             $this->putByte($pid);
-            if($this->packetProtocol >= ProtocolInfo::PROTOCOL_130){
+            if($this->protocol >= ProtocolInfo::PROTOCOL_130){
                 $this->putByte($this->senderSubId);
                 $this->putByte($this->recipientSubId);
             }

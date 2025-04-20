@@ -45,7 +45,7 @@ class MobEquipmentPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->item = $this->getSlot($this->getProtocol());
+		$this->item = $this->getSlot();
 		$this->inventorySlot = $this->getByte();
 		$this->hotbarSlot = $this->getByte();
 		$this->windowId = $this->getByte();
@@ -53,7 +53,7 @@ class MobEquipmentPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putSlot($this->item, $this->getProtocol());
+		$this->putSlot($this->item);
         $this->putByte($this->inventorySlot);
         $this->putByte($this->hotbarSlot);
         $this->putByte($this->windowId);

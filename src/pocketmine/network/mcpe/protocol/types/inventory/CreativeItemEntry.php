@@ -43,7 +43,7 @@ final class CreativeItemEntry{
             }
         }
 
-        $item = $in->getSlot($protocolVersion, false);
+        $item = $in->getSlot(false);
         if($protocolVersion >= ProtocolInfo::PROTOCOL_776){
             $groupId = $in->getUnsignedVarInt();
         }
@@ -61,7 +61,7 @@ final class CreativeItemEntry{
             }
         }
 
-        $out->putSlot($this->item, $protocolVersion, false);
+        $out->putSlot($this->item, false);
         if($protocolVersion >= ProtocolInfo::PROTOCOL_776){
             $out->putUnsignedVarInt($this->groupId);
         }

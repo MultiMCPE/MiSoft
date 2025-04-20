@@ -51,7 +51,7 @@ class ContainerSetContentPacket extends DataPacket{
 		}
 		$count = $this->getUnsignedVarInt();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
-			$this->slots[$s] = $this->getSlot($this->getProtocol());
+			$this->slots[$s] = $this->getSlot();
 		}
 
 		$hotbarCount = $this->getUnsignedVarInt(); //MCPE always sends this, even when it's not a player inventory
@@ -69,7 +69,7 @@ class ContainerSetContentPacket extends DataPacket{
 		}
 		$this->putUnsignedVarInt(count($this->slots));
 		foreach($this->slots as $slot){
-			$this->putSlot($slot, $this->getProtocol());
+			$this->putSlot($slot);
 		}
 		if($this->windowid === ContainerIds::INVENTORY and count($this->hotbar) > 0){
 			$this->putUnsignedVarInt(count($this->hotbar));

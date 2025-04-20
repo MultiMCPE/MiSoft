@@ -70,7 +70,7 @@ class PlayerSkinPacket extends DataPacket{
 	        	$this->premiumSkin = $this->getBool();
             }
         }else{
-            $this->skin = $this->getSkin($this->getProtocol());
+            $this->skin = $this->getSkin();
 	    	$this->newSkinName = $this->getString();
 	    	$this->oldSkinName = $this->getString();
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402)){
@@ -106,7 +106,7 @@ class PlayerSkinPacket extends DataPacket{
                 $this->putBool($this->premiumSkin);
             }
         }else{
-            $this->putSkin($this->skin, $this->getProtocol());
+            $this->putSkin($this->skin);
 	    	$this->putString($this->newSkinName);
 	    	$this->putString($this->oldSkinName);
 	    	if($this->getProtocol() === ProtocolInfo::PROTOCOL_390 || ($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402)){

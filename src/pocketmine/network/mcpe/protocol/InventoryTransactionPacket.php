@@ -176,7 +176,7 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->getBlockPosition($this->trData->x, $this->trData->y, $this->trData->z);
 				$this->trData->face = $this->getVarInt();
 				$this->trData->hotbarSlot = $this->getVarInt();
-				$this->trData->itemInHand = $this->getSlot($this->getProtocol());
+				$this->trData->itemInHand = $this->getSlot();
 				$this->trData->playerPos = $this->getVector3();
 				$this->trData->clickPos = $this->getVector3();
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_340){
@@ -190,14 +190,14 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->trData->entityRuntimeId = $this->getEntityRuntimeId();
 				$this->trData->actionType = $this->getUnsignedVarInt();
 				$this->trData->hotbarSlot = $this->getVarInt();
-				$this->trData->itemInHand = $this->getSlot($this->getProtocol());
+				$this->trData->itemInHand = $this->getSlot();
 				$this->trData->playerPos = $this->getVector3();
 				$this->trData->clickPos = $this->getVector3();
 				break;
 			case self::TYPE_RELEASE_ITEM:
 				$this->trData->actionType = $this->getUnsignedVarInt();
 				$this->trData->hotbarSlot = $this->getVarInt();
-				$this->trData->itemInHand = $this->getSlot($this->getProtocol());
+				$this->trData->itemInHand = $this->getSlot();
 				$this->trData->headPos = $this->getVector3();
 				break;
 			default:
@@ -228,7 +228,7 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->putBlockPosition($this->trData->x, $this->trData->y, $this->trData->z);
 				$this->putVarInt($this->trData->face);
 				$this->putVarInt($this->trData->hotbarSlot);
-				$this->putSlot($this->trData->itemInHand, $this->getProtocol());
+				$this->putSlot($this->trData->itemInHand);
 				$this->putVector3($this->trData->playerPos);
 				$this->putVector3($this->trData->clickPos);
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_340){
@@ -242,14 +242,14 @@ class InventoryTransactionPacket extends DataPacket{
 				$this->putEntityRuntimeId($this->trData->entityRuntimeId);
 				$this->putUnsignedVarInt($this->trData->actionType);
 				$this->putVarInt($this->trData->hotbarSlot);
-				$this->putSlot($this->trData->itemInHand, $this->getProtocol());
+				$this->putSlot($this->trData->itemInHand);
 				$this->putVector3($this->trData->playerPos);
 				$this->putVector3($this->trData->clickPos);
 				break;
 			case self::TYPE_RELEASE_ITEM:
 				$this->putUnsignedVarInt($this->trData->actionType);
 				$this->putVarInt($this->trData->hotbarSlot);
-				$this->putSlot($this->trData->itemInHand, $this->getProtocol());
+				$this->putSlot($this->trData->itemInHand);
 				$this->putVector3($this->trData->headPos);
 				break;
 			default:

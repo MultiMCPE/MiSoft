@@ -57,12 +57,12 @@ class CraftingEventPacket extends DataPacket{
 
 		$size = $this->getUnsignedVarInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
-			$this->input[] = $this->getSlot($this->getProtocol());
+			$this->input[] = $this->getSlot();
 		}
 
 		$size = $this->getUnsignedVarInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
-			$this->output[] = $this->getSlot($this->getProtocol());
+			$this->output[] = $this->getSlot();
 		}
 	}
 
@@ -73,12 +73,12 @@ class CraftingEventPacket extends DataPacket{
 
 		$this->putUnsignedVarInt(count($this->input));
 		foreach($this->input as $item){
-			$this->putSlot($item, $this->getProtocol());
+			$this->putSlot($item);
 		}
 
 		$this->putUnsignedVarInt(count($this->output));
 		foreach($this->output as $item){
-			$this->putSlot($item, $this->getProtocol());
+			$this->putSlot($item);
 		}
 	}
 

@@ -108,11 +108,11 @@ class AddPlayerPacket extends DataPacket{
 		$this->pitch = $this->getLFloat();
 		$this->yaw = $this->getLFloat();
 		$this->headYaw = $this->getLFloat();
-		$this->item = $this->getSlot($this->getProtocol());
+		$this->item = $this->getSlot();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 		    $this->gameMode = $this->getVarInt();
 		}
-		$this->metadata = $this->getEntityMetadata($this->getProtocol());
+		$this->metadata = $this->getEntityMetadata();
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
@@ -135,7 +135,7 @@ class AddPlayerPacket extends DataPacket{
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$linkCount = $this->getUnsignedVarInt();
 	        	for($i = 0; $i < $linkCount; ++$i){
-		        	$this->links[$i] = $this->getEntityLink($this->getProtocol());
+		        	$this->links[$i] = $this->getEntityLink();
 	        	}
 
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){
@@ -167,11 +167,11 @@ class AddPlayerPacket extends DataPacket{
         $this->putLFloat($this->pitch);
         $this->putLFloat($this->yaw);
         $this->putLFloat($this->headYaw ?? $this->yaw);
-		$this->putSlot($this->item, $this->getProtocol());
+		$this->putSlot($this->item);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 		    $this->putVarInt($this->gameMode);
 		}
-		$this->putEntityMetadata($this->metadata, $this->getProtocol());
+		$this->putEntityMetadata($this->metadata);
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
@@ -194,7 +194,7 @@ class AddPlayerPacket extends DataPacket{
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_132){
 	        	$this->putUnsignedVarInt(count($this->links));
 	        	foreach($this->links as $link){
-		        	$this->putEntityLink($link, $this->getProtocol());
+		        	$this->putEntityLink($link);
 	        	}
 
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_282){

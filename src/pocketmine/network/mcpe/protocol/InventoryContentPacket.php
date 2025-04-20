@@ -53,14 +53,14 @@ class InventoryContentPacket extends DataPacket{
 		$count = $this->getUnsignedVarInt();
 		for($i = 0; $i < $count; ++$i){
 		    $this->index[] = $this->getVarInt();
-			$this->items[] = $this->getSlot($this->getProtocol());
+			$this->items[] = $this->getSlot();
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 				$this->containerName = FullContainerName::read($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-					$this->storage = $this->getSlot($this->getProtocol());
+					$this->storage = $this->getSlot();
 				}else{
 				    $this->dynamicContainerSize = $this->getUnsignedVarInt();
 				}
@@ -82,14 +82,14 @@ class InventoryContentPacket extends DataPacket{
 			     	$this->putVarInt($index++);
 				}
 			}
-			$this->putSlot($item, $this->getProtocol());
+			$this->putSlot($item);
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
 				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-					$this->putSlot($this->storage ?? ItemFactory::get(Item::AIR), $this->getProtocol());
+					$this->putSlot($this->storage ?? ItemFactory::get(Item::AIR));
 				}else{
 				    $this->putUnsignedVarInt($this->dynamicContainerSize);
 				}

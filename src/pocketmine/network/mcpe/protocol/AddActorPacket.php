@@ -207,13 +207,13 @@ class AddActorPacket extends DataPacket{
 			}
 		}
 
-		$this->metadata = $this->getEntityMetadata($this->getProtocol());
+		$this->metadata = $this->getEntityMetadata();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
 		    $this->syncedProperties = PropertySyncData::read($this);
 		}
 		$linkCount = $this->getUnsignedVarInt();
 		for($i = 0; $i < $linkCount; ++$i){
-			$this->links[] = $this->getEntityLink($this->getProtocol());
+			$this->links[] = $this->getEntityLink();
 		}
 	}
 
@@ -247,13 +247,13 @@ class AddActorPacket extends DataPacket{
             $this->putLFloat($attribute->getMaxValue());
 		}
 
-		$this->putEntityMetadata($this->metadata, $this->getProtocol());
+		$this->putEntityMetadata($this->metadata);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
 		    ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
 		}
 		$this->putUnsignedVarInt(count($this->links));
 		foreach($this->links as $link){
-			$this->putEntityLink($link, $this->getProtocol());
+			$this->putEntityLink($link);
 		}
 	}
 

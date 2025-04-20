@@ -57,7 +57,7 @@ class UseItemPacket extends DataPacket{
 		$this->clickPos = $this->getVector3();
 		$this->playerPos = $this->getVector3();
 		$this->slot = $this->getVarInt();
-		$this->item = $this->getSlot($this->getProtocol());
+		$this->item = $this->getSlot();
 	}
 
 	public function encodePayload(){
@@ -67,7 +67,7 @@ class UseItemPacket extends DataPacket{
 		$this->putVector3($this->clickPos);
 		$this->putVector3($this->playerPos);
 		$this->putVarInt($this->slot);
-		$this->putSlot($this->item, $this->getProtocol());
+		$this->putSlot($this->item);
 	}
 
 	public function mustBeDecoded() : bool{
