@@ -289,7 +289,7 @@ class PlayerInventory extends BaseInventory{
 		}else{
 		    foreach($target as $player){
 		        $packet = clone $pk;
-		        if($target->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        if($player->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		            $packet->inventorySlot = $pk->hotbarSlot;
 		        }
 		        $player->dataPacket($packet);
@@ -349,6 +349,16 @@ class PlayerInventory extends BaseInventory{
         $this->resetHotbar();
         parent::clearAll($send);
     }
+
+	public function onSlotChange(int $index, Item $before, bool $send) : void{
+	    parent::onSlotChange($index, $before, $send);
+		if($index === $this->itemInHandIndex){
+			$this->sendHeldItem($this->holder->getViewers());
+			if($send && $this->holder instanceof Player){
+				$this->sendHeldItem($this->holder);
+			}
+		}
+	}
 
 	/**
 	 * This override is here for documentation and code completion purposes only.
