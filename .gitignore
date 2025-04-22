@@ -1,4 +1,5 @@
 players/*
+vendor/*
 players_logs/*
 logs/*
 /commands-list.yml
@@ -58,3 +59,5 @@ misoft.yml
 start.sh
 bedrock_packs/resource_packs.yml
 pw10_packs/resource_packs.yml
+.vscode/launch.json
+.vscode/settings.json
