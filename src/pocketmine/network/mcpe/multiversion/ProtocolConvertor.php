@@ -264,8 +264,19 @@ abstract class ProtocolConvertor{
 				return ProtocolInfo::PROTOCOL_101;
 			case ProtocolInfo::PROTOCOL_100:
 				return ProtocolInfo::PROTOCOL_100;
+			case ProtocolInfo::PROTOCOL_92:
+				return ProtocolInfo::PROTOCOL_92;
+			case ProtocolInfo::PROTOCOL_91:
+			    return ProtocolInfo::PROTOCOL_91;
+			case ProtocolInfo::PROTOCOL_90:
+				return ProtocolInfo::PROTOCOL_90;
+			case ProtocolInfo::PROTOCOL_84:
+			case ProtocolInfo::PROTOCOL_83:
+			case ProtocolInfo::PROTOCOL_82:
+			case ProtocolInfo::PROTOCOL_81:
+				return ProtocolInfo::PROTOCOL_81;
 			default:
-				return ProtocolInfo::PROTOCOL_100;
+				return ProtocolInfo::PROTOCOL_81;
 		}
 	}
 
@@ -422,8 +433,16 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_101:
 			case ProtocolInfo::PROTOCOL_100:
 				return ProtocolInfo::PROTOCOL_100;
+			case ProtocolInfo::PROTOCOL_92:
+				return ProtocolInfo::PROTOCOL_92;
+			case ProtocolInfo::PROTOCOL_91:
+			    return ProtocolInfo::PROTOCOL_91;
+			case ProtocolInfo::PROTOCOL_90:
+				return ProtocolInfo::PROTOCOL_90;
+			case ProtocolInfo::PROTOCOL_81:
+				return ProtocolInfo::PROTOCOL_81;
 			default:
-				return ProtocolInfo::PROTOCOL_100;
+				return ProtocolInfo::PROTOCOL_81;
 		}
 	}
 
@@ -581,8 +600,16 @@ abstract class ProtocolConvertor{
 			case ProtocolInfo::PROTOCOL_101:
 			case ProtocolInfo::PROTOCOL_100:
 				return ProtocolInfo::PROTOCOL_100;
+			case ProtocolInfo::PROTOCOL_92:
+				return ProtocolInfo::PROTOCOL_92;
+			case ProtocolInfo::PROTOCOL_91:
+			    return ProtocolInfo::PROTOCOL_91;
+			case ProtocolInfo::PROTOCOL_90:
+				return ProtocolInfo::PROTOCOL_90;
+			case ProtocolInfo::PROTOCOL_81:
+				return ProtocolInfo::PROTOCOL_81;
 			default:
-				return ProtocolInfo::PROTOCOL_100;
+				return ProtocolInfo::PROTOCOL_81;
 		}
 	}
 }

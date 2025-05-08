@@ -61,9 +61,15 @@ class MovePlayerPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->position = $this->getVector3();
-		$this->pitch = $this->getLFloat();
-		$this->yaw = $this->getLFloat();
-		$this->headYaw = $this->getLFloat();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->pitch = $this->getLFloat();
+	    	$this->yaw = $this->getLFloat();
+	    	$this->headYaw = $this->getLFloat();
+		}else{
+	    	$this->yaw = $this->getFloat();
+	    	$this->headYaw = $this->getFloat();
+	    	$this->pitch = $this->getFloat();
+		}
 		$this->mode = $this->getByte();
 		$this->onGround = $this->getBool();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
@@ -81,9 +87,15 @@ class MovePlayerPacket extends DataPacket{
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putVector3($this->position);
-        $this->putLFloat($this->pitch);
-        $this->putLFloat($this->yaw);
-        $this->putLFloat($this->headYaw);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putLFloat($this->pitch);
+            $this->putLFloat($this->yaw);
+            $this->putLFloat($this->headYaw);
+		}else{
+            $this->putFloat($this->yaw);
+            $this->putFloat($this->headYaw);
+            $this->putFloat($this->pitch);
+		}
         $this->putByte($this->mode);
         $this->putBool($this->onGround);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){

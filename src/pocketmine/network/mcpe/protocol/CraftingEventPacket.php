@@ -44,23 +44,17 @@ class CraftingEventPacket extends DataPacket{
 	/** @var Item[] */
 	public $output = [];
 
-	public function clean(){
-		$this->input = [];
-		$this->output = [];
-		return parent::clean();
-	}
-
 	protected function decodePayload(){
 		$this->windowId = $this->getByte();
-		$this->type = $this->getVarInt();
+		$this->type = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 		$this->id = $this->getUUID();
 
-		$size = $this->getUnsignedVarInt();
+		$size = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
 			$this->input[] = $this->getSlot();
 		}
 
-		$size = $this->getUnsignedVarInt();
+		$size = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 		for($i = 0; $i < $size and $i < 128; ++$i){
 			$this->output[] = $this->getSlot();
 		}
@@ -68,15 +62,27 @@ class CraftingEventPacket extends DataPacket{
 
 	protected function encodePayload(){
         $this->putByte($this->windowId);
-		$this->putVarInt($this->type);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->type);
+        }else{
+            $this->putInt($this->type);
+        }
 		$this->putUUID($this->id);
 
-		$this->putUnsignedVarInt(count($this->input));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->input));
+		}else{
+		    $this->putInt(count($this->input));
+		}
 		foreach($this->input as $item){
 			$this->putSlot($item);
 		}
 
-		$this->putUnsignedVarInt(count($this->output));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->output));
+		}else{
+		    $this->putInt(count($this->output));
+		}
 		foreach($this->output as $item){
 			$this->putSlot($item);
 		}

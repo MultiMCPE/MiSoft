@@ -108,6 +108,5 @@ if(!extension_loaded('pocketmine_chunkutils')){
 			}
 			return $result;
 		}
-
 	}
 }

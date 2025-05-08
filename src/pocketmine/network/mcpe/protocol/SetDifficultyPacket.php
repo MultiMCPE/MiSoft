@@ -33,11 +33,15 @@ class SetDifficultyPacket extends DataPacket{
 	public $difficulty;
 
 	protected function decodePayload(){
-		$this->difficulty = $this->getUnsignedVarInt();
+		$this->difficulty = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
-		$this->putUnsignedVarInt($this->difficulty);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt($this->difficulty);
+	    }else{
+	        $this->putInt($this->difficulty);
+	    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

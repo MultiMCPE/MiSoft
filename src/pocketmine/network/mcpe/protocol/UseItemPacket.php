@@ -52,21 +52,33 @@ class UseItemPacket extends DataPacket{
 
 	public function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->blockId = $this->getUnsignedVarInt();
-		$this->face = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+		    $this->blockId = $this->getUnsignedVarInt();
+		}
+		$this->face = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getByte();
 		$this->clickPos = $this->getVector3();
 		$this->playerPos = $this->getVector3();
-		$this->slot = $this->getVarInt();
+		$this->slot = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 		$this->item = $this->getSlot();
 	}
 
 	public function encodePayload(){
 	    $this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putUnsignedVarInt($this->blockId);
-		$this->putVarInt($this->face);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+	    	$this->putUnsignedVarInt($this->blockId);
+	    }
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->face);
+	    }else{
+	        $this->putByte($this->face);
+	    }
 		$this->putVector3($this->clickPos);
 		$this->putVector3($this->playerPos);
-		$this->putVarInt($this->slot);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->slot);
+		}else{
+		    $this->putInt($this->slot);
+		}
 		$this->putSlot($this->item);
 	}
 

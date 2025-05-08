@@ -43,20 +43,30 @@ class ServerToClientHandshakePacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->jwt = $this->getString();
-	    } else {
-	        $this->publicKey = $this->getString();
-	        $this->serverToken = $this->getString();
+	    }else{
+	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	            $this->publicKey = $this->getString();
+	            $this->serverToken = $this->getString();
+	        }else{
+	            $this->publicKey = $this->getShortString();
+	            $this->serverToken = $this->getShortString();
+	        }
 	    }
 	}
 
 	protected function encodePayload(){
-	    if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_130) {
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 	    	$this->putString($this->jwt);
-	    } else {
-	        $this->putString($this->publicKey);
-	        $this->putString($this->serverToken);
+	    }else{
+	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	            $this->putString($this->publicKey);
+	            $this->putString($this->serverToken);
+	        }else{
+	            $this->putShortString($this->publicKey);
+	            $this->putShortString($this->serverToken);
+	        }
 	    }
 	}
 

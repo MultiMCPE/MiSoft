@@ -31,6 +31,8 @@ use pocketmine\utils\Binary;
 use UnexpectedValueException;
 use function get_class;
 use function strlen;
+use function unpack;
+use function substr;
 use function zlib_decode;
 use function zlib_encode;
 use const ZLIB_ENCODING_DEFLATE;
@@ -50,11 +52,28 @@ class OldBatchPacket extends DataPacket{
 	}
 
 	protected function decodePayload(){
-		$this->payload = @zlib_decode($this->getString(), 1024 * 1024 * 2); //Max 2MB
+	    $length = (unpack("N", substr($this->buffer, 1, 4))[1] << 32 >> 32);
+	    $payload = substr($this->buffer, 5, $length);
+
+	    if(isset($payload[0]) && $payload[0] === "\x78"){
+	        $payload = $this->get($this->getInt());
+	        $this->protocol = ProtocolInfo::CURRENT_PROTOCOL;
+	    }else{
+	        $payload = $this->getString();
+	        $this->protocol = ProtocolInfo::PROTOCOL_90;
+	    }
+
+		$this->payload = @zlib_decode($payload, 1024 * 1024 * 2); //Max 2MB
 	}
 
 	protected function encodePayload(){
-		$this->putString(@zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel));
+		$payload = @zlib_encode($this->payload, ZLIB_ENCODING_DEFLATE, $this->compressionLevel);
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+		    $this->putInt(strlen($payload));
+		    $this->put($payload);
+		}else{
+		    $this->putString($payload);
+		}
 	}
 
 	public function addPacket(DataPacket $packet) : void{
@@ -65,21 +84,25 @@ class OldBatchPacket extends DataPacket{
 			$packet->encode();
 		}
 
-		$this->payload .= Binary::writeUnsignedVarInt(strlen($packet->buffer)) . $packet->buffer;
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+		    $this->payload .= Binary::writeInt(strlen($packet->buffer)) . $packet->buffer;
+		}else{
+	    	$this->payload .= Binary::writeUnsignedVarInt(strlen($packet->buffer)) . $packet->buffer;
+		}
 	}
 
 	/**
 	 * @return Generator
 	 */
 	public function getPackets(){
-		$stream = new NetworkBinaryStream($this->payload);
-		$count = 0;
-		while(!$stream->feof()){
-			if($count++ > 1024){
-				throw new UnexpectedValueException("Too many packets in a single batch");
-			}
-			yield $stream->getString();
-		}
+	    $stream = new NetworkBinaryStream($this->payload);
+	    $count = 0;
+	    while(!$stream->feof()){
+		    if($count++ > 1024){
+			    throw new UnexpectedValueException("Too many packets in a single batch");
+		    }
+		    yield ($this->getProtocol() < ProtocolInfo::PROTOCOL_90 ? $stream->get($stream->getInt()) : $stream->getString());
+	    }
 	}
 
 	public function getCompressionLevel() : int{

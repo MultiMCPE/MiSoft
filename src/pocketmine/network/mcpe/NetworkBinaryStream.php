@@ -44,6 +44,7 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
+use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\CommandOriginData;
 use pocketmine\network\mcpe\protocol\types\entity\AttributeModifier;
@@ -90,7 +91,16 @@ class NetworkBinaryStream extends BinaryStream{
 	}
 
 	public function putString(string $v) : void{
-		$this->putUnsignedVarInt(strlen($v));
+	    $this->putUnsignedVarInt(strlen($v));
+		($this->buffer .= $v);
+	}
+
+	public function getShortString() : string{
+		return $this->get($this->getShort());
+	}
+
+	public function putShortString(string $v) : void{
+	    $this->putShort(strlen($v));
 		($this->buffer .= $v);
 	}
 
@@ -279,17 +289,23 @@ class NetworkBinaryStream extends BinaryStream{
 	        return $this->getItemStack($withStackId);
 	    }
 
-		$id = $this->getVarInt();
+		$id = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getShort();
 		if($id === 0){
 			return ItemFactory::get(0, 0, 0);
 		}
 
-		$auxValue = $this->getVarInt();
-		$data = $auxValue >> 8;
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110 && $this->getProtocol() < ProtocolInfo::PROTOCOL_130 && $data === 0x7fff){
-		    $data = -1;
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$auxValue = $this->getVarInt();
+	    	$data = $auxValue >> 8;
+	    	$cnt = $auxValue & 0xff;
+
+	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110 && $this->getProtocol() < ProtocolInfo::PROTOCOL_130 && $data === 0x7fff){
+		        $data = -1;
+	        }
+		}else{
+		    $cnt = $this->getByte();
+		    $data = $this->getShort();
 		}
-		$cnt = $auxValue & 0xff;
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
             $palette = ItemPalette::getPalette($this->getProtocol());
@@ -391,7 +407,11 @@ class NetworkBinaryStream extends BinaryStream{
 	    }
 
 		if($item->getId() === 0){
-			$this->putVarInt(0);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putVarInt(0);
+		    }else{
+		        $this->putShort(0);
+		    }
 
 			return;
 		}
@@ -458,13 +478,19 @@ class NetworkBinaryStream extends BinaryStream{
 			}
 		}
 
-		$this->putVarInt($id);
-		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			$auxValue = ($damage << 8) | $item->getCount();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($id);
+	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
+		    	$auxValue = ($damage << 8) | $item->getCount();
+	    	}else{
+	    		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+	    	}
+	    	$this->putVarInt($auxValue);
 		}else{
-			$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+		    $this->putShort($id);
+		    $this->putByte($item->getCount());
+		    $this->putShort($damage);
 		}
-		$this->putVarInt($auxValue);
 
 		if($nbt !== null){
 		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_330){
@@ -779,60 +805,96 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return array
 	 */
 	public function getEntityMetadata(bool $types = true) : array{
-		$count = $this->getUnsignedVarInt();
-		if($count > 128){
-			throw new UnexpectedValueException("Too many actor metadata: $count");
-		}
-		$data = [];
-		for($i = 0; $i < $count; ++$i){
-			$key = $this->getUnsignedVarInt();
-			$type = $this->getUnsignedVarInt();
-			$value = null;
-			switch($type){
-				case Entity::DATA_TYPE_BYTE:
-					$value = (ord($this->get(1)));
-					break;
-				case Entity::DATA_TYPE_SHORT:
-					$value = $this->getSignedLShort();
-					break;
-				case Entity::DATA_TYPE_INT:
-					$value = $this->getVarInt();
-					break;
-				case Entity::DATA_TYPE_FLOAT:
-					$value = $this->getLFloat();
-					break;
-				case Entity::DATA_TYPE_STRING:
-					$value = $this->getString();
-					break;
-				case Entity::DATA_TYPE_SLOT:
-				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
-				        $value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
-				    }else{
-				        $value = $this->getSlot();
-				    }
-					break;
-				case Entity::DATA_TYPE_POS:
-					$value = new Vector3();
-					$this->getSignedBlockPosition($value->x, $value->y, $value->z);
-					break;
-				case Entity::DATA_TYPE_LONG:
-					$value = $this->getVarLong();
-					break;
-				case Entity::DATA_TYPE_VECTOR3F:
-					$value = $this->getVector3();
-					break;
-				default:
-					throw new UnexpectedValueException("Invalid data type " . $type);
-			}
-			if($types){
-				$data[$key] = [$type, $value];
-			}else{
-				$data[$key] = $value;
-			}
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$count = $this->getUnsignedVarInt();
+	    	if($count > 128){
+		    	throw new UnexpectedValueException("Too many actor metadata: $count");
+	    	}
+
+	    	$data = [];
+	    	for($i = 0; $i < $count; ++$i){
+		    	$key = $this->getUnsignedVarInt();
+		    	$type = $this->getUnsignedVarInt();
+			    $value = $this->getMetadataValue($type);
+
+		    	if($types){
+			    	$data[$key] = [$type, $value];
+		    	}else{
+			    	$data[$key] = $value;
+		    	}
+	    	}
+		}else{
+		    $data = [];
+		    $count = 0;
+	    	$b = $this->getByte();
+
+		    while($b !== 127 and !$this->feof()){
+		        if($count++ > 128){
+		            throw new UnexpectedValueException("Too many actor metadata: $count");
+		        }
+
+		    	$key = $b & 0x1F;
+		    	$type = $b >> 5;
+		    	$value = $this->getMetadataValue($type);
+
+		    	if($types === true){
+			    	$data[$key] = [$type, $value];
+		    	}else{
+			    	$data[$key] = $value;
+		    	}
+
+		    	$b = $this->getByte();
+		    }
 		}
 
 		return MetadataConvertor::rollbackMeta($data, $this->getProtocol());
 	}
+
+    /**
+     * @param int $type
+     * 
+     * @return mixed
+     */
+    public function getMetadataValue(int $type) : mixed{
+		switch($type){
+			case Entity::DATA_TYPE_BYTE:
+				$value = (ord($this->get(1)));
+				break;
+			case Entity::DATA_TYPE_SHORT:
+				$value = $this->getSignedLShort();
+				break;
+			case Entity::DATA_TYPE_INT:
+				$value = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getLInt();
+				break;
+			case Entity::DATA_TYPE_FLOAT:
+				$value = $this->getLFloat();
+				break;
+			case Entity::DATA_TYPE_STRING:
+				$value = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->get($this->getLShort());
+				break;
+			case Entity::DATA_TYPE_SLOT:
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
+				    $value = (new NetworkLittleEndianNBTStream())->read($this->buffer, false, $this->offset, 512);
+				}else{
+				    $value = $this->getSlot();
+				}
+				break;
+			case Entity::DATA_TYPE_POS:
+				$value = new Vector3();
+				$this->getSignedBlockPosition($value->x, $value->y, $value->z);
+				break;
+			case Entity::DATA_TYPE_LONG:
+				$value = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarLong() : $this->getLLong();
+				break;
+			case Entity::DATA_TYPE_VECTOR3F:
+				$value = $this->getVector3();
+				break;
+			default:
+				throw new UnexpectedValueException("Invalid data type " . $type);
+		}
+
+		return $value;
+    }
 
 	/**
 	 * Writes entity metadata to the packet buffer.
@@ -842,10 +904,16 @@ class NetworkBinaryStream extends BinaryStream{
 	public function putEntityMetadata(array $metadata) : void{
 	    $metadata = MetadataConvertor::updateMeta($metadata, $this->getProtocol());
 
-		$this->putUnsignedVarInt(count($metadata));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($metadata));
+		}
 		foreach($metadata as $key => $d){
-			$this->putUnsignedVarInt($key); //data key
-			$this->putUnsignedVarInt($d[0]); //data type
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putUnsignedVarInt($key); //data key
+		    	$this->putUnsignedVarInt($d[0]); //data type
+		    }else{
+		        $this->putByte(($d[0] << 5) | ($key & 0x1F));
+		    }
 			switch($d[0]){
 				case Entity::DATA_TYPE_BYTE:
                     $this->putByte($d[1]);
@@ -854,13 +922,22 @@ class NetworkBinaryStream extends BinaryStream{
                     $this->putLShort($d[1]);
 					break;
 				case Entity::DATA_TYPE_INT:
-					$this->putVarInt($d[1]);
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    	$this->putVarInt($d[1]);
+				    }else{
+				        $this->putLInt($d[1]);
+				    }
 					break;
 				case Entity::DATA_TYPE_FLOAT:
                     $this->putLFloat($d[1]);
 					break;
 				case Entity::DATA_TYPE_STRING:
-					$this->putString($d[1]);
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    	$this->putString($d[1]);
+				    }else{
+				        $this->putLShort(strlen($d[1]));
+				        $this->put($d[1]);
+				    }
 					break;
 				case Entity::DATA_TYPE_SLOT:
 				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_361){
@@ -878,7 +955,11 @@ class NetworkBinaryStream extends BinaryStream{
 					}
 					break;
 				case Entity::DATA_TYPE_LONG:
-					$this->putVarLong($d[1]);
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    	$this->putVarLong($d[1]);
+				    }else{
+				        $this->putLLong($d[1]);
+				    }
 					break;
 				case Entity::DATA_TYPE_VECTOR3F:
 					$this->putVector3Nullable($d[1]);
@@ -886,6 +967,9 @@ class NetworkBinaryStream extends BinaryStream{
 				default:
 					throw new UnexpectedValueException("Invalid data type " . $d[0]);
 			}
+		}
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+		    $this->put("\x7f"); // WHAT THE SHITTT
 		}
 	}
 
@@ -897,17 +981,25 @@ class NetworkBinaryStream extends BinaryStream{
 	 */
 	public function getAttributeList() : array{
 		$list = [];
-		$count = $this->getUnsignedVarInt();
+		$count = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getShort();
 
 		for($i = 0; $i < $count; ++$i){
-			$min = $this->getLFloat();
-			$max = $this->getLFloat();
-			$current = $this->getLFloat();
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->getLFloat(); //default min value
-                $this->getLFloat(); //default max value
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$min = $this->getLFloat();
+		    	$max = $this->getLFloat();
+		    	$current = $this->getLFloat();
+		    }else{
+		    	$min = $this->getFloat();
+		    	$max = $this->getFloat();
+		    	$current = $this->getFloat();
+		    }
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			    	$this->getLFloat(); //default min value
+                    $this->getLFloat(); //default max value
+		    	}
+		    	$default = $this->getLFloat();
 			}
-			$default = $this->getLFloat();
 			$name = $this->getString();
 			$modifiers = [];
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
@@ -921,7 +1013,7 @@ class NetworkBinaryStream extends BinaryStream{
 				$attr->setMinValue($min);
 				$attr->setMaxValue($max);
 				$attr->setValue($current);
-				$attr->setDefaultValue($default);
+				$attr->setDefaultValue($default ?? $current);
 				$attr->setModifiers($modifiers);
 
 				$list[] = $attr;
@@ -939,17 +1031,34 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param Attribute ...$attributes
 	 */
 	public function putAttributeList(Attribute ...$attributes) : void{
-		$this->putUnsignedVarInt(count($attributes));
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($attributes));
+	    }else{
+	        $this->putShort(count($attributes));
+	    }
 		foreach($attributes as $attribute){
-            $this->putLFloat($attribute->getMinValue());
-            $this->putLFloat($attribute->getMaxValue());
-            $this->putLFloat($attribute->getValue());
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->putLFloat($attribute->getMinValue()); //default min value
-                $this->putLFloat($attribute->getMaxValue()); //default max value
-			}
-            $this->putLFloat($attribute->getDefaultValue());
-			$this->putString($attribute->getName());
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                $this->putLFloat($attribute->getMinValue());
+                $this->putLFloat($attribute->getMaxValue());
+                $this->putLFloat($attribute->getValue());
+		    }else{
+                $this->putFloat($attribute->getMinValue());
+                $this->putFloat($attribute->getMaxValue());
+                $this->putFloat($attribute->getValue());
+		    }
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
+			    	$this->putLFloat($attribute->getMinValue()); //default min value
+                    $this->putLFloat($attribute->getMaxValue()); //default max value
+		    	}
+                $this->putLFloat($attribute->getDefaultValue());
+            }
+            $name = MultiversionEnums::getAttributeName($this->getProtocol(), $attribute->getId()) ?? $attribute->getName();
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putString($name);
+            }else{
+                $this->putShortString($name);
+            }
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_544){
 		    	$this->putUnsignedVarInt(count($attribute->getModifiers()));
 		    	foreach($attribute->getModifiers() as $modifier){
@@ -964,7 +1073,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return int
 	 */
 	final public function getEntityUniqueId() : int{
-		return $this->getVarLong();
+		return $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarLong() : $this->getLong();
 	}
 
 	/**
@@ -973,7 +1082,11 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $eid
 	 */
 	public function putEntityUniqueId(int $eid) : void{
-		$this->putVarLong($eid);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarLong($eid);
+	    }else{
+	        $this->putLong($eid);
+	    }
 	}
 
 	/**
@@ -981,7 +1094,7 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return int
 	 */
 	final public function getEntityRuntimeId() : int{
-		return $this->getUnsignedVarLong();
+		return $this->getProtocol() < ProtocolInfo::PROTOCOL_90 ? $this->getLong() : $this->getUnsignedVarLong();
 	}
 
 	/**
@@ -990,7 +1103,11 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $eid
 	 */
 	public function putEntityRuntimeId(int $eid) : void{
-		$this->putUnsignedVarLong($eid);
+	    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+	        $this->putLong($eid);
+	    }else{
+	    	$this->putUnsignedVarLong($eid);
+	    }
 	}
 
 	/**
@@ -1001,9 +1118,19 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int &$z
 	 */
 	public function getBlockPosition(&$x, &$y, &$z) : void{
-		$x = $this->getVarInt();
-		$y = $this->getUnsignedVarInt();
-		$z = $this->getVarInt();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$x = $this->getVarInt();
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+		        $y = $this->getUnsignedVarInt();
+	    	}else{
+		        $y = $this->getByte();
+		    }
+	    	$z = $this->getVarInt();
+	    }else{
+	        $x = $this->getInt();
+	        $y = $this->getInt();
+	        $z = $this->getInt();
+	    }
 	}
 
 	/**
@@ -1014,9 +1141,19 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $z
 	 */
 	public function putBlockPosition(int $x, int $y, int $z) : void{
-		$this->putVarInt($x);
-		$this->putUnsignedVarInt($y);
-		$this->putVarInt($z);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($x);
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+	        	$this->putUnsignedVarInt($y);
+	    	}else{
+		        $this->putByte($y);
+	    	}
+	    	$this->putVarInt($z);
+	    }else{
+	        $this->putInt($x);
+	        $this->putInt($y);
+	        $this->putInt($z);
+	    }
 	}
 
 	/**
@@ -1027,9 +1164,15 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int &$z
 	 */
 	public function getSignedBlockPosition(&$x, &$y, &$z) : void{
-		$x = $this->getVarInt();
-		$y = $this->getVarInt();
-		$z = $this->getVarInt();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$x = $this->getVarInt();
+	    	$y = $this->getVarInt();
+	    	$z = $this->getVarInt();
+	    }else{
+	    	$x = $this->getLInt();
+	    	$y = $this->getLInt();
+	    	$z = $this->getLInt();
+	    }
 	}
 
 	/**
@@ -1040,9 +1183,15 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param int $z
 	 */
 	public function putSignedBlockPosition(int $x, int $y, int $z) : void{
-		$this->putVarInt($x);
-		$this->putVarInt($y);
-		$this->putVarInt($z);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($x);
+	    	$this->putVarInt($y);
+	    	$this->putVarInt($z);
+	    }else{
+	    	$this->putLInt($x);
+	    	$this->putLInt($y);
+	    	$this->putLInt($z);
+	    }
 	}
 
 	/**
@@ -1051,11 +1200,19 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @return Vector3
 	 */
 	public function getVector3() : Vector3{
-		return new Vector3(
-            $this->getLFloat(),
-            $this->getLFloat(),
-            $this->getLFloat()
-		);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	return new Vector3(
+                $this->getLFloat(),
+                $this->getLFloat(),
+                $this->getLFloat()
+		    );
+	    }else{
+	    	return new Vector3(
+                $this->getFloat(),
+                $this->getFloat(),
+                $this->getFloat()
+		    );
+	    }
 	}
 
 	/**
@@ -1072,9 +1229,15 @@ class NetworkBinaryStream extends BinaryStream{
 		if($vector){
 			$this->putVector3($vector);
 		}else{
-            $this->putLFloat(0.0);
-            $this->putLFloat(0.0);
-            $this->putLFloat(0.0);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                $this->putLFloat(0.0);
+                $this->putLFloat(0.0);
+                $this->putLFloat(0.0);
+		    }else{
+                $this->putFloat(0.0);
+                $this->putFloat(0.0);
+                $this->putFloat(0.0);
+		    }
 		}
 	}
 
@@ -1084,9 +1247,15 @@ class NetworkBinaryStream extends BinaryStream{
 	 * @param Vector3 $vector
 	 */
 	public function putVector3(Vector3 $vector) : void{
-        $this->putLFloat($vector->x);
-        $this->putLFloat($vector->y);
-        $this->putLFloat($vector->z);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putLFloat($vector->x);
+            $this->putLFloat($vector->y);
+            $this->putLFloat($vector->z);
+	    }else{
+            $this->putFloat($vector->x);
+            $this->putFloat($vector->y);
+            $this->putFloat($vector->z);
+	    }
 	}
 
     /**

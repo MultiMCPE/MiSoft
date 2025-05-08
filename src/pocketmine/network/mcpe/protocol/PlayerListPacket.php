@@ -68,14 +68,18 @@ class PlayerListPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->type = $this->getByte();
-		$count = $this->getUnsignedVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$count = $this->getUnsignedVarInt();
+		}else{
+		    $count = $this->getInt();
+		}
 		for($i = 0; $i < $count; ++$i){
 			$entry = new PlayerListEntry();
 
 			if($this->type === self::TYPE_ADD){
 				$entry->uuid = $this->getUUID();
 				$entry->entityUniqueId = $this->getEntityUniqueId();
-				$entry->username = $this->getString();
+				$entry->username = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		            	$entry->thirdPartyName = $this->getString();
@@ -83,8 +87,13 @@ class PlayerListPacket extends DataPacket{
 			    	}
 
                     if($this->getProtocol() < ProtocolInfo::PROTOCOL_370){
-			        	$skinId = $this->getString();
-			        	$skinData = $this->getString();
+                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			            	$skinId = $this->getString();
+			            	$skinData = $this->getString();
+                        }else{
+			            	$skinId = $this->getShortString();
+			            	$skinData = $this->getShortString();
+                        }
 			        	$capeData = "";
 			        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_131){
 			            	$capeData = $this->getString();
@@ -143,12 +152,20 @@ class PlayerListPacket extends DataPacket{
 
 	protected function encodePayload(){
         $this->putByte($this->type);
-		$this->putUnsignedVarInt(count($this->entries));
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->entries));
+        }else{
+            $this->putInt(count($this->entries));
+        }
 		foreach($this->entries as $entry){
 			if($this->type === self::TYPE_ADD){
 				$this->putUUID($entry->uuid);
 				$this->putEntityUniqueId($entry->entityUniqueId);
-				$this->putString($entry->username);
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putString($entry->username);
+				}else{
+				    $this->putShortString($entry->username);
+				}
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 			    	if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		            	$this->putString($entry->thirdPartyName);
@@ -212,9 +229,16 @@ class PlayerListPacket extends DataPacket{
 			            	}
 			        	}
 			    	}
-				} else {
-				    $this->putString(self::getPESkinId($entry->skin));
-				    $this->putString($entry->skin->getClientFriendlySkinData($this->getProtocol()));
+				}else{
+				    $skinId = self::getPESkinId($entry->skin);
+				    $skinData = $entry->skin->getClientFriendlySkinData($this->getProtocol());
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				        $this->putString($skinId);
+				        $this->putString($skinData);
+				    }else{
+				        $this->putShortString($skinId);
+				        $this->putShortString($skinData);
+				    }
 				}
 			}else{
 				$this->putUUID($entry->uuid);

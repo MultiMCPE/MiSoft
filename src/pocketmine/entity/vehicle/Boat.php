@@ -32,6 +32,7 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\SetActorLinkPacket;
 use pocketmine\network\mcpe\protocol\types\EntityLink;
 use pocketmine\Player;
@@ -276,7 +277,9 @@ class Boat extends Vehicle{
 			}
 			$pk = new SetActorLinkPacket();
 			$pk->link = new EntityLink($this->getId(), $player->getId(), $type, false, true);
-			$viewer->sendDataPacket($pk);
+			if($player->getProtocol() >= ProtocolInfo::PROTOCOL_90){ // 0.15 crash fix
+		    	$viewer->sendDataPacket($pk);
+			}
 		}
 	}
 }

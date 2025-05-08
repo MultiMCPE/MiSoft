@@ -25,17 +25,24 @@ namespace pocketmine\tile;
 
 use pocketmine\level\Level;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\StringTag;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 
 abstract class Spawnable extends Tile{
 	/** @var string|null */
 	private $spawnCompoundCache = null;
+	/** @var string|null */
+	private $oldSpawnCompoundCache = null;
+
 	/** @var NetworkLittleEndianNBTStream|null */
 	private static $nbtWriter = null;
+	/** @var LittleEndianNBTStream|null */
+	private static $oldNbtWriter = null;
 
 	public function createSpawnPacket() : BlockActorDataPacket{
 		$pk = new BlockActorDataPacket();
@@ -52,7 +59,12 @@ abstract class Spawnable extends Tile{
 			return false;
 		}
 
-		$player->dataPacket($this->createSpawnPacket());
+		$pk = new BlockActorDataPacket();
+		$pk->x = $this->x;
+		$pk->y = $this->y;
+		$pk->z = $this->z;
+		$pk->namedtag = $this->getProtocolSerializedSpawnCompound($player->getProtocol());
+		$player->dataPacket($pk);
 
 		return true;
 	}
@@ -67,7 +79,10 @@ abstract class Spawnable extends Tile{
 			return;
 		}
 
-		$this->level->broadcastPacketToViewers($this, $this->createSpawnPacket());
+		$viewers = $this->level->getViewersForPosition($this);
+		foreach($viewers as $viewer){
+			$this->spawnTo($viewer);
+		}
 	}
 
 	/**
@@ -76,6 +91,7 @@ abstract class Spawnable extends Tile{
 	 */
 	protected function onChanged() : void{
 		$this->spawnCompoundCache = null;
+		$this->oldSpawnCompoundCache = null;
 		$this->spawnToAll();
 
 		$this->level->clearChunkCache($this->getFloorX() >> 4, $this->getFloorZ() >> 4);
@@ -117,6 +133,14 @@ abstract class Spawnable extends Tile{
 	 * @param int $playerProtocol
 	 */
 	public function getProtocolSerializedSpawnCompound(int $playerProtocol) : string{
+	    if($playerProtocol < ProtocolInfo::PROTOCOL_90){
+			if(self::$oldNbtWriter === null){
+				self::$oldNbtWriter = new LittleEndianNBTStream();
+			}
+
+			return $this->oldSpawnCompoundCache = self::$oldNbtWriter->write($this->getSpawnCompound());
+	    }
+
 		return $this->getSerializedSpawnCompound();
 	}
 

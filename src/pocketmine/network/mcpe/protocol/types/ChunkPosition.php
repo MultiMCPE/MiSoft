@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types;
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 final class ChunkPosition{
 
@@ -28,14 +29,24 @@ final class ChunkPosition{
 	public function getZ() : int{ return $this->z; }
 
 	public static function read(NetworkBinaryStream $in) : self{
-		$x = $in->getVarInt();
-		$z = $in->getVarInt();
+	    if($in->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$x = $in->getVarInt();
+	    	$z = $in->getVarInt();
+	    }else{
+	        $x = $in->getInt();
+	        $z = $in->getInt();
+	    }
 
 		return new self($x, $z);
 	}
 
 	public function write(NetworkBinaryStream $out) : void{
-		$out->putVarInt($this->x);
-		$out->putVarInt($this->z);
+	    if($out->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$out->putVarInt($this->x);
+	    	$out->putVarInt($this->z);
+	    }else{
+	    	$out->putInt($this->x);
+	    	$out->putInt($this->z);
+	    }
 	}
 }

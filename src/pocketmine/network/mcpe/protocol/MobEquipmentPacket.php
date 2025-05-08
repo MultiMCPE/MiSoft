@@ -48,7 +48,9 @@ class MobEquipmentPacket extends DataPacket{
 		$this->item = $this->getSlot();
 		$this->inventorySlot = $this->getByte();
 		$this->hotbarSlot = $this->getByte();
-		$this->windowId = $this->getByte();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->windowId = $this->getByte();
+		}
 	}
 
 	protected function encodePayload(){
@@ -56,7 +58,9 @@ class MobEquipmentPacket extends DataPacket{
 		$this->putSlot($this->item);
         $this->putByte($this->inventorySlot);
         $this->putByte($this->hotbarSlot);
-        $this->putByte($this->windowId);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putByte($this->windowId);
+        }
 	}
 
 	public function mustBeDecoded() : bool{

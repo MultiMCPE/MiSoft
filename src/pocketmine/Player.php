@@ -118,6 +118,7 @@ use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\DoubleTag;
@@ -936,6 +937,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->raknetProtocol >= 11){ // MCBE_RAKNET_PROTOCOL_VERSION_WITHOUT_ZLIB_COMPRESSION
 		    $this->enableCompression = false;
 		    $this->protocol = ProtocolInfo::PROTOCOL_567;
+		}elseif($this->raknetProtocol >= 8){ // MCPE_RAKNET_PROTOCOL_VERSION
+		    $this->protocol = ProtocolInfo::PROTOCOL_90;
 		}
 		$this->loaderId = Level::generateChunkLoaderId($this);
 		$this->chunksPerTick = (int) $this->server->getProperty("chunk-sending.per-tick", 4);
@@ -1213,7 +1216,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			if($targetLevel->getDimensionId() !== $oldLevel->getDimensionId()){
 				$pk = new ChangeDimensionPacket();
-				$pk->dimension = $targetLevel->getDimensionId();
+				$pk->dimension = $this->getClientFriendlyDimension($targetLevel->getDimensionId());
 				$pk->position = $this->asVector3();
 				$this->dataPacket($pk);
 
@@ -1323,6 +1326,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->inventory->sendContents($this);
 		$this->armorInventory->sendContents($this);
 		$this->inventory->sendHeldItem($this);
+
+		// for 0.15
+		$this->sendAttributes(true);
+		$this->level->sendTime($this);
+		$this->level->sendDifficulty($this);
 
 		if($this->hasPermission(Server::BROADCAST_CHANNEL_USERS)){
 			PermissionManager::getInstance()->subscribeToPermission(Server::BROADCAST_CHANNEL_USERS, $this);
@@ -1689,6 +1697,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	/**
+	 * @param int $dimension
+	 *
+	 * @return int
+	 */
+	public function getClientFriendlyDimension(int $dimension) : int{
+		return ($this->getProtocol() >= ProtocolInfo::PROTOCOL_100 ? $dimension : ($dimension & 0x1));
+	}
+
+	/**
 	 * Sets the gamemode, and if needed, kicks the Player.
 	 *
 	 * @param int  $gm
@@ -1809,26 +1826,43 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         }else{
 	    	$pk = new AdventureSettingsPacket();
 
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-		    	$pk->setFlag(AdventureSettingsPacket::BUILD, !$this->isSpectator());
-		    	$pk->setFlag(AdventureSettingsPacket::MINE, !$this->isSpectator());
-		    	$pk->setFlag(AdventureSettingsPacket::DOORS_AND_SWITCHES, !$this->isSpectator());
-				$pk->setFlag(AdventureSettingsPacket::OPEN_CONTAINERS, !$this->isSpectator());
-				$pk->setFlag(AdventureSettingsPacket::ATTACK_PLAYERS, !$this->isSpectator());
-				$pk->setFlag(AdventureSettingsPacket::ATTACK_MOBS, !$this->isSpectator());
-				$pk->setFlag(AdventureSettingsPacket::OPERATOR, ($this->isOp() && !$this->isSpectator()));
-				$pk->setFlag(AdventureSettingsPacket::TELEPORT, $this->hasPermission("pocketmine.command.teleport"));
-			}
-	    	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
-	    	$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
-	    	$pk->setFlag(AdventureSettingsPacket::AUTO_JUMP, $this->autoJump);
-	    	$pk->setFlag(AdventureSettingsPacket::ALLOW_FLIGHT, $this->allowFlight);
-	    	$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
-	    	$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        	$pk->setFlag(AdventureSettingsPacket::BUILD, !$this->isSpectator());
+		        	$pk->setFlag(AdventureSettingsPacket::MINE, !$this->isSpectator());
+		        	$pk->setFlag(AdventureSettingsPacket::DOORS_AND_SWITCHES, !$this->isSpectator());
+			    	$pk->setFlag(AdventureSettingsPacket::OPEN_CONTAINERS, !$this->isSpectator());
+			    	$pk->setFlag(AdventureSettingsPacket::ATTACK_PLAYERS, !$this->isSpectator());
+			    	$pk->setFlag(AdventureSettingsPacket::ATTACK_MOBS, !$this->isSpectator());
+			    	$pk->setFlag(AdventureSettingsPacket::OPERATOR, ($this->isOp() && !$this->isSpectator()));
+			    	$pk->setFlag(AdventureSettingsPacket::TELEPORT, $this->hasPermission("pocketmine.command.teleport"));
+		    	}
+	        	$pk->setFlag(AdventureSettingsPacket::AUTO_JUMP, $this->autoJump);
+	        	$pk->setFlag(AdventureSettingsPacket::ALLOW_FLIGHT, $this->allowFlight);
+	        	$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
+	        	$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
+	        	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
+	        	$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
 
-	    	$pk->commandPermission = (($this->isOp() && !$this->isSpectator()) ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
-	    	$pk->playerPermission = (($this->isOp() && !$this->isSpectator()) ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
+	        	$pk->commandPermission = (($this->isOp() && !$this->isSpectator()) ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
+	        	$pk->playerPermission = (($this->isOp() && !$this->isSpectator()) ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
 	    	$pk->entityUniqueId = $this->getId();
+			}else{
+			    if($this->autoJump){
+			        $pk->flags |= AdventureSettingsPacket::PRE_V_0_15_0_AUTO_JUMP;
+			    }
+			    if($this->allowFlight){
+			        $pk->flags |= AdventureSettingsPacket::PRE_V_0_15_0_ALLOW_FLIGHT;
+			    }
+			    if($this->isSpectator()){
+	            	$pk->flags |= AdventureSettingsPacket::PRE_V_0_15_0_NO_CLIP;
+	            	$pk->flags |= AdventureSettingsPacket::WORLD_IMMUTABLE;
+	            	$pk->flags |= AdventureSettingsPacket::NO_PVP;
+			    }
+
+			    $pk->commandPermission = AdventureSettingsPacket::PERMISSION_HOST; // wtf, idk how to send this correctly
+			    $pk->playerPermission = AdventureSettingsPacket::PERMISSION_HOST; // wtf, idk how to send this correctly
+			}
 
 	    	$this->dataPacket($pk);
         }
@@ -1977,7 +2011,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$revert = false;
 
-		if($distanceSquared > 100){
+		if($distanceSquared > 1000){
 			//TODO: this is probably too big if we process every movement
 			/* !!! BEWARE YE WHO ENTER HERE !!!
 			 *
@@ -2390,9 +2424,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	    	$packet->setProtocol($this->protocol);
 
 	    	$pk = new BatchPacket();
+	    	$pk->setProtocol($this->protocol);
 	    	$pk->addPacket($packet);
 	    	$pk->compressionEnabled = false;
-	    	$pk->setProtocol($this->protocol);
 	    	$this->sendDataPacket($pk, false, true);
 
 			//This pocketmine disconnect message will only be seen by the console (PlayStatusPacket causes the messages to be shown for the client)
@@ -2412,9 +2446,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$packet->setProtocol($this->protocol);
 
 		$pk = new BatchPacket();
+		$pk->setProtocol($this->protocol);
 		$pk->addPacket($packet);
 		$pk->compressionEnabled = false;
-		$pk->setProtocol($this->protocol);
 		$this->sendDataPacket($pk);
 
         $this->enableCompression = true;
@@ -2777,13 +2811,18 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->loggedIn = true;
 		$this->server->onPlayerLogin($this);
 
-		$pk = new ResourcePacksInfoPacket();
-		$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
-		$pk->resourcePackEntries = $manager->getResourceStack();
-		$pk->mustAccept = $manager->resourcePacksRequired();
-		$pk->worldTemplateId = UUID::fromBinary(str_repeat("\x00", 16), 0);
-		$pk->worldTemplateVersion = "";
-		$this->dataPacket($pk);
+		// 0.15.0 NOT HAVE RESOURCE PACKS, LOL
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$pk = new ResourcePacksInfoPacket();
+	    	$manager = $this->server->getResourcePackManager($this->getOriginalProtocol());
+	    	$pk->resourcePackEntries = $manager->getResourceStack();
+	    	$pk->mustAccept = $manager->resourcePacksRequired();
+	    	$pk->worldTemplateId = UUID::fromBinary(str_repeat("\x00", 16), 0);
+	    	$pk->worldTemplateVersion = "";
+	    	$this->dataPacket($pk);
+		}else{
+		    $this->completeLoginSequence();
+		}
 	}
 
 	public function handleResourcePackClientResponse(ResourcePackClientResponsePacket $packet) : bool{
@@ -2884,7 +2923,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$pk->pitch = $this->pitch;
 		$pk->yaw = $this->yaw;
 		$pk->seed = -1;
-		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", $this->level->getDimensionId()); //TODO: implement this properly
+		$pk->spawnSettings = new SpawnSettings(SpawnSettings::BIOME_TYPE_DEFAULT, "", $this->getClientFriendlyDimension($this->level->getDimensionId())); //TODO: implement this properly
 		$pk->worldGamemode = Player::gamemodeToNetworkId($this->server->getGamemode(), $this->getProtocol());
 		$pk->difficulty = $this->level->getDifficulty();
 		$pk->spawnX = $spawnPosition->getFloorX();
@@ -2943,6 +2982,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			TextFormat::AQUA . $this->deviceModel . TextFormat::WHITE,
 			$this->deviceOS,
 			$this->getProtocol(),
+			$this->getOriginalProtocol(),
 			TextFormat::AQUA . $this->getClientId() . TextFormat::WHITE
 		]));
 
@@ -3230,6 +3270,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$rawPos = $packet->position;
 		foreach([$rawPos->x, $rawPos->y, $rawPos->z, $packet->yaw, $packet->headYaw, $packet->pitch] as $float){
 			if(is_infinite($float) || is_nan($float)){
+			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+			        return true; // just ignore this movement
+			    }
 				$this->server->getLogger()->debug("Invalid movement from " . $this->getName() . ", contains NAN/INF components");
 				return false;
 			}
@@ -3762,7 +3805,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			$this->level->sendBlocks([$this], [$target, $block], UpdateBlockPacket::FLAG_ALL_PRIORITY);
 			return true;
-		}elseif($packet->face === -1){
+		}elseif($packet->face === -1 or ($this->getProtocol() < ProtocolInfo::PROTOCOL_90 && $packet->face === 0xff)){
 			$directionVector = $this->getDirectionVector();
 
 			if($this->isCreative()){
@@ -4598,7 +4641,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$t = $this->level->getTile($pos);
 		if($t instanceof Spawnable){
-			$nbt = new NetworkLittleEndianNBTStream();
+			$nbt = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? new NetworkLittleEndianNBTStream() : new LittleEndianNBTStream();
 			$_ = 0;
 			$compound = $nbt->read($packet->namedtag, false, $_, 512);
 
@@ -5132,9 +5175,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				    $pk->setProtocol($this->protocol);
 
 	            	$packet = new BatchPacket();
+	            	$packet->setProtocol($this->protocol);
 	            	$packet->addPacket($pk);
 	            	$packet->compressionEnabled = false;
-	            	$packet->setProtocol($this->protocol);
 
 	            	$this->directDataPacket($packet);
 				}else{

@@ -36,12 +36,6 @@ class ContainerSetContentPacket extends DataPacket{
 	public $slots = [];
 	public $hotbar = [];
 
-	public function clean(){
-		$this->slots = [];
-		$this->hotbar = [];
-		return parent::clean();
-	}
-
 	public function decodePayload(){
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->windowid = $this->getUnsignedVarInt();
@@ -49,14 +43,14 @@ class ContainerSetContentPacket extends DataPacket{
 		}else{
 			$this->windowid = $this->getByte();
 		}
-		$count = $this->getUnsignedVarInt();
+		$count = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getShort();
 		for($s = 0; $s < $count and !$this->feof(); ++$s){
 			$this->slots[$s] = $this->getSlot();
 		}
 
-		$hotbarCount = $this->getUnsignedVarInt(); //MCPE always sends this, even when it's not a player inventory
+		$hotbarCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getShort(); //MCPE always sends this, even when it's not a player inventory
 		for($s = 0; $s < $hotbarCount and !$this->feof(); ++$s){
-			$this->hotbar[$s] = $this->getVarInt();
+			$this->hotbar[$s] = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 		}
 	}
 
@@ -67,17 +61,33 @@ class ContainerSetContentPacket extends DataPacket{
 		}else{
             $this->putByte($this->windowid);
 		}
-		$this->putUnsignedVarInt(count($this->slots));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->slots));
+		}else{
+		    $this->putShort(count($this->slots));
+		}
 		foreach($this->slots as $slot){
 			$this->putSlot($slot);
 		}
 		if($this->windowid === ContainerIds::INVENTORY and count($this->hotbar) > 0){
-			$this->putUnsignedVarInt(count($this->hotbar));
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putUnsignedVarInt(count($this->hotbar));
+		    }else{
+		        $this->putShort(count($this->hotbar));
+		    }
 			foreach($this->hotbar as $slot){
-				$this->putVarInt($slot);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putVarInt($slot);
+			    }else{
+			        $this->putInt($slot);
+			    }
 			}
 		}else{
-			$this->putUnsignedVarInt(0);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putUnsignedVarInt(0);
+		    }else{
+		        $this->putShort(0);
+		    }
 		}
 	}
 

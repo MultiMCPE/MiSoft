@@ -51,10 +51,15 @@ class MobEffectPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->eventId = $this->getByte();
-		$this->effectId = $this->getVarInt();
-		$this->amplifier = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	   	    $this->effectId = $this->getVarInt();
+	    	$this->amplifier = $this->getVarInt();
+		}else{
+		    $this->effectId = $this->getByte();
+		    $this->amplifier = $this->getByte();
+		}
 		$this->particles = $this->getBool();
-		$this->duration = $this->getVarInt();
+		$this->duration = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
 				$this->tick = $this->getUnsignedVarLong();
@@ -67,10 +72,19 @@ class MobEffectPacket extends DataPacket{
 	protected function encodePayload(){
         $this->putEntityRuntimeId($this->entityRuntimeId);
         $this->putByte($this->eventId);
-		$this->putVarInt($this->effectId);
-		$this->putVarInt($this->amplifier);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->effectId);
+	    	$this->putVarInt($this->amplifier);
+        }else{
+            $this->putByte($this->effectId);
+            $this->putByte($this->amplifier);
+        }
         $this->putBool($this->particles);
-		$this->putVarInt($this->duration);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($this->duration);
+        }else{
+            $this->putInt($this->duration);
+        }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_662){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
 				$this->putUnsignedVarLong($this->tick);

@@ -40,8 +40,10 @@ class ChangeDimensionPacket extends DataPacket{
     public $loadingScreenId = null;
 
 	protected function decodePayload(){
-		$this->dimension = $this->getVarInt();
-		$this->position = $this->getVector3();
+		$this->dimension = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getByte();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->position = $this->getVector3();
+		}
 		$this->respawn = $this->getBool();
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
             $this->loadingScreenId = $this->readOptional(fn() => $this->getLInt());
@@ -49,8 +51,12 @@ class ChangeDimensionPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->dimension);
-		$this->putVector3($this->position);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->dimension);
+	    	$this->putVector3($this->position);
+	    }else{
+	        $this->putByte($this->dimension);
+	    }
         $this->putBool($this->respawn);
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
             $this->writeOptional($this->loadingScreenId, $this->putLInt(...));

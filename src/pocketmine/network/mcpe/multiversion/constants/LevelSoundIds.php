@@ -2565,7 +2565,7 @@ final class LevelSoundIds{
 			"SOUND_DEFAULT" => 106,
 			"SOUND_UNDEFINED" => 107
 		],
-		ProtocolInfo::PROTOCOL_100 => [
+		ProtocolInfo::PROTOCOL_81 => [
 			"SOUND_ITEM_USE_ON" => 0,
 			"SOUND_HIT" => 1,
 			"SOUND_STEP" => 2,

@@ -46,7 +46,9 @@ class AddItemActorPacket extends DataPacket{
 	public $isFromFishing = false;
 
 	protected function decodePayload(){
-		$this->entityUniqueId = $this->getEntityUniqueId();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+	    }
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->item = $this->getSlot();
 		$this->position = $this->getVector3();
@@ -60,7 +62,9 @@ class AddItemActorPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    }
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putSlot($this->item);
 		$this->putVector3($this->position);

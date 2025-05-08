@@ -28,16 +28,31 @@ use pocketmine\network\mcpe\NetworkSession;
 class RemoveBlockPacket extends DataPacket{
 	const NETWORK_ID = ProtocolInfo::REMOVE_BLOCK_PACKET;
 
+	public $entityRuntimeId;
 	public $x;
 	public $y;
 	public $z;
 
 	public function decodePayload(){
-		$this->getBlockPosition($this->x, $this->y, $this->z);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->getBlockPosition($this->x, $this->y, $this->z);
+	    }else{
+	        $this->entityRuntimeId = $this->getEntityRuntimeId();
+	        $this->x = $this->getInt();
+	        $this->z = $this->getInt();
+	        $this->y = $this->getByte();
+	    }
 	}
 
 	public function encodePayload(){
-		$this->putBlockPosition($this->x, $this->y, $this->z);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putBlockPosition($this->x, $this->y, $this->z);
+	    }else{
+	        $this->putEntityRuntimeId($this->entityRuntimeId);
+	        $this->putInt($this->x);
+	        $this->putInt($this->z);
+	        $this->putByte($this->y);
+	    }
 	}
 
 	public function mustBeDecoded() : bool{

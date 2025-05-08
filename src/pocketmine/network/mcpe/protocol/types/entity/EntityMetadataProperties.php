@@ -133,4 +133,7 @@ interface EntityMetadataProperties{
     public const DATA_OLD_SWELL = 198; //bype
     public const DATA_SWELL_DIRECTION = 199; //byte
     public const DATA_RIDER_SEAT_ROTATION_OFFSET = 200; //float
+    public const DATA_NO_AI = 201; //byte
+	public const DATA_SHOW_NAMETAG = 202; //byte
+    public const DATA_SILENT = 203; //byte
 }

@@ -48,12 +48,18 @@ class ExplodePacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->radius = (float) ($this->getVarInt() / 32);
 		}else{
-			$this->radius = $this->getLFloat();
+			$this->radius = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getLFloat() : $this->getFloat();
 		}
-		$count = $this->getUnsignedVarInt();
+		$count = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 		for($i = 0; $i < $count; ++$i){
 			$x = $y = $z = 0;
-			$this->getSignedBlockPosition($x, $y, $z);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->getSignedBlockPosition($x, $y, $z);
+			}else{
+			    $x = $this->getByte();
+			    $y = $this->getByte();
+			    $z = $this->getByte();
+			}
 			$this->records[$i] = new Vector3($x, $y, $z);
 		}
 	}
@@ -63,12 +69,26 @@ class ExplodePacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 	    	$this->putVarInt((int) ($this->radius * 32));
 		}else{
-			$this->putLFloat($this->radius);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putLFloat($this->radius);
+		    }else{
+		        $this->putFloat($this->radius);
+		    }
 		}
-		$this->putUnsignedVarInt(count($this->records));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->records));
+		}else{
+		    $this->putInt(count($this->records));
+		}
 		if(count($this->records) > 0){
 			foreach($this->records as $record){
-				$this->putSignedBlockPosition((int) $record->x, (int) $record->y, (int) $record->z);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putSignedBlockPosition((int) $record->x, (int) $record->y, (int) $record->z);
+			    }else{
+			        $this->putByte((int) $record->x);
+			    	$this->putByte((int) $record->y);
+			    	$this->putByte((int) $record->z);
+			    }
 			}
 		}
 	}

@@ -25,6 +25,8 @@ namespace pocketmine\network\mcpe\protocol;
 
 use InvalidArgumentException;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketMagicNumbers;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds81;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds91;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds100;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds102;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds105;
@@ -113,7 +115,9 @@ class PacketPool {
         ProtocolInfo::PROTOCOL_110 => PacketsIds110::class,
 		ProtocolInfo::PROTOCOL_105 => PacketsIds105::class,
 		ProtocolInfo::PROTOCOL_102 => PacketsIds102::class,
-		ProtocolInfo::PROTOCOL_100 => PacketsIds100::class
+		ProtocolInfo::PROTOCOL_100 => PacketsIds100::class,
+		ProtocolInfo::PROTOCOL_91 => PacketsIds91::class,
+		ProtocolInfo::PROTOCOL_81 => PacketsIds81::class
     ];
 
 	/** @var SplFixedArray<int>[] */

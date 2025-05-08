@@ -91,12 +91,12 @@ class AddPlayerPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->uuid = $this->getUUID();
-		$this->username = $this->getString();
+		$this->username = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 		if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 			$this->thirdPartyName = $this->getString();
 			$this->platform = $this->getVarInt();
 		}
-		if($this->getProtocol() < ProtocolInfo::PROTOCOL_534){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90 && $this->getProtocol() < ProtocolInfo::PROTOCOL_534){
 	    	$this->entityUniqueId = $this->getEntityUniqueId();
 		}
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
@@ -105,9 +105,15 @@ class AddPlayerPacket extends DataPacket{
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->pitch = $this->getLFloat();
-		$this->yaw = $this->getLFloat();
-		$this->headYaw = $this->getLFloat();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->pitch = $this->getLFloat();
+	    	$this->yaw = $this->getLFloat();
+	    	$this->headYaw = $this->getLFloat();
+		}else{
+	    	$this->yaw = $this->getFloat();
+	    	$this->headYaw = $this->getFloat();
+	    	$this->pitch = $this->getFloat();
+		}
 		$this->item = $this->getSlot();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 		    $this->gameMode = $this->getVarInt();
@@ -150,12 +156,16 @@ class AddPlayerPacket extends DataPacket{
 
 	protected function encodePayload(){
 		$this->putUUID($this->uuid);
-		$this->putString($this->username);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putString($this->username);
+		}else{
+		    $this->putShortString($this->username);
+		}
 		if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 			$this->putString($this->thirdPartyName);
 			$this->putVarInt($this->platform);
 		}
-		if($this->getProtocol() < ProtocolInfo::PROTOCOL_534){
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90 && $this->getProtocol() < ProtocolInfo::PROTOCOL_534){
 	    	$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		}
 		$this->putEntityRuntimeId($this->entityRuntimeId);
@@ -164,9 +174,15 @@ class AddPlayerPacket extends DataPacket{
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-        $this->putLFloat($this->pitch);
-        $this->putLFloat($this->yaw);
-        $this->putLFloat($this->headYaw ?? $this->yaw);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putLFloat($this->pitch);
+            $this->putLFloat($this->yaw);
+            $this->putLFloat($this->headYaw ?? $this->yaw);
+		}else{
+            $this->putFloat($this->yaw);
+            $this->putFloat($this->headYaw ?? $this->yaw);
+            $this->putFloat($this->pitch);
+		}
 		$this->putSlot($this->item);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_503){
 		    $this->putVarInt($this->gameMode);

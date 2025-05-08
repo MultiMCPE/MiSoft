@@ -84,7 +84,12 @@ class BatchPacket extends DataPacket{
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
             $this->put($payload);
 		}else{
-		    $this->putString($payload);
+		    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+		        $this->putInt(strlen($payload));
+		        $this->put($payload);
+		    }else{
+		        $this->putString($payload);
+		    }
 		}
 	}
 
@@ -99,7 +104,11 @@ class BatchPacket extends DataPacket{
 			$packet->encode();
 		}
 
-		$this->payload .= Binary::writeUnsignedVarInt(strlen($packet->buffer)) . $packet->buffer;
+		if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+		    $this->payload .= Binary::writeInt(strlen($packet->buffer)) . $packet->buffer;
+		}else{
+	    	$this->payload .= Binary::writeUnsignedVarInt(strlen($packet->buffer)) . $packet->buffer;
+		}
 	}
 
 	/**
@@ -130,17 +139,21 @@ class BatchPacket extends DataPacket{
 
 	public function handle(NetworkSession $session) : bool{
 	    if($session->isCompressionEnabled()){
-	        try{
-				if($this->getProtocol() < ProtocolInfo::PROTOCOL_649){
-					$this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
-				}else{
-			    	if((ord($this->payload[0])) === 0x0){
-	                    $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 2); //Max 2MB
-			    	}elseif($this->payload[0] === "\xff"){
-					    $this->payload = substr($this->payload, 1);
-					}
-				}
-	        }catch(ErrorException $e){ //zlib decode error
+	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	            try{
+			    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_649){
+				    	$this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
+			    	}else{
+			        	if((ord($this->payload[0])) === 0x0){
+	                        $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 2); //Max 2MB
+			        	}elseif($this->payload[0] === "\xff"){
+					        $this->payload = substr($this->payload, 1);
+				    	}
+			    	}
+	            }catch(ErrorException $e){ //zlib decode error
+	                $this->payload = Binary::writeUnsignedVarInt(strlen($this->payload)) . $this->payload; // for <= 1.0
+	            }
+	        }else{
 	            $this->payload = Binary::writeUnsignedVarInt(strlen($this->payload)) . $this->payload; // for <= 1.0
 	        }
 	    }

@@ -33,11 +33,15 @@ class SetPlayerGameTypePacket extends DataPacket{
 	public $gamemode;
 
 	protected function decodePayload(){
-		$this->gamemode = $this->getVarInt();
+		$this->gamemode = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->gamemode);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        $this->putVarInt($this->gamemode);
+	    }else{
+		    $this->putInt($this->gamemode);
+	    }
 	}
 
 	public function mustBeDecoded() : bool{

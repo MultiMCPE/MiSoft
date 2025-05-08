@@ -58,6 +58,12 @@ final class MetadataConvertor{
 
         if($flags !== null){
             $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
+            if($playerProtocol < ProtocolInfo::PROTOCOL_90){
+                $metadata[EntityMetadataProperties::DATA_NO_AI] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_IMMOBILE)) > 0 ? 1 : 0];
+                $metadata[EntityMetadataProperties::DATA_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
+                $metadata[EntityMetadataProperties::DATA_SILENT] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_SILENT)) > 0 ? 1 : 0];
+                $metadata[EntityMetadataProperties::DATA_FLAGS][0] = Entity::DATA_TYPE_BYTE;
+            }
         }
 
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol))($flags, $flags2);
@@ -95,6 +101,12 @@ final class MetadataConvertor{
         if(isset($metadata[EntityMetadataProperties::DATA_FLAGS2])){
             $flags2 = $metadata[EntityMetadataProperties::DATA_FLAGS2][1];
             unset($metadata[EntityMetadataProperties::DATA_FLAGS2][1]);
+        }
+
+        if($flags !== null){
+            if($playerProtocol < ProtocolInfo::PROTOCOL_90){
+                $metadata[EntityMetadataProperties::DATA_FLAGS][0] = Entity::DATA_TYPE_LONG;
+            }
         }
 
         (ActorMetadataConvertor::getMetadataFlags($playerProtocol, true))($flags, $flags2);

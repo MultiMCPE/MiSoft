@@ -65,9 +65,15 @@ class MoveActorAbsolutePacket extends DataPacket{
 		}else{
 	    	$this->entityRuntimeId = $this->getEntityRuntimeId();
 	    	$this->position = $this->getVector3();
-	    	$this->pitch = $this->getByteRotation();
-	    	$this->headYaw = $this->getByteRotation();
-	    	$this->yaw = $this->getByteRotation();
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        	$this->pitch = $this->getByteRotation();
+	        	$this->headYaw = $this->getByteRotation();
+	        	$this->yaw = $this->getByteRotation();
+	    	}else{
+	    	    $this->pitch = $this->getByteRotation();
+	        	$this->yaw = $this->getByteRotation();
+	        	$this->headYaw = $this->getByteRotation();
+	    	}
 
 	    	$this->flags = 0;
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
@@ -98,9 +104,15 @@ class MoveActorAbsolutePacket extends DataPacket{
 		}else{
 	    	$this->putEntityRuntimeId($this->entityRuntimeId);
 	    	$this->putVector3($this->position);
-	    	$this->putByteRotation($this->pitch);
-	    	$this->putByteRotation($this->headYaw);
-	    	$this->putByteRotation($this->yaw);
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        	$this->putByteRotation($this->pitch);
+	        	$this->putByteRotation($this->headYaw);
+	        	$this->putByteRotation($this->yaw);
+	    	}else{
+	    	    $this->putByteRotation($this->pitch);
+	        	$this->putByteRotation($this->yaw);
+	        	$this->putByteRotation($this->headYaw);
+	    	}
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 				$this->putBool(($this->flags & self::FLAG_GROUND) !== 0);

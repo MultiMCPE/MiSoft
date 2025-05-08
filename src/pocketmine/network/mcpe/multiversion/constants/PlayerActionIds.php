@@ -357,7 +357,7 @@ final class PlayerActionIds{
             'ACTION_SET_ENCHANTMENT_SEED' => 19,
             'ACTION_RELEASE_ITEM' => 99999
         ],
-        ProtocolInfo::PROTOCOL_100 => [
+        ProtocolInfo::PROTOCOL_81 => [
             'ACTION_START_BREAK' => 0,
             'ACTION_ABORT_BREAK' => 1,
             'ACTION_STOP_BREAK' => 2,

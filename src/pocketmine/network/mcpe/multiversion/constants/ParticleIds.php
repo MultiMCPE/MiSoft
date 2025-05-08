@@ -796,7 +796,7 @@ final class ParticleIds{
 			"TYPE_DRAGON_BREATH_FIRE" => 65,
 			"TYPE_DRAGON_BREATH_TRAIL" => 66
 		],
-		ProtocolInfo::PROTOCOL_100 => [
+		ProtocolInfo::PROTOCOL_81 => [
 			"TYPE_BUBBLE" => 1,
 			"TYPE_CRITICAL" => 2,
 			"TYPE_BLOCK_FORCE_FIELD" => 3,

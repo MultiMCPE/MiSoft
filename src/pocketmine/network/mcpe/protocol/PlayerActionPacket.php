@@ -91,22 +91,31 @@ class PlayerActionPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
-		$this->action = MultiversionEnums::getPlayerActionName($this->getProtocol(), $this->getVarInt());
+		$this->action = MultiversionEnums::getPlayerActionName($this->getProtocol(), $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt());
 		$this->getBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
 		    $this->getBlockPosition($this->rx, $this->ry, $this->rz);
 		}
-		$this->face = $this->getVarInt();
+		$this->face = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
-		$this->putVarInt(MultiversionEnums::getPlayerActionId($this->getProtocol(), $this->action));
+		$action = MultiversionEnums::getPlayerActionId($this->getProtocol(), $this->action);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($action);
+		}else{
+		    $this->putInt($action);
+		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_526){
 		    $this->putBlockPosition($this->rx, $this->ry, $this->rz);
 		}
-		$this->putVarInt($this->face);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->face);
+		}else{
+		    $this->putInt($this->face);
+		}
 	}
 
 	public function mustBeDecoded() : bool{

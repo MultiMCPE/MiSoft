@@ -45,7 +45,9 @@ class AddPaintingPacket extends DataPacket{
 	public $title;
 
 	protected function decodePayload(){
-		$this->entityUniqueId = $this->getEntityUniqueId();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+	    }
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 	    	$position = $this->getVector3();
@@ -55,20 +57,27 @@ class AddPaintingPacket extends DataPacket{
 		} else {
 		    $this->getBlockPosition($this->x, $this->y, $this->z);
 		}
-		$this->direction = $this->getVarInt();
-		$this->title = $this->getString();
+		$this->direction = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
+		$this->title = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 	}
 
 	protected function encodePayload(){
-		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    }
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if ($this->getProtocol() >= ProtocolInfo::PROTOCOL_360) {
 		    $this->putVector3(new Vector3($this->x, $this->y, $this->z));
 		} else {
 		    $this->putBlockPosition($this->x, $this->y, $this->z);
 		}
-		$this->putVarInt($this->direction);
-		$this->putString($this->title);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($this->direction);
+	    	$this->putString($this->title);
+		}else{
+		    $this->putInt($this->direction);
+		    $this->putShortString($this->title);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

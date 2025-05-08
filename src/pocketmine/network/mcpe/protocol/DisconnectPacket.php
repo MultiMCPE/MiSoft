@@ -47,9 +47,11 @@ class DisconnectPacket extends DataPacket{
 			$this->reason = $this->getVarInt();
 		}
 
-		$this->hideDisconnectionScreen = $this->getBool();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->hideDisconnectionScreen = $this->getBool();
+		}
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			$this->message = $this->getString();
+			$this->message = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 		}elseif(!$this->hideDisconnectionScreen){
            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
                $this->message = $this->getString();
@@ -65,9 +67,15 @@ class DisconnectPacket extends DataPacket{
 			$this->putVarInt($this->reason);
 		}
 
-        $this->putBool($this->hideDisconnectionScreen);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putBool($this->hideDisconnectionScreen);
+        }
         if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-            $this->putString($this->message);
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                $this->putString($this->message);
+            }else{
+                $this->putShortString($this->message);
+            }
         }elseif(!$this->hideDisconnectionScreen){
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
                 $this->putString($this->message);

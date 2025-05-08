@@ -25,8 +25,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 
 use pocketmine\network\mcpe\NetworkSession;
-use function pack;
-use function unpack;
 
 class PlayerInputPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::PLAYER_INPUT_PACKET;
@@ -41,15 +39,25 @@ class PlayerInputPacket extends DataPacket{
 	public $sneaking;
 
 	protected function decodePayload(){
-		$this->motionX = $this->getLFloat();
-		$this->motionY = $this->getLFloat();
-		$this->jumping = $this->getBool();
-		$this->sneaking = $this->getBool();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        $this->motionX = $this->getLFloat();
+	        $this->motionY = $this->getLFloat();
+	    }else{
+	        $this->motionX = $this->getFloat();
+	        $this->motionY = $this->getFloat();
+	    }
+	    $this->jumping = $this->getBool();
+	    $this->sneaking = $this->getBool();
 	}
 
 	protected function encodePayload(){
-        $this->putLFloat($this->motionX);
-        $this->putLFloat($this->motionY);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putLFloat($this->motionX);
+            $this->putLFloat($this->motionY);
+	    }else{
+            $this->putFloat($this->motionX);
+            $this->putFloat($this->motionY);
+	    }
         $this->putBool($this->jumping);
         $this->putBool($this->sneaking);
 	}

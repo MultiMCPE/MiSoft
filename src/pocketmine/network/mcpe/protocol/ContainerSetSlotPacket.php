@@ -40,18 +40,32 @@ class ContainerSetSlotPacket extends DataPacket{
 
 	public function decodePayload(){
 		$this->windowid = $this->getByte();
-		$this->slot = $this->getVarInt();
-		$this->hotbarSlot = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->slot = $this->getVarInt();
+	    	$this->hotbarSlot = $this->getVarInt();
+		}else{
+		    $this->slot = $this->getShort();
+		    $this->hotbarSlot = $this->getShort();
+		}
 		$this->item = $this->getSlot();
-		$this->selectSlot = $this->getByte();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+		    $this->selectSlot = $this->getByte();
+		}
 	}
 
 	public function encodePayload(){
         $this->putByte($this->windowid);
-		$this->putVarInt($this->slot);
-		$this->putVarInt($this->hotbarSlot);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->slot);
+	    	$this->putVarInt($this->hotbarSlot);
+        }else{
+            $this->putShort($this->slot);
+            $this->putShort($this->hotbarSlot);
+        }
 		$this->putSlot($this->item);
-        $this->putByte($this->selectSlot);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_92){
+            $this->putByte($this->selectSlot);
+		}
 	}
 
 	public function mustBeDecoded() : bool{

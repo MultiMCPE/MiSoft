@@ -50,14 +50,24 @@ class ContainerSetDataPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->windowId = $this->getByte();
-		$this->property = $this->getVarInt();
-		$this->value = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->property = $this->getVarInt();
+	    	$this->value = $this->getVarInt();
+		}else{
+	    	$this->property = $this->getShort();
+	    	$this->value = $this->getShort();
+		}
 	}
 
 	protected function encodePayload(){
         $this->putByte($this->windowId);
-		$this->putVarInt($this->property);
-		$this->putVarInt($this->value);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->property);
+	    	$this->putVarInt($this->value);
+        }else{
+	    	$this->putShort($this->property);
+	    	$this->putShort($this->value);
+        }
 	}
 
 	public function handle(NetworkSession $session) : bool{

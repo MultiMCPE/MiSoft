@@ -25,6 +25,7 @@ namespace pocketmine\network\mcpe\multiversion;
 
 use Closure;
 use pocketmine\level\particle\Particle;
+use pocketmine\network\mcpe\multiversion\constants\AttributeNameIds;
 use pocketmine\network\mcpe\multiversion\constants\CommandArgumentTypeIds;
 use pocketmine\network\mcpe\multiversion\constants\LevelSoundIds;
 use pocketmine\network\mcpe\multiversion\constants\ParticleIds;
@@ -51,6 +52,8 @@ abstract class MultiversionEnums{
     public const TO = 1;
 
     /** @var SplFixedArray<int>[] */
+    public static $attributesList = [];
+    /** @var SplFixedArray<int>[] */
     public static $soundList = [];
     /** @var SplFixedArray<int>[] */
     public static $commandArgTypes = [];
@@ -64,6 +67,7 @@ abstract class MultiversionEnums{
     public static $particleIds = [];
 
     public static function init() : void{
+        static::$attributesList = AttributeNameIds::ATTRIBUTE_NAMES;
         static::initList(LevelSoundEventPacket::class, LevelSoundIds::LEVEL_SOUND_IDS, static::$soundList,
         function(array $soundTypes) : int{
             return end($soundTypes);
@@ -112,6 +116,21 @@ abstract class MultiversionEnums{
      */
     public static function getClassConstants(string $class) : array{
         return (new ReflectionClass($class))->getConstants();
+    }
+
+    /**
+     * @param int $playerProtocol
+     * @param int $attributeId
+     * 
+     * @return ?string
+     */
+    public static function getAttributeName(int $playerProtocol, int $attributeId) : ?string{
+        foreach(static::$attributesList as $protocol => $attributeNames){
+            if($playerProtocol >= $protocol){
+                return $attributeNames[$attributeId] ?? null;
+            }
+        }
+        throw new RuntimeException("Not founded attribute names list for protocol $playerProtocol, MCPE library need to update");
     }
 
     /**

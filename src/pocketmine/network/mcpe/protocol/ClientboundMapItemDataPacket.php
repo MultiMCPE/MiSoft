@@ -82,7 +82,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->mapId = $this->getEntityUniqueId();
-		$this->type = $this->getUnsignedVarInt();
+		$this->type = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 	    	$this->dimensionId = $this->getByte();
 		}
@@ -93,10 +93,12 @@ class ClientboundMapItemDataPacket extends DataPacket{
 	    	}
 		}
 
-		if(($this->type & 0x08) !== 0){
-			$count = $this->getUnsignedVarInt();
-			for($i = 0; $i < $count; ++$i){
-				$this->eids[] = $this->getEntityUniqueId();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	if(($this->type & 0x08) !== 0){
+		    	$count = $this->getUnsignedVarInt();
+		    	for($i = 0; $i < $count; ++$i){
+			    	$this->eids[] = $this->getEntityUniqueId();
+		    	}
 			}
 		}
 
@@ -125,18 +127,18 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		    	}
 			}
 
-			for($i = 0, $count = $this->getUnsignedVarInt(); $i < $count; ++$i){
+			for($i = 0, $count = ($this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt()); $i < $count; ++$i){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$icon = $this->getByte();
 			    	$rotation = $this->getByte();
 			    }else{
-			    	$weird = $this->getVarInt();
+			    	$weird = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 			    	$rotation = $weird & 0x0f;
 			    	$icon = $weird >> 4;
 			    }
 				$xOffset = $this->getByte();
 				$yOffset = $this->getByte();
-				$label = $this->getString();
+				$label = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$color = Color::fromABGR($this->getUnsignedVarInt());
                 }else{
@@ -147,10 +149,17 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		}
 
 		if(($this->type & self::BITFLAG_TEXTURE_UPDATE) !== 0){
-			$this->width = $this->getVarInt();
-			$this->height = $this->getVarInt();
-			$this->xOffset = $this->getVarInt();
-			$this->yOffset = $this->getVarInt();
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->width = $this->getVarInt();
+		    	$this->height = $this->getVarInt();
+		    	$this->xOffset = $this->getVarInt();
+		    	$this->yOffset = $this->getVarInt();
+		    }else{
+		    	$this->width = $this->getInt();
+		    	$this->height = $this->getInt();
+		    	$this->xOffset = $this->getInt();
+		    	$this->yOffset = $this->getInt();
+		    }
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	$count = $this->getUnsignedVarInt();
@@ -161,7 +170,7 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 			for($y = 0; $y < $this->height; ++$y){
 				for($x = 0; $x < $this->width; ++$x){
-					$this->colors[$y][$x] = Color::fromABGR($this->getUnsignedVarInt());
+					$this->colors[$y][$x] = Color::fromABGR($this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getLInt());
 				}
 			}
 		}
@@ -171,8 +180,10 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		$this->putEntityUniqueId($this->mapId);
 
 		$type = 0;
-		if(($eidsCount = count($this->eids)) > 0){
-			$type |= 0x08;
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	if(($eidsCount = count($this->eids)) > 0){
+		    	$type |= 0x08;
+	    	}
 		}
 		if(($decorationCount = count($this->decorations)) > 0){
 			$type |= self::BITFLAG_DECORATION_UPDATE;
@@ -181,7 +192,11 @@ class ClientboundMapItemDataPacket extends DataPacket{
 			$type |= self::BITFLAG_TEXTURE_UPDATE;
 		}
 
-		$this->putUnsignedVarInt($type);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt($type);
+		}else{
+		    $this->putInt($type);
+		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
             $this->putByte($this->dimensionId);
 		}
@@ -192,10 +207,12 @@ class ClientboundMapItemDataPacket extends DataPacket{
 	    	}
 		}
 
-		if(($type & 0x08) !== 0){ //TODO: find out what these are for
-			$this->putUnsignedVarInt($eidsCount);
-			foreach($this->eids as $eid){
-				$this->putEntityUniqueId($eid);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	if(($type & 0x08) !== 0){ //TODO: find out what these are for
+		    	$this->putUnsignedVarInt($eidsCount);
+		    	foreach($this->eids as $eid){
+			    	$this->putEntityUniqueId($eid);
+		    	}
 			}
 		}
 
@@ -223,18 +240,30 @@ class ClientboundMapItemDataPacket extends DataPacket{
 				}
 			}
 
-			$this->putUnsignedVarInt($decorationCount);
+			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putUnsignedVarInt($decorationCount);
+			}else{
+			    $this->putInt($decorationCount);
+			}
 			foreach($this->decorations as $decoration){
 			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
                     $this->putByte($decoration->getIcon());
                     $this->putByte($decoration->getRotation());
 			    }else{
-			        $this->putVarInt(($decoration->getRotation() & 0x0f) | ($decoration->getIcon() << 4));
+			        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			            $this->putVarInt(($decoration->getRotation() & 0x0f) | ($decoration->getIcon() << 4));
+			        }else{
+			            $this->putInt(($decoration->getRotation() & 0x0f) | ($decoration->getIcon() << 4));
+			        }
 			    }
                 $this->putByte($decoration->getXOffset());
                 $this->putByte($decoration->getYOffset());
-				$this->putString($decoration->getLabel());
-				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putString($decoration->getLabel());
+                }else{
+                    $this->putShortString($decoration->getLabel());
+                }
+			   	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 			    	$this->putUnsignedVarInt($decoration->getColor()->toABGR());
 				}else{
 				    $this->putLInt($decoration->getColor()->toARGB());
@@ -243,10 +272,17 @@ class ClientboundMapItemDataPacket extends DataPacket{
 		}
 
 		if(($type & self::BITFLAG_TEXTURE_UPDATE) !== 0){
-			$this->putVarInt($this->width);
-			$this->putVarInt($this->height);
-			$this->putVarInt($this->xOffset);
-			$this->putVarInt($this->yOffset);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putVarInt($this->width);
+		    	$this->putVarInt($this->height);
+		    	$this->putVarInt($this->xOffset);
+		    	$this->putVarInt($this->yOffset);
+		    }else{
+		    	$this->putInt($this->width);
+		    	$this->putInt($this->height);
+		    	$this->putInt($this->xOffset);
+		    	$this->putInt($this->yOffset);
+		    }
 
             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_135){
 		    	$this->putUnsignedVarInt($this->width * $this->height); //list count, but we handle it as a 2D array... thanks for the confusion mojang
@@ -254,7 +290,11 @@ class ClientboundMapItemDataPacket extends DataPacket{
 
 			for($y = 0; $y < $this->height; ++$y){
 				for($x = 0; $x < $this->width; ++$x){
-					$this->putUnsignedVarInt($this->colors[$y][$x]->toABGR());
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    	$this->putUnsignedVarInt($this->colors[$y][$x]->toABGR());
+				    }else{
+				        $this->putLInt($this->colors[$y][$x]->toABGR());
+				    }
 				}
 			}
 		}

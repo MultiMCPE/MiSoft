@@ -70,20 +70,28 @@ class ContainerOpenPacket extends DataPacket{
 		$this->windowId = $this->getByte();
 		$this->type = $this->getByte();
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			$this->slots = $this->getVarInt();
+			$this->slots = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getShort();
 		}
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->entityUniqueId = $this->getEntityUniqueId();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+		}
 	}
 
 	protected function encodePayload(){
         $this->putByte($this->windowId);
         $this->putByte($this->type);
 		if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-			$this->putVarInt($this->slots ?? self::HARDCODED_WINDOW_SLOTS[$this->type]);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    	$this->putVarInt($this->slots ?? self::HARDCODED_WINDOW_SLOTS[$this->type]);
+		    }else{
+		        $this->putShort($this->slots ?? self::HARDCODED_WINDOW_SLOTS[$this->type]);
+		    }
 		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putEntityUniqueId($this->entityUniqueId);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        $this->putEntityUniqueId($this->entityUniqueId);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

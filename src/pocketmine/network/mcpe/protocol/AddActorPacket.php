@@ -159,6 +159,8 @@ class AddActorPacket extends DataPacket{
 
 	/** @var Attribute[] */
 	public $attributes = [];
+	/** @var int */
+	public $modifiers = 0;
 	/** @var array */
 	public $metadata = [];
 	/** @var PropertySyncData */
@@ -167,7 +169,9 @@ class AddActorPacket extends DataPacket{
 	public $links = [];
 
 	protected function decodePayload(){
-		$this->entityUniqueId = $this->getEntityUniqueId();
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->entityUniqueId = $this->getEntityUniqueId();
+	    }
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	$this->type = array_search($t = $this->getString(), self::LEGACY_ID_MAP_BC, true);
@@ -175,12 +179,17 @@ class AddActorPacket extends DataPacket{
 		    	throw new UnexpectedValueException("Can't map ID $t to legacy ID");
 	    	}
 		}else{
-		    $this->type = $this->getUnsignedVarInt();
+		    $this->type = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
 		}
 		$this->position = $this->getVector3();
 		$this->motion = $this->getVector3();
-		$this->pitch = $this->getLFloat();
-		$this->yaw = $this->getLFloat();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->pitch = $this->getLFloat();
+	    	$this->yaw = $this->getLFloat();
+		}else{
+		    $this->yaw = $this->getFloat() * (360 / 256);
+	    	$this->pitch = $this->getFloat() * (360 / 256);
+		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	$this->headYaw = $this->getLFloat();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
@@ -188,37 +197,43 @@ class AddActorPacket extends DataPacket{
 	    	}
 		}
 
-		$attrCount = $this->getUnsignedVarInt();
-		for($i = 0; $i < $attrCount; ++$i){
-			$name = $this->getString();
-			$min = $this->getLFloat();
-			$current = $this->getLFloat();
-			$max = $this->getLFloat();
-			$attr = Attribute::getAttributeByName($name);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$attrCount = $this->getUnsignedVarInt();
+	    	for($i = 0; $i < $attrCount; ++$i){
+		    	$name = $this->getString();
+		    	$min = $this->getLFloat();
+		    	$current = $this->getLFloat();
+		    	$max = $this->getLFloat();
+		    	$attr = Attribute::getAttributeByName($name);
 
-			if($attr !== null){
-				$attr->setMinValue($min);
-				$attr->setMaxValue($max);
-				$attr->setValue($current);
-				$attr->setModifiers([]);
-				$this->attributes[] = $attr;
-			}else{
-				throw new UnexpectedValueException("Unknown attribute type \"$name\"");
+		    	if($attr !== null){
+			    	$attr->setMinValue($min);
+			    	$attr->setMaxValue($max);
+			    	$attr->setValue($current);
+			    	$attr->setModifiers([]);
+			    	$this->attributes[] = $attr;
+		    	}else{
+			    	throw new UnexpectedValueException("Unknown attribute type \"$name\"");
+		    	}
 			}
+		}else{
+		    $this->modifiers = $this->getInt();
 		}
 
 		$this->metadata = $this->getEntityMetadata();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
 		    $this->syncedProperties = PropertySyncData::read($this);
 		}
-		$linkCount = $this->getUnsignedVarInt();
+		$linkCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getShort();
 		for($i = 0; $i < $linkCount; ++$i){
 			$this->links[] = $this->getEntityLink();
 		}
 	}
 
 	protected function encodePayload(){
-		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
+	    }
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_310){
 	    	if(!isset(self::LEGACY_ID_MAP_BC[$this->type])){
@@ -226,12 +241,21 @@ class AddActorPacket extends DataPacket{
 	    	}
 	    	$this->putString(self::LEGACY_ID_MAP_BC[$this->type]);
 		}else{
-		    $this->putUnsignedVarInt($this->type);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		        $this->putUnsignedVarInt($this->type);
+		    }else{
+		        $this->putInt($this->type);
+		    }
 		}
 		$this->putVector3($this->position);
 		$this->putVector3Nullable($this->motion);
-        $this->putLFloat($this->pitch);
-        $this->putLFloat($this->yaw);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+            $this->putLFloat($this->pitch);
+            $this->putLFloat($this->yaw);
+		}else{
+		    $this->putFloat($this->yaw / (360 / 256));
+            $this->putFloat($this->pitch / (360 / 256));
+		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
             $this->putLFloat($this->headYaw);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_534){
@@ -239,19 +263,27 @@ class AddActorPacket extends DataPacket{
 	    	}
 		}
 
-		$this->putUnsignedVarInt(count($this->attributes));
-		foreach($this->attributes as $attribute){
-			$this->putString($attribute->getName());
-            $this->putLFloat($attribute->getMinValue());
-            $this->putLFloat($attribute->getValue());
-            $this->putLFloat($attribute->getMaxValue());
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->attributes));
+	    	foreach($this->attributes as $attribute){
+		    	$this->putString($attribute->getName());
+                $this->putLFloat($attribute->getMinValue());
+                $this->putLFloat($attribute->getValue());
+                $this->putLFloat($attribute->getMaxValue());
+	    	}
+		}else{
+		    $this->putInt($this->modifiers);
 		}
 
 		$this->putEntityMetadata($this->metadata);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_557){
 		    ($this->syncedProperties ?? new PropertySyncData([], []))->write($this);
 		}
-		$this->putUnsignedVarInt(count($this->links));
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putUnsignedVarInt(count($this->links));
+		}else{
+		    $this->putShort(count($this->links));
+		}
 		foreach($this->links as $link){
 			$this->putEntityLink($link);
 		}

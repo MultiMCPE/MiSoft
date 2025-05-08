@@ -102,13 +102,17 @@ class ActorEventPacket extends DataPacket{
 	protected function decodePayload(){
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		$this->event = $this->getByte();
-		$this->data = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->data = $this->getVarInt();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putEntityRuntimeId($this->entityRuntimeId);
         $this->putByte($this->event);
-		$this->putVarInt($this->data);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->data);
+        }
 	}
 
 	public function mustBeDecoded() : bool{

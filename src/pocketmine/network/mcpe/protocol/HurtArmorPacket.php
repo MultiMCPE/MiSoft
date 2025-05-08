@@ -39,7 +39,7 @@ class HurtArmorPacket extends DataPacket{
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 			$this->cause = $this->getVarInt();
 	    }
-		$this->health = $this->getVarInt();
+		$this->health = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getByte();
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 			$this->armorSlotFlags = $this->getUnsignedVarLong();
         }
@@ -49,7 +49,11 @@ class HurtArmorPacket extends DataPacket{
 	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 			$this->putVarInt($this->cause);
 	    }
-		$this->putVarInt($this->health);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->health);
+	    }else{
+	        $this->putByte($this->health);
+	    }
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_465){
 			$this->putUnsignedVarLong($this->armorSlotFlags);
         }

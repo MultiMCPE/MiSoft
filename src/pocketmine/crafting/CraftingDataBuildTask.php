@@ -105,9 +105,9 @@ class CraftingDataBuildTask extends AsyncTask{
 	    $pk->encode();
 
 	    $batch = new BatchPacket();
+	    $batch->setProtocol($this->protocol);
 	    $batch->addPacket($pk);
 	    $batch->setCompressionLevel($this->compressionLevel);
-	    $batch->setProtocol($this->protocol);
 	    $batch->encode();
 
 		$this->setResult($batch->getBuffer());

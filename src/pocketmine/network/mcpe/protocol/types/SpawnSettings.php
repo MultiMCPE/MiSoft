@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 final class SpawnSettings{
@@ -58,21 +58,25 @@ final class SpawnSettings{
 		return $this->dimension;
 	}
 
-	public static function read(DataPacket $in) : self{
+	public static function read(NetworkBinaryStream $in) : self{
 	    if($in->getProtocol() >= ProtocolInfo::PROTOCOL_401){
 	    	$biomeType = $in->getLShort();
 	    	$biomeName = $in->getString();
 	    }
-		$dimension = $in->getVarInt();
+		$dimension = $in->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $in->getVarInt() : $in->getByte();
 
 		return new self($biomeType ?? 0, $biomeName ?? "", $dimension);
 	}
 
-	public function write(DataPacket $out) : void{
-	    if($out->getProtocol() >= ProtocolInfo::PROTOCOL_401){
-	    	$out->putLShort($this->biomeType);
-	    	$out->putString($this->biomeName);
+	public function write(NetworkBinaryStream $out) : void{
+	    if($out->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        if($out->getProtocol() >= ProtocolInfo::PROTOCOL_401){
+	        	$out->putLShort($this->biomeType);
+	        	$out->putString($this->biomeName);
+	        }
+	    	$out->putVarInt($this->dimension);
+	    }else{
+	        $out->putByte($this->dimension);
 	    }
-		$out->putVarInt($this->dimension);
 	}
 }

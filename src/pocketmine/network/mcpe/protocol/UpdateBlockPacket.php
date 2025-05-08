@@ -57,7 +57,13 @@ class UpdateBlockPacket extends DataPacket{
 	public $dataLayerId = self::DATA_LAYER_NORMAL;
 
 	protected function decodePayload(){
-		$this->getBlockPosition($this->x, $this->y, $this->z);
+	    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+	        $this->x = $this->getInt();
+	        $this->z = $this->getInt();
+	        $this->y = $this->getByte();
+	    }else{
+		    $this->getBlockPosition($this->x, $this->y, $this->z);
+	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	$runtimeId = $this->getUnsignedVarInt();
 	    	$palette = BlockPalette::getPalette($this->getProtocol());
@@ -69,15 +75,28 @@ class UpdateBlockPacket extends DataPacket{
 	        	$this->dataLayerId = $this->getUnsignedVarInt();
 	    	}
 		}else{
-	    	$this->blockId = $this->getUnsignedVarInt();
-	    	$aux = $this->getUnsignedVarInt();
-	    	$this->blockMeta = $aux & 0x0f;
-	    	$this->flags = $aux >> 4;
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        	$this->blockId = $this->getUnsignedVarInt();
+	        	$aux = $this->getUnsignedVarInt();
+	        	$this->blockMeta = $aux & 0x0f;
+	        	$this->flags = $aux >> 4;
+		    }else{
+		        $this->blockId = $this->getByte();
+		        $aux = $this->getByte();
+	        	$this->blockMeta = $aux & 0x0f;
+	        	$this->flags = $aux >> 4;
+		    }
 		}
 	}
 
 	protected function encodePayload(){
-		$this->putBlockPosition($this->x, $this->y, $this->z);
+	    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+	        $this->putInt($this->x);
+	        $this->putInt($this->z);
+	        $this->putByte($this->y);
+	    }else{
+	    	$this->putBlockPosition($this->x, $this->y, $this->z);
+	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 		    $palette = BlockPalette::getPalette($this->getProtocol());
 	    	$runtimeId = $palette::toStaticRuntimeId($this->blockId, $this->blockMeta);
@@ -87,8 +106,13 @@ class UpdateBlockPacket extends DataPacket{
 	        	$this->putUnsignedVarInt($this->dataLayerId);
 	    	}
 		}else{
-	    	$this->putUnsignedVarInt($this->blockId);
-	    	$this->putUnsignedVarInt(($this->flags << 4) | $this->blockMeta);
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	        	$this->putUnsignedVarInt($this->blockId);
+	        	$this->putUnsignedVarInt(($this->flags << 4) | $this->blockMeta);
+		    }else{
+		        $this->putByte($this->blockId);
+		        $this->putByte(($this->flags << 4) | $this->blockMeta);
+		    }
 		}
 	}
 

@@ -33,11 +33,15 @@ class ChunkRadiusUpdatedPacket extends DataPacket{
 	public $radius;
 
 	protected function decodePayload(){
-		$this->radius = $this->getVarInt();
+	    $this->radius = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->radius);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->radius);
+	    }else{
+	        $this->putInt($this->radius);
+	    }
 	}
 
 	public function handle(NetworkSession $session) : bool{

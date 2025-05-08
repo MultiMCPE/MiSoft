@@ -41,9 +41,16 @@ final class ProtocolInfo implements PacketMagicNumbers{
 	/**
 	 * Actual Minecraft: PE protocol version
 	 */
-	public const CURRENT_PROTOCOL = ProtocolInfo::PROTOCOL_100;
+	public const CURRENT_PROTOCOL = ProtocolInfo::PROTOCOL_81;
 
 	public const ACCEPTED_PROTOCOLS = [
+	    ProtocolInfo::PROTOCOL_81,
+	    ProtocolInfo::PROTOCOL_82,
+	    ProtocolInfo::PROTOCOL_83,
+	    ProtocolInfo::PROTOCOL_84,
+	    ProtocolInfo::PROTOCOL_90,
+	    ProtocolInfo::PROTOCOL_91,
+	    ProtocolInfo::PROTOCOL_92,
 		ProtocolInfo::PROTOCOL_100,
 		ProtocolInfo::PROTOCOL_101,
 		ProtocolInfo::PROTOCOL_102,
@@ -185,6 +192,13 @@ final class ProtocolInfo implements PacketMagicNumbers{
 		ProtocolInfo::PROTOCOL_786
 	];
 
+    public const PROTOCOL_81 = 81; // 0.15.0, 0.15.1, 0.15.2, 0.15.3
+    public const PROTOCOL_82 = 82; // 0.15.4, 0.15.6, 0.15.7, 0.15.8
+    public const PROTOCOL_83 = 83; // 0.15.9
+    public const PROTOCOL_84 = 84; // 0.15.10
+    public const PROTOCOL_90 = 90; // 0.15.90, 0.15.90.1, 0.16.0
+    public const PROTOCOL_91 = 91; // 0.16.0, 0.16.1, 0.16.2, 0.17.0.1, 0.17.0.2
+    public const PROTOCOL_92 = 92; // 1.0.0.0, 1.0.0.1
     public const PROTOCOL_100 = 100; // 1.0.0.2, 1.0.0.7, 1.0.0, 1.0.1, 1.0.2
 	public const PROTOCOL_101 = 101; // 1.0.3.0, 1.0.3, 1.0.4.0
 	public const PROTOCOL_102 = 102; // 1.0.4.1, 1.0.4
@@ -347,7 +361,7 @@ final class ProtocolInfo implements PacketMagicNumbers{
     /**
 	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
 	 */
-	public const MINECRAFT_VERSION = '1.X';
+	public const MINECRAFT_VERSION = '0.15.0 - 1.21.70';
 	/**
 	 * Version number sent to clients in ping responses.
 	 */

@@ -33,9 +33,7 @@ use pocketmine\block\BlockFactory;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\PacketPool;
-use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
-use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
 use pocketmine\scheduler\AsyncTask;
@@ -122,20 +120,18 @@ class ChunkRequestTask extends AsyncTask{
 
 	    $pk = LevelChunkPacket::withoutCache(
 	        new ChunkPosition($this->chunkX, $this->chunkZ),
+	        LevelChunkPacket::ORDER_COLUMNS,
 	        $dimensionId,
-	        (($protocol >= ProtocolInfo::PROTOCOL_475 && $dimensionId === DimensionIds::OVERWORLD) ?
-	            $chunk->getSubChunkSendCount() + 4 :
-	            $chunk->getSubChunkSendCount()
-	       ),
-	       $chunk->networkSerialize($protocol, $dimensionId, $legacyToRuntime ?? null) . $this->tiles
+	        $chunk->getSubChunkSendCount($dimensionId, $protocol),
+	        $chunk->networkSerialize($protocol, $dimensionId, $legacyToRuntime ?? null) . $this->tiles
 	    );
 		$pk->setPacketIdToSend($this->levelChunkPacketId);
 	    $pk->setProtocol($protocol);
 
 	    $batch = new BatchPacket();
+	    $batch->setProtocol($protocol);
 	    $batch->addPacket($pk);
 	    $batch->setCompressionLevel($this->compressionLevel);
-	    $batch->setProtocol($protocol);
 	    $batch->encode();
 
         $this->setResult($batch->buffer);

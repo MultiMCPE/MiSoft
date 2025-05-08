@@ -34,6 +34,7 @@ use pocketmine\level\biome\Biome;
 use pocketmine\level\Level;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\chunk\ChunkConverter;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\Player;
@@ -818,15 +819,6 @@ class Chunk{
 	}
 
 	/**
-	 * Returns the count of subchunks that need sending to players
-	 *
-	 * @return int
-	 */
-	public function getSubChunkSendCount() : int{
-		return $this->getHighestSubChunkIndex() + 1;
-	}
-
-	/**
 	 * Disposes of empty subchunks and frees data where possible
 	 */
 	public function collectGarbage() : void{
@@ -842,26 +834,56 @@ class Chunk{
 	}
 
     /**
-	 * Returns the max subchunk index expected in the protocol.
-	 * This has no relation to the world height supported by PM.
-	 *
-	 * @param int $playerProtocol
-	 * @phpstan-param DimensionIds::* $dimensionId
-	 * @return int
-	 * @phpstan-return int
-	 */
-	public function getDimensionBiomeMaxSubChunkIndex(int $playerProtocol, int $dimensionId) : int{
-		if($playerProtocol >= ProtocolInfo::PROTOCOL_503){
-	    	return match($dimensionId){
-		    	DimensionIds::OVERWORLD => 24,
-		    	DimensionIds::NETHER => 8,
-		    	DimensionIds::THE_END => 16,
-		    	default => throw new InvalidArgumentException("Unknown dimension ID $dimensionId"),
-	    	};
-		}else{
-			return 25;
-		}
-	}
+     * Returns the min/max subchunk index expected in the protocol.
+     * This has no relation to the world height supported by PM.
+     *
+     * @phpstan-param DimensionIds::* $dimensionId
+     * @phpstan-param int $playerProtocol
+     * @return int[]
+     * @phpstan-return array{int, int}
+     */
+    public static function getDimensionChunkBounds(int $dimensionId, int $playerProtocol) : array{
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
+            return match($dimensionId){
+                DimensionIds::OVERWORLD => [-4, 19],
+                DimensionIds::NETHER => [0, 7],
+                DimensionIds::THE_END => [0, 15],
+                default => throw new InvalidArgumentException("Unknown dimension ID $dimensionId"),
+            };
+        }elseif($playerProtocol >= ProtocolInfo::PROTOCOL_100){
+            return match($dimensionId){
+                DimensionIds::OVERWORLD, DimensionIds::THE_END => [0, 15],
+                DimensionIds::NETHER => [0, 7],
+                default => throw new InvalidArgumentException("Unknown dimension ID $dimensionId"),
+            };
+        }else{
+            return match($dimensionId){
+                DimensionIds::OVERWORLD, DimensionIds::THE_END, DimensionIds::NETHER => [0, 7],
+                default => throw new InvalidArgumentException("Unknown dimension ID $dimensionId"),
+            };
+        }
+    }
+
+    /**
+     * Returns the number of subchunks that will be sent from the given chunk.
+     * Chunks are sent in a stack, so every chunk below the top non-empty one must be sent.
+     *
+     * @phpstan-param DimensionIds::* $dimensionId
+     * @phpstan-param int $playerProtocol
+     */
+    public function getSubChunkSendCount(int $dimensionId, int $playerProtocol) : int{
+        //if the protocol world bounds ever exceed the PM supported bounds again in the future, we might need to
+        //polyfill some stuff here
+        [$minSubChunkIndex, $maxSubChunkIndex] = self::getDimensionChunkBounds($dimensionId, $playerProtocol);
+        for($y = $maxSubChunkIndex, $count = $maxSubChunkIndex - $minSubChunkIndex + 1; $y >= $minSubChunkIndex; --$y, --$count){
+            if($this->getSubChunk($y)->isEmpty(false)){
+                continue;
+            }
+            return $count;
+        }
+
+        return 0;
+    }
 
 	/**
 	 * Serializes the chunk for sending to players
@@ -874,33 +896,59 @@ class Chunk{
 	 */
 	public function networkSerialize(int $playerProtocol, int $dimensionId, ?Closure $legacyToRuntime) : string{
 		$stream = new BinaryStream();
-		$subChunkCount = $this->getSubChunkSendCount();
-		if($playerProtocol < ProtocolInfo::PROTOCOL_360){
+		$subChunkCount = $this->getSubChunkSendCount($dimensionId, $playerProtocol);
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_92 && $playerProtocol < ProtocolInfo::PROTOCOL_360){
 	    	$stream->putByte($subChunkCount);
-		}elseif($playerProtocol >= ProtocolInfo::PROTOCOL_475 && $dimensionId === DimensionIds::OVERWORLD){
-	    	//TODO: HACK! fill in fake subchunks to make up for the new negative space client-side
-	    	for($y = 0; $y < 4; ++$y){
-		    	$stream->putByte(8); //subchunk version 8
-		    	$stream->putByte(0); //0 layers - client will treat this as all-air
-	    	}
 		}
-		for($y = 0; $y < $subChunkCount; ++$y){
-			$this->networkSerializeSubChunk($this->getSubChunk($y), $playerProtocol, $legacyToRuntime, $stream);
-		}
+
+        [$minSubChunkIndex, $maxSubChunkIndex] = self::getDimensionChunkBounds($dimensionId, $playerProtocol);
+        if($playerProtocol >= ProtocolInfo::PROTOCOL_92){
+            for($writtenCount = 0, $y = $minSubChunkIndex; $writtenCount < $subChunkCount; ++$y, ++$writtenCount){
+		        $this->networkSerializeSubChunk($this->getSubChunk($y), $playerProtocol, $legacyToRuntime, $stream);
+	        }
+        }else{
+            $palettedBlocks = [];
+            for($writtenCount = 0, $y = $minSubChunkIndex; $writtenCount < $subChunkCount; ++$y, ++$writtenCount){
+                $palettedBlocks[] = $this->getSubChunk($y)->getBlockLayers()[0] ?? new PalettedBlockArray(Block::AIR);
+            }
+
+            [$blockIdArray, $blockDataArray] = ChunkConverter::convertSubChunkFromPaletteColumn($palettedBlocks, $playerProtocol);
+            $stream->put($blockIdArray);
+            $stream->put($blockDataArray);
+
+            for($y = 0; $y < 8; $y++){
+                $stream->put(ChunkConverter::unreorderNibbleArray($this->getSubChunk($y)->getBlockSkyLightArray(), "\xff"));
+            }
+
+            for($y = 0; $y < 8; $y++){
+                $stream->put(ChunkConverter::unreorderNibbleArray($this->getSubChunk($y)->getBlockLightArray()));
+            }
+        }
+
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_475){
 	        //TODO: right now we don't support 3D natively, so we just 3Dify our 2D biomes so they fill the column
 	        $encodedBiomePalette = $this->networkSerializeBiomesAsPalette();
-	        $stream->put(str_repeat($encodedBiomePalette, $this->getDimensionBiomeMaxSubChunkIndex($playerProtocol, $dimensionId)));
+	        for($y = $minSubChunkIndex; $y <= $maxSubChunkIndex; ++$y){
+	            $stream->put($encodedBiomePalette);
+	        }
 		}else{
 		    if($playerProtocol < ProtocolInfo::PROTOCOL_360){
-		        $stream->put(pack("v*", ...$this->heightMap));
+		        $stream->put(pack(($playerProtocol < ProtocolInfo::PROTOCOL_92 ? "C*" : "v*"), ...$this->heightMap));
 		    }
-	    	$stream->put($this->biomeIds);
+
+		    $stream->put(($playerProtocol < ProtocolInfo::PROTOCOL_92 ?
+		        $this->convertChunkBiomeColorsFromBiomeIds() : 
+		        $this->biomeIds
+		    ));
 		}
-		$stream->putByte(0); //border block array count
-	    //Border block entry format: 1 byte (4 bits X, 4 bits Z). These are however useless since they crash the regular client.
-		if($playerProtocol < ProtocolInfo::PROTOCOL_270){
-		    $stream->putVarInt(0); // extraData (WTF)
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_92){
+	    	$stream->putByte(0); //border block array count
+	        //Border block entry format: 1 byte (4 bits X, 4 bits Z). These are however useless since they crash the regular client.
+	    	if($playerProtocol < ProtocolInfo::PROTOCOL_270){
+		        $stream->putVarInt(0); // extraData (WTF)
+	    	}
+		}else{
+		    $stream->putLInt(0); // extraData
 		}
 
 		return $stream->getBuffer();
@@ -910,34 +958,7 @@ class Chunk{
 		if($legacyToRuntime === null){
 		    $stream->putByte(0); // storage version
 
-			$palettedBlockArray = $subChunk->getBlockLayers()[0] ?? new PalettedBlockArray(Block::AIR);
-
-			// thx Submarine :)
-			$blockIdArray = "";
-			$blockDataArray = "";
-			for($x = 0; $x < 16; ++$x){
-				for($z = 0; $z < 16; ++$z){
-					for($y = 0; $y < 16; ++$y){
-						$fullBlock = $palettedBlockArray->get($x, $y, $z);
-						$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
-						$block = $block->getBlockProtocol($playerProtocol) ?? $block;
-						[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
-
-						if($legacyId > 255){
-							$legacyId = 248; //minecraft:info_update
-							$legacyMeta = 0;
-						}
-
-						$blockIdArray[($x << 8) | ($z << 4) | $y] = chr($legacyId);
-						$indexData = ($x << 7) | ($z << 3) | ($y >> 1);
-						if(($y & 1) === 0){
-							$blockDataArray[$indexData] = chr((ord($blockDataArray[$indexData] ?? chr(0)) & 0xf0) | ($legacyMeta & 0x0f));
-						}else{
-							$blockDataArray[$indexData] = chr((($legacyMeta & 0x0f) << 4) | (ord($blockDataArray[$indexData] ?? chr(0)) & 0x0f));
-						}
-					}
-				}
-			}
+			[$blockIdArray, $blockDataArray] = ChunkConverter::convertSubChunkFromPaletteXZY($subChunk->getBlockLayers()[0] ?? new PalettedBlockArray(Block::AIR), $playerProtocol);
 
 		    $stream->put($blockIdArray);
 		    $stream->put($blockDataArray);
@@ -1056,6 +1077,32 @@ class Chunk{
 
 		return $encodedBiomePalette;
 	}
+
+    /**
+    * Converts a biome ID string (256 bytes) back to a pre-MCPE-1.0 biome color array.
+    * 
+    * @param string $biomeIds
+    * 
+    * @return string
+    */
+    public function convertChunkBiomeColorsFromBiomeIds() : string{
+        /** @var string[]|null $biomeColorMap */
+		static $biomeColorMap = null;
+		if($biomeColorMap === null){
+			$biomeColorMapRaw = file_get_contents(\pocketmine\RESOURCE_PATH . '/vanilla/biome_color_map.json');
+			if($biomeColorMapRaw === false) throw new AssumptionFailedError();
+			$biomeColorMapDecoded = json_decode($biomeColorMapRaw, true);
+			if(!is_array($biomeColorMapDecoded)) throw new AssumptionFailedError();
+			$biomeColorMap = $biomeColorMapDecoded;
+		}
+
+        $result = [];
+        for($i = 0; $i < 256; $i++){
+            $result[$i] = $biomeColorMap[$this->biomeIds[$i]] ?? 0x8DB371; // 0x8DB371 - ocean biome color
+        }
+
+        return pack('N*', ...$result);
+    }
 
 	/**
 	 * Fast-serializes the chunk for passing between threads

@@ -26,12 +26,11 @@ namespace pocketmine\tile;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
+use pocketmine\nbt\LittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
-use pocketmine\Player;
 
 class ItemFrame extends Spawnable{
 	public const TAG_ITEM_ROTATION = "ItemRotation";
@@ -47,6 +46,9 @@ class ItemFrame extends Spawnable{
 
 	/** @var NetworkLittleEndianNBTStream|null */
 	private static $nbtWriter = null;
+
+	/** @var LittleEndianNBTStream|null */
+	private static $oldNbtWriter = null;
 
 	/** @var int[string|null] */
 	private $protocolSpawnCompoundCache = [];
@@ -111,33 +113,6 @@ class ItemFrame extends Spawnable{
 		$nbt->setByte(self::TAG_ITEM_ROTATION, $this->itemRotation);
 	}
 
-	public function spawnTo(Player $player) : bool{
-		if($this->closed){
-			return false;
-		}
-
-		$pk = new BlockActorDataPacket();
-		$pk->x = $this->x;
-		$pk->y = $this->y;
-		$pk->z = $this->z;
-		$pk->namedtag = $this->getProtocolSerializedSpawnCompound($player->getProtocol());
-
-		$player->dataPacket($pk);
-
-		return true;
-	}
-
-	public function spawnToAll(){
-		if($this->closed){
-			return;
-		}
-
-		$viewers = $this->level->getViewersForPosition($this);
-		foreach($viewers as $viewer){
-			$this->spawnTo($viewer);
-		}
-	}
-
 	/**
 	 * Performs actions needed when the tile is modified, such as clearing caches and respawning the tile to players.
 	 * WARNING: This MUST be called to clear spawn-compound and chunk caches when the tile's spawn compound has changed!
@@ -163,11 +138,19 @@ class ItemFrame extends Spawnable{
 		}
 
 		if(!isset($this->protocolSpawnCompoundCache[$playerProtocol])){
-			if(self::$nbtWriter === null){
-				self::$nbtWriter = new NetworkLittleEndianNBTStream();
-			}
+		    if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+		    	if(self::$nbtWriter === null){
+			    	self::$nbtWriter = new NetworkLittleEndianNBTStream();
+		    	}
+		    	$nbtWriter = self::$nbtWriter;
+		    }else{
+		    	if(self::$oldNbtWriter === null){
+			    	self::$oldNbtWriter = new LittleEndianNBTStream();
+		    	}
+		    	$nbtWriter = self::$oldNbtWriter;
+		    }
 
-			$this->protocolSpawnCompoundCache[$playerProtocol] = self::$nbtWriter->write($compound);
+			$this->protocolSpawnCompoundCache[$playerProtocol] = $nbtWriter->write($compound);
 		}
 
 		return $this->protocolSpawnCompoundCache[$playerProtocol];

@@ -44,7 +44,7 @@ class AnimatePacket extends DataPacket{
 	public $rowingTime = 0.0; // Boat rowing time
 
 	protected function decodePayload(){
-		$this->action = $this->getVarInt();
+		$this->action = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getByte();
 		$this->entityRuntimeId = $this->getEntityRuntimeId();
 		if($this->action & 0x80){
 			$this->rowingTime = $this->getLFloat();
@@ -52,7 +52,11 @@ class AnimatePacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->action);
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->action);
+	    }else{
+	        $this->putByte($this->action);
+	    }
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		if($this->action & 0x80){
             $this->putLFloat($this->rowingTime);

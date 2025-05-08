@@ -41,6 +41,7 @@ use UnexpectedValueException;
 use function count;
 use function pack;
 use function str_repeat;
+use function strlen;
 
 class CraftingDataPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CRAFTING_DATA_PACKET;
@@ -75,10 +76,13 @@ class CraftingDataPacket extends DataPacket{
 
     protected function decodePayload() : void{
         $this->decodedEntries = [];
-        $recipeCount = $this->getUnsignedVarInt();
+        $recipeCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
         for($i = 0; $i < $recipeCount; ++$i){
             $entry = [];
-            $entry["type"] = $recipeType = $this->getVarInt();
+            $entry["type"] = $recipeType = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                $this->getInt(); // buffer length
+            }
 
             switch($recipeType){
                 case self::ENTRY_SHAPELESS:
@@ -87,7 +91,7 @@ class CraftingDataPacket extends DataPacket{
                     if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
                         $entry["recipe_id"] = $this->getString();
                     }
-                    $ingredientCount = $this->getUnsignedVarInt();
+                    $ingredientCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
                     /** @var Item */
                     $entry["input"] = [];
                     for($j = 0; $j < $ingredientCount; ++$j){
@@ -98,7 +102,7 @@ class CraftingDataPacket extends DataPacket{
                             $entry["input"][] = $this->getSlot(false);
                         }
                     }
-                    $resultCount = $this->getUnsignedVarInt();
+                    $resultCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
                     $entry["output"] = [];
                     for($k = 0; $k < $resultCount; ++$k){
                         $entry["output"][] = $this->getSlot(false);
@@ -128,8 +132,13 @@ class CraftingDataPacket extends DataPacket{
                     if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360){
                         $entry["recipe_id"] = $this->getString();
                     }
-                    $entry["width"] = $this->getVarInt();
-                    $entry["height"] = $this->getVarInt();
+                    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                        $entry["width"] = $this->getVarInt();
+                        $entry["height"] = $this->getVarInt();
+                    }else{
+                        $entry["width"] = $this->getInt();
+                        $entry["height"] = $this->getInt();
+                    }
                     $count = $entry["width"] * $entry["height"];
                     $entry["input"] = [];
                     for($j = 0; $j < $count; ++$j){
@@ -140,7 +149,7 @@ class CraftingDataPacket extends DataPacket{
                             $entry["input"][] = $this->getSlot(false);
                         }
                     }
-                    $resultCount = $this->getUnsignedVarInt();
+                    $resultCount = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getInt();
                     $entry["output"] = [];
                     for($k = 0; $k < $resultCount; ++$k){
                         $entry["output"][] = $this->getSlot(false);
@@ -170,7 +179,9 @@ class CraftingDataPacket extends DataPacket{
                     break;
                 case self::ENTRY_FURNACE:
                 case self::ENTRY_FURNACE_DATA:
-                    $inputId = $this->getVarInt();
+                    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                        $inputId = $this->getVarInt();
+                    }
                     if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
                         $palette = ItemPalette::getPalette($this->getProtocol());
                         if($recipeType === self::ENTRY_FURNACE){
@@ -182,10 +193,18 @@ class CraftingDataPacket extends DataPacket{
                     }else{
                         $inputData = -1;
                         if($recipeType === self::ENTRY_FURNACE_DATA){
-                            $inputData = $this->getVarInt();
+                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+                                $inputData = $this->getVarInt();
+                            }else{
+                                $value = $this->getInt();
+                                $inputId = $value >> 16;
+                                $damage = $value & 0xFFFF;
+                            }
                             if($inputData === 0x7fff){
                                 $inputData = -1;
                             }
+                        }else{
+                            $inputId = $this->getInt();
                         }
                     }
                     $entry["input"] = ItemFactory::get($inputId, $inputData);
@@ -281,7 +300,11 @@ class CraftingDataPacket extends DataPacket{
 	    if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
             $stream->putString(Binary::writeInt($pos)); //some kind of recipe ID, doesn't matter what it is as long as it's unique
 	    }
-		$stream->putUnsignedVarInt($recipe->getIngredientCount());
+	    if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+	    	$stream->putUnsignedVarInt($recipe->getIngredientCount());
+	    }else{
+	        $stream->putInt($recipe->getIngredientCount());
+	    }
 		foreach($recipe->getIngredientList() as $item){
 		    if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
 		    	$stream->putRecipeIngredient($item);
@@ -291,7 +314,11 @@ class CraftingDataPacket extends DataPacket{
 		}
 
 		$results = $recipe->getResults();
-		$stream->putUnsignedVarInt(count($results));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+	    	$stream->putUnsignedVarInt(count($results));
+		}else{
+		    $stream->putInt(count($results));
+		}
 		foreach($results as $item){
 			$stream->putSlot($item, false);
 		}
@@ -317,8 +344,13 @@ class CraftingDataPacket extends DataPacket{
 	    if($playerProtocol >= ProtocolInfo::PROTOCOL_360){
             $stream->putString(Binary::writeInt($pos)); //some kind of recipe ID, doesn't matter what it is as long as it's unique
 	    }
-		$stream->putVarInt($recipe->getWidth());
-		$stream->putVarInt($recipe->getHeight());
+	    if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+	    	$stream->putVarInt($recipe->getWidth());
+	    	$stream->putVarInt($recipe->getHeight());
+	    }else{
+	    	$stream->putInt($recipe->getWidth());
+	    	$stream->putInt($recipe->getHeight());
+	    }
 
 		for($z = 0; $z < $recipe->getHeight(); ++$z){
 			for($x = 0; $x < $recipe->getWidth(); ++$x){
@@ -332,7 +364,11 @@ class CraftingDataPacket extends DataPacket{
 		}
 
 		$results = $recipe->getResults();
-		$stream->putUnsignedVarInt(count($results));
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+	    	$stream->putUnsignedVarInt(count($results));
+		}else{
+		    $stream->putInt(count($results));
+		}
 		foreach($results as $item){
 			$stream->putSlot($item, false);
 		}
@@ -369,15 +405,23 @@ class CraftingDataPacket extends DataPacket{
 		    	[$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
 	    	}
 		}
-		$stream->putVarInt($id);
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+	    	$stream->putVarInt($id);
+		}
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
 		    $stream->putVarInt($damage);
 		    $result = CraftingDataPacket::ENTRY_FURNACE_DATA;
 		}else{
 	    	$result = CraftingDataPacket::ENTRY_FURNACE;
 	    	if(!$recipe->getInput()->hasAnyDamageValue()){ //Data recipe
-		     	$stream->putVarInt($damage);
+	    	    if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
+		        	$stream->putVarInt($damage);
+	    	    }else{
+	    	        $stream->putInt(($recipe->getInput()->getId() << 16) | ($recipe->getInput()->getDamage()));
+	    	    }
 		    	$result = CraftingDataPacket::ENTRY_FURNACE_DATA;
+	    	}elseif($playerProtocol < ProtocolInfo::PROTOCOL_90){
+	    	    $stream->putInt($recipe->getInput()->getId());
 	    	}
 		}
 		$stream->putSlot($recipe->getResult(), false);
@@ -400,7 +444,11 @@ class CraftingDataPacket extends DataPacket{
 	}
 
 	protected function encodePayload(){
-		$this->putUnsignedVarInt(count($this->entries));
+	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putUnsignedVarInt(count($this->entries));
+	    }else{
+	        $this->putInt(count($this->entries));
+	    }
 
 		$writer = new NetworkBinaryStream();
 		$writer->setProtocol($this->getProtocol());
@@ -408,10 +456,20 @@ class CraftingDataPacket extends DataPacket{
 		foreach($this->entries as $d){
 			$entryType = self::writeEntry($d, $writer, $counter++, $this->getProtocol());
 			if($entryType >= 0){
-				$this->putVarInt($entryType);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putVarInt($entryType);
+			    }else{
+			        $this->putInt($entryType);
+			        $this->putInt(strlen($writer->getBuffer()));
+			    }
                 $this->put($writer->getBuffer());
 			}else{
-				$this->putVarInt(-1);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putVarInt(-1);
+			    }else{
+			        $this->putInt(-1);
+			        $this->putInt(0);
+			    }
 			}
 
 			$writer->reset();

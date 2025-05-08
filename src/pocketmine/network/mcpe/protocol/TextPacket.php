@@ -77,7 +77,7 @@ class TextPacket extends DataPacket{
 			case self::TYPE_WHISPER:
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
-				$this->sourceName = $this->getString();
+				$this->sourceName = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 				if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->sourceThirdPartyName = $this->getString();
 		        	$this->sourcePlatform = $this->getVarInt();
@@ -88,23 +88,28 @@ class TextPacket extends DataPacket{
 			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
 			case self::TYPE_JSON_ANNOUNCEMENT:
-				$this->message = $this->getString();
+				$this->message = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 				break;
 			case self::TYPE_POPUP:
 			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_134){
-			        $this->sourceName = $this->getString();
-			        $this->message = $this->getString();
+			        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			            $this->sourceName = $this->getString();
+			            $this->message = $this->getString();
+			        }else{
+			            $this->sourceName = $this->getShortString();
+			            $this->message = $this->getShortString();
+			        }
 			        break;
 			    }
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
-				$this->message = $this->getString();
-				$count = $this->getUnsignedVarInt();
+				$this->message = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
+				$count = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getUnsignedVarInt() : $this->getByte();
 				if($count > self::PARAMETERS_LIMIT){
 					throw new UnexpectedValueException("Too many translation parameters count: $count");
 				}
 				for($i = 0; $i < $count; ++$i){
-					$this->parameters[] = $this->getString();
+					$this->parameters[] = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getString() : $this->getShortString();
 				}
 				break;
 		}
@@ -130,7 +135,11 @@ class TextPacket extends DataPacket{
 			case self::TYPE_WHISPER:
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case self::TYPE_ANNOUNCEMENT:
-				$this->putString($this->sourceName);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putString($this->sourceName);
+			    }else{
+			        $this->putShortString($this->sourceName);
+			    }
 				if($this->getProtocol() !== ProtocolInfo::PROTOCOL_201 && $this->getProtocol() >= ProtocolInfo::PROTOCOL_200 && $this->getProtocol() < ProtocolInfo::PROTOCOL_290){
 		        	$this->putString($this->sourceThirdPartyName);
 		        	$this->putVarInt($this->sourcePlatform);
@@ -141,20 +150,38 @@ class TextPacket extends DataPacket{
 			case self::TYPE_JSON_WHISPER:
 			case self::TYPE_JSON:
 			case self::TYPE_JSON_ANNOUNCEMENT:
-				$this->putString($this->message);
+			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			    	$this->putString($this->message);
+			    }else{
+			        $this->putShortString($this->message);
+			    }
 				break;
 			case self::TYPE_POPUP:
 			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_134){
-			        $this->putString($this->sourceName);
-			        $this->putString($this->message);
+			        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+			            $this->putString($this->sourceName);
+			            $this->putString($this->message);
+			        }else{
+			            $this->putShortString($this->sourceName);
+			            $this->putShortString($this->message);
+			        }
 			        break;
 			    }
 			case self::TYPE_TRANSLATION:
 			case self::TYPE_JUKEBOX_POPUP:
-				$this->putString($this->message);
-				$this->putUnsignedVarInt(count($this->parameters));
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    $this->putString($this->message);
+			    	$this->putUnsignedVarInt(count($this->parameters));
+				}else{
+				    $this->putShortString($this->message);
+				    $this->putByte(count($this->parameters));
+				}
 				foreach($this->parameters as $p){
-					$this->putString($p);
+				    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+				    	$this->putString($p);
+				    }else{
+				        $this->putShortString($p);
+				    }
 				}
 				break;
 		}

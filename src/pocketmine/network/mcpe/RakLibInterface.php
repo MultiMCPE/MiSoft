@@ -63,6 +63,7 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 	private const MCBE_RAKNET_PROTOCOL_VERSION_WITH_RAW_ZLIB_ENCODING = 10;
 	private const MCBE_RAKNET_PROTOCOL_VERSION = 9;
 	private const MCPE_RAKNET_PROTOCOL_VERSION = 8;
+	private const V_0_15_0_MCPE_RAKNET_PROTOCOL_VERSION = 7;
 
 	private const MCPE_RAKNET_PACKET_ID = "\xfe";
 
@@ -103,7 +104,8 @@ class RakLibInterface implements ServerInstance, AdvancedSourceInterface{
 			    self::MCBE_RAKNET_PROTOCOL_VERSION_WITHOUT_ZLIB_COMPRESSION,
 			    self::MCBE_RAKNET_PROTOCOL_VERSION_WITH_RAW_ZLIB_ENCODING,
 			    self::MCBE_RAKNET_PROTOCOL_VERSION,
-			    self::MCPE_RAKNET_PROTOCOL_VERSION
+			    self::MCPE_RAKNET_PROTOCOL_VERSION,
+			    self::V_0_15_0_MCPE_RAKNET_PROTOCOL_VERSION
 			],
 			$this->sleeper
 		);

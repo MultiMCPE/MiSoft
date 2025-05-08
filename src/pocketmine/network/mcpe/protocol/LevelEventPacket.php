@@ -176,9 +176,9 @@ class LevelEventPacket extends DataPacket{
 	public $data;
 
 	protected function decodePayload(){
-		$this->evid = $this->getVarInt();
+		$this->evid = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getShort();
 		$this->position = $this->getVector3();
-		$this->data = $this->getVarInt();
+		$this->data = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
@@ -187,7 +187,11 @@ class LevelEventPacket extends DataPacket{
         }else{
             $evid = $this->evid;
         }
-		$this->putVarInt($evid);
+        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($evid);
+        }else{
+            $this->putShort($evid);
+        }
 		$this->putVector3Nullable($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	switch($this->evid){
@@ -216,7 +220,11 @@ class LevelEventPacket extends DataPacket{
                 $meta = $this->data & Block::INTERNAL_METADATA_MASK;
                 $this->data = $id + ($meta << 8);
             }
-    	    $this->putVarInt($this->data);
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+    	        $this->putVarInt($this->data);
+            }else{
+                $this->putInt($this->data);
+            }
     	}
 	}
 

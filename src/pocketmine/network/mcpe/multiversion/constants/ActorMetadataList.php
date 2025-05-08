@@ -27,7 +27,29 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 abstract class ActorMetadataList{
 	public const METADATA = [
-		ProtocolInfo::PROTOCOL_100 => [
+	    ProtocolInfo::PROTOCOL_81 => [
+	        "DATA_FLAGS" => 0,
+	        "DATA_AIR" => 1,
+	        "DATA_NAMETAG" => 2,
+	        "DATA_SHOW_NAMETAG" => 3,
+	        "DATA_SILENT" => 4,
+
+			"DATA_POTION_COLOR" => 7,
+			"DATA_POTION_AMBIENT" => 8,
+
+			"DATA_ENTITY_AGE" => 14,
+			"DATA_NO_AI" => 15,
+			"DATA_PLAYER_FLAGS" => 16,
+	        "DATA_PLAYER_BED_POSITION" => 17,
+			"DATA_VARIANT" => 18,
+			"DATA_SWELL" => 19,
+			"DATA_BOAT_COLOR" => 20,
+			"DATA_IN_LOVE" => 21,
+
+			"DATA_LEAD_HOLDER_EID" => 23,
+			"DATA_LEAD" => 24
+	    ],
+		ProtocolInfo::PROTOCOL_90 => [
 			"DATA_FLAGS" => 0,
 			"DATA_HEALTH" => 1,
 			"DATA_VARIANT" => 2,
@@ -422,7 +444,15 @@ abstract class ActorMetadataList{
 	];
 
 	public const FLAGS = [
-		ProtocolInfo::PROTOCOL_100 => [
+	    ProtocolInfo::PROTOCOL_81 => [
+			"DATA_FLAG_ONFIRE" => 0,
+			"DATA_FLAG_SNEAKING" => 1,
+			"DATA_FLAG_RIDING" => 2,
+			"DATA_FLAG_SPRINTING" => 3,
+			"DATA_FLAG_ACTION" => 4,
+			"DATA_FLAG_INVISIBLE" => 5
+	    ],
+		ProtocolInfo::PROTOCOL_90 => [
 			"DATA_FLAG_ONFIRE" => 0,
 			"DATA_FLAG_SNEAKING" => 1,
 			"DATA_FLAG_RIDING" => 2,
