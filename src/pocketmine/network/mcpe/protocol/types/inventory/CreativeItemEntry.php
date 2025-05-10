@@ -33,36 +33,36 @@ final class CreativeItemEntry{
 
     public function setEntryId(int $entryId) : void{ $this->entryId = $entryId; }
 
-    public static function read(NetworkBinaryStream $in, int $protocolVersion) : self{
-        if($protocolVersion >= ProtocolInfo::PROTOCOL_419){
+    public static function read(NetworkBinaryStream $in) : self{
+        if($in->getProtocol() >= ProtocolInfo::PROTOCOL_419){
             $entryId = $in->getVarInt();
         }else{
             $entryId = $in->getUnsignedVarInt();
-            if($protocolVersion < ProtocolInfo::PROTOCOL_406){
+            if($in->getProtocol() < ProtocolInfo::PROTOCOL_406){
                 $in->getUnsignedVarInt();
             }
         }
 
         $item = $in->getSlot(false);
-        if($protocolVersion >= ProtocolInfo::PROTOCOL_776){
+        if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776){
             $groupId = $in->getUnsignedVarInt();
         }
 
         return new self($entryId, $item, $groupId ?? 0);
     }
 
-    public function write(NetworkBinaryStream $out, int $protocolVersion) : void{
-        if($protocolVersion >= ProtocolInfo::PROTOCOL_419){
+    public function write(NetworkBinaryStream $out) : void{
+        if($out->getProtocol() >= ProtocolInfo::PROTOCOL_419){
             $out->putVarInt($this->entryId);
         }else{
             $out->putUnsignedVarInt($this->entryId);
-            if($protocolVersion < ProtocolInfo::PROTOCOL_406){
+            if($out->getProtocol() < ProtocolInfo::PROTOCOL_406){
                 $out->putUnsignedVarInt($this->groupId);
             }
         }
 
         $out->putSlot($this->item, false);
-        if($protocolVersion >= ProtocolInfo::PROTOCOL_776){
+        if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776){
             $out->putUnsignedVarInt($this->groupId);
         }
     }

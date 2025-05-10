@@ -12,11 +12,15 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types;
+namespace pocketmine\network\mcpe\protocol\types\inventory;
 
-enum PredictedResult : int{
+use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
+
+enum InventoryLayout : int{
 	use PacketIntEnumTrait;
 
-	case FAILURE = 0;
-	case SUCCESS = 1;
+	case NONE = 0;
+	case SURVIVAL = 1;
+	case RECIPE_BOOK = 2;
+	case CREATIVE = 3;
 }

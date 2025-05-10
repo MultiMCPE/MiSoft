@@ -12,16 +12,15 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types;
+namespace pocketmine\network\mcpe\protocol\types\inventory;
 
-enum InventoryLeftTab : int{
+use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
+
+enum InventoryRightTab : int{
 	use PacketIntEnumTrait;
 
 	case NONE = 0;
-	case CONSTRUCTION = 1;
-	case EQUIPMENT = 2;
-	case ITEMS = 3;
-	case NATURE = 4;
-	case SEARCH = 5;
-	case SURVIVAL = 6;
+	case FULL_SCREEN = 1;
+	case CRAFTING = 2;
+	case ARMOR = 3;
 }

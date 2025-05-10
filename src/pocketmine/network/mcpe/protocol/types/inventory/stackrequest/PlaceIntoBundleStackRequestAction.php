@@ -12,12 +12,16 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types;
+namespace pocketmine\network\mcpe\protocol\types\inventory\stackrequest;
 
-enum TriggerType : int{
-	use PacketIntEnumTrait;
+use pocketmine\network\mcpe\protocol\types\GetTypeIdFromConstTrait;
 
-	case UNKNOWN = 0;
-	case PLAYER_INPUT = 1;
-	case SIMULATION_TICK = 2;
+/**
+ * Insert an item into a bundle.
+ */
+final class PlaceIntoBundleStackRequestAction extends ItemStackRequestAction{
+	use GetTypeIdFromConstTrait;
+	use TakeOrPlaceStackRequestActionTrait;
+
+	public const ID = ItemStackRequestActionType::PLACE_INTO_BUNDLE;
 }

@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\FullContainerName;
+use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
 use function count;
 
 class ContainerRegistryCleanupPacket extends DataPacket{
@@ -42,14 +42,14 @@ class ContainerRegistryCleanupPacket extends DataPacket{
 	protected function decodePayload() : void{
 		$this->removedContainers = [];
 		for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
-			$this->removedContainers[] = FullContainerName::read($this, $this->getProtocol());
+			$this->removedContainers[] = FullContainerName::read($this);
 		}
 	}
 
 	protected function encodePayload() : void{
 		$this->putUnsignedVarInt(count($this->removedContainers));
 		foreach($this->removedContainers as $container){
-			$container->write($this, $this->getProtocol());
+			$container->write($this);
 		}
 	}
 

@@ -121,7 +121,7 @@ class CraftingDataPacket extends DataPacket{
                                 }
                             }
                             if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-                                $entry["net_id"] = $this->readGenericTypeNetworkId();
+                                $entry["net_id"] = $this->readRecipeNetId();
                             }
                         }
                     }
@@ -171,7 +171,7 @@ class CraftingDataPacket extends DataPacket{
                                         }
                                     }
                                 }
-                                $entry["net_id"] = $this->readGenericTypeNetworkId();
+                                $entry["net_id"] = $this->readRecipeNetId();
                             }
                         }
                     }
@@ -224,7 +224,7 @@ class CraftingDataPacket extends DataPacket{
                 case self::ENTRY_MULTI:
                     $entry["uuid"] = $this->getUUID()->toString();
                     if($this->getProtocol() >= ProtocolInfo::PROTOCOL_392){
-                        $entry["net_id"] = $this->readGenericTypeNetworkId();
+                        $entry["net_id"] = $this->readRecipeNetId();
                     }
                     break;
                 default:
@@ -332,7 +332,7 @@ class CraftingDataPacket extends DataPacket{
 					if($playerProtocol >= ProtocolInfo::PROTOCOL_685){
                         $stream->putBool(true); //RecipeUnlockingRequirement
 					}
-	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	    $stream->writeRecipeNetId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
 	    	}
 		}
@@ -385,7 +385,7 @@ class CraftingDataPacket extends DataPacket{
                             $stream->putBool(true); //RecipeUnlockingRequirement
 						}
 					}
-	        	    $stream->writeGenericTypeNetworkId($pos); //TODO: ANOTHER recipe ID, only used on the network
+	        	    $stream->writeRecipeNetId($pos); //TODO: ANOTHER recipe ID, only used on the network
 	        	}
 	    	}
 		}

@@ -12,13 +12,14 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types;
+namespace pocketmine\network\mcpe\protocol\types\inventory;
 
-enum InventoryRightTab : int{
+use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
+
+enum TriggerType : int{
 	use PacketIntEnumTrait;
 
-	case NONE = 0;
-	case FULL_SCREEN = 1;
-	case CRAFTING = 2;
-	case ARMOR = 3;
+	case UNKNOWN = 0;
+	case PLAYER_INPUT = 1;
+	case SIMULATION_TICK = 2;
 }
