@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types\inventory;
 
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use UnexpectedValueException;
 use function count;
 
 final class InventoryTransactionChangedSlotsHack{
@@ -48,8 +49,12 @@ final class InventoryTransactionChangedSlotsHack{
 
 	public static function read(NetworkBinaryStream $in) : self{
 		$containerId = $in->getByte();
+		$len = $in->getUnsignedVarInt();
+		if($len >= 128){
+			throw new UnexpectedValueException("Too many slots count in inventory transaction: " . $len);
+		}
 		$changedSlots = [];
-		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
+		for($i = 0, $len; $i < $len; ++$i){
 			$changedSlots[] = $in->getByte();
 		}
 		return new self($containerId, $changedSlots);

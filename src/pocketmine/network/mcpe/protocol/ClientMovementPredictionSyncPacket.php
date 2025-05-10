@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\network\mcpe\protocol\types\BitSet;
+use pocketmine\network\mcpe\protocol\serializer\BitSet;
 use pocketmine\network\mcpe\NetworkSession;
 use InvalidArgumentException;
 
