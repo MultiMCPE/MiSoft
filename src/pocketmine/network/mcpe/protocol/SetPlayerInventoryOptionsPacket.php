@@ -15,9 +15,9 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\InventoryLayout;
-use pocketmine\network\mcpe\protocol\types\InventoryLeftTab;
-use pocketmine\network\mcpe\protocol\types\InventoryRightTab;
+use pocketmine\network\mcpe\protocol\types\inventory\InventoryLayout;
+use pocketmine\network\mcpe\protocol\types\inventory\InventoryLeftTab;
+use pocketmine\network\mcpe\protocol\types\inventory\InventoryRightTab;
 
 class SetPlayerInventoryOptionsPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_PLAYER_INVENTORY_OPTIONS_PACKET;

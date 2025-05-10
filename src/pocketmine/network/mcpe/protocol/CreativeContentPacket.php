@@ -65,13 +65,13 @@ class CreativeContentPacket extends DataPacket{
 		$this->groups = [];
         if($this->getProtocol() < ProtocolInfo::PROTOCOL_406 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
 	    	for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
-		    	$this->groups[] = CreativeGroupEntry::read($this, $this->getProtocol());
+		    	$this->groups[] = CreativeGroupEntry::read($this);
             }
 		}
 
 		$this->items = [];
 		for($i = 0, $len = $this->getUnsignedVarInt(); $i < $len; ++$i){
-			$this->items[] = CreativeItemEntry::read($this, $this->getProtocol());
+			$this->items[] = CreativeItemEntry::read($this);
 		}
     }
 
@@ -79,13 +79,13 @@ class CreativeContentPacket extends DataPacket{
         if($this->getProtocol() < ProtocolInfo::PROTOCOL_406 || $this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
             $this->putUnsignedVarInt(count($this->groups));
             foreach($this->groups as $entry){
-                $entry->write($this, $this->getProtocol());
+                $entry->write($this);
             }
         }
 
         $this->putUnsignedVarInt(count($this->items));
         foreach($this->items as $entry){
-            $entry->write($this, $this->getProtocol());
+            $entry->write($this);
         }
     }
 

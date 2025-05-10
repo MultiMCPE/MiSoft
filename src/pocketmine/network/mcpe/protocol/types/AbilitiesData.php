@@ -41,27 +41,27 @@ final class AbilitiesData{
 	 */
 	public function getAbilityLayers() : array{ return $this->abilityLayers; }
 
-	public static function decode(NetworkBinaryStream $in, int $playerProtocol) : self{
+	public static function decode(NetworkBinaryStream $in) : self{
 		$targetActorUniqueId = $in->getLLong(); //WHY IS THIS NON-STANDARD?
 		$playerPermission = $in->getByte();
 		$commandPermission = $in->getByte();
 
 		$abilityLayers = [];
 		for($i = 0, $len = $in->getByte(); $i < $len; $i++){
-			$abilityLayers[] = AbilitiesLayer::decode($in, $playerProtocol);
+			$abilityLayers[] = AbilitiesLayer::decode($in);
 		}
 
 		return new self($commandPermission, $playerPermission, $targetActorUniqueId, $abilityLayers);
 	}
 
-	public function encode(NetworkBinaryStream $out, int $playerProtocol) : void{
+	public function encode(NetworkBinaryStream $out) : void{
 		$out->putLLong($this->targetActorUniqueId);
 		$out->putByte($this->playerPermission);
 		$out->putByte($this->commandPermission);
 
 		$out->putByte(count($this->abilityLayers));
 		foreach($this->abilityLayers as $abilityLayer){
-			$abilityLayer->encode($out, $playerProtocol);
+			$abilityLayer->encode($out);
 		}
 	}
 }
