@@ -77,12 +77,12 @@ final class AbilitiesLayer{
 
 	public function getWalkSpeed() : ?float{ return $this->walkSpeed; }
 
-	public static function decode(NetworkBinaryStream $in) : self{
+	public static function decode(NetworkBinaryStream $in, int $playerProtocol) : self{
 		$layerId = $in->getLShort();
 		$setAbilities = $in->getLInt();
 		$setAbilityValues = $in->getLInt();
 		$flySpeed = $in->getLFloat();
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
 			$verticalFlySpeed = $in->getLFloat();
 		}
 		$walkSpeed = $in->getLFloat();
@@ -102,7 +102,7 @@ final class AbilitiesLayer{
 			}
 			$flySpeed = null;
 		}
-		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
 		    if(($setAbilities & (1 << self::ABILITY_VERTICAL_FLY_SPEED)) === 0){
 			    if($verticalFlySpeed !== 0.0){
 				    throw new RuntimeException("Vertical fly speed should be zero if the layer does not set it");
@@ -120,7 +120,7 @@ final class AbilitiesLayer{
 		return new self($layerId, $boolAbilities, $flySpeed, $verticalFlySpeed ?? 0.0, $walkSpeed);
 	}
 
-	public function encode(NetworkBinaryStream $out) : void{
+	public function encode(NetworkBinaryStream $out, int $playerProtocol) : void{
 		$out->putLShort($this->layerId);
 
 		$setAbilities = 0;
@@ -132,7 +132,7 @@ final class AbilitiesLayer{
 		if($this->flySpeed !== null){
 			$setAbilities |= (1 << self::ABILITY_FLY_SPEED);
 		}
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
 			if($this->verticalFlySpeed !== null){
 				$setAbilities |= (1 << self::ABILITY_VERTICAL_FLY_SPEED);
 			}
@@ -144,7 +144,7 @@ final class AbilitiesLayer{
 		$out->putLInt($setAbilities);
 		$out->putLInt($setAbilityValues);
 		$out->putLFloat($this->flySpeed ?? 0);
-		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_776){
+		if($playerProtocol >= ProtocolInfo::PROTOCOL_776){
 			$out->putLFloat($this->verticalFlySpeed ?? 0);
 		}
 		$out->putLFloat($this->walkSpeed ?? 0);

@@ -84,8 +84,4 @@ class ShulkerBox extends Spawnable implements InventoryHolder, Container, Nameab
         $this->saveItems($nbt);
         $nbt->setByte("facing", $this->facing);
     }
-
-    public function writeBlockData(CompoundTag $nbt){
-        $this->saveItems($nbt);
-    }
 }

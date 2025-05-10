@@ -14,8 +14,11 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-trait GetTypeIdFromConstTrait{
-	public function getTypeId() : int{
-		return self::ID;
-	}
+enum InventoryLayout : int{
+	use PacketIntEnumTrait;
+
+	case NONE = 0;
+	case SURVIVAL = 1;
+	case RECIPE_BOOK = 2;
+	case CREATIVE = 3;
 }

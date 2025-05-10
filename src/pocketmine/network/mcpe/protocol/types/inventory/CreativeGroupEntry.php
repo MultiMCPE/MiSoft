@@ -32,8 +32,8 @@ final class CreativeGroupEntry{
 
     public function getIcon() : Item{ return $this->icon; }
 
-    public static function read(NetworkBinaryStream $in) : self{
-        if($in->getProtocol() < ProtocolInfo::PROTOCOL_406){
+    public static function read(NetworkBinaryStream $in, int $protocolVersion) : self{
+        if($protocolVersion < ProtocolInfo::PROTOCOL_406){
             $categoryName = $in->getString();
             $icon = ItemFactory::get($in->getLInt());
             $in->getUnsignedVarInt(); // nbt count
@@ -45,8 +45,8 @@ final class CreativeGroupEntry{
         return new self($categoryId ?? 0, $categoryName, $icon);
     }
 
-    public function write(NetworkBinaryStream $out) : void{
-        if($out->getProtocol() < ProtocolInfo::PROTOCOL_406){
+    public function write(NetworkBinaryStream $out, int $protocolVersion) : void{
+        if($protocolVersion < ProtocolInfo::PROTOCOL_406){
             $out->putString($this->categoryName);
             $out->putLInt($this->icon->getId());
             $out->putUnsignedVarInt(0); // nbt count

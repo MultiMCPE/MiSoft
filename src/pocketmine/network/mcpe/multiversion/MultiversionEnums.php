@@ -32,14 +32,12 @@ use pocketmine\network\mcpe\multiversion\constants\ParticleIds;
 use pocketmine\network\mcpe\multiversion\constants\PlayerActionIds;
 use pocketmine\network\mcpe\multiversion\constants\ResourcePackTypeIds;
 use pocketmine\network\mcpe\multiversion\constants\TextPacketTypeIds;
-use pocketmine\network\mcpe\multiversion\constants\ItemStackRequestActionTypeIds;
 use pocketmine\network\mcpe\multiversion\utils\TableConverter;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\PlayerActionPacket;
 use pocketmine\network\mcpe\protocol\TextPacket;
 use pocketmine\network\mcpe\protocol\types\ResourcePackType;
-use pocketmine\network\mcpe\protocol\types\inventory\stackrequest\ItemStackRequestActionType;
 use ReflectionClass;
 use RuntimeException;
 use SplFixedArray;
@@ -67,8 +65,6 @@ abstract class MultiversionEnums{
     public static $textPacketTypes = [];
     /** @var SplFixedArray<int>[] */
     public static $particleIds = [];
-    /** @var SplFixedArray<int>[] */
-    public static $itemStackRequestActionIds = [];
 
     public static function init() : void{
         static::$attributesList = AttributeNameIds::ATTRIBUTE_NAMES;
@@ -85,7 +81,6 @@ abstract class MultiversionEnums{
         static::initList(PlayerActionPacket::class, PlayerActionIds::PLAYER_ACTION_IDS, static::$playerActions);
         static::initList(ResourcePackType::class, ResourcePackTypeIds::RESOURCE_PACK_TYPE_IDS, static::$resourcePackTypes);
         static::initList(TextPacket::class, TextPacketTypeIds::TEXT_PACKET_TYPE_IDS, static::$textPacketTypes);
-        static::initList(ItemStackRequestActionType::class, ItemStackRequestActionTypeIds::ITEM_STACK_REQUEST_ACTION_TYPE_IDS, static::$itemStackRequestActionIds);
         static::initList(Particle::class, ParticleIds::PARTICLE_IDS, static::$particleIds);
     }
 
@@ -296,35 +291,5 @@ abstract class MultiversionEnums{
             }
         }
         throw new RuntimeException("Not founded particle ids list for protocol $playerProtocol, MCPE library need to update");
-    }
-
-    /**
-     * @param int $playerProtocol
-     * @param int $itemStackRequestActionTypeId
-     * 
-     * @return int
-     */
-    public static function getItemStackRequestActionType(int $playerProtocol, int $itemStackRequestActionTypeId) : int{
-        foreach(self::$itemStackRequestActionIds as $protocol => $itemStackRequestActions){
-            if($playerProtocol >= $protocol){
-                return $itemStackRequestActions[self::TO][$itemStackRequestActionTypeId];
-            }
-        }
-        throw new RuntimeException("Not founded item stack action types list for protocol $playerProtocol, MCPE library need to update");
-    }
-
-    /**
-     * @param int $playerProtocol
-     * @param int $itemStackRequestActionType
-     * 
-     * @return int
-     */
-    public static function getItemStackRequestActionTypeId(int $playerProtocol, int $itemStackRequestActionType) : int{
-        foreach(self::$itemStackRequestActionTypes as $protocol => $itemStackRequestActions){
-            if($playerProtocol >= $protocol){
-                return $itemStackRequestActions[self::FROM][$itemStackRequestActionType];
-            }
-        }
-        throw new RuntimeException("Not founded item stack action types list for protocol $playerProtocol, MCPE library need to update");
     }
 }

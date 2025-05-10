@@ -26,7 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\NetworkSession;
-use pocketmine\network\mcpe\protocol\types\inventory\FullContainerName;
+use pocketmine\network\mcpe\protocol\types\FullContainerName;
 use pocketmine\network\mcpe\protocol\types\ContainerIds;
 use function count;
 
@@ -58,7 +58,7 @@ class InventoryContentPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				$this->containerName = FullContainerName::read($this);
+				$this->containerName = FullContainerName::read($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
 					$this->storage = $this->getSlot();
 				}else{
@@ -87,7 +87,7 @@ class InventoryContentPacket extends DataPacket{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_729){
-				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this);
+				($this->containerName ?? new FullContainerName(ContainerIds::FIRST))->write($this, $this->getProtocol());
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
 					$this->putSlot($this->storage ?? ItemFactory::get(Item::AIR));
 				}else{

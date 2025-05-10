@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 final class PlayerMovementSettings{
@@ -47,7 +47,7 @@ final class PlayerMovementSettings{
 
 	public function isServerAuthoritativeBlockBreaking() : bool{ return $this->serverAuthoritativeBlockBreaking; }
 
-	public static function read(NetworkBinaryStream $in) : self{
+	public static function read(DataPacket $in) : self{
 		$movementType = ServerAuthMovementMode::fromPacket($in->getVarInt());
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$rewindHistorySize = $in->getVarInt();
@@ -56,7 +56,7 @@ final class PlayerMovementSettings{
 		return new self($movementType, $rewindHistorySize ?? 0, $serverAuthBlockBreaking ?? false);
 	}
 
-	public function write(NetworkBinaryStream $out) : void{
+	public function write(DataPacket $out) : void{
 		$out->putVarInt($this->movementType->value);
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$out->putVarInt($this->rewindHistorySize);

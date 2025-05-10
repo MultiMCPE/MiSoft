@@ -28,8 +28,9 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
+use pocketmine\nbt\tag\StringTag;
 use pocketmine\tile\Container;
-use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\tile\Nameable;
 use pocketmine\tile\ShulkerBox as TileShulkerBox;
 use pocketmine\tile\Tile;
 
@@ -68,12 +69,22 @@ class ShulkerBox extends Transparent{
     }
 
     public function onBreak(Item $item, Player $player = null) : bool{
-        $t = $this->level->getTile($this);
+        $t = $this->getLevelNonNull()->getTile($this);
         if($t instanceof TileShulkerBox){
-            $t->getInventory()->clearAll(false);
+            $item = ItemFactory::get($this->id, $this instanceof UndyedShulkerBox ? 0 : $this->meta);
+            $cleanedNBT = $t->getCleanedNBT();
+            if($cleanedNBT->hasTag(Nameable::TAG_CUSTOM_NAME, StringTag::class)){
+                $item->setCustomName($cleanedNBT->getTag(Nameable::TAG_CUSTOM_NAME)->getValue());
+            }
+            $nbt = clone $item->getNamedTag();
+            $nbt->setTag($cleanedNBT->getTag(Container::TAG_ITEMS));
+            $item->setNamedTag($nbt);
+            $this->getLevelNonNull()->dropItem($this->add(0.5, 0.5, 0.5), $item);
+            $t->getInventory()->clearAll();
+            $t->close();
         }
-
-        return parent::onBreak($item, $player);
+        $this->getLevelNonNull()->setBlock($this, new Air(), true, true);
+        return true;
     }
 
     public function onActivate(Item $item, Player $player = null) : bool{
@@ -99,20 +110,7 @@ class ShulkerBox extends Transparent{
         return true;
     }
 
-    public function getDropsForCompatibleTool(Item $item) : array{
-        $item = ItemFactory::get($this->id, $this->meta);
-
-        $t = $this->level->getTile($this);
-        if($t instanceof TileShulkerBox){
-    	    $blockData = new CompoundTag();
-			$t->writeBlockData($blockData);
-			$item->setNamedTag($blockData);
-
-			if($t->hasName()){
-			    $item->setCustomName($t->getName());
-			}
-        }
-
-        return [$item];
+    public function getDrops(Item $item) : array{
+        return [];
     }
 }

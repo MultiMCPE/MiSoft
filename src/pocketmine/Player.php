@@ -2011,7 +2011,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		$revert = false;
 
-		if($distanceSquared > 100){
+		if($distanceSquared > 1000){
 			//TODO: this is probably too big if we process every movement
 			/* !!! BEWARE YE WHO ENTER HERE !!!
 			 *
@@ -3270,6 +3270,9 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$rawPos = $packet->position;
 		foreach([$rawPos->x, $rawPos->y, $rawPos->z, $packet->yaw, $packet->headYaw, $packet->pitch] as $float){
 			if(is_infinite($float) || is_nan($float)){
+			    if($this->getProtocol() < ProtocolInfo::PROTOCOL_90){
+			        return true; // just ignore this movement
+			    }
 				$this->server->getLogger()->debug("Invalid movement from " . $this->getName() . ", contains NAN/INF components");
 				return false;
 			}
