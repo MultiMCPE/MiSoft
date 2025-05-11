@@ -126,6 +126,7 @@ use pocketmine\nbt\tag\DoubleTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
+use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
 use pocketmine\network\mcpe\multiversion\block\BlockPalette;
 use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
 use pocketmine\network\mcpe\multiversion\ProtocolConvertor;
@@ -137,7 +138,6 @@ use pocketmine\network\mcpe\protocol\AnimatePacket;
 use pocketmine\network\mcpe\protocol\AvailableActorIdentifiersPacket;
 use pocketmine\network\mcpe\protocol\AvailableCommandsPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
-use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
 use pocketmine\network\mcpe\protocol\BlockActorDataPacket;
 use pocketmine\network\mcpe\protocol\BlockPickRequestPacket;
 use pocketmine\network\mcpe\protocol\BookEditPacket;
@@ -2982,7 +2982,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 				$this->sendDataPacket(ItemRegistryPacket::create($palette::getEntries()));
 			}
 	    	$this->sendDataPacket(new AvailableActorIdentifiersPacket());
-	    	$this->sendDataPacket(new BiomeDefinitionListPacket());
+	    	$this->sendDataPacket(BiomeDefinitionPalette::getBiomeDefinitionListPacket($this->getProtocol()));
         }
 
 		$this->level->sendTime($this);

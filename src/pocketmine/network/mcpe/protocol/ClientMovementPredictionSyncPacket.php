@@ -21,8 +21,6 @@ use InvalidArgumentException;
 class ClientMovementPredictionSyncPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::CLIENT_MOVEMENT_PREDICTION_SYNC_PACKET;
 
-    public const FLAG_LENGTH = 123;
-
 	private BitSet $flags;
 
 	private float $scale;
@@ -86,10 +84,6 @@ class ClientMovementPredictionSyncPacket extends DataPacket{
 		int $actorUniqueId,
 		bool $actorFlyingState,
 	) : self{
-		if($flags->getLength() !== self::FLAG_LENGTH){
-			throw new InvalidArgumentException("Input flags must be " . self::FLAG_LENGTH . " bits long");
-		}
-
 		return self::internalCreate($flags, $scale, $width, $height, $movementSpeed, $underwaterMovementSpeed, $lavaMovementSpeed, $jumpStrength, $health, $hunger, $actorUniqueId, $actorFlyingState);
 	}
 
@@ -118,7 +112,9 @@ class ClientMovementPredictionSyncPacket extends DataPacket{
     public function getActorFlyingState() : bool{ return $this->actorFlyingState; }
 
 	protected function decodePayload() : void{
-		$this->flags = BitSet::read($this, $this->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? self::FLAG_LENGTH : 120);
+		$this->flags = BitSet::read($this, $this->getProtocol() >= ProtocolInfo::PROTOCOL_800 ? 124 : (
+			$this->getProtocol() >= ProtocolInfo::PROTOCOL_786 ? 123 : 120
+		));
 		$this->scale = $this->getLFloat();
 		$this->width = $this->getLFloat();
 		$this->height = $this->getLFloat();

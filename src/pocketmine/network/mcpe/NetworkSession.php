@@ -250,6 +250,8 @@ use pocketmine\network\mcpe\protocol\ClientMovementPredictionSyncPacket;
 use pocketmine\network\mcpe\protocol\UpdateClientOptionsPacket;
 use pocketmine\network\mcpe\protocol\PlayerVideoCapturePacket;
 use pocketmine\network\mcpe\protocol\PlayerUpdateEntityOverridesPacket;
+use pocketmine\network\mcpe\protocol\handlePlayerLocation;
+use pocketmine\network\mcpe\protocol\handleClientboundControlSchemeSet;
 
 abstract class NetworkSession{
 
@@ -1160,6 +1162,14 @@ abstract class NetworkSession{
 	}
 
 	public function handlePlayerUpdateEntityOverridesPacket(PlayerUpdateEntityOverridesPacket $packet) : bool{
+		return false;
+	}
+
+	public function handlePlayerLocation(PlayerLocationPacket $packet) : bool{
+		return false;
+	}
+
+	public function handleClientboundControlSchemeSet(ClientboundControlSchemeSetPacket $packet) : bool{
 		return false;
 	}
 }

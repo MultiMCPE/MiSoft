@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\utils\Color;
 use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
@@ -122,6 +123,9 @@ class PlayerListPacket extends DataPacket{
 			                	$entry->isHost = $this->getBool();
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 							    	$entry->isSubClient = $this->getBool();
+									if($this->getProtocol() >= ProtocolInfo::PROTOCOL_800){
+										$entry->color = Color::fromARGB($this->getLInt());
+									}
 								}
 			            	}
 			        	}
@@ -225,6 +229,9 @@ class PlayerListPacket extends DataPacket{
                                 $this->putBool($entry->isHost);
 								if($this->getProtocol() >= ProtocolInfo::PROTOCOL_649){
 									$this->putBool($entry->isSubClient);
+									if($this->getProtocol() >= ProtocolInfo::PROTOCOL_800){
+										$this->putLInt(($entry->color ?? new Color(255, 255, 255))->toARGB());
+									}
 								}
 			            	}
 			        	}

@@ -23,14 +23,21 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\multiversion\biomes;
 
+use pocketmine\utils\Color;
+use pocketmine\network\mcpe\protocol\BiomeDefinitionListPacket;
+use pocketmine\network\mcpe\protocol\types\biome\BiomeDefinitionEntry;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use RuntimeException;
 use function array_diff;
 use function scandir;
 use function file_get_contents;
+use function json_decode;
 use function krsort;
+use function count;
 use const pocketmine\RESOURCE_PATH;
 
 class BiomeDefinitionPalette{
-    /** @var string[] */
+    /** @var BiomeDefinitionListPacket[] */
     protected static $biomeDefs = null;
 
     /**
@@ -40,7 +47,39 @@ class BiomeDefinitionPalette{
         self::$biomeDefs = [];
         $biomeDefsDirectory = RESOURCE_PATH . '/vanilla/biomes/';
         foreach(array_diff(scandir($biomeDefsDirectory), ["..", "."]) as $protocol){
-            self::$biomeDefs[$protocol] = file_get_contents($biomeDefsDirectory . $protocol . '/biome_definitions.nbt');
+            $protocol = (int) $protocol;
+            if($protocol >= ProtocolInfo::PROTOCOL_800){
+                $data = json_decode(file_get_contents($biomeDefsDirectory . $protocol . '/biome_definitions.json'), true);
+
+				$entries = [];
+                foreach($data as $biomeName => $biomeDefinition){
+                    $mapWaterColour = $biomeDefinition["mapWaterColour"];
+			    	$entries[] = new BiomeDefinitionEntry(
+				    	(string) $biomeName,
+				    	$biomeDefinition["id"],
+				    	$biomeDefinition["temperature"],
+				    	$biomeDefinition["downfall"],
+				    	$biomeDefinition["redSporeDensity"],
+				    	$biomeDefinition["blueSporeDensity"],
+				    	$biomeDefinition["ashDensity"],
+				    	$biomeDefinition["whiteAshDensity"],
+				    	$biomeDefinition["depth"],
+					    $biomeDefinition["scale"],
+					    new Color(
+					    	$mapWaterColour["r"],
+					    	$mapWaterColour["g"],
+					    	$mapWaterColour["b"],
+					    	$mapWaterColour["a"]
+				    	),
+				    	$biomeDefinition["rain"],
+				    	count($biomeDefinition["tags"]) > 0 ? $biomeDefinition["tags"] : null,
+			    	);
+                }
+                $packet = BiomeDefinitionListPacket::fromDefinitions($entries);
+            }else{
+                $packet = BiomeDefinitionListPacket::create(file_get_contents($biomeDefsDirectory . $protocol . '/biome_definitions.nbt'));
+            }
+            self::$biomeDefs[$protocol] = $packet;
         }
         krsort(self::$biomeDefs);
     }
@@ -48,14 +87,14 @@ class BiomeDefinitionPalette{
     /**
      * @param int $playerProtocol
      * 
-     * @return string
+     * @return BiomeDefinitionListPacket
      */
-    public static function getBiomesCache(int $playerProtocol) : string{
-        foreach(self::$biomeDefs as $protocol => $cache){
+    public static function getBiomeDefinitionListPacket(int $playerProtocol) : BiomeDefinitionListPacket{
+        foreach(self::$biomeDefs as $protocol => $biomeDefinitionList){
             if($playerProtocol >= $protocol){
-                return $cache;
+                return $biomeDefinitionList;
             }
         }
-        return "";
+        throw new RuntimeException("Not founded biome definition list packet for protocol $playerProtocol, MCBE library need to update");
     }
 }

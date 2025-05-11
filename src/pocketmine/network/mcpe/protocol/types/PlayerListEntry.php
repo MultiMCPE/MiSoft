@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol\types;
 
 use pocketmine\entity\Skin;
+use pocketmine\utils\Color;
 use pocketmine\utils\UUID;
 
 class PlayerListEntry{
@@ -52,6 +53,8 @@ class PlayerListEntry{
 	public $isHost = false;
 	/** @var bool */
 	public $isSubClient = false;
+	/** @var ?Color */
+	public $color = null;
 
 	public static function createRemovalEntry(UUID $uuid) : PlayerListEntry{
 		$entry = new PlayerListEntry();
@@ -60,7 +63,7 @@ class PlayerListEntry{
 		return $entry;
 	}
 
-	public static function createAdditionEntry(UUID $uuid, int $entityUniqueId, string $username, Skin $skin, string $xboxUserId = "", string $platformChatId = "", string $thirdPartyName = "", int $platform = 0, int $buildPlatform = -1, bool $isTeacher = false, bool $isHost = false, bool $isSubClient = false) : PlayerListEntry{
+	public static function createAdditionEntry(UUID $uuid, int $entityUniqueId, string $username, Skin $skin, string $xboxUserId = "", string $platformChatId = "", string $thirdPartyName = "", int $platform = 0, int $buildPlatform = -1, bool $isTeacher = false, bool $isHost = false, bool $isSubClient = false, ?Color $color = null) : PlayerListEntry{
 		$entry = new PlayerListEntry();
 		$entry->uuid = $uuid;
 		$entry->entityUniqueId = $entityUniqueId;
@@ -74,6 +77,7 @@ class PlayerListEntry{
 		$entry->isTeacher = $isTeacher;
 		$entry->isHost = $isHost;
 		$entry->isSubClient = $isSubClient;
+		$entry->color = $color;
 
 		return $entry;
 	}
