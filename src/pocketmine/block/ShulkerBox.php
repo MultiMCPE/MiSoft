@@ -119,7 +119,7 @@ class ShulkerBox extends Transparent{
 
     public function getBlockProtocol(int $protocol) : ?Block{
         if($protocol < ProtocolInfo::PROTOCOL_100){
-            return new Dirt();
+            return new Chest();
         }
 
         return parent::getBlockProtocol($protocol);
