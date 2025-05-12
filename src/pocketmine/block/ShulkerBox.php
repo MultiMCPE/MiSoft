@@ -27,6 +27,7 @@ use pocketmine\block\utils\ColorBlockMetaHelper;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\tile\Container;
 use pocketmine\nbt\tag\CompoundTag;
@@ -114,5 +115,13 @@ class ShulkerBox extends Transparent{
         }
 
         return [$item];
+    }
+
+    public function getBlockProtocol(int $protocol) : ?Block{
+        if($protocol < ProtocolInfo::PROTOCOL_100){
+            return new Dirt();
+        }
+
+        return parent::getBlockProtocol($protocol);
     }
 }
