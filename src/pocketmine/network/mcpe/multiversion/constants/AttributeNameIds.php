@@ -34,13 +34,13 @@ final class AttributeNameIds{
 	public const ATTRIBUTE_NAMES = [
 	    ProtocolInfo::PROTOCOL_90 => [
 	        Attribute::ABSORPTION => "minecraft:absorption",
-	        Attribute::SATURATION => "minecraft:saturation",
-	        Attribute::EXHAUSTION => "minecraft:exhaustion",
+	        Attribute::SATURATION => "minecraft:player.saturation",
+	        Attribute::EXHAUSTION => "minecraft:player.exhaustion",
 	        Attribute::KNOCKBACK_RESISTANCE => "minecraft:knockback_resistance",
 	        Attribute::HEALTH => "minecraft:health",
 	        Attribute::MOVEMENT_SPEED => "minecraft:movement",
 	        Attribute::FOLLOW_RANGE => "minecraft:follow_range",
-	        Attribute::HUNGER => "minecraft:hunger",
+	        Attribute::HUNGER => "minecraft:player.hunger",
 	        Attribute::ATTACK_DAMAGE => "minecraft:attack_damage",
 	        Attribute::EXPERIENCE_LEVEL => "minecraft:player.level",
 	        Attribute::EXPERIENCE => "minecraft:player.experience",
