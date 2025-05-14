@@ -70,15 +70,17 @@ class ResourcePacksInfoPacket extends DataPacket{
 		    	$this->getString();
 		    	$this->getString();
 		    	$this->getLLong();
-		    	$this->getString();
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 		        	$this->getString();
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
 		            	$this->getString();
-		        	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		                	$this->getBool();
-                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                                $this->getBool();
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		                	$this->getString();
+		        	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		                    	$this->getBool();
+                                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                    $this->getBool();
+                                }
 							}
                         }
 		        	}
@@ -95,20 +97,22 @@ class ResourcePacksInfoPacket extends DataPacket{
 			}
 			$this->getString();
             $this->getLLong();
-			$this->getString();
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
 		    	$this->getString();
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		    	    $this->getString();
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-		            	$this->getBool();
-                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                            $this->getBool();
-                        }
-		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
-		            	    $this->getBool();
-							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-								$this->getString();
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        	$this->getString();
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		    	        $this->getString();
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+		                	$this->getBool();
+                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                $this->getBool();
+                            }
+		                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
+		            	        $this->getBool();
+						    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+							    	$this->getString();
+						    	}
 							}
 		            	}
 		        	}
@@ -147,15 +151,17 @@ class ResourcePacksInfoPacket extends DataPacket{
 		    	$this->putString($entry->getPackId());
 		    	$this->putString($entry->getPackVersion());
                 $this->putLLong($entry->getPackSize());
-		    	$this->putString(""); //TODO: encryption key
-			    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-		        	$this->putString(""); //TODO: subpack name
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		            	$this->putString($entry->getPackId()); //TODO: content identity
-		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-                            $this->putBool(false); //TODO: has scripts (?)
-                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                                $this->putBool(false); //TODO: is addon pack
+                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		        	$this->putString(""); //TODO: encryption key
+			        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		            	$this->putString(""); //TODO: subpack name
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		                	$this->putString($entry->getPackId()); //TODO: content identity
+		                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+                                $this->putBool(false); //TODO: has scripts (?)
+                                if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                    $this->putBool(false); //TODO: is addon pack
+                                }
 							}
                         }
 		        	}
@@ -171,20 +177,22 @@ class ResourcePacksInfoPacket extends DataPacket{
 			}
 			$this->putString($entry->getPackVersion());
             $this->putLLong($entry->getPackSize());
-			$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key
-			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
-		    	$this->putString(""); //TODO: subpack name
-		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
-		        	$this->putString($entry->getPackId()); //TODO: content identity
-		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
-                        $this->putBool(false); //TODO: seems useless for resource packs
-                        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
-                            $this->putBool(false); //TODO: is addon pack
-                        }
-		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
-		            	    $this->putBool(false); //TODO: supports RTX
-							if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
-								$this->putString(""); //TODO: cdn url
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+		    	$this->putString($entry->getEncryptionKey() ?? ""); //TODO: encryption key
+		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_130){
+		        	$this->putString(""); //TODO: subpack name
+		        	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
+		            	$this->putString($entry->getPackId()); //TODO: content identity
+		            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
+                            $this->putBool(false); //TODO: seems useless for resource packs
+                            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_712){
+                                $this->putBool(false); //TODO: is addon pack
+                            }
+		                	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_422){
+		            	        $this->putBool(false); //TODO: supports RTX
+						    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_748){
+							    	$this->putString(""); //TODO: cdn url
+						    	}
 							}
 		            	}
 		        	}
