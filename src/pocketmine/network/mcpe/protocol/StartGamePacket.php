@@ -498,9 +498,9 @@ class StartGamePacket extends DataPacket{
 	    	$this->spawnY = $this->getInt();
 	    	$this->spawnZ = $this->getInt();
 	    	$this->playerPosition = $this->getVector3();
-	    	$this->getByte();
-	    	$this->getByte();
-	    	$this->getByte();
+	    	$this->hasAchievementsDisabled = $this->getBool();
+	    	$this->dayCycleStopTime = $this->getBool();
+	    	$this->eduMode = $this->getBool();
 	    	$this->levelId = $this->getShortString();
 	    }
 	}
@@ -752,9 +752,9 @@ class StartGamePacket extends DataPacket{
 	    	$this->putInt($this->spawnY);
 	    	$this->putInt($this->spawnZ);
 	    	$this->putVector3($this->playerPosition);
-	    	$this->putByte(1); // idk what the shit
-	    	$this->putByte(1);
-	    	$this->putByte(0);
+	    	$this->putBool($this->hasAchievementsDisabled);
+	    	$this->putBool($this->time === -1);
+	    	$this->putBool($this->eduMode);
 	    	$this->putShortString($this->levelId);
 	    }
 	}
