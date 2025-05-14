@@ -104,6 +104,8 @@ class StartGamePacket extends DataPacket{
 	public $exportedFromEditorMode = false;
 	/** @var int */
 	public $time = -1;
+	/** @var bool */
+	public $dayCycleStopTime = false;
 	/** @var int */
 	public $eduEditionOffer = EducationEditionOffer::NONE;
 	/** @var bool */
@@ -753,7 +755,7 @@ class StartGamePacket extends DataPacket{
 	    	$this->putInt($this->spawnZ);
 	    	$this->putVector3($this->playerPosition);
 	    	$this->putBool($this->hasAchievementsDisabled);
-	    	$this->putBool($this->time === -1);
+	    	$this->putBool($this->dayCycleStopTime);
 	    	$this->putBool($this->eduMode);
 	    	$this->putShortString($this->levelId);
 	    }
