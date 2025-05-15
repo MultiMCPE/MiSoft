@@ -94,11 +94,9 @@ class ArmorInventory extends BaseInventory{
 		return $this->setItem(self::SLOT_FEET, $boots);
 	}
 
-    public function setItem(int $index, Item $item, bool $send = true) : bool{
-        if($item instanceof Armor){
-            if($item->getArmorSlot() === $index){
-                return parent::setItem($index, $item, $send);
-            }
+    public function setItem(int $index, Item $item, bool $send = true): bool {
+        if (($item instanceof Armor && $item->getArmorSlot() === $index) || $item->isNull()) {
+            return parent::setItem($index, $item, $send);
         }
 
         return false;
@@ -126,15 +124,14 @@ class ArmorInventory extends BaseInventory{
 			    	$pk2->windowId = $player->getWindowId($this);
 			    	$pk2->inventorySlot = $index;
 			    	$pk2->item = $this->getItem($index);
-			    	$player->dataPacket(clone $pk2);
                 }else{
         	    	$pk2 = new ContainerSetSlotPacket();
 	            	$pk2->slot = $index;
 	            	$pk2->item = $this->getItem($index);
 	            	$pk2->windowid = $player->getWindowId($this);
-                    $player->dataPacket(clone $pk2);
                 }
-			}else{
+                $player->dataPacket(clone $pk2);
+            }else{
 				$player->dataPacket(clone $pk);
 			}
 		}
@@ -159,15 +156,14 @@ class ArmorInventory extends BaseInventory{
 		    		$pk2 = new InventoryContentPacket();
 			    	$pk2->windowId = $player->getWindowId($this);
 			    	$pk2->items = $this->getContents(true);
-			    	$player->dataPacket(clone $pk2);
-			    }else{
+                }else{
 			        $pk2 = new ContainerSetContentPacket();
 		        	$pk2->windowid = $player->getWindowId($this);
 		        	$pk2->targetEid = $player->getId();
 		        	$pk2->slots = $this->getContents(true);
-			        $player->dataPacket(clone $pk2);
-			    }
-			}else{
+                }
+                $player->dataPacket(clone $pk2);
+            }else{
 				$player->dataPacket(clone $pk);
 			}
 		}
