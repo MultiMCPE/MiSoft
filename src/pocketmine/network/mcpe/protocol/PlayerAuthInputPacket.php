@@ -289,7 +289,7 @@ class PlayerAuthInputPacket extends DataPacket{
             $this->tick = $this->getUnsignedVarLong();
             $this->delta = $this->getVector3();
 
-            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_471){
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
                 if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
                     $this->itemInteractionData = ItemInteractionData::read($this);
                 }
@@ -358,7 +358,7 @@ class PlayerAuthInputPacket extends DataPacket{
             $this->putUnsignedVarLong($this->tick);
             $this->putVector3($this->delta);
 
-            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_471){
+            if($this->getProtocol() >= ProtocolInfo::PROTOCOL_428){
                 if($this->itemInteractionData !== null){
                     $this->itemInteractionData->write($this);
                 }
