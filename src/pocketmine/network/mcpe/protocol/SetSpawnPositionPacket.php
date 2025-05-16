@@ -52,24 +52,32 @@ class SetSpawnPositionPacket extends DataPacket{
 	public $spawnForced;
 
 	protected function decodePayload(){
-		$this->spawnType = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->spawnType = $this->getVarInt();
+		}
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
-	    	$this->dimension = $this->getVarInt();
-	    	$this->getBlockPosition($this->x2, $this->y2, $this->z2);
-		}else{
-	    	$this->spawnForced = $this->getBool();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
+	        	$this->dimension = $this->getVarInt();
+	        	$this->getBlockPosition($this->x2, $this->y2, $this->z2);
+	    	}else{
+	        	$this->spawnForced = $this->getBool();
+			}
 		}
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->spawnType);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($this->spawnType);
+		}
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
-	    	$this->putVarInt($this->dimension);
-	    	$this->putBlockPosition($this->x2, $this->y2, $this->z2);
-		}else{
-            $this->putBool($this->spawnForced);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401){
+	        	$this->putVarInt($this->dimension);
+	        	$this->putBlockPosition($this->x2, $this->y2, $this->z2);
+	    	}else{
+                $this->putBool($this->spawnForced);
+			}
 		}
 	}
 

@@ -33,11 +33,15 @@ class SetHealthPacket extends DataPacket{
 	public $health;
 
 	protected function decodePayload(){
-		$this->health = $this->getVarInt();
+		$this->health = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->health);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($this->health);
+		}else{
+			$this->putInt($this->health);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

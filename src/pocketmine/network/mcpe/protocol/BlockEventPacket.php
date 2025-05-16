@@ -47,14 +47,24 @@ class BlockEventPacket extends DataPacket{
 
 	protected function decodePayload(){
 		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->eventType = $this->getVarInt();
-		$this->eventData = $this->getVarInt();
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->eventType = $this->getVarInt();
+	    	$this->eventData = $this->getVarInt();
+		}else{
+	    	$this->eventType = $this->getInt();
+	    	$this->eventData = $this->getInt();
+		}
 	}
 
 	protected function encodePayload(){
 		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putVarInt($this->eventType);
-		$this->putVarInt($this->eventData);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+	    	$this->putVarInt($this->eventType);
+	    	$this->putVarInt($this->eventData);
+		}else{
+	    	$this->putInt($this->eventType);
+	    	$this->putInt($this->eventData);
+		}
 	}
 
 	public function handle(NetworkSession $session) : bool{

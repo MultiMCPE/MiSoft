@@ -34,11 +34,15 @@ class RiderJumpPacket extends DataPacket{
 	public $jumpStrength; //percentage
 
 	protected function decodePayload(){
-		$this->jumpStrength = $this->getVarInt();
+		$this->jumpStrength = $this->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $this->getVarInt() : $this->getInt();
 	}
 
 	protected function encodePayload(){
-		$this->putVarInt($this->jumpStrength);
+		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
+		    $this->putVarInt($this->jumpStrength);
+		}else{
+			$this->putInt($this->jumpStrength);
+		}
 	}
 
 	public function mustBeDecoded() : bool{
