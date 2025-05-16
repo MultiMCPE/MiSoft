@@ -796,7 +796,7 @@ final class ParticleIds{
 			"TYPE_DRAGON_BREATH_FIRE" => 65,
 			"TYPE_DRAGON_BREATH_TRAIL" => 66
 		],
-		ProtocolInfo::PROTOCOL_81 => [
+		ProtocolInfo::PROTOCOL_90 => [
 			"TYPE_BUBBLE" => 1,
 			"TYPE_CRITICAL" => 2,
 			"TYPE_BLOCK_FORCE_FIELD" => 3,
@@ -850,6 +850,40 @@ final class ParticleIds{
 			"TYPE_BUBBLE_COLUMN_UP" => 52,
 			"TYPE_BUBBLE_COLUMN_DOWN" => 53,
 			"TYPE_SNEEZE" => 54
+		],
+        ProtocolInfo::PROTOCOL_81 => [
+			"TYPE_BUBBLE" => 1,
+			"TYPE_CRITICAL" => 2,
+			"TYPE_SMOKE" => 3,
+			"TYPE_EXPLODE" => 4,
+			"TYPE_EVAPORATION" => 5,
+			"TYPE_FLAME" => 6,
+			"TYPE_LAVA" => 7,
+			"TYPE_LARGE_SMOKE" => 8,
+			"TYPE_REDSTONE" => 9,
+			"TYPE_ITEM_BREAK" => 10,
+			"TYPE_SNOWBALL_POOF" => 11,
+			"TYPE_HUGE_EXPLODE_SEED" => 12,
+			"TYPE_HUGE_EXPLODE" => 13,
+			"TYPE_MOB_FLAME" => 14,
+			"TYPE_HEART" => 15,
+			"TYPE_TERRAIN" => 16,
+			"TYPE_SUSPENDED_TOWN" => 17, "TYPE_TOWN_AURA" => 17,
+			"TYPE_PORTAL" => 18,
+			"TYPE_SPLASH" => 19, "TYPE_WATER_SPLASH" => 19,
+			"TYPE_WATER_WAKE" => 20,
+			"TYPE_DRIP_WATER" => 21,
+			"TYPE_DRIP_LAVA" => 22,
+			"TYPE_FALLING_DUST" => 23, "DUST" => 23,
+			"TYPE_MOB_SPELL" => 24,
+			"TYPE_MOB_SPELL_AMBIENT" => 25,
+			"TYPE_MOB_SPELL_INSTANTANEOUS" => 26,
+			"TYPE_INK" => 27,
+			"TYPE_SLIME" => 28,
+			"TYPE_RAIN_SPLASH" => 29,
+			"TYPE_VILLAGER_ANGRY" => 30,
+			"TYPE_VILLAGER_HAPPY" => 31,
+			"TYPE_ENCHANTMENT_TABLE" => 32
 		]
 	];
 }
