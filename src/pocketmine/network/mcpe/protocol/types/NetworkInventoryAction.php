@@ -184,7 +184,7 @@ class NetworkInventoryAction{
 	 * @throws UnexpectedValueException
 	 */
 	public function createInventoryAction(Player $player){
-		if($this->oldItem->equalsExact($this->newItem)){
+		if($player->getProtocol() >= ProtocolInfo::PROTOCOL_385 && $this->oldItem->equalsExact($this->newItem)){
 			//filter out useless noise in 1.13
 			return null;
 		}
