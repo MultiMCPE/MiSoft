@@ -45,7 +45,7 @@ class InventoryTransactionPacket extends DataPacket{
 	public const TYPE_RELEASE_ITEM = 4;
 
     /** @var int */
-	public $requestId;
+	public $requestId = 0;
 	/** @var InventoryTransactionChangedSlotsHack[] */
 	public $requestChangedSlots;
 	/** @var TransactionData */
