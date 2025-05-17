@@ -119,7 +119,7 @@ class Explosion{
 						$pointerY = $this->source->y;
 						$pointerZ = $this->source->z;
 
-						for($blastForce = $this->size * (mt_rand(700, 1300) / 1000); $blastForce > 0; $blastForce -= $this->stepLen * 0.75){
+                        for($blastForce = $this->size * (mt_rand(300, 600) / 1000); $blastForce > 0; $blastForce -= $this->stepLen * 0.75){
 							$x = (int) $pointerX;
 							$y = (int) $pointerY;
 							$z = (int) $pointerZ;
@@ -200,8 +200,13 @@ class Explosion{
 				$damage = (int) ((($impact * $impact + $impact) / 2) * 8 * $explosionSize + 1);
 
 				if($this->what instanceof Entity){
-					$ev = new EntityDamageByEntityEvent($this->what, $entity, EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, $damage);
-				}elseif($this->what instanceof Block){
+                    if($this->what->y < $entity->y) {
+                        $ev = new EntityDamageByEntityEvent($this->what, $entity, EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, $damage *  6);
+                    } else {
+                        $ev = new EntityDamageByEntityEvent($this->what, $entity, EntityDamageEvent::CAUSE_ENTITY_EXPLOSION, $damage);
+                    }
+                    $entity->attack($ev);
+                }elseif($this->what instanceof Block){
 					$ev = new EntityDamageByBlockEvent($this->what, $entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
 				}else{
 					$ev = new EntityDamageEvent($entity, EntityDamageEvent::CAUSE_BLOCK_EXPLOSION, $damage);
