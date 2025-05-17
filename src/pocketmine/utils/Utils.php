@@ -32,7 +32,6 @@ use DaveRandom\CallbackValidator\CallbackType;
 use DaveRandom\CallbackValidator\InvalidCallbackException;
 use pocketmine\errorhandler\ErrorTypeToStringMap;
 use pocketmine\thread\ThreadCrashInfoFrame;
-use pocketmine\log\MainLogger;
 use ErrorException;
 use Exception;
 use InvalidArgumentException;
