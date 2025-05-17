@@ -62,14 +62,11 @@ class DropItemTransaction extends Transaction{
             return $this->error("Player transaction inventory not contains $item");
         }
 
-        $ev = new PlayerDropItemEvent($player, $item);
-        $ev->call();
-        if($ev->isCancelled()){
-            $player->getInventory()->addItem($item);
+        if(!$player->dropItem($item)){
+            $this->getInventory()->addItem($item);
             return true;
         }
 
-        $player->dropItem($item);
         $player->getInventory()->sendHeldItem($player);
         $player->getInventory()->sendHeldItem($player->getViewers());
 

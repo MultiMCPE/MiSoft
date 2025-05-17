@@ -59,6 +59,7 @@ use pocketmine\event\player\PlayerBlockPickEvent;
 use pocketmine\event\player\PlayerChangeSkinEvent;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerCommandPreprocessEvent;
+use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerDeathEvent;
 use pocketmine\event\player\PlayerEditBookEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
@@ -4681,6 +4682,12 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			$this->server->getLogger()->debug($this->getName() . " attempted to drop a null item (" . $item . ")");
 			return true;
 		}
+
+        $ev = new PlayerDropItemEvent($this, $item);
+        $ev->call();
+        if($ev->isCancelled()){
+            return false;
+        }
 
 		$motion = $this->getDirectionVector()->multiply(0.4);
 

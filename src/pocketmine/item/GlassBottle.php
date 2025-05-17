@@ -25,7 +25,6 @@ namespace pocketmine\item;
 
 use pocketmine\block\Block;
 use pocketmine\block\Water;
-use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\math\Vector3;
 use pocketmine\Player;
 
@@ -47,13 +46,7 @@ class GlassBottle extends Item{
 			$this->pop();
 
 			foreach($player->getInventory()->addItem($waterPotion) as $remains){
-				$dropEvent = new PlayerDropItemEvent($player, $remains);
-				$dropEvent->call();
-				if($dropEvent->isCancelled()){
-					$player->getInventory()->setItemInHand($stack);
-					return false;
-				}
-				$player->dropItem($dropEvent->getItem());
+				$player->dropItem($remains);
 			}
 
 			return true;
