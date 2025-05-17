@@ -26,6 +26,7 @@ namespace pocketmine\inventory;
 use pocketmine\entity\Living;
 use pocketmine\item\Armor;
 use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\item\ItemFactory;
 use pocketmine\network\mcpe\protocol\ContainerSetContentPacket;
 use pocketmine\network\mcpe\protocol\ContainerSetSlotPacket;
@@ -95,7 +96,7 @@ class ArmorInventory extends BaseInventory{
 	}
 
     public function setItem(int $index, Item $item, bool $send = true): bool {
-        if (($item instanceof Armor && $item->getArmorSlot() === $index) || $item->isNull()) {
+        if(($item instanceof Armor && $item->getArmorSlot() === $index) || ($index === self::SLOT_HEAD && ($item->getId() === ItemIds::SKULL || $item->getId() === ItemIds::PUMPKIN)) || $item->isNull()){
             return parent::setItem($index, $item, $send);
         }
 

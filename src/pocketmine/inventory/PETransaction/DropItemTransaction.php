@@ -63,7 +63,7 @@ class DropItemTransaction extends Transaction{
         }
 
         if(!$player->dropItem($item)){
-            $this->getInventory()->addItem($item);
+            $player->getInventory()->addItem($item);
             return true;
         }
 
