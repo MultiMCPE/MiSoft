@@ -23,98 +23,90 @@ declare(strict_types=1);
 
 namespace pocketmine\scheduler;
 
-use pmmp\thread\Thread as NativeThread;
 use pocketmine\thread\log\ThreadSafeLogger;
 use pocketmine\thread\Worker;
-use pocketmine\utils\MainLogger;
-use pocketmine\utils\Utils;
 use Throwable;
 use function gc_enable;
 use function ini_set;
 
 class AsyncWorker extends Worker{
-    /** @var mixed[] */
-    private static array $store = [];
+	/** @var mixed[] */
+	private static $store = [];
 
-    public function __construct(
-        private ThreadSafeLogger $logger,
-        private int $id,
-        private int $memoryLimit
-    ){}
+	private $logger;
+	private $id;
 
-    protected function onRun() : void{
-        $this->registerClassLoader();
-        \GlobalLogger::set($this->logger);
+	/** @var int */
+	private $memoryLimit;
 
-        //set this after the autoloader is registered
-        set_error_handler([Utils::class, 'errorExceptionHandler']);
-
-        gc_enable();
-
-        if($this->memoryLimit > 0){
-            ini_set('memory_limit', $this->memoryLimit . 'M');
-            $this->logger->debug("Set memory limit to " . $this->memoryLimit . " MB");
-        }else{
-            ini_set('memory_limit', '-1');
-            $this->logger->debug("No memory limit set");
-        }
+	public function __construct(ThreadSafeLogger $logger, int $id, int $memoryLimit){
+		$this->logger = $logger;
+		$this->id = $id;
+		$this->memoryLimit = $memoryLimit;
 	}
 
-    public function getLogger() : ThreadSafeLogger{
-        return $this->logger;
-    }
+	public function onRun() : void{
+        \GlobalLogger::set($this->logger);
 
-    public function handleException(Throwable $e) : void{
-        $this->logger->logException($e);
-    }
+		gc_enable();
+		if($this->memoryLimit > 0){
+			ini_set('memory_limit', $this->memoryLimit . 'M');
+			$this->logger->debug("Set memory limit to " . $this->memoryLimit . " MB");
+		}else{
+			ini_set('memory_limit', '-1');
+			$this->logger->debug("No memory limit set");
+		}
+	}
 
-    public function getThreadName() : string{
-        return "AsyncWorker#" . $this->id;
-    }
+	public function getLogger() : ThreadSafeLogger{
+		return $this->logger;
+	}
 
-    public function getAsyncWorkerId() : int{
-        return $this->id;
-    }
+	public function handleException(Throwable $e){
+		$this->logger->logException($e);
+	}
 
-    /**
-     * Saves mixed data into the worker's thread-local object store. This can be used to store objects which you
-     * want to use on this worker thread from multiple AsyncTasks.
-     *
-     * @deprecated Use static class properties instead.
-     */
-    public function saveToThreadStore(string $identifier, mixed $value) : void{
-        if(NativeThread::getCurrentThread() !== $this){
-            throw new \LogicException("Thread-local data can only be stored in the thread context");
-        }
-        self::$store[$identifier] = $value;
-    }
+	public function getThreadName() : string{
+		return "Asynchronous Worker #" . $this->id;
+	}
 
-    /**
-     * Retrieves mixed data from the worker's thread-local object store.
-     *
-     * Note that the thread-local object store could be cleared and your data might not exist, so your code should
-     * account for the possibility that what you're trying to retrieve might not exist.
-     *
-     * Objects stored in this storage may ONLY be retrieved while the task is running.
-     *
-     * @deprecated Use static class properties instead.
-     */
-    public function getFromThreadStore(string $identifier) : mixed{
-        if(NativeThread::getCurrentThread() !== $this){
-            throw new \LogicException("Thread-local data can only be fetched in the thread context");
-        }
-        return self::$store[$identifier] ?? null;
-    }
+	public function getAsyncWorkerId() : int{
+		return $this->id;
+	}
 
-    /**
-     * Removes previously-stored mixed data from the worker's thread-local object store.
-     *
-     * @deprecated Use static class properties instead.
-     */
-    public function removeFromThreadStore(string $identifier) : void{
-        if(NativeThread::getCurrentThread() !== $this){
-            throw new \LogicException("Thread-local data can only be removed in the thread context");
-        }
-        unset(self::$store[$identifier]);
-    }
+	/**
+	 * Saves mixed data into the worker's thread-local object store. This can be used to store objects which you
+	 * want to use on this worker thread from multiple AsyncTasks.
+	 *
+	 * @param string $identifier
+	 * @param mixed  $value
+	 */
+	public function saveToThreadStore(string $identifier, $value) : void{
+		self::$store[$identifier] = $value;
+	}
+
+	/**
+	 * Retrieves mixed data from the worker's thread-local object store.
+	 *
+	 * Note that the thread-local object store could be cleared and your data might not exist, so your code should
+	 * account for the possibility that what you're trying to retrieve might not exist.
+	 *
+	 * Objects stored in this storage may ONLY be retrieved while the task is running.
+	 *
+	 * @param string $identifier
+	 *
+	 * @return mixed
+	 */
+	public function getFromThreadStore(string $identifier){
+		return self::$store[$identifier] ?? null;
+	}
+
+	/**
+	 * Removes previously-stored mixed data from the worker's thread-local object store.
+	 *
+	 * @param string $identifier
+	 */
+	public function removeFromThreadStore(string $identifier) : void{
+		unset(self::$store[$identifier]);
+	}
 }
