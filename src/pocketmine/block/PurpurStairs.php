@@ -56,7 +56,7 @@ class PurpurStairs extends Stair{
 
 	public function getBlockProtocol(int $protocol) : ?Block{
 		if($protocol < ProtocolInfo::PROTOCOL_100){
-	    	return new Stair();
+	    	return new StoneBrickStairs();
 		}
 
 		return parent::getBlockProtocol($protocol);

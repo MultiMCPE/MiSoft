@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\block\utils\ColorBlockMetaHelper;
 
 class StainedGlass extends Glass{
@@ -31,5 +32,13 @@ class StainedGlass extends Glass{
 
 	public function getName() : string{
 		return ColorBlockMetaHelper::getColorFromMeta($this->getVariant()) . " Stained Glass";
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Glass();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

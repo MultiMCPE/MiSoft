@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
-
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\event\block\BlockGrowEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
@@ -85,5 +85,13 @@ class NetherWartPlant extends Flowable{
 
 	public function isAffectedBySilkTouch() : bool{
 		return false;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Netherrack();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

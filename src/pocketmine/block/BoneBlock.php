@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\block\utils\PillarRotationHelper;
 use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
@@ -60,5 +61,13 @@ class BoneBlock extends Solid{
 
 	public function getVariantBitmask() : int{
 		return 0x03;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Quartz();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

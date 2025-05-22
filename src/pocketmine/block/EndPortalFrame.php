@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 
@@ -64,5 +65,13 @@ class EndPortalFrame extends Solid{
 			$this->y + (($this->getDamage() & 0x04) > 0 ? 1 : 0.8125),
 			$this->z + 1
 		);
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new Portal();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

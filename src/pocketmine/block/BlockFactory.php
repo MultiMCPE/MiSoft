@@ -151,7 +151,7 @@ class BlockFactory{
 		self::registerBlock(new Cactus());
 		self::registerBlock(new Clay());
 		self::registerBlock(new Sugarcane());
-		//TODO: JUKEBOX
+		self::registerBlock(new Jukebox());
 		self::registerBlock(new WoodenFence());
 		self::registerBlock(new Pumpkin());
 		self::registerBlock(new Netherrack());
@@ -227,6 +227,7 @@ class BlockFactory{
 		self::registerBlock(new WoodenSlab());
 		self::registerBlock(new StainedClay());
 		self::registerBlock(new StainedGlassPane());
+		self::registerBlock(new StainedGlassPane2());
 		self::registerBlock(new Leaves2());
 		self::registerBlock(new Wood2());
 		self::registerBlock(new WoodenStairs(Block::ACACIA_STAIRS, 0, "Acacia Stairs"));

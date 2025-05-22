@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class NetherWartBlock extends Solid{
 
 	protected $id = Block::NETHER_WART_BLOCK;
@@ -37,5 +39,13 @@ class NetherWartBlock extends Solid{
 
 	public function getHardness() : float{
 		return 1;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Netherrack();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

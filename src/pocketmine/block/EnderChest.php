@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\TieredTool;
@@ -105,5 +106,13 @@ class EnderChest extends Chest{
 
 	public function getFuelTime() : int{
 		return 0;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new Chest();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }
