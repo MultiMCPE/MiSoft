@@ -1369,6 +1369,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			])
 		);
 		$ev->call();
+
+        if(!$this->isConnected()){
+        	return;
+        }
+
 		if(strlen(trim((string) $ev->getJoinMessage())) > 0){
 			$this->server->broadcastMessage($ev->getJoinMessage());
 		}
@@ -2926,6 +2931,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 			return;
 		}
+
+        if(!$this->isConnected()){
+        	return;
+        }
 
 		if(!$this->hasValidSpawnPosition()){
 			if(($level = $this->server->getLevelByName($this->namedtag->getString("SpawnLevel", ""))) instanceof Level){

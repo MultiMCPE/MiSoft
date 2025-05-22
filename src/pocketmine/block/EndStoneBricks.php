@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\TieredTool;
 
 class EndStoneBricks extends Solid{
@@ -47,5 +48,13 @@ class EndStoneBricks extends Solid{
 
 	public function getToolHarvestLevel() : int{
 		return TieredTool::TIER_WOODEN;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new BrickStairs();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

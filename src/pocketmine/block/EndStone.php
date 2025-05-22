@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\TieredTool;
 
 class EndStone extends Solid{
@@ -47,5 +48,13 @@ class EndStone extends Solid{
 
 	public function getHardness() : float{
 		return 3;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new Stone();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

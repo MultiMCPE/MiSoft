@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\TieredTool;
 
 class PurpurStairs extends Stair{
@@ -51,5 +52,13 @@ class PurpurStairs extends Stair{
 
 	public function getBlastResistance() : float{
 		return 30;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new Stair();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

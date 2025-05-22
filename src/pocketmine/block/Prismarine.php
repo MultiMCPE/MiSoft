@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\TieredTool;
 
 class Prismarine extends Solid{
@@ -60,5 +61,13 @@ class Prismarine extends Solid{
 
 	public function getVariantBitmask() : int{
 		return 0x03;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_90){
+	    	return new Stone(Stone::ANDESITE);
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

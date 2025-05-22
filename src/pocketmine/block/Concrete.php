@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\block\utils\ColorBlockMetaHelper;
 use pocketmine\item\TieredTool;
 
@@ -48,5 +49,13 @@ class Concrete extends Solid{
 
 	public function getToolHarvestLevel() : int{
 		return TieredTool::TIER_WOODEN;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Wool($this->meta);
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

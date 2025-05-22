@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\Item;
 use pocketmine\math\AxisAlignedBB;
 use pocketmine\math\Vector3;
@@ -100,5 +101,13 @@ class EndRod extends Flowable{
 
 	public function getVariantBitmask() : int{
 		return 0;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new IronBars();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

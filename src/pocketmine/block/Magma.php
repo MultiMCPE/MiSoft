@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\entity\Entity;
 use pocketmine\event\entity\EntityDamageByBlockEvent;
 use pocketmine\event\entity\EntityDamageEvent;
@@ -69,5 +70,13 @@ class Magma extends Solid{
 
 	public function burnsForever() : bool{
 		return true;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new SoulSand();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 
@@ -50,5 +51,13 @@ class SeaLantern extends Transparent{
 		return [
 			ItemFactory::get(Item::PRISMARINE_CRYSTALS, 0, 3)
 		];
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_90){
+	    	return new Glowstone();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

@@ -24,6 +24,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\item\Item;
 use pocketmine\item\TieredTool;
 use pocketmine\math\Vector3;
@@ -59,5 +60,13 @@ class GlazedTerracotta extends Solid{
 
 	public function getVariantBitmask() : int{
 		return 0;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_110){
+	    	return new Stone();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 
 class Sponge extends Solid{
 
@@ -38,5 +39,13 @@ class Sponge extends Solid{
 
 	public function getName() : string{
 		return "Sponge";
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_90){
+	    	return new Sand();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }

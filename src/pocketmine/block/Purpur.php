@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class Purpur extends Quartz{
 
 	protected $id = self::PURPUR_BLOCK;
@@ -43,5 +45,13 @@ class Purpur extends Quartz{
 
 	public function getBlastResistance() : float{
 		return 30;
+	}
+
+	public function getBlockProtocol(int $protocol) : ?Block{
+		if($protocol < ProtocolInfo::PROTOCOL_100){
+	    	return new Stone();
+		}
+
+		return parent::getBlockProtocol($protocol);
 	}
 }
