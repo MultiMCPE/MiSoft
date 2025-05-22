@@ -14,7 +14,6 @@ use RuntimeException;
 use function igbinary_serialize;
 use function igbinary_unserialize;
 use function openssl_error_string;
-use function openssl_free_key;
 use function openssl_pkey_get_details;
 use function openssl_pkey_new;
 use function random_bytes;
@@ -77,9 +76,6 @@ class PrepareEncryptionTask extends AsyncTask{
 		$this->handshakeJwt = EncryptionUtils::generateServerHandshakeJwt($derServPublicKey, $serverPriv, $salt);
 
 		$this->serverTokenRandom = $salt;
-
-		@openssl_free_key($serverPriv);
-		@openssl_free_key($clientPub);
 	}
 
 	public function onCompletion(Server $server) : void{
