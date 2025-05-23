@@ -3391,7 +3391,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
         $useItemTransaction = $packet->getItemInteractionData();
         if($useItemTransaction !== null){
-            if(count($useItemTransaction->getTransactionData()->getActions()) > 50){
+            if(count($useItemTransaction->getTransactionData()->getActions()) > 100){
                 $this->server->getLogger()->debug("Too many actions in item use transaction from " . $this->getName());
                 return false;
             }
@@ -3621,7 +3621,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		if(count($packet->trData->getActions()) > 50){
+		if(count($packet->trData->getActions()) > 100){
 		    throw new UnexpectedValueException("Too many actions in inventory transaction");
 		}
 

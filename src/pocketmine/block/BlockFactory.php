@@ -278,7 +278,7 @@ class BlockFactory{
 
 		self::registerBlock(new Magma());
 		self::registerBlock(new NetherWartBlock());
-		self::registerBlock(new NetherBrick(Block::RED_NETHER_BRICK, 0, "Red Nether Bricks"));
+		self::registerBlock(new RedNetherBrick());
 		self::registerBlock(new BoneBlock());
 
         self::registerBlock(new ShulkerBox());
