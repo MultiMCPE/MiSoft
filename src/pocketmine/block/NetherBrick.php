@@ -26,7 +26,6 @@ namespace pocketmine\block;
 use pocketmine\item\TieredTool;
 
 class NetherBrick extends Solid{
-
 	public function getToolType() : int{
 		return BlockToolType::TYPE_PICKAXE;
 	}

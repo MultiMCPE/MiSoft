@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\network\mcpe\NetworkSession;
 
 class UpdateBlockPacket extends DataPacket{
@@ -66,10 +66,7 @@ class UpdateBlockPacket extends DataPacket{
 	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
 	    	$runtimeId = $this->getUnsignedVarInt();
-	    	$palette = BlockPalette::getPalette($this->getProtocol());
-	    	$blockData = $palette::fromStaticRuntimeId($runtimeId);
-		    $this->blockId = $blockData[0];
-		    $this->blockMeta = $blockData[1];
+		    [$this->blockId, $this->blockMeta] = BlockPalettePool::getPalette($this->getProtocol())->fromStaticRuntimeId($runtimeId);
 	    	$this->flags = $this->getUnsignedVarInt();
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_240){
 	        	$this->dataLayerId = $this->getUnsignedVarInt();
@@ -98,9 +95,7 @@ class UpdateBlockPacket extends DataPacket{
 	    	$this->putBlockPosition($this->x, $this->y, $this->z);
 	    }
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
-		    $palette = BlockPalette::getPalette($this->getProtocol());
-	    	$runtimeId = $palette::toStaticRuntimeId($this->blockId, $this->blockMeta);
-	    	$this->putUnsignedVarInt($runtimeId);
+	    	$this->putUnsignedVarInt(BlockPalettePool::getPalette($this->getProtocol())->toStaticRuntimeId($this->blockId, $this->blockMeta));
 	    	$this->putUnsignedVarInt($this->flags);
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_240){
 	        	$this->putUnsignedVarInt($this->dataLayerId);

@@ -28,7 +28,7 @@ use Generator;
 use pocketmine\crafting\CraftingDataBuildTask;
 use pocketmine\item\Item;
 use pocketmine\item\Potion;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
@@ -201,7 +201,6 @@ class CraftingManager{
                     $this->furnaceRecipes,
 					$this->brewingRecipes,
                     $player->getCraftingProtocol(),
-                    ($player->getCraftingProtocol() >= ProtocolInfo::PROTOCOL_429 ? BlockPalette::getPalette($player->getCraftingProtocol()) : null),
                     Server::getInstance()->networkCompressionLevel
                 ));
 

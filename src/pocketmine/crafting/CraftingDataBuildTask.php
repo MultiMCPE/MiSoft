@@ -26,12 +26,12 @@ namespace pocketmine\crafting;
 use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\block\BlockFactory;
 use pocketmine\item\ItemFactory;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\CraftingDataPacket;
 use pocketmine\network\mcpe\protocol\PacketPool;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\PotionTypeRecipe;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
@@ -49,25 +49,22 @@ class CraftingDataBuildTask extends AsyncTask{
 	protected $brewingRecipes;
     /** @var int */
     protected $protocol;
-    /** @phpstan-var NonThreadSafeValue<null|Palette> */
-    protected $palette;
     /** @var int */
     protected $compressionLevel;
 
-	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, array $brewingRecipes, int $protocol, ?Palette $palette, int $networkCompressionLevel){
+	public function __construct(array $shapelessRecipes, array $shapedRecipes, array $furnaceRecipes, array $brewingRecipes, int $protocol, int $networkCompressionLevel){
 	    $this->shapelessRecipes = new NonThreadSafeValue($shapelessRecipes);
 	    $this->shapedRecipes = new NonThreadSafeValue($shapedRecipes);
 	    $this->furnaceRecipes = new NonThreadSafeValue($furnaceRecipes);
 		$this->brewingRecipes = new NonThreadSafeValue($brewingRecipes);
 	    $this->protocol = $protocol;
-	    $this->palette = new NonThreadSafeValue($palette);
 		$this->compressionLevel = $networkCompressionLevel;
 	}
 
 	public function onRun() : void{
-	    ItemPalette::init();
-	    if(($palette = $this->palette->deserialize()) !== null){
-	        BlockPalette::addPalette($palette, $this->protocol);
+	    ItemPalettePool::init();
+	    if($this->protocol >= ProtocolInfo::PROTOCOL_429){
+	        BlockPalettePool::initPalette($this->protocol);
 	    }
 	    PacketPool::init();
 	    ItemFactory::init();

@@ -28,13 +28,17 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 class RedNetherBrick extends NetherBrick{
 	protected $id = self::RED_NETHER_BRICK;
 
+	public function __construct(int $meta = 0){
+		$this->meta = $meta;
+	}
+
 	public function getName() : string{
 		return "Red Nether Bricks";
 	}
 
 	public function getBlockProtocol(int $protocol) : ?Block{
 		if($protocol < ProtocolInfo::PROTOCOL_100){
-	    	return new NetherBrick();
+	    	return new NetherBrick(Block::NETHER_BRICK_BLOCK, 0, "Nether Bricks");
 		}
 
 		return parent::getBlockProtocol($protocol);

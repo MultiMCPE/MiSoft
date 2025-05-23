@@ -26,16 +26,15 @@ namespace pocketmine\level\format\io;
 use pocketmine\block\Block;
 use pocketmine\block\BlockIds;
 use pocketmine\math\Vector3;
-use pocketmine\thread\NonThreadSafeValue;
 use pocketmine\level\format\Chunk;
 use pocketmine\level\Level;
 use pocketmine\block\BlockFactory;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\LevelChunkPacket;
 use pocketmine\network\mcpe\protocol\PacketPool;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\ChunkPosition;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\block\palettes\Palette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\scheduler\AsyncTask;
 use pocketmine\Server;
 use pocketmine\tile\Spawnable;
@@ -55,14 +54,13 @@ class ChunkRequestTask extends AsyncTask{
 	protected $dimensionId;
 	/** @var string */
     protected $tiles;
-	/** @var NonThreadSafeValue */
-	protected $palette;
     /** @var int */
 	protected $compressionLevel;
 	/** @var int */
 	protected $protocol;
 	/** @var int */
 	protected $levelChunkPacketId;
+	/** @var bool */
 	protected $obfuscate;
 
     const REPLACE_WITH = [
@@ -74,7 +72,7 @@ class ChunkRequestTask extends AsyncTask{
         BlockIds::EMERALD_ORE, BlockIds::EMERALD_BLOCK,
     ];
 
-	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol, $obfuscate){
+	public function __construct(Level $level, int $chunkX, int $chunkZ, int $dimensionId, Chunk $chunk, int $protocol, bool $obfuscate){
 		$this->levelId = $level->getId();
 		$this->compressionLevel = $level->getServer()->networkCompressionLevel;
 
@@ -91,8 +89,6 @@ class ChunkRequestTask extends AsyncTask{
 			}
 		}
         $this->tiles = $tiles;
-
-		$this->palette = new NonThreadSafeValue(BlockPalette::getPalette($protocol));
 
 		$this->protocol = $protocol;
 
@@ -111,10 +107,11 @@ class ChunkRequestTask extends AsyncTask{
             self::obfuscateChunk($chunk);
         }
 
-		if(($palette = $this->palette->deserialize()) !== null){
-			BlockPalette::addPalette($palette, $protocol);
+		if($protocol >= ProtocolInfo::PROTOCOL_220){
+			BlockPalettePool::initPalette($protocol);
+			$palette = BlockPalettePool::getPalette($protocol);
 		    $legacyToRuntime = function(int $blockId, int $meta) use ($palette) : int{
-			    return $palette::toStaticRuntimeId($blockId, $meta);
+			    return $palette->toStaticRuntimeId($blockId, $meta);
 		    };
 		}
 

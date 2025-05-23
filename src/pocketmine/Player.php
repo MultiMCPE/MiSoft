@@ -128,8 +128,8 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\network\mcpe\encryption\EncryptionContext;
 use pocketmine\network\mcpe\encryption\PrepareEncryptionTask;
 use pocketmine\network\mcpe\multiversion\biomes\BiomeDefinitionPalette;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\multiversion\ProtocolConvertor;
 use pocketmine\network\mcpe\PacketRateLimiter;
 use pocketmine\network\mcpe\PlayerNetworkSessionAdapter;
@@ -2532,7 +2532,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
         $this->originalProtocol = $packet->protocol;
         $this->chunkProtocol = ProtocolConvertor::convertChunkProtocol($this->protocol);
         $this->craftingProtocol = ProtocolConvertor::convertCraftingProtocol($this->protocol);
-		BlockPalette::initPalette($this->protocol);
+		BlockPalettePool::initPalette($this->protocol);
 
 		$this->username = str_replace(" ", "_", TextFormat::clean($packet->username));
 		$this->displayName = $this->username;
@@ -2988,8 +2988,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_331){
 			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_776){
-				$palette = ItemPalette::getPalette($this->getProtocol());
-				$this->sendDataPacket(ItemRegistryPacket::create($palette::getEntries()));
+				$palette = ItemPalettePool::getPalette($this->getProtocol());
+				$this->sendDataPacket(ItemRegistryPacket::create($palette->getEntries()));
 			}
 	    	$this->sendDataPacket(new AvailableActorIdentifiersPacket());
 	    	$this->sendDataPacket(BiomeDefinitionPalette::getBiomeDefinitionListPacket($this->getProtocol()));
@@ -3560,8 +3560,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
 					$id = $packet->data >> 16;
-					$palette = ItemPalette::getPalette($this->getProtocol());
-					[$id, ] = $palette::getLegacyFromRuntimeId($id, 0);
+					$palette = ItemPalettePool::getPalette($this->getProtocol());
+					[$id, ] = $palette->getLegacyFromRuntimeId($id, 0);
 				}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_386){
 					$id = $packet->data >> 16;
 				}else{
@@ -3582,8 +3582,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$pk->event = ActorEventPacket::EATING_ITEM;
 
 					if($viewer->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-						$palette = ItemPalette::getPalette($viewer->getProtocol());
-						$idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, 0);
+						$palette = ItemPalettePool::getPalette($viewer->getProtocol());
+						$idMeta = $palette->getRuntimeFromLegacyIdQuiet($id, 0);
 						if($idMeta === null){
 							continue;
 						}

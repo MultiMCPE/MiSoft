@@ -25,7 +25,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\block\Block;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\NetworkSession;
 
@@ -198,17 +198,13 @@ class LevelEventPacket extends DataPacket{
 		    	case self::EVENT_PARTICLE_DESTROY:
 			    	$id = $this->data >> Block::INTERNAL_METADATA_BITS;
 			    	$meta = $this->data & Block::INTERNAL_METADATA_MASK;
-			    	$palette = BlockPalette::getPalette($this->getProtocol());
-			    	$runtimeId = $palette::toStaticRuntimeId($id, $meta);
-			    	$this->putVarInt($runtimeId);
+			    	$this->putVarInt(BlockPalettePool::getPalette($this->getProtocol())->toStaticRuntimeId($id, $meta));
 			    	break;
 		    	case self::EVENT_PARTICLE_PUNCH_BLOCK:
 			    	$id = $this->data & 0xff;
 			    	$meta = ($this->data >> 8) & 0x0f;
 			    	$face = $this->data >> 16;
-			    	$palette = BlockPalette::getPalette($this->getProtocol());
-			    	$runtimeId = $palette::toStaticRuntimeId($id, $meta) | ($face << 24);
-			    	$this->putVarInt($runtimeId);
+			    	$this->putVarInt(BlockPalettePool::getPalette($this->getProtocol())->toStaticRuntimeId($id, $meta) | ($face << 24));
 			    	break;
 		    	default:
 			    	$this->putVarInt($this->data);

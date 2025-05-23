@@ -34,9 +34,10 @@ use pocketmine\level\Level;
 use pocketmine\level\Position;
 use pocketmine\nbt\tag\ByteTag;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\SetActorDataPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
 use pocketmine\Player;
 use UnexpectedValueException;
@@ -171,11 +172,8 @@ class FallingBlock extends Entity{
 	    	$pk->attributes = $this->attributeMap->getAll();
 	    	$pk->metadata = $this->propertyManager->getAll();
 	    	$pk->syncedProperties = new PropertySyncData([], []);
-	    	if(isset($pk->metadata[self::DATA_VARIANT])){
-		    	$palette = BlockPalette::getPalette($player->getProtocol());
-		    	if(!is_null($palette)){
-			    	$pk->metadata[self::DATA_VARIANT][1] = $palette::toStaticRuntimeId($this->getBlock(), $this->getDamage());
-		    	}
+	    	if(isset($pk->metadata[self::DATA_VARIANT]) && $player->getProtocol() >= ProtocolInfo::PROTOCOL_220){
+			    $pk->metadata[self::DATA_VARIANT][1] = BlockPalettePool::getPalette($player->getProtocol())->toStaticRuntimeId($this->getBlock(), $this->getDamage());
 			}
 
 	    	$player->dataPacket($pk);
@@ -197,11 +195,8 @@ class FallingBlock extends Entity{
 		$pk->syncedProperties = new PropertySyncData([], []);
 
 		foreach($player as $p){
-		    if(isset($pk->metadata[self::DATA_VARIANT])){
-		    	$palette = BlockPalette::getPalette($p->getProtocol());
-		    	if(!is_null($palette)){
-			    	$pk->metadata[self::DATA_VARIANT][1] = $palette::toStaticRuntimeId($this->getBlock(), $this->getDamage());
-		    	}
+		    if(isset($pk->metadata[self::DATA_VARIANT]) && $p->getProtocol() >= ProtocolInfo::PROTOCOL_220){
+				$pk->metadata[self::DATA_VARIANT][1] = BlockPalettePool::getPalette($p->getProtocol())->toStaticRuntimeId($this->getBlock(), $this->getDamage());
 			}
 
 			$p->dataPacket(clone $pk);

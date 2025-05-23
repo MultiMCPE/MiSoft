@@ -24,7 +24,7 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\NetworkSession;
 use function array_search;
@@ -599,9 +599,7 @@ class LevelSoundEventPacket extends DataPacket{
 	    	if($runtimeId < 0){
 	    	    $this->extraData = -1;
 	    	}else{
-	        	$palette = BlockPalette::getPalette($this->getProtocol());
-	        	$blockData = $palette::fromStaticRuntimeId($runtimeId);
-		        $this->extraData = $blockData[0];
+	        	$this->extraData = BlockPalettePool::getPalette($this->getProtocol())->fromStaticRuntimeId($runtimeId)[0];
 	    	}
 		}else{
 		    $this->extraData = $this->getVarInt();
@@ -633,9 +631,7 @@ class LevelSoundEventPacket extends DataPacket{
 		$this->putVector3($this->position);
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_220){
             if ($this->sound === self::SOUND_HIT || $this->sound === self::SOUND_PLACE) {
-                $palette = BlockPalette::getPalette($this->getProtocol());
-                $runtimeId = $palette::toStaticRuntimeId($this->extraData);
-                $this->putVarInt($runtimeId);
+                $this->putVarInt(BlockPalettePool::getPalette($this->getProtocol())->toStaticRuntimeId($this->extraData));
             } else {
                 $this->putVarInt($this->extraData);
             }

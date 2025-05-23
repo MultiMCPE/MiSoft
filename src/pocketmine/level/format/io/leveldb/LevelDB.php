@@ -307,7 +307,7 @@ class LevelDB extends BaseLevelProvider{
         $palette = [];
 
         if(self::$cacheBlockIdMap === null){
-            self::$cacheBlockIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block_id_map407.json"), true);
+            self::$cacheBlockIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block/block_id_map407.json"), true);
         }
         for($i = 0, $paletteSize = $stream->getLInt(); $i < $paletteSize; ++$i){
             try{
@@ -542,7 +542,7 @@ class LevelDB extends BaseLevelProvider{
 
 	protected function writeChunk(Chunk $chunk) : void{
         if(self::$cacheBlockIdMapFlip === null){
-            self::$cacheBlockIdMapFlip = array_flip(json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block_id_map407.json"), true));
+            self::$cacheBlockIdMapFlip = array_flip(json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/palette/block/block_id_map407.json"), true));
         }
 
 		$index = LevelDB::chunkIndex($chunk->getX(), $chunk->getZ());

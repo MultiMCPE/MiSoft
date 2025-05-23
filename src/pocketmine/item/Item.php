@@ -43,7 +43,7 @@ use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\ShortTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\cache\CreativePacketCache;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
@@ -990,10 +990,10 @@ class Item implements ItemIds, JsonSerializable{
 		$id = $this->id;
 		$meta = $this->meta;
 		if($this->id !== 0 && $playerProtocol !== null && $playerProtocol >= ProtocolInfo::PROTOCOL_419){
-			$palette = ItemPalette::getPalette($playerProtocol);
-			[$id, $meta] = ($palette::getRuntimeFromLegacyIdQuiet($id, $meta) ?? [0, 0]);
+			$palette = ItemPalettePool::getPalette($playerProtocol);
+			[$id, $meta] = ($palette->getRuntimeFromLegacyIdQuiet($id, $meta) ?? [0, 0]);
 
-			$idTag = new StringTag("Name", $palette::getStringFromRuntimeId($id));
+			$idTag = new StringTag("Name", $palette->getStringFromRuntimeId($id));
 		}else{
 			$idTag = new ShortTag("id", $id);
 		}

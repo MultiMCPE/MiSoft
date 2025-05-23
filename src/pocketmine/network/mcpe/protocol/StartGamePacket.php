@@ -27,8 +27,8 @@ use pocketmine\math\Vector3;
 use pocketmine\nbt\NetworkLittleEndianNBTStream;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\BlockPaletteEntry;
@@ -56,8 +56,8 @@ use const pocketmine\RESOURCE_PATH;
 class StartGamePacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::START_GAME_PACKET;
 
-	/** @var string|null */
-	private static $itemTableCache = null;
+	/** @var string[] */
+	private static $itemTableCache = [];
 
 	/** @var int */
 	public $entityUniqueId;
@@ -690,8 +690,7 @@ class StartGamePacket extends DataPacket{
 
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_280){
                     if($this->getProtocol() < ProtocolInfo::PROTOCOL_419){
-                        $palette = BlockPalette::getPalette($this->getProtocol());
-                        $this->put($palette::getEncodedPalette());
+                        $this->put(BlockPalettePool::getPalette($this->getProtocol())->getEncodedPalette());
                     }else{
 	                	$this->putUnsignedVarInt(count($this->blockPalette));
 	                	$nbtWriter = new NetworkLittleEndianNBTStream();
@@ -702,14 +701,25 @@ class StartGamePacket extends DataPacket{
                     }
 	            	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_360 && $this->getProtocol() < ProtocolInfo::PROTOCOL_776){
 	        	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	        	            $palette = ItemPalette::getPalette($this->getProtocol());
-	        	            $this->put($palette::getEncodedPalette());
+	        	            $palette = ItemPalettePool::getPalette($this->getProtocol());
+							if(!isset(self::$itemTableCache[$palette->getProtocol()])){
+							    $entries = $palette->getEntries();
+	                    	    $stream = new NetworkBinaryStream();
+	                    	    $stream->putUnsignedVarInt(count($entries));
+	                        	foreach($entries as $entry){
+		                        	$stream->putString($entry->getStringId());
+		                    	    $stream->putLShort($entry->getNumericId());
+									$stream->putBool($entry->isComponentBased());
+	                    	    }
+								self::$itemTableCache[$palette->getProtocol()] = $stream->getBuffer();
+						    }
+	        	            $this->put(self::$itemTableCache[$palette->getProtocol()]);
 	        	        }else{
 	            	        if($this->itemTable === null){
-		                    	if(self::$itemTableCache === null){
-			                    	self::$itemTableCache = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/item_id_map.json'), true));
+		                    	if(!isset(self::$itemTableCache[ProtocolInfo::PROTOCOL_360])){
+			                    	self::$itemTableCache[ProtocolInfo::PROTOCOL_360] = self::serializeItemTable(json_decode(file_get_contents(RESOURCE_PATH . '/vanilla/palette/item/item_id_map.json'), true));
 		                     	}
-                                $this->put(self::$itemTableCache);
+                                $this->put(self::$itemTableCache[ProtocolInfo::PROTOCOL_360]);
 	                    	}else{
                                 $this->put(self::serializeItemTable($this->itemTable));
 	                    	}

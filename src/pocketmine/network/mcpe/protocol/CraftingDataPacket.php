@@ -29,7 +29,7 @@ use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\NetworkBinaryStream;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PotionContainerChangeRecipe;
@@ -183,12 +183,12 @@ class CraftingDataPacket extends DataPacket{
                         $inputId = $this->getVarInt();
                     }
                     if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                        $palette = ItemPalette::getPalette($this->getProtocol());
+                        $palette = ItemPalettePool::getPalette($this->getProtocol());
                         if($recipeType === self::ENTRY_FURNACE){
-                            [$inputId, $inputData] = $palette::getLegacyFromRuntimeIdWildcard($inputId, 0x7fff);
+                            [$inputId, $inputData] = $palette->getLegacyFromRuntimeIdWildcard($inputId, 0x7fff);
                         }else{
                             $inputData = $this->getVarInt();
-                            [$inputId, $inputData] = $palette::getLegacyFromRuntimeIdWildcard($inputId, $inputData);
+                            [$inputId, $inputData] = $palette->getLegacyFromRuntimeIdWildcard($inputId, $inputData);
                         }
                     }else{
                         $inputData = -1;
@@ -247,10 +247,10 @@ class CraftingDataPacket extends DataPacket{
                     $outputMeta = $this->getVarInt();
                 }
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                    $palette = ItemPalette::getPalette($this->getProtocol());
-                    [$input, $inputMeta] = $palette::getLegacyFromRuntimeId($input, $inputMeta);
-                    [$ingredient, $ingredientMeta] = $palette::getLegacyFromRuntimeId($ingredient, $ingredientMeta);
-                    [$output, $outputMeta] = $palette::getLegacyFromRuntimeId($output, $outputMeta);
+                    $palette = ItemPalettePool::getPalette($this->getProtocol());
+                    [$input, $inputMeta] = $palette->getLegacyFromRuntimeId($input, $inputMeta);
+                    [$ingredient, $ingredientMeta] = $palette->getLegacyFromRuntimeId($ingredient, $ingredientMeta);
+                    [$output, $outputMeta] = $palette->getLegacyFromRuntimeId($output, $outputMeta);
                 }
                 $this->potionTypeRecipes[] = new PotionTypeRecipe($input, $inputMeta ?? 0, $ingredient, $ingredientMeta ?? 0, $output, $outputMeta ?? 0);
             }
@@ -259,10 +259,10 @@ class CraftingDataPacket extends DataPacket{
                 $ingredient = $this->getVarInt();
                 $output = $this->getVarInt();
                 if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                    $palette = ItemPalette::getPalette($this->getProtocol());
-                    [$input, ] = $palette::getLegacyFromRuntimeId($input, 0);
-                    [$ingredient, ] = $palette::getLegacyFromRuntimeId($ingredient, 0);
-                    [$output, ] = $palette::getLegacyFromRuntimeId($output, 0);
+                    $palette = ItemPalettePool::getPalette($this->getProtocol());
+                    [$input, ] = $palette->getLegacyFromRuntimeId($input, 0);
+                    [$ingredient, ] = $palette->getLegacyFromRuntimeId($ingredient, 0);
+                    [$output, ] = $palette->getLegacyFromRuntimeId($output, 0);
                 }
                 $this->potionContainerRecipes[] = new PotionContainerChangeRecipe($input, $ingredient, $output);
             }
@@ -397,12 +397,12 @@ class CraftingDataPacket extends DataPacket{
 	    $id = $recipe->getInput()->getId();
 	    $damage = $recipe->getInput()->getDamage();
 	    if($playerProtocol >= ProtocolInfo::PROTOCOL_419){
-	        $palette = ItemPalette::getPalette($playerProtocol);
+	        $palette = ItemPalettePool::getPalette($playerProtocol);
 	    	if($recipe->getInput()->hasAnyDamageValue()){
-		    	[$id, ] = $palette::getRuntimeFromLegacyId($id, 0);
+		    	[$id, ] = $palette->getRuntimeFromLegacyId($id, 0);
 		    	$damage = 0x7fff;
 	    	}else{
-		    	[$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
+		    	[$id, $damage] = $palette->getRuntimeFromLegacyId($id, $damage);
 	    	}
 		}
 		if($playerProtocol >= ProtocolInfo::PROTOCOL_90){
@@ -484,10 +484,10 @@ class CraftingDataPacket extends DataPacket{
 	    	    $output = $recipe->getOutputItemId();
 	    	    $outputMeta = $recipe->getOutputItemMeta();
 	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	    	        $palette = ItemPalette::getPalette($this->getProtocol());
-	    	        [$input, $inputMeta] = $palette::getRuntimeFromLegacyId($input, $inputMeta);
-	    	        [$ingredient, $ingredientMeta] = $palette::getRuntimeFromLegacyId($ingredient, $ingredientMeta);
-	    	        [$output, $outputMeta] = $palette::getRuntimeFromLegacyId($output, $outputMeta);
+	    	        $palette = ItemPalettePool::getPalette($this->getProtocol());
+	    	        [$input, $inputMeta] = $palette->getRuntimeFromLegacyId($input, $inputMeta);
+	    	        [$ingredient, $ingredientMeta] = $palette->getRuntimeFromLegacyId($ingredient, $ingredientMeta);
+	    	        [$output, $outputMeta] = $palette->getRuntimeFromLegacyId($output, $outputMeta);
 	    	    }
 		    	$this->putVarInt($input);
 		    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_401 && $this->getProtocol() !== ProtocolInfo::PROTOCOL_402){
@@ -508,10 +508,10 @@ class CraftingDataPacket extends DataPacket{
 	    	    $ingredient = $recipe->getIngredientItemId();
 	    	    $output = $recipe->getOutputItemId();
 	    	    if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-	    	        $palette = ItemPalette::getPalette($this->getProtocol());
-	    	        [$input, ] = $palette::getRuntimeFromLegacyId($input, 0);
-	    	        [$ingredient, ] = $palette::getRuntimeFromLegacyId($ingredient, 0);
-	    	        [$output, ] = $palette::getRuntimeFromLegacyId($output, 0);
+	    	        $palette = ItemPalettePool::getPalette($this->getProtocol());
+	    	        [$input, ] = $palette->getRuntimeFromLegacyId($input, 0);
+	    	        [$ingredient, ] = $palette->getRuntimeFromLegacyId($ingredient, 0);
+	    	        [$output, ] = $palette->getRuntimeFromLegacyId($output, 0);
 	    	    }
 		    	$this->putVarInt($input);
 		    	$this->putVarInt($ingredient);

@@ -43,7 +43,7 @@ use pocketmine\level\sound\EndermanTeleportSound;
 use pocketmine\level\weather\Weather;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\IntTag;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\PlaySoundPacket;
@@ -353,8 +353,8 @@ class Enderman extends Monster{
 	    	$pk->syncedProperties = new PropertySyncData([], []);
 	    	if(isset($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID])){
 		    	if($player->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                    $palette = ItemPalette::getPalette($player->getProtocol());
-                    [$id, ] = $palette::getRuntimeFromLegacyIdQuiet($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1], 0) ?? [0, 0];
+                    $palette = ItemPalettePool::getPalette($player->getProtocol());
+                    [$id, ] = $palette->getRuntimeFromLegacyIdQuiet($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1], 0) ?? [0, 0];
 
                     $pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1] = $id;
                 }
@@ -381,8 +381,8 @@ class Enderman extends Monster{
 		foreach($player as $p){
 		    if(isset($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID])){
 		    	if($p->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-                    $palette = ItemPalette::getPalette($p->getProtocol());
-                    [$id, ] = $palette::getRuntimeFromLegacyIdQuiet($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1], 0) ?? [0, 0];
+                    $palette = ItemPalettePool::getPalette($p->getProtocol());
+                    [$id, ] = $palette->getRuntimeFromLegacyIdQuiet($pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1], 0) ?? [0, 0];
 
                     $pk->metadata[self::DATA_ENDERMAN_HELD_ITEM_ID][1] = $id;
                 }

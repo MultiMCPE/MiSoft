@@ -41,8 +41,8 @@ use pocketmine\nbt\tag\IntTag;
 use pocketmine\nbt\tag\LongTag;
 use pocketmine\nbt\tag\NamedTag;
 use pocketmine\nbt\tag\StringTag;
-use pocketmine\network\mcpe\multiversion\block\BlockPalette;
-use pocketmine\network\mcpe\multiversion\inventory\ItemPalette;
+use pocketmine\network\mcpe\multiversion\palette\block\BlockPalettePool;
+use pocketmine\network\mcpe\multiversion\palette\item\ItemPalettePool;
 use pocketmine\network\mcpe\multiversion\MetadataConvertor;
 use pocketmine\network\mcpe\multiversion\MultiversionEnums;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
@@ -308,8 +308,8 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-            $palette = ItemPalette::getPalette($this->getProtocol());
-            [$id, $data] = $palette::getLegacyFromRuntimeId($id, $data);
+            $palette = ItemPalettePool::getPalette($this->getProtocol());
+            [$id, $data] = $palette->getLegacyFromRuntimeId($id, $data);
         }
 
 		$nbtLen = $this->getLShort();
@@ -436,13 +436,13 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 
         if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-            $palette = ItemPalette::getPalette($this->getProtocol());
-            $idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, $damage);
+            $palette = ItemPalettePool::getPalette($this->getProtocol());
+            $idMeta = $palette->getRuntimeFromLegacyIdQuiet($id, $damage);
 
 			if($idMeta === null){
 				//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
 				//other unmapped items.
-				[$id, $damage] = $palette::getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
+				[$id, $damage] = $palette->getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
 				if($nbt === null){
 					$nbt = new CompoundTag();
 				}
@@ -530,8 +530,8 @@ class NetworkBinaryStream extends BinaryStream{
 		$cnt = $this->getLShort();
 		$netData = $this->getUnsignedVarInt();
 
-        $palette = ItemPalette::getPalette($this->getProtocol());
-		[$id, $meta] = $palette::getLegacyFromRuntimeId($netId, $netData);
+        $palette = ItemPalettePool::getPalette($this->getProtocol());
+		[$id, $meta] = $palette->getLegacyFromRuntimeId($netId, $netData);
 
 		if($withStackId === true){
 			$includeNetId = $this->getBool();
@@ -649,12 +649,12 @@ class NetworkBinaryStream extends BinaryStream{
             [$id, $coreData] = [$protocolItem->getId(), $protocolItem->getDamage()];
 		}
 
-        $palette = ItemPalette::getPalette($this->getProtocol());
-		$idMeta = $palette::getRuntimeFromLegacyIdQuiet($id, $coreData);
+        $palette = ItemPalettePool::getPalette($this->getProtocol());
+		$idMeta = $palette->getRuntimeFromLegacyIdQuiet($id, $coreData);
 		if($idMeta === null){
 			//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
 			//other unmapped items.
-			[$netId, $netData] = $palette::getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
+			[$netId, $netData] = $palette->getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
 			if($nbt === null){
 				$nbt = new CompoundTag();
 			}
@@ -702,8 +702,7 @@ class NetworkBinaryStream extends BinaryStream{
 		if($isBlockItem){
 		    $block = $item->getBlock()->getBlockProtocol($this->getProtocol()) ?? $item->getBlock();
 			if($block->getId() !== BlockIds::AIR){
-			    $palette = BlockPalette::getPalette($this->getProtocol());
-			    $blockRuntimeId = $palette::toStaticRuntimeId($block->getId(), $block->getDamage());
+			    $blockRuntimeId = BlockPalettePool::getPalette($this->getProtocol())->toStaticRuntimeId($block->getId(), $block->getDamage());
 			}
 		}
 		$this->putVarInt($blockRuntimeId);
@@ -737,8 +736,8 @@ class NetworkBinaryStream extends BinaryStream{
 		}
 		$meta = $this->getVarInt();
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-            $palette = ItemPalette::getPalette($this->getProtocol());
-		    [$id, $meta] = $palette::getLegacyFromRuntimeId($id, $meta);
+            $palette = ItemPalettePool::getPalette($this->getProtocol());
+		    [$id, $meta] = $palette->getLegacyFromRuntimeId($id, $meta);
 		}elseif($meta === 0x7fff){
 		    $meta = -1;
 		}
@@ -754,12 +753,12 @@ class NetworkBinaryStream extends BinaryStream{
 		        $id = $item->getId();
 		        $damage = $item->getDamage();
 		        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_419){
-		            $palette = ItemPalette::getPalette($this->getProtocol());
+		            $palette = ItemPalettePool::getPalette($this->getProtocol());
 		            if($item->hasAnyDamageValue()){
-		                [$id, ] = $palette::getRuntimeFromLegacyId($id, 0);
+		                [$id, ] = $palette->getRuntimeFromLegacyId($id, 0);
 		                $damage = 0x7fff;
 		            }else{
-		                [$id, $damage] = $palette::getRuntimeFromLegacyId($id, $damage);
+		                [$id, $damage] = $palette->getRuntimeFromLegacyId($id, $damage);
 		            }
 		        }else{
 		            $damage = $damage & 0x7fff;
@@ -781,12 +780,12 @@ class NetworkBinaryStream extends BinaryStream{
 			    }else{
 			    	$this->putByte(1); // internal item descriptor type
 
-		            $palette = ItemPalette::getPalette($this->getProtocol());
+		            $palette = ItemPalettePool::getPalette($this->getProtocol());
 		            if($item->hasAnyDamageValue()){
-		                [$netId, ] = $palette::getRuntimeFromLegacyId($item->getId(), 0);
+		                [$netId, ] = $palette->getRuntimeFromLegacyId($item->getId(), 0);
 		                $netData = 0x7fff;
 		            }else{
-		                [$netId, $netData] = $palette::getRuntimeFromLegacyId($item->getId(), $item->getDamage());
+		                [$netId, $netData] = $palette->getRuntimeFromLegacyId($item->getId(), $item->getDamage());
 		            }
 
 			        $this->putLShort($netId);
