@@ -1,0 +1,61 @@
+<?php
+
+/*
+ *
+ *  ____            _        _   __  __ _                  __  __ ____
+ * |  _ \ ___   ___| | _____| |_|  \/  (_)_ __   ___      |  \/  |  _ \
+ * | |_) / _ \ / __| |/ / _ \ __| |\/| | | '_ \ / _ \_____| |\/| | |_) |
+ * |  __/ (_) | (__|   <  __/ |_| |  | | | | | |  __/_____| |  | |  __/
+ * |_|   \___/ \___|_|\_\___|\__|_|  |_|_|_| |_|\___|     |_|  |_|_|
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * @author PocketMine Team
+ * @link http://www.pocketmine.net/
+ *
+ *
+*/
+
+declare(strict_types=1);
+
+namespace pocketmine\network\mcpe\multiversion;
+
+use pocketmine\block\BlockIds;
+use pocketmine\utils\AssumptionFailedError;
+use function array_flip;
+use function file_get_contents;
+use function json_decode;
+use const pocketmine\RESOURCE_PATH;
+
+final class BlockValidator{
+	/** @var int[]|null */
+	private static $oldBlockIdMap = null;
+
+	public static function init() : void{
+        $oldBlockIdMapFile = file_get_contents(RESOURCE_PATH . '/vanilla/old_block_id_map.json');
+        if($oldBlockIdMapFile === false){
+            throw new AssumptionFailedError("Missing old block id map file");
+        }
+
+        $oldBlockIdMap = json_decode($oldBlockIdMapFile, true);
+        if($oldBlockIdMap === null){
+            throw new AssumptionFailedError("Incorrect old block id map file");
+        }
+
+        self::$oldBlockIdMap = array_flip($oldBlockIdMap);
+	}
+
+    public static function lazyInit() : void{
+        if(self::$oldBlockIdMap === null){
+            self::init();
+        }
+    }
+
+	public static function validate(int $id) : int{
+        self::lazyInit();
+		return isset(self::$oldBlockIdMap[$id]) ? $id : BlockIds::INFO_UPDATE;
+	}
+}

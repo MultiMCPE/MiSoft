@@ -227,7 +227,6 @@ class BlockFactory{
 		self::registerBlock(new WoodenSlab());
 		self::registerBlock(new StainedClay());
 		self::registerBlock(new StainedGlassPane());
-		self::registerBlock(new StainedGlassPane2());
 		self::registerBlock(new Leaves2());
 		self::registerBlock(new Wood2());
 		self::registerBlock(new WoodenStairs(Block::ACACIA_STAIRS, 0, "Acacia Stairs"));

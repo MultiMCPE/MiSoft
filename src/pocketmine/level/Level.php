@@ -78,6 +78,7 @@ use pocketmine\metadata\Metadatable;
 use pocketmine\metadata\MetadataValue;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
+use pocketmine\network\mcpe\multiversion\BlockValidator;
 use pocketmine\network\mcpe\protocol\AddActorPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
@@ -87,6 +88,7 @@ use pocketmine\network\mcpe\protocol\SetDifficultyPacket;
 use pocketmine\network\mcpe\protocol\SetTimePacket;
 use pocketmine\network\mcpe\protocol\types\DimensionIds;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\Player;
 use pocketmine\plugin\Plugin;
 use pocketmine\Server;
@@ -1112,13 +1114,15 @@ class Level implements ChunkManager, Metadatable{
 
 			    	if($b instanceof Block){
 						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
-				    	$pk->blockId = $b->getId();
+						$id = $player->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $b->getId() : BlockValidator::validate($b->getId());
+				    	$pk->blockId = $id;
 				    	$pk->blockMeta = $b->getDamage();
 			    	}else{
 				    	$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
 						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
 						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
-				    	$pk->blockId = $b->getId();
+						$id = $player->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $b->getId() : BlockValidator::validate($b->getId());
+				    	$pk->blockId = $id;
 				    	$pk->blockMeta = $b->getDamage();
 			    	}
 
@@ -1144,13 +1148,15 @@ class Level implements ChunkManager, Metadatable{
 
 			    	if($b instanceof Block){
 						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
-				    	$pk->blockId = $b->getId();
+						$id = $player->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $b->getId() : BlockValidator::validate($b->getId());
+				    	$pk->blockId = $id;
 				    	$pk->blockMeta = $b->getDamage();
 			    	}else{
 				    	$fullBlock = $this->getFullBlock($b->x, $b->y, $b->z);
 						$b = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
 						$b = $b->getBlockProtocol($player->getProtocol()) ?? $b;
-				    	$pk->blockId = $b->getId();
+						$id = $player->getProtocol() >= ProtocolInfo::PROTOCOL_90 ? $b->getId() : BlockValidator::validate($b->getId());
+				    	$pk->blockId = $id;
 				    	$pk->blockMeta = $b->getDamage();
 			    	}
 

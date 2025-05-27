@@ -216,8 +216,6 @@ interface BlockIds{
 	public const REPEATING_COMMAND_BLOCK = 188;
 	public const CHAIN_COMMAND_BLOCK = 189;
 
-    public const STAINED_GLASS_PANE_2 = 191;
-
 	public const SPRUCE_DOOR_BLOCK = 193;
 	public const BIRCH_DOOR_BLOCK = 194;
 	public const JUNGLE_DOOR_BLOCK = 195;

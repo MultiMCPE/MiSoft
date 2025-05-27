@@ -26,6 +26,8 @@ namespace pocketmine\network\mcpe\chunk;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\world\format\PalettedBlockArray;
+use pocketmine\network\mcpe\multiversion\BlockValidator;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use function str_repeat;
 use function ord;
 use function chr;
@@ -91,6 +93,9 @@ final class ChunkConverter{
 				    	$block = BlockFactory::get($fullBlock >> Block::INTERNAL_METADATA_BITS, $fullBlock & Block::INTERNAL_METADATA_MASK);
 				    	$block = $block->getBlockProtocol($protocol) ?? $block;
 				    	[$legacyId, $legacyMeta] = [$block->getId(), $block->getDamage()];
+                        if($protocol < ProtocolInfo::PROTOCOL_90){
+                            $legacyId = BlockValidator::validate($legacyId);
+                        }
 
 				    	if($legacyId > 255){
 					    	$legacyId = 248; //minecraft:info_update
