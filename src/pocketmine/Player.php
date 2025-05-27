@@ -1710,7 +1710,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
     public static function gamemodeToNetworkId(int $gamemode, int $playerProtocol) : int{
-		return (($playerProtocol >= ProtocolInfo::PROTOCOL_560 && ($gamemode & 0x3) === self::SPECTATOR) ? GameMode::SPECTATOR : self::getClientFriendlyGamemode($gamemode));
+		return match(true){
+			($playerProtocol >= ProtocolInfo::PROTOCOL_560 && ($gamemode & 0x3) === self::SPECTATOR) => GameMode::SPECTATOR,
+			($playerProtocol < ProtocolInfo::PROTOCOL_110 && ($gamemode & 0x3) === self::ADVENTURE) => GameMode::SURVIVAL,
+			default => self::getClientFriendlyGamemode($gamemode)
+		};
 	}
 
 	public static function protocolGameModeToCore(int $gameMode) : ?int{
@@ -1870,12 +1874,16 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	        	$pk->setFlag(AdventureSettingsPacket::ALLOW_FLIGHT, $this->allowFlight);
 	        	$pk->setFlag(AdventureSettingsPacket::NO_CLIP, $this->isSpectator());
 	        	$pk->setFlag(AdventureSettingsPacket::FLYING, $this->flying);
-	        	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_110){
+	            	$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, $this->isSpectator());
+				}else{
+					$pk->setFlag(AdventureSettingsPacket::WORLD_IMMUTABLE, ($this->isSpectator() or $this->isAdventure(true)));
+				}
 	        	$pk->setFlag(AdventureSettingsPacket::NO_PVP, $this->isSpectator());
 
 	        	$pk->commandPermission = (($this->isOp() && !$this->isSpectator()) ? AdventureSettingsPacket::PERMISSION_OPERATOR : AdventureSettingsPacket::PERMISSION_NORMAL);
 	        	$pk->playerPermission = (($this->isOp() && !$this->isSpectator()) ? PlayerPermissions::OPERATOR : PlayerPermissions::MEMBER);
-	    	$pk->entityUniqueId = $this->getId();
+	        	$pk->entityUniqueId = $this->getId();
 			}else{
 			    if($this->autoJump){
 			        $pk->flags |= AdventureSettingsPacket::PRE_V_0_15_0_AUTO_JUMP;
@@ -1885,9 +1893,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			    }
 			    if($this->isSpectator()){
 	            	$pk->flags |= AdventureSettingsPacket::PRE_V_0_15_0_NO_CLIP;
-	            	$pk->flags |= AdventureSettingsPacket::WORLD_IMMUTABLE;
-	            	$pk->flags |= AdventureSettingsPacket::NO_PVP;
+					$pk->flags |= AdventureSettingsPacket::NO_PVP;
 			    }
+				if($this->isSpectator() or $this->isAdventure(true)){
+	            	$pk->flags |= AdventureSettingsPacket::WORLD_IMMUTABLE;
+				}
 
 			    $pk->commandPermission = AdventureSettingsPacket::PERMISSION_HOST; // wtf, idk how to send this correctly
 			    $pk->playerPermission = AdventureSettingsPacket::PERMISSION_HOST; // wtf, idk how to send this correctly
