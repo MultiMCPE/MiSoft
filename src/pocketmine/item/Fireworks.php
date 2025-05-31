@@ -130,7 +130,7 @@ class Fireworks extends Item{
 
     public function getItemProtocol(int $protocol) : ?Item{
         if($protocol < ProtocolInfo::PROTOCOL_130){
-            return ItemFactory::get(ItemIds::NETHER_STAR, $this->getDamage());
+            return new Compass();
         }
 
         return parent::getItemProtocol($protocol);

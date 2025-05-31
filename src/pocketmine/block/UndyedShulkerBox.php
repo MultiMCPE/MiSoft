@@ -23,10 +23,20 @@ declare(strict_types=1);
 
 namespace pocketmine\block;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class UndyedShulkerBox extends ShulkerBox{
     protected $id = self::UNDYED_SHULKER_BOX;
 
     public function getName() : string{
         return "Undyed Shulker Box";
+    }
+
+    public function getBlockProtocol(int $protocol) : ?Block{
+        if($protocol < ProtocolInfo::PROTOCOL_100){
+            return new Chest();
+        }
+
+        return parent::getBlockProtocol($protocol);
     }
 }

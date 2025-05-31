@@ -142,10 +142,10 @@ class BatchPacket extends DataPacket{
 	        if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
 	            try{
 			    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_649){
-				    	$this->payload = zlib_decode($this->payload, 1024 * 1024 * 2); //Max 2MB
+				    	$this->payload = zlib_decode($this->payload, 1024 * 1024 * 8); //Max 8MB
 			    	}else{
 			        	if((ord($this->payload[0])) === 0x0){
-	                        $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 2); //Max 2MB
+	                        $this->payload = zlib_decode((substr($this->payload, 1)), 1024 * 1024 * 8); //Max 8MB
 			        	}elseif($this->payload[0] === "\xff"){
 					        $this->payload = substr($this->payload, 1);
 				    	}

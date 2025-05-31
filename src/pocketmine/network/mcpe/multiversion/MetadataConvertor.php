@@ -57,12 +57,13 @@ final class MetadataConvertor{
         }
 
         if($flags !== null){
-            $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
             if($playerProtocol < ProtocolInfo::PROTOCOL_90){
                 $metadata[EntityMetadataProperties::DATA_NO_AI] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_IMMOBILE)) > 0 ? 1 : 0];
-                $metadata[EntityMetadataProperties::DATA_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
+                $metadata[EntityMetadataProperties::DATA_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_CAN_SHOW_NAMETAG)) > 0 ? 1 : 0];
                 $metadata[EntityMetadataProperties::DATA_SILENT] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_SILENT)) > 0 ? 1 : 0];
                 $metadata[EntityMetadataProperties::DATA_FLAGS][0] = Entity::DATA_TYPE_BYTE;
+            }else{
+                $metadata[EntityMetadataProperties::DATA_ALWAYS_SHOW_NAMETAG] = [Entity::DATA_TYPE_BYTE, ($flags & (1 << EntityMetadataFlags::DATA_FLAG_ALWAYS_SHOW_NAMETAG)) > 0 ? 1 : 0];
             }
         }
 

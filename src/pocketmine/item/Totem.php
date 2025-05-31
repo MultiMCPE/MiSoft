@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class Totem extends Item{
 	public function __construct(int $meta = 0){
 		parent::__construct(self::TOTEM, $meta, "Totem of Undying");
@@ -31,4 +33,12 @@ class Totem extends Item{
 	public function getMaxStackSize() : int{
 		return 1;
 	}
+
+    public function getItemProtocol(int $protocol) : ?Item{
+        if($protocol < ProtocolInfo::PROTOCOL_100){
+            return new Compass();
+        }
+
+        return parent::getItemProtocol($protocol);
+    }
 }

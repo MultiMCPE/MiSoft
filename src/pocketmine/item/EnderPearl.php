@@ -23,6 +23,8 @@ declare(strict_types=1);
 
 namespace pocketmine\item;
 
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
+
 class EnderPearl extends ProjectileItem{
 	public function __construct(int $meta = 0){
 		parent::__construct(self::ENDER_PEARL, $meta, "Ender Pearl");
@@ -43,4 +45,12 @@ class EnderPearl extends ProjectileItem{
 	public function getCooldownTicks() : int{
 		return 20;
 	}
+
+    public function getItemProtocol(int $protocol) : ?Item{
+        if($protocol < ProtocolInfo::PROTOCOL_100){
+            return new Compass();
+        }
+
+        return parent::getItemProtocol($protocol);
+    }
 }

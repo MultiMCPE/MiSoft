@@ -187,8 +187,8 @@ class AddActorPacket extends DataPacket{
 	    	$this->pitch = $this->getLFloat();
 	    	$this->yaw = $this->getLFloat();
 		}else{
-		    $this->yaw = $this->getFloat() * (360 / 256);
-	    	$this->pitch = $this->getFloat() * (360 / 256);
+		    $this->yaw = $this->getFloat() / (256 / 360);
+	    	$this->pitch = $this->getFloat() / (256 / 360);
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
 	    	$this->headYaw = $this->getLFloat();
@@ -253,8 +253,8 @@ class AddActorPacket extends DataPacket{
             $this->putLFloat($this->pitch);
             $this->putLFloat($this->yaw);
 		}else{
-		    $this->putFloat($this->yaw / (360 / 256));
-            $this->putFloat($this->pitch / (360 / 256));
+		    $this->putFloat($this->yaw * (256 / 360));
+            $this->putFloat($this->pitch * (256 / 360));
 		}
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_273){
             $this->putLFloat($this->headYaw);
