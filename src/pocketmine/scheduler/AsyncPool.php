@@ -181,7 +181,9 @@ class AsyncPool{
 
 		$this->tasks[$task->getTaskId()] = $task;
 
-		$this->getWorker($worker)->stack($task);
+		$taskWorker = $this->getWorker($worker);
+		$task->worker = $taskWorker;
+		$taskWorker->stack($task);
 		$this->workerUsage[$worker]++;
 		$this->taskWorkers[$task->getTaskId()] = $worker;
 		$this->workerLastUsed[$worker] = time();
