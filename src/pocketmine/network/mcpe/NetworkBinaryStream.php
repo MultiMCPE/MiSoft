@@ -515,7 +515,7 @@ class NetworkBinaryStream extends BinaryStream{
 	    	$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 	    	$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-	    	if($id === ItemIds::SHIELD){
+	    	if($item->getId() === ItemIds::SHIELD){
 		    	$this->putVarLong(0); //"blocking tick" (ffs mojang)
 			}
 		}
@@ -708,7 +708,7 @@ class NetworkBinaryStream extends BinaryStream{
 		$this->putVarInt($blockRuntimeId);
 
 		$this->putString(
-		(static function() use ($nbt, $netId) : string{
+		(static function() use ($nbt, $id) : string{
 			$extraData = new NetworkBinaryStream();
 
 			if($nbt !== null){
@@ -722,7 +722,7 @@ class NetworkBinaryStream extends BinaryStream{
 			$extraData->putLInt(0); //CanPlaceOn entry count (TODO)
 			$extraData->putLInt(0); //CanDestroy entry count (TODO)
 
-			if($netId === ItemIds::SHIELD){
+			if($id === ItemIds::SHIELD){
 				$extraData->putLLong(0); //"blocking tick" (ffs mojang)
 			}
 			return $extraData->getBuffer();
