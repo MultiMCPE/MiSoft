@@ -442,54 +442,44 @@ class NetworkBinaryStream extends BinaryStream{
 			if($idMeta === null){
 				//Display unmapped items as INFO_UPDATE, but stick something in their NBT to make sure they don't stack with
 				//other unmapped items.
-				[$id, $damage] = $palette->getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
+				[$netId, $netData] = $palette->getRuntimeFromLegacyId(ItemIds::INFO_UPDATE, 0);
 				if($nbt === null){
 					$nbt = new CompoundTag();
 				}
 				$nbt->setInt(self::PM_ID_TAG, $item->getId());
 				$nbt->setInt(self::PM_META_TAG, $item->getDamage());
 			}else{
-				[$id, $damage] = $idMeta;
-				if($item instanceof Durable and $item->getDamage() > 0){
-					if($nbt !== null){
-						if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
-							$nbt->removeTag(self::DAMAGE_TAG);
-							$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-							$nbt->setTag($existing);
-						}
-					}else{
-						$nbt = new CompoundTag();
-					}
-					$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
-				}
+				[$netId, $netData] = $idMeta;
 			}
         }else{
-			if($item instanceof Durable and $item->getDamage() > 0){
-				if($nbt !== null){
-					if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
-						$nbt->removeTag(self::DAMAGE_TAG);
-						$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
-						$nbt->setTag($existing);
-					}
-				}else{
-					$nbt = new CompoundTag();
+			[$netId, $netData] = [$id, $damage];
+		}
+
+		if($item instanceof Durable and $item->getDamage() > 0){
+			if($nbt !== null){
+				if(($existing = $nbt->getTag(self::DAMAGE_TAG)) !== null){
+					$nbt->removeTag(self::DAMAGE_TAG);
+					$existing->setName(self::DAMAGE_TAG_CONFLICT_RESOLUTION);
+					$nbt->setTag($existing);
 				}
-				$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
+			}else{
+				$nbt = new CompoundTag();
 			}
+			$nbt->setInt(self::DAMAGE_TAG, $item->getDamage());
 		}
 
 		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_90){
-	    	$this->putVarInt($id);
+	    	$this->putVarInt($netId);
 	    	if($this->getProtocol() < ProtocolInfo::PROTOCOL_110){
-		    	$auxValue = ($damage << 8) | $item->getCount();
+		    	$auxValue = ($netData << 8) | $item->getCount();
 	    	}else{
-	    		$auxValue = (($damage & 0x7fff) << 8) | $item->getCount();
+	    		$auxValue = (($netData & 0x7fff) << 8) | $item->getCount();
 	    	}
 	    	$this->putVarInt($auxValue);
 		}else{
-		    $this->putShort($id);
+		    $this->putShort($netId);
 		    $this->putByte($item->getCount());
-		    $this->putShort($damage);
+		    $this->putShort($netData);
 		}
 
 		if($nbt !== null){
@@ -498,7 +488,7 @@ class NetworkBinaryStream extends BinaryStream{
                 $this->putByte(1); //TODO: some kind of count field? always 1 as of 1.9.0
 		    	$this->put((new NetworkLittleEndianNBTStream())->write($nbt));
 		    }else{
-                if($this->getProtocol() < ProtocolInfo::PROTOCOL_130 && $item->getId() === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
+                if($this->getProtocol() < ProtocolInfo::PROTOCOL_130 && $id === ItemIds::FILLED_MAP && $item->getNamedTag()->hasTag("map_uuid", LongTag::class)){
                     $tag = $item->getNamedTag();
                     $uuid = $tag->getLong("map_uuid");
                     $nbt->setString("map_uuid", (string) $uuid, true);
@@ -515,7 +505,7 @@ class NetworkBinaryStream extends BinaryStream{
 	    	$this->putVarInt(0); //CanPlaceOn entry count (TODO)
 	    	$this->putVarInt(0); //CanDestroy entry count (TODO)
 
-	    	if($item->getId() === ItemIds::SHIELD){
+	    	if($id === ItemIds::SHIELD){
 		    	$this->putVarLong(0); //"blocking tick" (ffs mojang)
 			}
 		}
