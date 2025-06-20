@@ -3902,9 +3902,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					if($this->isSurvival()){
 						$this->inventory->setItemInHand($item);
 					}
+					
+				if(!$item instanceof ProjectileItem) {
+						$this->setUsingItem(true);
+					}
 				}
-
-				$this->setUsingItem(true);
 
 				return true;
 			default:
