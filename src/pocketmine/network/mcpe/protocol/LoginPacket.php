@@ -30,10 +30,14 @@ use pocketmine\utils\Utils;
 use GlobalLogger;
 use RuntimeException;
 use Throwable;
+use JsonException;
 use function get_class;
 use function in_array;
+use function is_array;
+use function is_string;
 use function json_decode;
 use function zlib_decode;
+use const JSON_THROW_ON_ERROR;
 
 class LoginPacket extends DataPacket{
 	public const NETWORK_ID = ProtocolInfo::LOGIN_PACKET;
@@ -57,6 +61,8 @@ class LoginPacket extends DataPacket{
 	/** @var string */
 	public $locale;
 
+	/** @var array */
+	public $authInfo = [];
 	/** @var array (the "chain" index contains one or more JWTs) */
 	public $chainData = [];
 	/** @var string */
@@ -123,7 +129,35 @@ class LoginPacket extends DataPacket{
             $buffer = new BinaryStream($this->getString());
         }
 
-		$this->chainData = json_decode($buffer->get($buffer->getLInt()), true);
+		$authInfoJsonLength = $buffer->getLInt();
+		if($authInfoJsonLength <= 0){
+			//technically this is always positive; the problem results because getLInt() is implicitly signed
+			//this is inconsistent with many other methods, but we can't do anything about that for now
+			throw new RuntimeException("Length of auth info JSON must be positive");
+		}
+
+		try{
+			$this->authInfo = json_decode($buffer->get($authInfoJsonLength), true, JSON_THROW_ON_ERROR);
+		}catch(JsonException $e){
+			throw new RuntimeException("Failed decoding chain data JSON: " . $e->getMessage());
+		}
+
+		if(isset($this->authInfo["Certificate"]) && is_string($this->authInfo["Certificate"])){
+			$certificateData = json_decode($this->authInfo["Certificate"], true);
+			if(isset($certificateData["chain"]) && is_array($certificateData["chain"])){
+				$chainArray = $certificateData;
+			}else{
+				throw new RuntimeException("Invalid 'chain' data in Certificate field");
+			}
+		}else{
+			if(isset($this->authInfo["chain"]) && is_array($this->authInfo["chain"])){
+				$chainArray = $this->authInfo;
+			} else {
+				throw new RuntimeException("Missing or invalid 'chain' field in chain data");
+			}
+		}
+
+		$this->chainData = $chainArray;
 
 		$hasExtraData = false;
 		foreach($this->chainData["chain"] as $chain){

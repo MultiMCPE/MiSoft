@@ -69,6 +69,7 @@ use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds748;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds776;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds786;
 use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds800;
+use pocketmine\network\mcpe\protocol\PacketsIds\PacketsIds818;
 use pocketmine\utils\Binary;
 use ReflectionClass;
 use SplFixedArray;
@@ -76,6 +77,7 @@ use function array_key_last;
 
 class PacketPool {
     private const PROTOCOL_POOL = [
+		ProtocolInfo::PROTOCOL_818 => PacketsIds818::class,
 		ProtocolInfo::PROTOCOL_800 => PacketsIds800::class,
         ProtocolInfo::PROTOCOL_786 => PacketsIds786::class,
 		ProtocolInfo::PROTOCOL_776 => PacketsIds776::class,
@@ -371,6 +373,7 @@ class PacketPool {
 		self::registerPacket(new PlayerUpdateEntityOverridesPacket());
 		self::registerPacket(new PlayerLocationPacket());
 		self::registerPacket(new ClientboundControlSchemeSetPacket());
+		self::registerPacket(new ServerScriptDebugDrawerPacket());
 		// ExplodePacket - TickSyncPacket
 		self::registerPacket(new ExplodePacket());
 		// ItemComponentPacket - ItemRegistryPacket

@@ -100,14 +100,15 @@ use pocketmine\inventory\transaction\action\SlotChangeAction;
 use pocketmine\inventory\transaction\CraftingTransaction;
 use pocketmine\inventory\transaction\InventoryTransaction;
 use pocketmine\inventory\transaction\TransactionValidationException;
+use pocketmine\item\Bow;
 use pocketmine\item\Consumable;
 use pocketmine\item\Durable;
 use pocketmine\item\Elytra;
+use pocketmine\item\ProjectileItem;
 use pocketmine\item\enchantment\EnchantmentInstance;
 use pocketmine\item\enchantment\MeleeWeaponEnchantment;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
-use pocketmine\item\ProjectileItem;
 use pocketmine\item\WritableBook;
 use pocketmine\item\WrittenBook;
 use pocketmine\lang\TextContainer;
@@ -3903,11 +3904,13 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					if($this->isSurvival()){
 						$this->inventory->setItemInHand($item);
 					}
-					
-				if(!$item instanceof ProjectileItem) {
-						$this->setUsingItem(true);
-					}
 				}
+
+				$this->setUsingItem(
+					$item instanceof Consumable ||
+					$item instanceof ProjectileItem ||
+					$item instanceof Bow
+				);
 
 				return true;
 			default:

@@ -42,6 +42,7 @@ use const pocketmine\RESOURCE_PATH;
 
 class BlockPalettePool{
     public const BLOCK_PALETTE_PROTOCOLS = [
+        ProtocolInfo::PROTOCOL_818,
         ProtocolInfo::PROTOCOL_800,
         ProtocolInfo::PROTOCOL_786,
         ProtocolInfo::PROTOCOL_776,

@@ -198,6 +198,8 @@ class StartGamePacket extends DataPacket{
 	public $worldIdentifier = "";
 	/** @var string */
 	public $scenarioIdentifier = "";
+	/** @var string */
+	public $ownerIdentifier = "";
 
 	/** @var string */
 	public $levelId = ""; //base64 string, usually the same as world folder name in vanilla
@@ -386,6 +388,9 @@ class StartGamePacket extends DataPacket{
 													    	$this->serverIdentifier = $this->getString();
 													    	$this->worldIdentifier = $this->getString();
 													    	$this->scenarioIdentifier = $this->getString();
+															if($this->getProtocol() >= ProtocolInfo::PROTOCOL_818){
+																$this->ownerIdentifier = $this->getString();
+															}
 												    	}
 	                                	    	    }
 	                                    		}
@@ -652,6 +657,9 @@ class StartGamePacket extends DataPacket{
 							    					    	$this->putString($this->serverIdentifier);
 								    				    	$this->putString($this->worldIdentifier);
 									    			    	$this->putString($this->scenarioIdentifier);
+															if($this->getProtocol() >= ProtocolInfo::PROTOCOL_818){
+																$this->putString($this->ownerIdentifier);
+															}
 										    	    	}
 	                                	            }
 	                                        	}

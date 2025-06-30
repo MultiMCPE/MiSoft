@@ -37,6 +37,8 @@ class ResourcePacksInfoPacket extends DataPacket{
 	public $hasAddons = false;
 	/** @var bool */
 	public $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
+	/** @var bool */
+	public $forceDisableVibrantVisuals = true;
 	/** @var UUID */
 	public $worldTemplateId;
 	/** @var string */
@@ -60,6 +62,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->forceServerPacks = $this->getBool();
 	    	}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_818){
+					$this->forceDisableVibrantVisuals = $this->getBool();
+				}
 				$this->worldTemplateId = $this->getUUID();
 				$this->worldTemplateVersion = $this->getString();
 			}
@@ -140,6 +145,9 @@ class ResourcePacksInfoPacket extends DataPacket{
 	    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_448 && $this->getProtocol() < ProtocolInfo::PROTOCOL_729){
 	    	    $this->putBool($this->forceServerPacks);
 	    	}elseif($this->getProtocol() >= ProtocolInfo::PROTOCOL_766){
+				if($this->getProtocol() >= ProtocolInfo::PROTOCOL_818){
+					$this->putBool($this->forceDisableVibrantVisuals);
+				}
 				$this->putUUID($this->worldTemplateId);
 				$this->putString($this->worldTemplateVersion);
 			}

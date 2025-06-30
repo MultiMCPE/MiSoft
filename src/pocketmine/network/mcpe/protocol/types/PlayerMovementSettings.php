@@ -48,16 +48,20 @@ final class PlayerMovementSettings{
 	public function isServerAuthoritativeBlockBreaking() : bool{ return $this->serverAuthoritativeBlockBreaking; }
 
 	public static function read(NetworkBinaryStream $in) : self{
-		$movementType = ServerAuthMovementMode::fromPacket($in->getVarInt());
+		if($in->getProtocol() < ProtocolInfo::PROTOCOL_818){
+		    $movementType = ServerAuthMovementMode::fromPacket($in->getVarInt());
+		}
 		if($in->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$rewindHistorySize = $in->getVarInt();
 	    	$serverAuthBlockBreaking = $in->getBool();
     	}
-		return new self($movementType, $rewindHistorySize ?? 0, $serverAuthBlockBreaking ?? false);
+		return new self($movementType ?? ServerAuthMovementMode::SERVER_AUTHORITATIVE_V3, $rewindHistorySize ?? 0, $serverAuthBlockBreaking ?? false);
 	}
 
 	public function write(NetworkBinaryStream $out) : void{
-		$out->putVarInt($this->movementType->value);
+		if($out->getProtocol() < ProtocolInfo::PROTOCOL_818){
+		    $out->putVarInt($this->movementType->value);
+		}
 		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_428){
 	    	$out->putVarInt($this->rewindHistorySize);
 	    	$out->putBool($this->serverAuthoritativeBlockBreaking);

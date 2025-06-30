@@ -544,6 +544,21 @@ final class LevelSoundIds{
 			"SOUND_OPEN_LONG" => 543,
 			"SOUND_CLOSE" => 544,
 			"SOUND_CLOSE_LONG" => 545,
+            "SOUND_IMITATE_PHANTOM" => 546,
+            "SOUND_IMITATE_ZOGLIN" => 547,
+            "SOUND_IMITATE_GUARDIAN" => 548,
+            "SOUND_IMITATE_RAVAGER" => 549,
+            "SOUND_IMITATE_PILLAGER" => 550,
+            "SOUND_PLACE_IN_WATER" => 551,
+            "SOUND_STATE_CHANGE" => 552,
+            "SOUND_IMITATE_HAPPY_GHAST" => 553,
+            "SOUND_UNEQUIP_GENERIC" => 554,
+            "SOUND_RECORD_TEARS" => 555,
+            "SOUND_THE_END_LIGHT_FLASH" => 556,
+            "SOUND_LEAD_LEASH" => 557,
+            "SOUND_LEAD_UNLEASH" => 558,
+            "SOUND_LEAD_BREAK" => 559,
+            "SOUND_UNSADDLE" => 560,
 
         	//The following aliases are kept for backwards compatibility only
             "SOUND_SCULK_SENSOR_POWER_ON" => 328,
@@ -567,7 +582,7 @@ final class LevelSoundIds{
             "SOUND_WARDEN_NEARBY_CLOSER" => 368,
             "SOUND_WARDEN_NEARBY_CLOSEST" => 369,
             "SOUND_WARDEN_SLIGHTLY_ANGRY" => 370,
-            "SOUND_UNDEFINED" => 546
+            "SOUND_UNDEFINED" => 561
         ],
         ProtocolInfo::PROTOCOL_486 => [
 			"SOUND_ITEM_USE_ON" => 0,
