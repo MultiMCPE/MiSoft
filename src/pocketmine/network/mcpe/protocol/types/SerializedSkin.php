@@ -51,6 +51,9 @@ class SerializedSkin{
 	/** @var array[]|null */
 	public static $skinIdToBedrockMap = null;
 
+    /** @var string|null */
+    public static $defaultGeometryData = null;
+
 	public static function init() : void{
 		$skinIdMap = json_decode(file_get_contents(RESOURCE_PATH . "/vanilla/skins/pw10_skins/skin_id_map.json"), true);
 		foreach($skinIdMap as $skinId => $item){
@@ -68,6 +71,8 @@ class SerializedSkin{
 			}
 			self::$skinIdToBedrockMap[$skinId] = $data;
 		}
+
+        self::$defaultGeometryData = file_get_contents(RESOURCE_PATH . "/vanilla/skins/geometry_data.json");
 	}
 
     public static function lazyInit() : void{
@@ -153,7 +158,7 @@ class SerializedSkin{
      */
     public static function updateGeometry(string $skinGeometryData, string $skinGeometryName) : string{
         if($skinGeometryData === "" || $skinGeometryName === "" || $skinGeometryName === self::GEOMETRY_CUSTOM || $skinGeometryName === self::GEOMETRY_CUSTOM_SLIM){
-            return "";
+            return self::$defaultGeometryData ?? "";
         }
 
         return $skinGeometryData;

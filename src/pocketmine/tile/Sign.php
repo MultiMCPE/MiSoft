@@ -183,7 +183,26 @@ class Sign extends Spawnable{
 	}
 
 	protected function addAdditionalSpawnData(CompoundTag $nbt) : void{
-		$nbt->setString(self::TAG_TEXT_BLOB, implode("\n", $this->text));
+		$getText = function (array $text) : array {
+			$line1 = $text[0] ?? "";
+			$line2 = $text[1] ?? "";
+			$line3 = $text[2] ?? "";
+			$line4 = $text[3] ?? "";
+
+			if($line4 !== ""){
+				return [$line1, $line2, $line3, $line4];
+			}elseif($line3 !== ""){
+				return [$line1, $line2, $line3];
+			}elseif($line2 !== ""){
+				return [$line1, $line2];
+			}elseif($line1 !== ""){
+				return [$line1];
+			}
+
+			return [];
+		};
+
+		$nbt->setString(self::TAG_TEXT_BLOB, implode("\n", $getText($this->text)));
 
 		for($i = 1; $i <= 4; ++$i){ //Backwards-compatibility
 			$textKey = sprintf(self::TAG_TEXT_LINE, $i);
@@ -200,7 +219,7 @@ class Sign extends Spawnable{
 			return $textTag;
 		};
 		$front_text_tag = $textPolyfill(new CompoundTag(self::TAG_FRONT_TEXT));
-		$front_text_tag->setString(self::TAG_TEXT_BLOB, implode("\n", $this->text));
+		$front_text_tag->setString(self::TAG_TEXT_BLOB, implode("\n", $getText($this->text)));
 		$nbt->setTag(
 			$front_text_tag
 		);
