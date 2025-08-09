@@ -16,6 +16,7 @@ namespace pocketmine\network\mcpe\protocol\types\biome;
 
 use pocketmine\utils\Color;
 use pocketmine\network\mcpe\NetworkBinaryStream;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\types\biome\chunkgen\BiomeDefinitionChunkGenData;
 use function count;
 
@@ -76,7 +77,7 @@ final class BiomeDefinitionData{
 
 	public static function read(NetworkBinaryStream $in) : self{
 		$nameIndex = $in->getLShort();
-		$id = $in->readOptional($in->getLShort(...));
+		$id = $in->getProtocol() >= ProtocolInfo::PROTOCOL_827 ? $in->getLShort() : $in->readOptional($in->getLShort(...)) ?? 65535;
 		$temperature = $in->getLFloat();
 		$downfall = $in->getLFloat();
 		$redSporeDensity = $in->getLFloat();
@@ -118,7 +119,11 @@ final class BiomeDefinitionData{
 
 	public function write(NetworkBinaryStream $out) : void{
 		$out->putLShort($this->nameIndex);
-		$out->writeOptional($this->id, $out->putLShort(...));
+		if($out->getProtocol() >= ProtocolInfo::PROTOCOL_827){
+			$out->putLShort($this->id ?? 65535);
+		}else{
+			$out->writeOptional($this->id === 65535 ? null : $this->id, $out->putLShort(...));
+		}
 		$out->putLFloat($this->temperature);
 		$out->putLFloat($this->downfall);
 		$out->putLFloat($this->redSporeDensity);

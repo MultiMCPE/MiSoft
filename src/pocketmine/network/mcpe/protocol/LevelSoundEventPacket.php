@@ -554,14 +554,16 @@ class LevelSoundEventPacket extends DataPacket{
 	public const SOUND_PLACE_IN_WATER = 551;
 	public const SOUND_STATE_CHANGE = 552;
 	public const SOUND_IMITATE_HAPPY_GHAST = 553;
-	public const SOUND_UNEQUIP_GENERIC = 554;
+	public const SOUND_ARMOR_UNEQUIP_GENERIC = 554;
 	public const SOUND_RECORD_TEARS = 555;
-	public const SOUND_THE_END_LIGHT_FLASH = 556;
+	public const SOUND_AMBIENT_WEATHER_THE_END_LIGHT_FLASH = 556;
 	public const SOUND_LEAD_LEASH = 557;
 	public const SOUND_LEAD_UNLEASH = 558;
 	public const SOUND_LEAD_BREAK = 559;
 	public const SOUND_UNSADDLE = 560;
-    public const SOUND_UNDEFINED = 561;
+	public const SOUND_ARMOR_EQUIP_COPPER = 561;
+	public const SOUND_RECORD_LAVA_CHICKEN = 562;
+    public const SOUND_UNDEFINED = 563;
 
     //The following aliases are kept for backwards compatibility only
     public const SOUND_SCULK_SENSOR_POWER_ON = 328;

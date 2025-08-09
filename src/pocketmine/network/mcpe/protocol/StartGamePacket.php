@@ -233,6 +233,8 @@ class StartGamePacket extends DataPacket{
     public $enableClientSideChunkGeneration = false;
 	/** @var bool */
 	public $blockNetworkIdsAreHashes = false; //new in 1.19.80, possibly useful for multi version
+	/** @var bool */
+	public $enableTickDeathSystems = false;
 	/** @var NetworkPermissions */
 	public $networkPermissions;
 
@@ -484,7 +486,10 @@ class StartGamePacket extends DataPacket{
 									    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
 									    		$this->blockNetworkIdsAreHashes = $this->getBool();
 								    			if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
-									   			$this->networkPermissions = NetworkPermissions::decode($this);
+													if($this->getProtocol() >= ProtocolInfo::PROTOCOL_827){
+														$this->enableTickDeathSystems = $this->getBool();
+													}
+									   			    $this->networkPermissions = NetworkPermissions::decode($this);
 									    		}
 									    	}
 								        }
@@ -751,6 +756,9 @@ class StartGamePacket extends DataPacket{
 									    	if($this->getProtocol() >= ProtocolInfo::PROTOCOL_582){
                                                 $this->putBool($this->blockNetworkIdsAreHashes);
 									    		if($this->getProtocol() >= ProtocolInfo::PROTOCOL_589){
+													if($this->getProtocol() >= ProtocolInfo::PROTOCOL_827){
+														$this->putBool($this->enableTickDeathSystems);
+													}
 							    					$this->networkPermissions->encode($this);
 										    	}
 									    	}
