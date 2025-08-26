@@ -35,9 +35,9 @@ class Position extends Vector3{
 	public $level = null;
 
 	/**
-	 * @param int   $x
-	 * @param int   $y
-	 * @param int   $z
+	 * @param int|float   $x
+	 * @param int|float   $y
+	 * @param int|float   $z
 	 * @param Level $level
 	 */
 	public function __construct($x = 0, $y = 0, $z = 0, Level $level = null){
