@@ -33,9 +33,9 @@ class Location extends Position{
 	public $pitch;
 
 	/**
-	 * @param int   $x
-	 * @param int   $y
-	 * @param int   $z
+	 * @param int|float   $x
+	 * @param int|float   $y
+	 * @param int|float   $z
 	 * @param float $yaw
 	 * @param float $pitch
 	 * @param Level $level
